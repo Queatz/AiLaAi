@@ -418,13 +418,6 @@ fun ProfileNavPage(
             }
         }
 
-        NavMenuItem("history_edu", appString { scripts }) {
-            onScriptsClick()
-        }
-
-        NavMenuItem("landscape", "Scenes") {
-            onScenesClick()
-        }
 
         if (isPlatformHost) {
             NavMenuItem("guardian", appString { platform }) {

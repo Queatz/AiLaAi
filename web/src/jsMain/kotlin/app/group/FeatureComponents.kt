@@ -2,6 +2,11 @@ package app.group
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import appString
+import app.nav.NavTopBar
+import application
 import app.AppNavigation
 import app.NavPage
 import app.appNav
@@ -60,6 +65,76 @@ fun FeatureButton(
             }
         }) {
             Text(description)
+        }
+    }
+}
+// Overload FeaturePreview to show a custom list of features
+@Composable
+fun FeaturePreview(pages: List<NavPage>) {
+    val scope = rememberCoroutineScope()
+    val me by application.me.collectAsState()
+    // Feature Preview Div with custom pages
+    Div({
+        style {
+            height(100.percent)
+            display(DisplayStyle.Flex)
+            flexDirection(FlexDirection.Column)
+            alignItems(AlignItems.Center)
+            justifyContent(JustifyContent.FlexStart)
+        }
+    }) {
+        Div({
+            style {
+                width(100.percent)
+            }
+        }) {
+            NavTopBar(
+                me = me,
+                title = appString { apps },
+                onProfileClick = {
+                    scope.launch {
+                        appNav.navigate(AppNavigation.Nav(NavPage.Profile))
+                    }
+                }
+            )
+        }
+        Div({
+            style {
+                display(DisplayStyle.Grid)
+                property("grid-template-columns", "repeat(auto-fill, minmax(200px, 1fr))")
+                property("grid-gap", "1rem")
+                padding(2.r)
+                width(100.percent)
+                maxWidth(800.px)
+                maxHeight(100.percent)
+                overflowY("auto")
+            }
+        }) {
+            pages.forEach { page ->
+                when (page) {
+                    NavPage.Scripts -> FeatureButton(
+                        icon = "description",
+                        title = "Create a script",
+                        description = "Create a script to automate tasks",
+                        onClick = {
+                            scope.launch {
+                                appNav.navigate(AppNavigation.Nav(NavPage.Scripts))
+                            }
+                        }
+                    )
+                    NavPage.Scenes -> FeatureButton(
+                        icon = "movie",
+                        title = "Create a scene",
+                        description = "Create a new interactive scene",
+                        onClick = {
+                            scope.launch {
+                                appNav.navigate(AppNavigation.Nav(NavPage.Scenes))
+                            }
+                        }
+                    )
+                    else -> {}
+                }
+            }
         }
     }
 }

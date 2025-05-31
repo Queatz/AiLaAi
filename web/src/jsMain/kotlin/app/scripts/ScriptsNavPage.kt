@@ -22,11 +22,13 @@ import appString
 import application
 import bulletedString
 import com.queatz.db.Script
+import components.Icon
 import components.IconButton
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.Div
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
@@ -166,7 +168,10 @@ fun ScriptsNavPage(
         scripts.filter {
             (searchQuery.isBlank() || it.id == searchQuery || it.name.orEmpty().contains(searchQuery, ignoreCase = true)) &&
                     (selectedCategory.isNullOrBlank() || it.categories.orEmpty().contains(selectedCategory))
-        }.forEach { script ->
+        }.sortedWith(
+            compareByDescending<Script> { it.pin == true }
+                .thenByDescending { it.createdAt }
+        ).forEach { script ->
             NavMenuItem(
                 icon = null,
                 title = script.name.orEmpty().ifBlank {
@@ -176,7 +181,17 @@ fun ScriptsNavPage(
                     script.categories?.firstOrNull(),
                     script.description
                 ),
-                selected = (selected as? ScriptsNav.Script)?.script?.id == script.id
+                selected = (selected as? ScriptsNav.Script)?.script?.id == script.id,
+                trailingIcon = if (script.pin == true) {
+                    {
+                        Icon("keep") {
+                            marginLeft(.5.r)
+                            marginRight(0.r)
+                            fontSize(16.px)
+                            opacity(.25f)
+                        }
+                    }
+                } else null
             ) {
                 onSelected(ScriptsNav.Script(script = script))
             }

@@ -261,6 +261,10 @@ fun collections() = listOf(
         ensurePersistentIndex(listOf(GroupPin::person.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(GroupPin::group.name), PersistentIndexOptions())
     },
+    ScriptPin::class.db {
+        ensurePersistentIndex(listOf(ScriptPin::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(ScriptPin::script.name), PersistentIndexOptions())
+    },
     Prompt::class.db {
         ensurePersistentIndex(listOf(Prompt::person.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Prompt::context.name), PersistentIndexOptions())

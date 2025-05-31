@@ -327,11 +327,6 @@ class Tilemap(
      * @param callback Called when the texture atlas is ready
      */
     private fun createTextureAtlas(callback: (Texture) -> Unit) {
-        // Add all textures to the atlas
-        tileTextures.keys.forEach { gameTileId ->
-            textureAtlas.addTexture(gameTileId)
-        }
-
         // Create the atlas and return it
         val atlas = textureAtlas.createAtlas()
         callback(atlas)

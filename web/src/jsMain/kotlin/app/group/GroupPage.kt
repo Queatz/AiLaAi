@@ -10,20 +10,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
-import app.AppNavigation
 import app.FullPageLayout
-import app.NavPage
 import app.ailaai.api.createGroup
 import app.ailaai.api.exploreGroups
 import app.ailaai.api.group
 import app.ailaai.api.updateGroup
-import app.appNav
 import app.components.TopBarSearch
 import app.dialog.inputDialog
 import app.nav.GroupNav
-import app.softwork.routingcompose.Router
 import appString
-import appText
 import application
 import com.queatz.db.Group
 import com.queatz.db.GroupExtended
@@ -34,12 +29,13 @@ import defaultGeo
 import format
 import kotlinx.coroutines.launch
 import notBlank
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Text
 import r
-import app.group.FeatureButton
-import app.group.FeaturePreview
 
 @Composable
 fun GroupPage(

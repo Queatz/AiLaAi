@@ -35,8 +35,7 @@ fun NavSearchInput(
         }
 
         style {
-            width(100.percent)
-            if (defaultMargins) margin(.5.r, 0.r, 0.r, 0.r)
+            if (defaultMargins) margin(.5.r, 1.r, 0.r, 1.r)
             styles()
         }
         onKeyDown {

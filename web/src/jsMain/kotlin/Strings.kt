@@ -1822,6 +1822,11 @@ object Strings {
         vn = "Lịch",
         ru = "Расписание"
     )
+    val apps = Translation(
+        en = "Apps",
+        vn = "Ứng dụng",
+        ru = "Приложения"
+    )
     val timezone = Translation(
         en = "Timezone",
         vn = "Múi giờ",

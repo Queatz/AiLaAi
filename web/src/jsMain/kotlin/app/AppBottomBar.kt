@@ -50,5 +50,13 @@ fun AppBottomBar(nav: NavPage, onNavClick: (NavPage) -> Unit) {
         }) {
             onNavClick(NavPage.Schedule)
         }
+        IconButton("apps", appString { apps }, styles = {
+            if (nav == NavPage.Apps) {
+                backgroundColor(Styles.colors.primary)
+                color(Color.white)
+            }
+        }) {
+            onNavClick(NavPage.Apps)
+        }
     }
 }

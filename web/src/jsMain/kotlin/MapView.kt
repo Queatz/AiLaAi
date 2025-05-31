@@ -24,11 +24,11 @@ import components.Icon
 import components.IconButton
 import components.SearchField
 import components.Switch
-import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.dom.addClass
+import lib.ResizeObserver
 import lib.getCameraLngLat
 import lib.mapboxgl
 import org.jetbrains.compose.web.css.AlignItems
@@ -417,6 +417,17 @@ fun MapView(
             options.bearing = initialBearing.toDouble()
             options.pitch = initialPitch.toDouble()
             options.style = mapStyles[currentStyleIndex] // Use the current style
+
+            val observer = ResizeObserver { _, _ ->
+                map?.resize()
+            }.apply {
+                observe(ref)
+            }
+
+            onDispose {
+                observer.disconnect()
+            }
+
             map = mapboxgl.Map(options).apply {
                 addControl(locateMeControl, "bottom-right")
 

@@ -103,6 +103,12 @@ class GroupPin(
 ) : Model()
 
 @Serializable
+class ScriptPin(
+    var person: String? = null,
+    var script: String? = null
+) : Model()
+
+@Serializable
 class Transfer(
     var person: String? = null,
     var code: String? = null
@@ -475,6 +481,7 @@ class Script(
     var background: String? = null,
 
     var author: Person? = null,
+    var pin: Boolean? = null
 ) : Model()
 
 @Serializable

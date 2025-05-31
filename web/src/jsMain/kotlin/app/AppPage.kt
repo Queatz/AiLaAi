@@ -16,16 +16,16 @@ import app.ailaai.api.gameScene
 import app.ailaai.api.group
 import app.cards.CardsPage
 import app.components.Background
+import app.group.FeaturePreview
 import app.group.GroupPage
 import app.nav.CardNav
-import components.IconButton
 import app.nav.CardsNavPage
 import app.nav.GroupNav
 import app.nav.GroupsNavPage
 import app.nav.ProfileNavPage
-import app.nav.ScheduleNavPage
 import app.nav.SceneNav
 import app.nav.SceneNavPage
+import app.nav.ScheduleNavPage
 import app.nav.StoriesNavPage
 import app.nav.StoryNav
 import app.page.ScenePage
@@ -56,6 +56,7 @@ import com.queatz.push.MessagePushData
 import com.queatz.push.PushAction
 import com.queatz.push.ReminderPushData
 import com.queatz.push.StoryPushData
+import components.IconButton
 import format
 import kotlinx.browser.document
 import kotlinx.browser.window
@@ -69,22 +70,15 @@ import notBlank
 import notifications
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
-import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexGrow
-import org.jetbrains.compose.web.css.left
-import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflow
-import org.jetbrains.compose.web.css.position
-import org.jetbrains.compose.web.css.px
-import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.dom.Audio
 import org.jetbrains.compose.web.dom.Div
 import push
-import r
 import stories.StoryStyles
 import stories.commentDialog
 
@@ -94,6 +88,7 @@ enum class NavPage {
     Schedule,
     Cards,
     Stories,
+    Apps,
     Profile,
     Platform,
     Scripts,
@@ -538,6 +533,7 @@ fun AppPage() {
                             nav = NavPage.Profile
                         }
                     )
+                    NavPage.Apps -> FeaturePreview(listOf(NavPage.Scenes, NavPage.Scripts))
                     NavPage.Scenes -> SceneNavPage(
                         selected = scene,
                         onSelected = { selectedScene ->
@@ -572,6 +568,10 @@ fun AppPage() {
                 }
             }
             when (nav) {
+                NavPage.Profile -> {
+                    FeaturePreview()
+                }
+
                 NavPage.Groups -> GroupPage(
                     nav = group,
                     onGroup = {
@@ -628,6 +628,8 @@ fun AppPage() {
                         nav = NavPage.Groups
                     }
                 )
+                NavPage.Apps -> {
+                }
 
                 NavPage.Profile -> {
 

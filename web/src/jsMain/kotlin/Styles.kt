@@ -170,7 +170,7 @@ object Styles : StyleSheet() {
         desc(self, selector(":last-child")) style {
             property("margin-bottom", "0")
         }
-        
+
         desc(self, selector("blockquote")) style {
             property("border-left", "${2.px} ${LineStyle.Solid} ${colors.primary}")
             paddingLeft(.5.r)
@@ -979,10 +979,6 @@ object Styles : StyleSheet() {
         mobile(self) {
             width(100.percent)
         }
-
-        desktop(self) {
-            maxWidth(50.percent)
-        }
     }
 
     val mapListAutoHide by style {  }
@@ -1014,7 +1010,7 @@ object Styles : StyleSheet() {
 
         desktop(self) {
             width(24.r)
-            property("max-height", "calc(${100.percent} - ${1.r})")
+            property("max-height", "calc(${100.percent} - ${6.r})")
         }
 
         mobile(self) {

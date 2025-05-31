@@ -1,3 +1,4 @@
+
 package app.nav
 
 import IndicatorSource
@@ -28,6 +29,7 @@ import appString
 import appText
 import application
 import baseUrl
+import bulletedString
 import com.queatz.db.Group
 import com.queatz.db.GroupExtended
 import com.queatz.db.Member
@@ -274,9 +276,17 @@ fun GroupsNavPage(
         }
     }
 
-    NavTopBar(me, appString { this.groups }, onProfileClick = onProfileClick) {
-        IconButton("search", appString { search }, styles = {
-        }) {
+    NavTopBar(
+        me = me,
+        title = appString { this.groups },
+        onProfileClick = onProfileClick
+    ) {
+        IconButton(
+            name = "search",
+            title = appString { search },
+            styles = {
+            }
+        ) {
             showSearch = !showSearch
         }
         IconButton("filter_list", appString { filter }, count = selectedCategory?.let { 1 } ?: 0, styles = {
@@ -316,16 +326,14 @@ fun GroupsNavPage(
     }
 
     if (showSearch) {
-        Div({
-            style {
-                width(100.percent)
-            }
-        }) {
-            NavSearchInput(searchText, { searchText = it }, onDismissRequest = {
+        NavSearchInput(
+            value = searchText,
+            onChange = { searchText = it },
+            onDismissRequest = {
                 searchText = ""
                 showSearch = false
-            })
-        }
+            }
+        )
     }
 
     if (isLoading) {
@@ -364,6 +372,7 @@ fun GroupsNavPage(
             } else {
                 val people = remember(shownGroups) { shownGroups.people() }
 
+                // Friends
                 LazyColumn {
                     if (!showSearch && selectedCategory == null) {
                         item {
@@ -378,7 +387,12 @@ fun GroupsNavPage(
                                     Div({
                                         classes(Styles.personItem)
 
-                                        title(person.name.orEmpty())
+                                        title(
+                                            bulletedString(
+                                                person.name.orEmpty(),
+                                                statuses[person.id!!]?.status
+                                            )
+                                        )
 
                                         onClick {
                                             onFriendClick(person)

@@ -53,6 +53,7 @@ fun NavMenuItem(
     selected: Boolean = false,
     textIcon: Boolean = false,
     iconColor: CSSColorValue? = null,
+    trailingIcon: (@Composable () -> Unit)? = null,
     onClick: () -> Unit
 ) {
     Div({
@@ -112,5 +113,7 @@ fun NavMenuItem(
                 }
             }
         }
+
+        trailingIcon?.invoke()
     }
 }

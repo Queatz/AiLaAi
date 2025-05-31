@@ -1,3 +1,5 @@
+import org.codehaus.groovy.ast.tools.GeneralUtils.args
+
 plugins {
     kotlin("multiplatform") version "2.1.20"
     kotlin("plugin.serialization") version "2.1.20"
@@ -15,10 +17,19 @@ repositories {
     maven("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
 }
 
+tasks.register("run") {
+    group = "application"
+    description = "Runs the Kotlin/JS webpack dev server"
+    dependsOn("jsBrowserDevelopmentRun")
+}
+
+defaultTasks("run")
+
 kotlin {
     js(IR) {
         browser {
             runTask {
+                args("-t")
                 devServer = devServer.copy(port = 4040)
             }
             commonWebpackConfig {
@@ -43,7 +54,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-content-negotiation:${versions.ktor}")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:${versions.ktor}")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
-                implementation("app.softwork:routing-compose:0.3.0")
+                implementation("app.softwork:routing-compose:0.4.0")
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2025.4.12")
                 implementation(npm("@paulmillr/qr", "0.2.0"))
                 implementation(npm("date-fns", "4.1.0"))

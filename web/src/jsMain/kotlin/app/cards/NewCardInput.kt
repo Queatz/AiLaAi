@@ -42,8 +42,8 @@ fun NewCardInput(
         }
     }) {
         NavSearchInput(
-            newCardTitle,
-            { newCardTitle = it },
+            value = newCardTitle,
+            onChange = { newCardTitle = it },
             placeholder = appString { newCard },
             autoFocus = false,
             defaultMargins = defaultMargins,

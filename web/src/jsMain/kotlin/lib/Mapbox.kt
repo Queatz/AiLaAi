@@ -102,6 +102,7 @@ external object mapboxgl {
         fun getFreeCameraOptions(): dynamic
         fun on(event: String, block: (event: mapboxgl.MapEvent) -> Unit)
         fun setStyle(style: String)
+        fun resize()
     }
 
     class GeolocateControl(options: dynamic = definedExternally) {

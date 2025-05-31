@@ -108,3 +108,15 @@ suspend fun Api.updateScriptData(
     onError = onError,
     onSuccess = onSuccess
 )
+
+suspend fun Api.pinScript(
+    id: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode> = {},
+) = post("scripts/$id/pin", onError = onError, onSuccess = onSuccess)
+
+suspend fun Api.unpinScript(
+    id: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode> = {},
+) = post("scripts/$id/unpin", onError = onError, onSuccess = onSuccess)

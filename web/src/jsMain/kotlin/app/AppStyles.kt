@@ -7,7 +7,6 @@ import ellipsize
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.*
 import r
-import web.cssom.translatex
 
 
 object AppStyles : StyleSheet() {

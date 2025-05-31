@@ -22,7 +22,10 @@ This document outlines the core guidelines for development in the Junie project.
 
 ## Code Style Guidelines
 
-1. Kotlin
+1. General
+    - Never duplicate code, always refactor to make code reusable
+
+2. Kotlin
     - Follow official Kotlin coding conventions
     - Use data classes for models
     - Use KotlinX DateTime library for date and time handling

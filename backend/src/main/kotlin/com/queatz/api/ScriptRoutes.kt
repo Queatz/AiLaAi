@@ -4,9 +4,11 @@ import com.queatz.db.RunScriptBody
 import com.queatz.db.Script
 import com.queatz.db.ScriptData
 import com.queatz.db.allScripts
+import com.queatz.db.pinScript
 import com.queatz.db.scriptData
 import com.queatz.db.scriptsOfPerson
 import com.queatz.db.searchScripts
+import com.queatz.db.unpinScript
 import com.queatz.notBlank
 import com.queatz.parameter
 import com.queatz.plugins.db
@@ -166,6 +168,20 @@ fun Route.scriptRoutes() {
                 }
 
                 db.update(scriptData)
+            }
+        }
+
+        post("/scripts/{id}/pin") {
+            respond {
+                db.pinScript(me.id!!, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+                HttpStatusCode.OK
+            }
+        }
+
+        post("/scripts/{id}/unpin") {
+            respond {
+                db.unpinScript(me.id!!, parameter("id"))
+                HttpStatusCode.OK
             }
         }
     }

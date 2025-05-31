@@ -1,1 +1,1 @@
-./gradlew :jsBrowserDevelopmentRun
+./gradlew :jsBrowserDevelopmentRun -t

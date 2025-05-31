@@ -191,16 +191,14 @@ fun SceneNavPage(
     }
 
     if (showSearch) {
-        Div({
-            style {
-                width(100.percent)
-            }
-        }) {
-            NavSearchInput(searchText, { searchText = it }, onDismissRequest = {
+        NavSearchInput(
+            value = searchText,
+            onChange = { searchText = it },
+            onDismissRequest = {
                 searchText = ""
                 showSearch = false
-            })
-        }
+            }
+        )
     }
 
     NavMenu {

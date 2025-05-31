@@ -19,10 +19,12 @@ import app.ailaai.api.categories
 import app.ailaai.api.createScript
 import app.ailaai.api.deleteScript
 import app.ailaai.api.newCard
+import app.ailaai.api.pinScript
 import app.ailaai.api.prompts
 import app.ailaai.api.runScript
 import app.ailaai.api.scriptData
 import app.ailaai.api.scripts
+import app.ailaai.api.unpinScript
 import app.ailaai.api.updateScript
 import app.ailaai.api.updateScriptData
 import app.dialog.rememberChoosePhotoDialog
@@ -689,6 +691,26 @@ fun ScriptsPage(
                                         }
                                     } catch (e: Exception) {
                                         isBackgroundLoading = false
+                                    }
+                                }
+                            }
+                        )
+                        item(
+                            title = if (script.pin == true) appString { unpin } else appString { pin },
+                            icon = if (script.pin == true) "keep_off" else "keep",
+                            onClick = {
+                                menuTarget = null
+                                scope.launch {
+                                    if (script.pin == true) {
+                                        api.unpinScript(script.id!!) {
+                                            script.pin = false
+                                            onUpdate(script)
+                                        }
+                                    } else {
+                                        api.pinScript(script.id!!) {
+                                            script.pin = true
+                                            onUpdate(script)
+                                        }
                                     }
                                 }
                             }
