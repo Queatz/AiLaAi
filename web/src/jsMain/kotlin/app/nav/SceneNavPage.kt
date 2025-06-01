@@ -197,6 +197,7 @@ fun SceneNavPage(
             value = searchText,
             onChange = { searchText = it },
             defaultMargins = true,
+            autoFocus = true,
             onDismissRequest = {
                 searchText = ""
                 showSearch = false

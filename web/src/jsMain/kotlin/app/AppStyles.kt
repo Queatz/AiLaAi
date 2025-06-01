@@ -507,6 +507,21 @@ class AppStyleSheet : StyleSheet() {
         ellipsize()
     }
 
+    val navMenu by style {
+        overflowY("auto")
+        overflowX("hidden")
+        padding(1.r / 2)
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+    }
+
+    val navMenuSectionHeader by style {
+        padding(1.r, 1.r, .5.r, 1.r)
+        fontSize(14.px)
+        fontWeight("bold")
+        opacity(.667)
+    }
+
     val navMenuItem by style {
         self + className(groupItem) style {
             padding(1.r)

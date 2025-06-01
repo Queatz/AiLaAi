@@ -3,11 +3,13 @@ package app
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
+import r
 
 @Composable
 fun FullPageLayout(
     maxWidth: CSSpxValue? = 800.px,
     useVh: Boolean = false,
+    usePadding: Boolean = false,
     content: @Composable () -> Unit
 ) {
     Div({
@@ -23,6 +25,10 @@ fun FullPageLayout(
             if (maxWidth == null) {
                 overflowX("hidden")
                 overflowY("auto")
+            }
+            if (usePadding) {
+                padding(1.r)
+                boxSizing("border-box")
             }
         }
     }) {

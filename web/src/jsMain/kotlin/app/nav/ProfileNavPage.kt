@@ -329,6 +329,8 @@ fun ProfileNavPage(
             }
         }
 
+        NavSectionHeader("Help improve Hi Town!")
+
         // todo: translate
         NavMenuItem("lightbulb", "Request a feature", iconColor = Styles.colors.green) {
             sendAppFeedback = AppFeedbackType.Suggestion
@@ -347,10 +349,7 @@ fun ProfileNavPage(
         val configuration = LocalConfiguration.current
         val router = Router.current
 
-        // todo: translate
-        NavMenuItem("palette", "Theme", iconColor = Styles.colors.primary) {
-            router.navigate("/theme")
-        }
+        NavSectionHeader("Settings")
 
         NavMenuItem(
             when (configuration.language) {
@@ -372,6 +371,11 @@ fun ProfileNavPage(
                     else -> "en"
                 }
             )
+        }
+
+        // todo: translate
+        NavMenuItem("palette", "Theme", iconColor = Styles.colors.primary) {
+            router.navigate("/theme")
         }
 
         val signOut = appString { signOut }
@@ -422,6 +426,7 @@ fun ProfileNavPage(
                             style {
                                 borderRadius(1.r)
                                 overflow("hidden")
+                                display(DisplayStyle.Flex)
                             }
                         }) {
                             if (qrCode != null) {

@@ -14,6 +14,7 @@ import api
 import app.dialog.rememberChoosePhotoDialog
 import com.queatz.db.AiTranscribeResponse
 import components.IconButton
+import getImageDimensions
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.InputType
@@ -36,8 +37,8 @@ import org.jetbrains.compose.web.css.fontFamily
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.margin
-import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.maxHeight
+import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.minHeight
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.paddingRight
@@ -91,6 +92,7 @@ fun FlexInput(
     // Style configuration
     styles: StyleScope.() -> Unit = {},
     defaultMargins: Boolean = false,
+    useDefaultWidth: Boolean = true,
     // Feature toggles
     enableVoiceInput: Boolean = true,
     enablePhotoPasting: Boolean = false,
@@ -98,7 +100,8 @@ fun FlexInput(
     // Action handlers
     onSubmit: suspend () -> Boolean = { false },
     onDismissRequest: () -> Unit = {},
-    onPhotoSelected: (suspend (String, Int?, Int?) -> Unit)? = null,
+    onPhotoFiles: (suspend (List<File>) -> Unit)? = null,
+    onPhotos: (suspend (List<Triple<String, Int?, Int?>>) -> Unit)? = null,
     // Button configuration
     showButtons: Boolean = false,
     buttonText: String = "Submit",
@@ -119,7 +122,7 @@ fun FlexInput(
     var valueChanged by remember { mutableStateOf(false) }
 
     // Photo dialog if photo upload is enabled
-    val photoDialog = if (enablePhotoUpload && onPhotoSelected != null) {
+    val photoDialog = if (enablePhotoUpload && onPhotos != null) {
         rememberChoosePhotoDialog(showUpload = true)
     } else null
 
@@ -231,6 +234,10 @@ fun FlexInput(
                 style {
                     flex(1)
                     paddingRight(inputEndPadding)
+                    maxWidth(100.percent)
+                    if (!useDefaultWidth) {
+                        width(0.r)
+                    }
                 }
 
                 placeholder(placeholder)
@@ -302,6 +309,9 @@ fun FlexInput(
 
                 style {
                     height(3.5.r)
+                    if (!useDefaultWidth) {
+                        width(0.r)
+                    }
                     if (autoSize) {
                         minHeight(3.5.r)
                         maxHeight(18.r)
@@ -363,7 +373,7 @@ fun FlexInput(
 
                 if (enablePhotoPasting) {
                     onPaste {
-                        if (onPhotoSelected == null) return@onPaste
+                        if (onPhotoFiles == null) return@onPaste
 
                         val items = it.clipboardData?.items ?: return@onPaste
 
@@ -377,15 +387,8 @@ fun FlexInput(
 
                         if (photos.isEmpty()) return@onPaste
 
-                        // Handle pasted photos
                         scope.launch {
-                            photos.forEach { photo ->
-                                photoDialog?.launch(false) { url, width, height ->
-                                    scope.launch {
-                                        onPhotoSelected(url, width, height)
-                                    }
-                                }
-                            }
+                            onPhotoFiles(photos)
                         }
 
                         it.preventDefault()
@@ -447,7 +450,7 @@ fun FlexInput(
         }
 
         // Photo upload button
-        if (enablePhotoUpload && onPhotoSelected != null) {
+        if (enablePhotoUpload && onPhotos != null) {
             IconButton(
                 name = "photo",
                 title = "Upload photo",
@@ -459,7 +462,11 @@ fun FlexInput(
                     opacity(.5f)
                 }
             ) {
-                photoDialog?.launch(false, onPhotoSelected)
+                photoDialog?.launch(
+                    multiple = false, onPhoto = { photo, width, height ->
+                        onPhotos(listOf(Triple(photo, width, height)))
+                    }
+                )
                 focus?.invoke()
             }
         }

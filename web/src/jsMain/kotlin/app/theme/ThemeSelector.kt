@@ -732,7 +732,7 @@ fun ColorPicker(label: String, color: String, onColorChanged: (String) -> Unit) 
         // Label
         Div({
             style {
-                width(12.r)
+                width(10.r)
                 fontWeight("bold")
                 flexShrink(0)
             }
@@ -752,6 +752,7 @@ fun ColorPicker(label: String, color: String, onColorChanged: (String) -> Unit) 
                 padding(0.px)
                 border(1.px, LineStyle.Solid, Styles.colors.lightgray)
                 borderRadius(4.px)
+                flexShrink(0)
             }
             onInput { event ->
                 onColorChanged(event.value)
@@ -767,7 +768,9 @@ fun ColorPicker(label: String, color: String, onColorChanged: (String) -> Unit) 
                 onColorChanged(event.value)
             }
             style {
-                flex(1)
+                flexGrow(1)
+                flexShrink(1)
+                width(0.r)
             }
         }
     }

@@ -1,47 +1,36 @@
 package app.nav
 
-import Strings.newStory
 import Styles
 import androidx.compose.runtime.Composable
 import app.AppStyles
 import app.messaages.inList
-import appString
 import components.Icon
 import focusable
-import notBlank
 import org.jetbrains.compose.web.css.CSSColorValue
-import org.jetbrains.compose.web.css.Color
-import org.jetbrains.compose.web.css.DisplayStyle
-import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.color
-import org.jetbrains.compose.web.css.display
-import org.jetbrains.compose.web.css.div
-import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexGrow
-import org.jetbrains.compose.web.css.overflowX
-import org.jetbrains.compose.web.css.overflowY
-import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
-import r
-import stories.storyStatus
 
 
 @Composable
 fun NavMenu(content: @Composable () -> Unit) {
     Div({
-        style {
-            overflowY("auto")
-            overflowX("hidden")
-            padding(1.r / 2)
-            display(DisplayStyle.Flex)
-            flexDirection(FlexDirection.Column)
-        }
+        classes(AppStyles.navMenu)
     }) {
         content()
+    }
+}
+
+@Composable
+fun NavSectionHeader(text: String) {
+    Div({
+        classes(AppStyles.navMenuSectionHeader)
+    }) {
+        Text(text)
     }
 }
 

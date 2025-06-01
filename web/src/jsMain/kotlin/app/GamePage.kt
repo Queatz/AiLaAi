@@ -709,6 +709,10 @@ fun GamePage(
                         }
                     }
 
+                    onMouseEnter {
+                        canvasRef?.focus()
+                    }
+
                     // Add mouse event listener to stop animation on click
                     onClick { event ->
                         if (game?.isPlaying() == true) {

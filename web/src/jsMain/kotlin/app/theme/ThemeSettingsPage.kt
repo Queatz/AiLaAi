@@ -16,7 +16,10 @@ fun ThemeSettingsPage() {
     var showEditor by remember { mutableStateOf(false) }
     var themeToEdit by remember { mutableStateOf<UserTheme?>(null) }
 
-    FullPageLayout(useVh = true) {
+    FullPageLayout(
+        useVh = true,
+        usePadding = true,
+    ) {
         H2 {
             Text("Theme Settings")
         }

@@ -60,10 +60,10 @@ import json
 import kotlinx.browser.window
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import time.formatDistanceToNow
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import notBlank
 import org.jetbrains.compose.web.attributes.ATarget
-import org.jetbrains.compose.web.attributes.AutoComplete.Companion.url
 import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -79,7 +79,6 @@ import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.opacity
-import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
@@ -95,8 +94,11 @@ import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import qr
 import r
+import time.formatDistanceToNow
 import webBaseUrl
 import kotlin.js.Date
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 
 @Composable
 fun GroupTopBar(
@@ -112,6 +114,8 @@ fun GroupTopBar(
     val scope = rememberCoroutineScope()
     val calls by call.calls.collectAsState()
     val callParticipants = calls.firstOrNull { it.group == group.group!!.id }?.participants ?: 0
+
+    val isSnoozed = myMember?.member?.snoozed == true || myMember?.member?.snoozedUntil?.let { it > Clock.System.now() } == true
 
     val closeStr = appString { close }
 
@@ -501,6 +505,75 @@ fun GroupTopBar(
         }
     }
 
+    fun snooze(snoozed: Boolean) {
+        scope.launch {
+            api.updateMember(
+                myMember!!.member!!.id!!,
+                Member(snoozed = snoozed)
+            ) {
+                onGroupUpdated()
+            }
+        }
+    }
+
+    fun snooze(snoozedUntil: Instant) {
+        scope.launch {
+            api.updateMember(
+                myMember!!.member!!.id!!,
+                Member(snoozedUntil = snoozedUntil)
+            ) {
+                onGroupUpdated()
+            }
+        }
+    }
+
+    fun showSnoozeDialog() {
+        scope.launch {
+            dialog(
+                title = "Snooze",
+                cancelButton = closeStr,
+                confirmButton = null
+            ) {
+                InlineMenu({
+                    it(false)
+                }) {
+                    item("1 hour") {
+                        snooze(Clock.System.now() + 1.hours)
+                        it(false)
+                    }
+                    item("3 hours") {
+                        snooze(Clock.System.now() + 3.hours)
+                        it(false)
+                    }
+                    item("6 hours") {
+                        snooze(Clock.System.now() + 6.hours)
+                        it(false)
+                    }
+                    item("12 hours") {
+                        snooze(Clock.System.now() + 12.hours)
+                        it(false)
+                    }
+                    item("1 day") {
+                        snooze(Clock.System.now() + 1.days)
+                        it(false)
+                    }
+                    item("7 days") {
+                        snooze(Clock.System.now() + 7.days)
+                        it(false)
+                    }
+                    item("30 days") {
+                        snooze(Clock.System.now() + 30.days)
+                        it(false)
+                    }
+                    item("Forever") {
+                        snooze(true)
+                        it(false)
+                    }
+                }
+            }
+        }
+    }
+
     if (menuTarget != null) {
         Menu({ menuTarget = null }, menuTarget!!) {
             item(appString { openInNewTab }, icon = "open_in_new") {
@@ -646,6 +719,18 @@ fun GroupTopBar(
                         }
                     }
                 }
+
+                if (myMember != null) {
+                    if (isSnoozed) {
+                        item("Unsnooze", icon = "notifications_active") {
+                            snooze(false)
+                        }
+                    } else {
+                        item("Snooze", icon = "notifications_paused") {
+                            showSnoozeDialog()
+                        }
+                    }
+                }
                 item(appString { hide }) {
                     scope.launch {
                         api.updateMember(
@@ -696,6 +781,7 @@ fun GroupTopBar(
     LaunchedEffect(allJoinRequests) {
         joinRequests = allJoinRequests.filter { it.joinRequest?.group == group.group?.id }
     }
+
 
     if (joinRequests.isNotEmpty()) {
         Div({
@@ -759,6 +845,17 @@ fun GroupTopBar(
             renameGroup()
         },
         actions = {
+            if (isSnoozed && myMember != null) {
+                IconButton(
+                    name = "notifications_paused",
+                    title = "Snoozed",
+                    styles = {
+                        marginRight(.5.r)
+                    }
+                ) {
+                    snooze(false)
+                }
+            }
             if (!showCards) {
                 IconButton(
                     name = "call",

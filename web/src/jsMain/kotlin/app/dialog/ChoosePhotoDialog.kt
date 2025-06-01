@@ -27,10 +27,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.Position.Companion.Absolute
+import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.bottom
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
+import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflowY
@@ -50,6 +57,7 @@ import org.w3c.files.FileReader
 import pickPhotos
 import r
 import toBytes
+import web.cssom.Overflow
 
 class ChoosePhotoDialogControl(
     private val scope: CoroutineScope,
@@ -214,9 +222,9 @@ private suspend fun choosePhotoDialog(
                     right(5.r)
                     top(1.r)
                     bottom(1.r)
-                    property("display", "flex")
-                    property("align-items", "center")
-                    property("gap", "0.5rem")
+                    display(DisplayStyle.Flex)
+                    alignItems(AlignItems.Center)
+                    gap(0.5.r)
                 }
             }) {
 
@@ -224,10 +232,10 @@ private suspend fun choosePhotoDialog(
                 if (multiple) {
                     Div({
                         style {
-                            property("display", "flex")
-                            property("flex-direction", "column")
-                            property("align-items", "center")
-                            property("font-size", "0.75rem")
+                            display(DisplayStyle.Flex)
+                            flexDirection(FlexDirection.Column)
+                            alignItems(AlignItems.Center)
+                            fontSize(0.75.r)
                         }
                     }) {
                         NumberInput(
@@ -270,7 +278,7 @@ private suspend fun choosePhotoDialog(
             if (showUpload) {
                 IconButton("photo", application.appString { choosePhoto }) {
                     pickPhotos(multiple = multiple) { files ->
-                        onFile(files.first())
+                        files.forEach(onFile)
                     }
                     resolve(false)
                 }

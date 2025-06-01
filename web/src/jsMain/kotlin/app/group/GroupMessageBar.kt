@@ -40,6 +40,8 @@ import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.overflow
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
@@ -332,6 +334,7 @@ fun GroupMessageBar(
             autoFocus = true,
             autoSize = true,
             enablePhotoPasting = true,
+            useDefaultWidth = false,
             onSubmit = {
                 sendMessage()
                 true
@@ -339,8 +342,12 @@ fun GroupMessageBar(
             onDismissRequest = {
                 // No action needed
             },
-            onPhotoSelected = { url: String, _: Int?, _: Int? ->
-                sendPhotos(listOf(File(arrayOf(url), "pasted-image.jpg")))
+            onPhotoFiles = { photos: List<File> ->
+                sendPhotos(photos)
+            },
+            styles = {
+                width(0.r)
+                flexGrow(1)
             }
         )
     }

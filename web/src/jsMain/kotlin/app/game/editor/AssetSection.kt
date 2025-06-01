@@ -102,6 +102,7 @@ fun <T : Asset> AssetSection(
                     FlexInput(
                         value = searchQuery,
                         onChange = { searchQuery = it },
+                        autoFocus = true,
                         onDismissRequest = {
                             showSearch = false
                             searchQuery = ""

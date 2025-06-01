@@ -225,28 +225,32 @@ fun StoriesPage(
                                 showButtons = true,
                                 buttonText = appString { post },
                                 onSubmit = {
-                                    isSaving = true
-                                    var success = false
-                                    api.createStory(
-                                        Story(
-                                            title = newPostText
-                                        )
-                                    ) { story ->
-                                        api.updateStory(
-                                            id = story.id!!,
-                                            story = Story(published = true)
-                                        ) {
-                                            reload()
-                                            onStoryUpdated(it)
-                                            success = true
-                                            if (success) {
-                                                newPostText = ""
-                                                messageChanged = false
+                                    if (newPostText.isNotBlank()) {
+                                        isSaving = true
+                                        var success = false
+                                        api.createStory(
+                                            Story(
+                                                title = newPostText
+                                            )
+                                        ) { story ->
+                                            api.updateStory(
+                                                id = story.id!!,
+                                                story = Story(published = true)
+                                            ) {
+                                                reload()
+                                                onStoryUpdated(it)
+                                                success = true
+                                                if (success) {
+                                                    newPostText = ""
+                                                    messageChanged = false
+                                                }
                                             }
                                         }
+                                        isSaving = false
+                                        success
+                                    } else {
+                                        false
                                     }
-                                    isSaving = false
-                                    success
                                 }
                             )
                         }
