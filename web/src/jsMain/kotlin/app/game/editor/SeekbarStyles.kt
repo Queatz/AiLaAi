@@ -1,5 +1,7 @@
 package app.game.editor
 
+import Styles
+import app.AppStyleSheet
 import app.dark
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.Color
@@ -29,11 +31,13 @@ import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.css.width
 import r
 
+val SeekbarStyles get() = StyleManager.style(SeekbarStyleSheet::class)
+
 /**
  * Styles for the Seekbar component
  */
 @OptIn(ExperimentalComposeWebApi::class)
-object SeekbarStyles : StyleSheet() {
+class SeekbarStyleSheet : StyleSheet() {
     val seekbarContainer by style {
         position(Position.Relative)
         width(100.percent)

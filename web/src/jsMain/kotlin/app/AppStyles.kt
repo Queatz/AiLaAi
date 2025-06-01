@@ -1,15 +1,16 @@
 package app
 
 import Styles
-import Styles.elevated
-import Styles.textIcon
 import ellipsize
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.*
 import r
+import web.cssom.AspectRatio
+import web.cssom.PropertyName.Companion.aspectRatio
 
+val AppStyles get() = StyleManager.style(AppStyleSheet::class)
 
-object AppStyles : StyleSheet() {
+class AppStyleSheet : StyleSheet() {
 
     // Game Editor Panel Styles
     val editorTabContainer by style {
@@ -46,12 +47,12 @@ object AppStyles : StyleSheet() {
         borderRadius(0.5.r)
 
         hover(self) style {
-            backgroundColor(Color("#f0f0f0"))
+            backgroundColor(Styles.colors.lightgray)
         }
 
         dark(self) {
             hover(self) style {
-                backgroundColor(Color("#333333"))
+                backgroundColor(Styles.colors.darkgray)
             }
         }
     }
@@ -62,12 +63,12 @@ object AppStyles : StyleSheet() {
 
     val editorPanelContent by style {
         padding(1.r)
-        backgroundColor(Color("#f0f0f0"))
+        backgroundColor(Styles.colors.lightgray)
         borderRadius(0.5.r)
         marginTop(0.5.r)
 
         dark(self) {
-            backgroundColor(Color("#222222"))
+            backgroundColor(Styles.colors.darkgray)
         }
     }
 
@@ -100,7 +101,9 @@ object AppStyles : StyleSheet() {
         borderRadius(1.r)
         padding(1.r)
         cursor("pointer")
-        elevated()
+        with(Styles) {
+            elevated()
+        }
     }
 
     val seenUntilLayout by style {
@@ -134,7 +137,7 @@ object AppStyles : StyleSheet() {
         alignItems(AlignItems.Center)
         padding(1.r)
         marginBottom(1.r)
-        backgroundColor(Color.white)
+        backgroundColor(Styles.colors.white)
         borderRadius(1.r)
         cursor("pointer")
         property("box-shadow", "2px 2px 16px rgba(0, 0, 0, 0.125)")
@@ -212,7 +215,7 @@ object AppStyles : StyleSheet() {
 
     val menu by style {
         padding(.5.r)
-        backgroundColor(Color.white)
+        backgroundColor(Styles.colors.white)
         borderRadius(1.r)
         property("box-shadow", "2px 2px 16px rgba(0, 0, 0, 0.125)")
         position(Position.Fixed)
@@ -228,7 +231,7 @@ object AppStyles : StyleSheet() {
     }
 
     val menuInline by style {
-        backgroundColor(Color.white)
+        backgroundColor(Styles.colors.white)
         borderRadius(1.r)
         property("user-select", "none")
 
@@ -257,13 +260,13 @@ object AppStyles : StyleSheet() {
 
         dark(self) {
             self + hover style {
-                backgroundColor(Color.black)
+                backgroundColor(Styles.colors.black)
             }
         }
 
         self + className(menuItemSelected) style {
             backgroundColor(Styles.colors.primary)
-            color(Color.white)
+            color(Styles.colors.white)
         }
     }
 
@@ -275,8 +278,8 @@ object AppStyles : StyleSheet() {
         display(DisplayStyle.Flex)
 
         dark(self) {
-            backgroundColor(Color.black)
-            color(Color.white)
+            backgroundColor(Styles.colors.black)
+            color(Styles.colors.white)
         }
 
         mobile(self) {
@@ -293,7 +296,9 @@ object AppStyles : StyleSheet() {
         marginLeft(1.r)
         marginBottom(1.r)
         property("z-index", "1")
-        elevated()
+        with(Styles) {
+            elevated()
+        }
 
         dark(self) {
             backgroundColor(Styles.colors.dark.background)
@@ -426,12 +431,12 @@ object AppStyles : StyleSheet() {
 
         dark(self) {
             self + hover style {
-                backgroundColor(Color.black)
+                backgroundColor(Styles.colors.black)
             }
 
             self + className(groupItemOnSurface) style {
                 self + hover style {
-                    backgroundColor(Color.black)
+                    backgroundColor(Styles.colors.black)
                 }
             }
 
@@ -470,17 +475,17 @@ object AppStyles : StyleSheet() {
         }
 
         dark(self) {
-            backgroundColor(Color.black)
+            backgroundColor(Styles.colors.black)
 
             self + className(groupItemOnSurface) style {
-                backgroundColor(Color.black)
+                backgroundColor(Styles.colors.black)
             }
         }
     }
 
     val groupItemSelectedPrimary by style {
         backgroundColor(Styles.colors.primary)
-        color(Color.white)
+        color(Styles.colors.white)
 
         self + className(groupItem) + hover style {
             backgroundColor(Styles.colors.primary)
@@ -511,7 +516,7 @@ object AppStyles : StyleSheet() {
             marginRight(1.r)
         }
 
-        child(self, className(textIcon)) style {
+        child(self, className(Styles.textIcon)) style {
             marginRight(1.r)
         }
     }
@@ -537,7 +542,7 @@ object AppStyles : StyleSheet() {
 
     val messageItem by style {
         padding(1.r)
-        backgroundColor(Color.white)
+        backgroundColor(Styles.colors.white)
         borderRadius(1.r)
         border(1.px, LineStyle.Solid, Styles.colors.background)
         maxWidth(100.percent)
@@ -556,20 +561,20 @@ object AppStyles : StyleSheet() {
 
         self + className(myMessage) style {
             backgroundColor(Styles.colors.background)
-            outline("${1.px} ${LineStyle.Solid} ${Color.white}")
+            outline("${1.px} ${LineStyle.Solid} ${Styles.colors.white}")
             property("border", "none")
         }
 
         dark(self) {
             self + className(myMessage) style {
                 backgroundColor(Styles.colors.dark.background)
-                outline("${1.px} ${LineStyle.Solid} ${Color.black}")
+                outline("${1.px} ${LineStyle.Solid} ${Styles.colors.black}")
             }
         }
 
         dark(self) {
-            backgroundColor(Color.black)
-            border(1.px, LineStyle.Solid, Color("#444444"))
+            backgroundColor(Styles.colors.black)
+            border(1.px, LineStyle.Solid, Styles.colors.gray)
         }
     }
 
@@ -604,7 +609,7 @@ object AppStyles : StyleSheet() {
             1.r,
             1.r / 2,
         )
-        backgroundColor(Color("#fafafa"))
+        backgroundColor(Styles.colors.lightgray)
         property("border-left", "4px solid ${Styles.colors.background}")
 
         self + className(myMessageReply) style {
@@ -621,10 +626,10 @@ object AppStyles : StyleSheet() {
 
         dark(self) {
             backgroundColor(Styles.colors.dark.background)
-            property("border-left", "4px solid ${Color("#444")}")
+            property("border-left", "4px solid ${Styles.colors.gray}")
 
             self + className(myMessageReply) style {
-                property("border-right", "4px solid ${Color("#444")}")
+                property("border-right", "4px solid ${Styles.colors.gray}")
             }
         }
     }
@@ -694,13 +699,13 @@ object AppStyles : StyleSheet() {
         overflowX("hidden")
         overflowY("auto")
         flexDirection(FlexDirection.Column)
-        backgroundColor(Color("#fafafa"))
-        border(1.px, LineStyle.Solid, Color("#e4e4e4"))
+        backgroundColor(Styles.colors.gray)
+        border(1.px, LineStyle.Solid, Styles.colors.lightgray)
         borderRadius(1.r)
 
         dark(self) {
             backgroundColor(Styles.colors.dark.background)
-            border(1.px, LineStyle.Solid, Color("#444444"))
+            border(1.px, LineStyle.Solid, Styles.colors.darkgray)
         }
     }
 
@@ -710,32 +715,32 @@ object AppStyles : StyleSheet() {
         maxHeight(100.vw)
         maxWidth(100.percent)
         borderRadius(1.r)
-        border(3.px, LineStyle.Solid, Color.white)
+        border(3.px, LineStyle.Solid, Styles.colors.white)
         cursor("pointer")
         property("object-fit", "contain")
 
         dark(self) {
-            backgroundColor(Color.black)
-            border(3.px, LineStyle.Solid, Color.black)
+            backgroundColor(Styles.colors.black)
+            border(3.px, LineStyle.Solid, Styles.colors.black)
         }
     }
 
     val stickerMessage by style {
         borderRadius(4.r)
-        backgroundColor(Color.white)
+        backgroundColor(Styles.colors.white)
         padding(1.r / 2, 1.r)
         whiteSpace("nowrap")
         property("z-index", "1")
 
         dark(self) {
             backgroundColor(Styles.colors.dark.background)
-            color(Color.white)
+            color(Styles.colors.white)
         }
     }
 
     val messageItemStory by style {
         borderRadius(1.r)
-        backgroundColor(Color.white)
+        backgroundColor(Styles.colors.white)
         property("box-shadow", "1px 1px 4px rgba(0, 0, 0, 0.125)")
         padding(1.r)
         cursor("pointer")

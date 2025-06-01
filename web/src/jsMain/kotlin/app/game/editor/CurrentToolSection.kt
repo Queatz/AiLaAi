@@ -330,7 +330,7 @@ fun CurrentToolSection(
                                     display(DisplayStyle.Flex)
                                     justifyContent(JustifyContent.Center)
                                     alignItems(AlignItems.Center)
-                                    color(if (step == currentStep) Color.white else Color("#666666"))
+                                    color(if (step == currentStep) Styles.colors.white else Styles.colors.gray)
                                     fontWeight(if (step == currentStep) "bold" else "normal")
                                 }
                             }) {
@@ -342,7 +342,7 @@ fun CurrentToolSection(
                                 style {
                                     fontSize(12.px)
                                     textAlign("center")
-                                    color(if (step == currentStep) Styles.colors.primary else Color("#666666"))
+                                    color(if (step == currentStep) Styles.colors.primary else Styles.colors.gray)
                                     fontWeight(if (step == currentStep) "bold" else "normal")
                                 }
                             }) {

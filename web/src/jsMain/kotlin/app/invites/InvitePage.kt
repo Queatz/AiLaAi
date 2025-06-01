@@ -1,5 +1,6 @@
 package app.invites
 
+import StyleManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -7,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import api
-import app.AppStyles
+import app.AppStyleSheet
 import app.FullPageLayout
 import app.ailaai.api.invite
 import app.components.Empty
@@ -17,7 +18,6 @@ import components.Loading
 import mainContent
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
-import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.padding
@@ -26,7 +26,9 @@ import r
 
 @Composable
 fun InvitePage(code: String) {
-    Style(AppStyles)
+    StyleManager.use(
+        AppStyleSheet::class
+    )
 
     var isLoading by remember {
         mutableStateOf(true)

@@ -33,7 +33,6 @@ import lib.getCameraLngLat
 import lib.mapboxgl
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.AlignSelf
-import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.JustifyContent
@@ -298,14 +297,14 @@ fun MapView(
                                 style {
                                     textAlign("center")
                                     fontSize(128.px)
-                                    color(Color.black)
+                                    color(Styles.colors.black)
                                     padding(2.r)
                                     lineHeight(120.percent)
 
                                     if (isNpc) {
                                         property("box-shadow", "0 2px 16px rgba(0, 0, 0, 0.125)")
                                         borderRadius(2.r)
-                                        backgroundColor(Color.white)
+                                        backgroundColor(Styles.colors.white)
                                     }
                                 }
                             }) {
@@ -366,7 +365,7 @@ fun MapView(
                                         height(16.r)
                                         borderRadius(16.r)
                                         backgroundColor(Styles.colors.background)
-                                        property("border", "${2.px} solid ${Color.white}")
+                                        property("border", "${2.px} solid ${Styles.colors.white}")
                                         backgroundImage("url($baseUrl${card.photo!!})")
                                         backgroundPosition("center")
                                         backgroundSize("cover")
@@ -375,7 +374,7 @@ fun MapView(
                                         height(16.r)
                                         borderRadius(16.r)
                                         backgroundColor(Styles.colors.background)
-                                        property("border", "${2.px} solid ${Color.white}")
+                                        property("border", "${2.px} solid ${Styles.colors.white}")
                                     }
                                 }
                             })
@@ -422,10 +421,6 @@ fun MapView(
                 map?.resize()
             }.apply {
                 observe(ref)
-            }
-
-            onDispose {
-                observer.disconnect()
             }
 
             map = mapboxgl.Map(options).apply {
@@ -514,7 +509,7 @@ fun MapView(
 
                                     Span({
                                         style {
-                                            color(Color.gray)
+                                            color(Styles.colors.gray)
                                             paddingTop(1f.r)
                                             paddingBottom(.5f.r)
                                         }
@@ -558,6 +553,8 @@ fun MapView(
 
             onDispose {
                 map?.remove()
+                map = null
+                observer.disconnect()
             }
         }
     }) {}

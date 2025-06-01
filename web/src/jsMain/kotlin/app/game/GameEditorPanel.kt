@@ -41,6 +41,7 @@ fun GameEditorPanel(
     onScenePublished: () -> Unit = {},
     onSceneForked: (GameScene) -> Unit = {},
     onSceneUpdated: (GameScene) -> Unit = {},
+    onSceneSaved: (GameScene) -> Unit = {},
     styles: StyleScope.() -> Unit = {}
 ) {
     // Get the current user
@@ -79,7 +80,8 @@ fun GameEditorPanel(
                             onSceneDeleted = onSceneDeleted,
                             onPixelatedChanged = onPixelatedChanged,
                             onSceneForked = onSceneForked,
-                            onSceneUpdated = onSceneUpdated
+                            onSceneUpdated = onSceneUpdated,
+                            onSceneSaved = onSceneSaved
                         )
                     })
                 }

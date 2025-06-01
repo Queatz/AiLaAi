@@ -1340,7 +1340,7 @@ fun TagButton(
                 justifyContent(JustifyContent.Center)
 
                 if (!outline) {
-                    color(Color.white)
+                    color(Styles.colors.white)
                     backgroundColor(tagColor(tag))
                 }
             }

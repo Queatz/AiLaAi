@@ -1077,6 +1077,7 @@ fun ScriptsPage(
                                         val prompt = inputDialog(
                                             title = application.appString { aiPrompt },
                                             confirmButton = application.appString { send },
+                                            inputEndPadding = 5.r,
                                             singleLine = false,
                                             placeholder = if (
                                                 (editedScript ?: script.source.orEmpty()).isBlank()
@@ -1092,7 +1093,7 @@ fun ScriptsPage(
                                                         }
 
                                                         position(Absolute)
-                                                        right(0.5.r)
+                                                        right(2.5.r)
                                                         top(1.r)
                                                         bottom(1.r)
                                                     }

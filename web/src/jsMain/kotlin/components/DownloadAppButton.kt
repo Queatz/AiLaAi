@@ -1,4 +1,5 @@
 package components
+import Styles
 import androidx.compose.runtime.Composable
 import appString
 import org.jetbrains.compose.web.css.*
@@ -17,7 +18,7 @@ fun DownloadAppButton() {
             fontWeight(700)
             fontSize(18.px)
             borderRadius(2.r)
-            color(Color.white)
+            color(Styles.colors.white)
             textDecoration("none")
             textAlign("center")
             property("box-shadow", "2px 2px 8px rgba(0, 0, 0, .25)")

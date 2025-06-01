@@ -1,6 +1,7 @@
 package components
 
 import AppLayout
+import StyleManager
 import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,6 +13,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
 import app.AppNavigation
+import app.AppStyleSheet
 import app.AppStyles
 import app.ailaai.api.activeCardsOfPerson
 import app.ailaai.api.createGroup
@@ -42,7 +44,6 @@ import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.FlexWrap
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.Position
-import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.backgroundImage
@@ -80,6 +81,7 @@ import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.Video
 import org.w3c.dom.HTMLVideoElement
+import profile.ProfileStyleSheet
 import profile.ProfileStyles
 import r
 import webBaseUrl
@@ -88,8 +90,10 @@ import kotlin.js.Date
 @OptIn(ExperimentalComposeWebApi::class)
 @Composable
 fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (PersonProfile) -> Unit) {
-    Style(ProfileStyles)
-    Style(AppStyles)
+    StyleManager.use(
+        AppStyleSheet::class,
+        ProfileStyleSheet::class
+    )
 
     var personId by remember { mutableStateOf(personId) }
     val scope = rememberCoroutineScope()

@@ -1,14 +1,13 @@
 package app.game.editor
 
+import StyleManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import app.util.rememberDragTracker
-import format1Decimal
 import format3Decimals
-import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.left
 import org.jetbrains.compose.web.css.percent
@@ -57,7 +56,9 @@ fun Seekbar(
     keyframes: List<SeekbarKeyframe> = emptyList(),
     onPositionChange: (Double) -> Unit
 ) {
-    Style(SeekbarStyles)
+    StyleManager.use(
+        SeekbarStyleSheet::class
+    )
     var isDragging by remember { mutableStateOf(false) }
 
     // Calculate total duration based on the last keyframe + its duration

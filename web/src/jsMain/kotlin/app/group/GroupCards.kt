@@ -1,7 +1,14 @@
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import app.AppStyles
 import app.ailaai.api.groupCards
 import app.ailaai.api.newCard
+import app.cards.CardsPageStyleSheet
 import app.cards.CardsPageStyles
 import app.components.TopBarSearch
 import app.dialog.inputDialog
@@ -11,12 +18,19 @@ import components.CardItem
 import components.Loading
 import components.Tip
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.marginTop
+import org.jetbrains.compose.web.css.paddingBottom
 import org.jetbrains.compose.web.dom.Div
 
 @Composable
 fun GroupCards(group: GroupExtended) {
-    Style(CardsPageStyles)
+    StyleManager.use(
+        CardsPageStyleSheet::class
+    )
 
     val scope = rememberCoroutineScope()
 

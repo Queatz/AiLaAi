@@ -1,5 +1,6 @@
 package app.page
 
+import StyleManager
 import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -62,7 +63,6 @@ import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.Position
-import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
@@ -158,7 +158,9 @@ fun SchedulePage(
     onUpdate: (Reminder) -> Unit,
     onDelete: (Reminder) -> Unit,
 ) {
-    Style(SchedulePageStyles)
+    StyleManager.use(
+        SchedulePageStyleSheet::class
+    )
 
     val scope = rememberCoroutineScope()
 

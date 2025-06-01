@@ -21,6 +21,7 @@ import app.ailaai.api.updateProfile
 import app.components.FlexInput
 import app.dialog.dialog
 import app.dialog.inputDialog
+import app.softwork.routingcompose.Router
 import appString
 import appText
 import application
@@ -339,12 +340,17 @@ fun ProfileNavPage(
         }
 
         // todo: translate
-        NavMenuItem("feedback", "Other feedback", iconColor = Styles.colors.primary) {
+        NavMenuItem("feedback", "Other feedback", iconColor = Styles.colors.tertiary) {
             sendAppFeedback = AppFeedbackType.Other
         }
 
-
         val configuration = LocalConfiguration.current
+        val router = Router.current
+
+        // todo: translate
+        NavMenuItem("palette", "Theme", iconColor = Styles.colors.primary) {
+            router.navigate("/theme")
+        }
 
         NavMenuItem(
             when (configuration.language) {

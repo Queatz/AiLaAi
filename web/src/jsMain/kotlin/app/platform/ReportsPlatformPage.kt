@@ -107,12 +107,12 @@ fun ReportsPlatformPage() {
                     }) {
                         Div {
                             // todo: translate
-                            Span({ style { color(Color.gray) } }) { Text("Type ") }
+                            Span({ style { color(Styles.colors.gray) } }) { Text("Type ") }
                             Text(report.type.toString())
                         }
                         Div {
                             // todo: translate
-                            Span({ style { color(Color.gray) } }) { Text("Entity ") }
+                            Span({ style { color(Styles.colors.gray) } }) { Text("Entity ") }
                             Text(report.entity.orEmpty())
                         }
                     }
@@ -123,7 +123,7 @@ fun ReportsPlatformPage() {
                             padding(1.r)
                             overflowX("auto")
                             borderRadius(1.r)
-                            border(1.px, LineStyle.Solid, Color.gray)
+                            border(1.px, LineStyle.Solid, Styles.colors.gray)
                         }
                     }) {
                         Text(report.reporterMessage.orEmpty())

@@ -123,6 +123,15 @@ fun AppFooter(
         Bullet()
         Span({
             classes(Styles.menuButton)
+            onClick {
+                router.navigate("/theme")
+            }
+        }) {
+            Text("Theme")
+        }
+        Bullet()
+        Span({
+            classes(Styles.menuButton)
 
             onClick {
                 scope.launch {
@@ -138,7 +147,7 @@ fun AppFooter(
         }) {
             Span { appText { madeWith } }
             Span({
-                style { color(Color.red) }
+                style { color(Styles.colors.red) }
             }) { Text(" ♥ ") }
             Span { appText { inHCMC } }
         }

@@ -1,5 +1,6 @@
 package components
 
+import Styles
 import app.dialog.dialog
 import appText
 import application

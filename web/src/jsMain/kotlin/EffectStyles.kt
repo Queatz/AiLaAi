@@ -18,8 +18,10 @@ import org.jetbrains.compose.web.css.transform
 import org.jetbrains.compose.web.css.vh
 import org.jetbrains.compose.web.css.width
 
+val EffectStyles get() = StyleManager.style(EffectStyleSheet::class)
+
 @OptIn(ExperimentalComposeWebApi::class)
-object EffectStyles : StyleSheet() {
+class EffectStyleSheet : StyleSheet() {
     val container by style {
         position(Position.Fixed)
         property("inset", "0")

@@ -1,5 +1,6 @@
 package app.game.editor
 
+import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -9,11 +10,9 @@ import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.updateGameScene
 import com.queatz.db.GameScene
-import game.Map
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import lib.Engine
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div

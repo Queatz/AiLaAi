@@ -1,5 +1,6 @@
 package app.platform
 
+import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -56,7 +57,7 @@ fun HealthPlatformPage() {
 
             stats.forEach {
                 Div {
-                    Span({ style { color(Color.gray) } }) { Text(it.key) }
+                    Span({ style { color(Styles.colors.gray) } }) { Text(it.key) }
                     Text(" ")
                     Text(it.value.jsonPrimitive.content)
                 }

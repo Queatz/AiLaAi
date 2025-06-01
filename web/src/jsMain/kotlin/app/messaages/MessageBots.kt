@@ -64,7 +64,7 @@ fun MessageBots(
             right(2.px)
             borderRadius(1.r)
             backgroundColor(if (success) Styles.colors.green else Styles.colors.red)
-            color(Color.white)
+            color(Styles.colors.white)
             fontSize(12.px)
         }
     }

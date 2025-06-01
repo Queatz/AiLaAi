@@ -5,7 +5,9 @@ import ellipsize
 import org.jetbrains.compose.web.css.*
 import r
 
-object ProfileStyles : StyleSheet() {
+val ProfileStyles get() = StyleManager.style(ProfileStyleSheet::class)
+
+class ProfileStyleSheet : StyleSheet() {
     val mainContent by style {
         display(DisplayStyle.Flex)
         media(mediaMaxWidth(640.px)) {
@@ -29,11 +31,11 @@ object ProfileStyles : StyleSheet() {
         backgroundPosition("center")
         backgroundSize("cover")
         borderRadius(100.percent)
-        border(6.px, LineStyle.Solid, Color.white)
+        border(6.px, LineStyle.Solid, Styles.colors.white)
         media(mediaMaxWidth(640.px)) {
             self style {
                 property("margin-top", "-22.5vw")
-                border(4.px, LineStyle.Solid, Color.white)
+                border(4.px, LineStyle.Solid, Styles.colors.white)
             }
         }
         media(mediaMinWidth(641.px)) {

@@ -1,5 +1,6 @@
 package app.dialog
 
+import Styles
 import aiPhoto
 import aiStyles
 import androidx.compose.runtime.Composable
@@ -34,7 +35,6 @@ import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.paddingLeft
-import org.jetbrains.compose.web.css.paddingRight
 import org.jetbrains.compose.web.css.paddingTop
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px

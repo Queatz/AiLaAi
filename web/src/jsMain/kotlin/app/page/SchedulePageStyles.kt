@@ -1,12 +1,13 @@
 package app.page
 
 import Styles
-import Styles.elevated
 import app.dark
 import org.jetbrains.compose.web.css.*
 import r
 
-object SchedulePageStyles : StyleSheet() {
+val SchedulePageStyles get() = StyleManager.style(SchedulePageStyleSheet::class)
+
+class SchedulePageStyleSheet : StyleSheet() {
     val title by style {
         marginBottom(.5.r)
         fontSize(18.px)
@@ -17,11 +18,13 @@ object SchedulePageStyles : StyleSheet() {
         borderRadius(1.r)
         padding(.5.r)
         marginBottom(1.r)
-        backgroundColor(Color.white)
+        backgroundColor(Styles.colors.white)
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.Column)
         overflow("hidden")
-        elevated()
+        with(Styles) {
+            elevated()
+        }
 
         dark(self) {
             backgroundColor(Styles.colors.dark.background)
@@ -66,15 +69,15 @@ object SchedulePageStyles : StyleSheet() {
 
         dark(self) {
             self + hover style {
-                backgroundColor(Color.black)
+                backgroundColor(Styles.colors.black)
             }
 
             self + focus style {
-                backgroundColor(Color.black)
+                backgroundColor(Styles.colors.black)
             }
 
             child(self, className(rowActions)) style {
-                color(Color.white)
+                color(Styles.colors.white)
             }
         }
     }

@@ -49,7 +49,8 @@ fun GameEditorTabEditor(
     onSceneDeleted: () -> Unit = {},
     onPixelatedChanged: (Boolean) -> Unit = {},
     onSceneForked: (GameScene) -> Unit = {},
-    onSceneUpdated: (GameScene) -> Unit = {}
+    onSceneUpdated: (GameScene) -> Unit = {},
+    onSceneSaved: (GameScene) -> Unit = {}
 ) {
     // Create state variables to track when to clear selections
     var clearTileSelection by remember { mutableStateOf(false) }
@@ -314,8 +315,12 @@ fun GameEditorTabEditor(
                                     config = configJson
                                 )
 
-                                api.updateGameScene(gameScene.id!!, updatedGameScene) {
+                                api.updateGameScene(gameScene.id!!, updatedGameScene) { savedScene ->
                                     console.log("GameScene saved successfully")
+                                    // Call onSceneUpdated with the saved scene to update the parent component
+                                    onSceneUpdated(savedScene)
+                                    // Call onSceneSaved to indicate the scene was saved
+                                    onSceneSaved(savedScene)
                                     // Set saving state back to false after successful save
                                 }
                             } catch (e: Exception) {

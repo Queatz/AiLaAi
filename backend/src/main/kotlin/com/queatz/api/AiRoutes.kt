@@ -2,6 +2,8 @@ package com.queatz.api
 
 import com.queatz.Ai
 import com.queatz.TextPrompt
+import com.queatz.db.AiJsonRequest
+import com.queatz.db.AiJsonResponse
 import com.queatz.db.AiPhotoRequest
 import com.queatz.db.AiPhotoResponse
 import com.queatz.db.AiScriptRequest
@@ -99,6 +101,27 @@ fun Route.aiRoutes() {
                 }
 
                 transcribedText?.let { AiTranscribeResponse(it) } ?: HttpStatusCode.InternalServerError
+            }
+        }
+
+        post("/ai/json") {
+            respond {
+                val request = call.receive<AiJsonRequest>()
+
+                request.prompt.notBlank?.let {
+                    db.addPrompt(
+                        person = me.id!!,
+                        prompt = it,
+                        context = PromptContext.Json,
+                    )
+                }
+
+                val response = openAi.json(
+                    prompt = request.prompt,
+                    schema = request.schema
+                )
+
+                response?.let { AiJsonResponse(it) } ?: HttpStatusCode.InternalServerError
             }
         }
     }

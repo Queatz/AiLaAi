@@ -1,5 +1,6 @@
 package stories
 
+import StyleManager
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,7 +13,6 @@ import app.messaages.inList
 import application
 import com.queatz.db.CommentExtended
 import components.Loading
-import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.px
 import r
@@ -23,7 +23,9 @@ suspend fun commentDialog(comment: CommentExtended) = dialog(
     maxWidth = 800.px,
     cancelButton = null
 ) {
-    Style(StoryStyles)
+    StyleManager.use(
+        StoryStyleSheet::class
+    )
 
     var comment by remember { mutableStateOf(comment) }
     var isLoading by remember { mutableStateOf(true) }

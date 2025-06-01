@@ -70,7 +70,7 @@ data class OpenAiOutputFormat(
 )
 
 @Serializable
-data class OpenAiStructuredOutput(
+data class OpenAiStructuredCodeOutput(
     val description: String,
     val code: String,
 )
@@ -202,7 +202,7 @@ class OpenAi {
                 ?.content
                 ?.firstOrNull { it.type == "output_text" }
                 ?.text?.let {
-                val response = json.decodeFromString<OpenAiStructuredOutput>(it)
+                val response = json.decodeFromString<OpenAiStructuredCodeOutput>(it)
 
                 """
                 |/**
@@ -252,4 +252,35 @@ class OpenAi {
     }.onFailure {
         it.printStackTrace()
     }.getOrNull()
+
+    suspend fun json(
+        prompt: String,
+        schema: JsonObject
+    ): String? {
+        return runCatching {
+            http.post("https://api.openai.com/v1/responses") {
+                bearerAuth(secrets.openAi.key)
+                contentType(ContentType.Application.Json.withCharset(UTF_8))
+                setBody(
+                    OpenAiResponsesBody(
+                        input = listOf(
+                            OpenAiCompletionsMessage(
+                                role = "user",
+                                content = prompt
+                            )
+                        ),
+                        text = schema
+                    )
+                )
+            }.also {
+                getAnonymousLogger().warning("OpenAi JSON response: ${it.bodyAsText()}")
+            }.body<OpenAiResponsesResponse>()
+        }.getOrNull()?.let { response ->
+            response.output
+                .firstOrNull { it.type == "message" }
+                ?.content
+                ?.firstOrNull { it.type == "output_text" }
+                ?.text
+        }
+    }
 }

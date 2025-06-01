@@ -1,5 +1,6 @@
 package app.widget.space
 
+import Styles
 import androidx.compose.runtime.Composable
 import app.widget.WidgetStyles
 import components.IconButton

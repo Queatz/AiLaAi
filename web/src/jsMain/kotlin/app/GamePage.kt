@@ -377,6 +377,8 @@ fun GamePage(
     onScenePublished: () -> Unit = {},
     onSceneForked: (GameScene) -> Unit = {},
     onSceneUpdated: (GameScene) -> Unit = {},
+    onSceneSaved: (GameScene) -> Unit = {},
+    onGameCreated: (Game) -> Unit = {},
     styles: StyleScope.() -> Unit = {},
     content: @Composable () -> Unit = {},
     showSidePanel: Boolean = true,
@@ -466,6 +468,9 @@ fun GamePage(
             }
         }
         game = localGame
+
+        // Notify that the game instance has been created
+        onGameCreated(localGame)
 
         onDispose {
             localGame.dispose()
@@ -749,7 +754,7 @@ fun GamePage(
                             left(50.percent)
                             transform { translateX(-50.percent) }
                             backgroundColor(rgba(0, 0, 0, 0.7f))
-                            color(Color.white)
+                            color(Styles.colors.white)
                             padding(2.r)
                             borderRadius(2.r)
                             fontSize(28.px)
@@ -800,7 +805,7 @@ fun GamePage(
                         padding(1.r, 2.r)
                         borderRadius(1.r)
                         property("z-index", "10")
-                        color(Color.black)
+                        color(Styles.colors.black)
                         property("pointer-events", "none")
                         fontSize(32.px)
                     }
@@ -829,7 +834,7 @@ fun GamePage(
                             height(12.r)
                             borderRadius(50.percent)
                             backgroundColor(rgba(0, 0, 0, 0.5))
-                            color(Color.white)
+                            color(Styles.colors.white)
                             display(DisplayStyle.Flex)
                             alignItems(AlignItems.Center)
                             justifyContent(JustifyContent.Center)
@@ -862,7 +867,7 @@ fun GamePage(
                     background = true,
                     styles = {
                         backgroundColor(rgba(0, 0, 0, 0.5))
-                        color(Color.white)
+                        color(Styles.colors.white)
                         padding(0.5.r)
                         borderRadius(0.5.r)
                         property("margin-right", "0.5rem")
@@ -887,7 +892,7 @@ fun GamePage(
                     background = true,
                     styles = {
                         backgroundColor(rgba(0, 0, 0, 0.5))
-                        color(Color.white)
+                        color(Styles.colors.white)
                         padding(0.5.r)
                         borderRadius(0.5.r)
                         property("margin-right", "0.5rem")
@@ -903,7 +908,7 @@ fun GamePage(
                         background = true,
                         styles = {
                             backgroundColor(rgba(0, 0, 0, 0.5))
-                            color(Color.white)
+                            color(Styles.colors.white)
                             padding(0.5.r)
                             borderRadius(0.5.r)
                             property("margin-right", "0.5rem")
@@ -921,7 +926,7 @@ fun GamePage(
                         background = true,
                         styles = {
                             backgroundColor(rgba(0, 0, 0, 0.5))
-                            color(Color.white)
+                            color(Styles.colors.white)
                             padding(0.5.r)
                             borderRadius(0.5.r)
                         }
@@ -991,6 +996,11 @@ fun GamePage(
                     onSceneForked = onSceneForked,
                     onSceneUpdated = { updatedScene ->
                         localGameScene = updatedScene
+                        onSceneUpdated(updatedScene)
+                    },
+                    onSceneSaved = { savedScene ->
+                        localGameScene = savedScene
+                        onSceneSaved(savedScene)
                     },
                     styles = {
                         flexShrink(0)

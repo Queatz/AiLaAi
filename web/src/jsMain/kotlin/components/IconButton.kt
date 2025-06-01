@@ -42,6 +42,7 @@ fun IconButton(
     backgroundColor: CSSColorValue? = null,
     isLoading: Boolean = false,
     small: Boolean = false,
+    circular: Boolean = false,
     styles: (StyleScope.() -> Unit)? = null,
     iconStyles: (StyleScope.() -> Unit)? = null,
     onClick: (SyntheticMouseEvent) -> Unit
@@ -77,6 +78,10 @@ fun IconButton(
             if (text != null) {
                 paddingLeft(1.r)
                 paddingRight(1.r)
+            }
+
+            if (circular) {
+                property("aspect-ratio", "1")
             }
 
             styles?.invoke(this)

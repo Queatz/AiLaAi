@@ -16,6 +16,7 @@ sealed interface AppNavigation {
     data class Group(val id: String, val groupExtended: GroupExtended? = null) : AppNavigation
     data class Page(val id: String, val card: Card? = null) : AppNavigation
     data class GameScene(val id: String, val gameScene: GameSceneModel? = null) : AppNavigation
+    data object ExploreScenes : AppNavigation
     data class Script(val id: String, val script: com.queatz.db.Script? = null) : AppNavigation
     data object ExploreScripts : AppNavigation
 }

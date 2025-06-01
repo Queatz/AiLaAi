@@ -1,5 +1,7 @@
 package app.group
 
+import GroupMessages
+import StyleManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -8,7 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import api
-import app.AppStyles
+import app.AppStyleSheet
 import app.FullPageLayout
 import app.ailaai.api.group
 import app.components.Empty
@@ -20,17 +22,17 @@ import components.Loading
 import mainContent
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
-import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.dom.Div
 import r
-import GroupMessages
 
 @Composable
 fun GroupCoverPage(groupId: String, onGroupLoaded: (GroupExtended) -> Unit) {
-    Style(AppStyles)
+    StyleManager.use(
+        AppStyleSheet::class
+    )
 
     val layout by application.layout.collectAsState()
 

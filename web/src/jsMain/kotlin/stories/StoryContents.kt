@@ -1,5 +1,6 @@
 package stories
 
+import StyleManager
 import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -11,7 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
-import app.AppStyles
+import app.AppStyleSheet
 import app.ailaai.api.group
 import app.components.FlexInput
 import app.dialog.photoDialog
@@ -24,7 +25,7 @@ import app.widget.PageTreeWidget
 import app.widget.ScriptWidget
 import app.widget.SpaceWidget
 import app.widget.WebWidget
-import app.widget.WidgetStyles
+import app.widget.WidgetStyleSheet
 import appString
 import application
 import baseUrl
@@ -53,7 +54,6 @@ import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.Position
-import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.backgroundImage
 import org.jetbrains.compose.web.css.border
@@ -100,9 +100,11 @@ fun StoryContents(
     onEdited: ((index: Int, part: StoryContent) -> Unit)? = null,
     onSave: ((List<StoryContent>) -> Unit)? = {},
 ) {
-    Style(StoryStyles)
-    Style(AppStyles)
-    Style(WidgetStyles)
+    StyleManager.use(
+        AppStyleSheet::class,
+        StoryStyleSheet::class,
+        WidgetStyleSheet::class
+    )
 
     val scope = rememberCoroutineScope()
 

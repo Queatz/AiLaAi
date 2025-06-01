@@ -1,6 +1,8 @@
 import app.ailaai.api.Api
 import app.ailaai.api.ErrorBlock
 import app.ailaai.api.SuccessBlock
+import com.queatz.db.AiJsonRequest
+import com.queatz.db.AiJsonResponse
 import com.queatz.db.AiPhotoRequest
 import com.queatz.db.AiPhotoResponse
 import com.queatz.db.AiScriptRequest
@@ -72,6 +74,17 @@ suspend fun Api.aiTranscribe(
             )
         }
     ),
+    onError = onError,
+    onSuccess = onSuccess
+)
+
+suspend fun Api.aiJson(
+    request: AiJsonRequest,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<AiJsonResponse>,
+) = post(
+    url = "ai/json",
+    body = request,
     onError = onError,
     onSuccess = onSuccess
 )

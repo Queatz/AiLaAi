@@ -33,7 +33,8 @@ enum class DrawMode {
 class TilemapEditor(
     private val scene: Scene,
     val tilemap: Tilemap,
-    val toolState: ToolState
+    val toolState: ToolState,
+    private val map: Map? = null
 ) {
     val cursor: Mesh
     var grid: Mesh
@@ -1052,6 +1053,8 @@ class TilemapEditor(
         // Fill all the tiles at once
         if (tilesToFill.isNotEmpty()) {
             tilemap.setTiles(tilesToFill)
+            // Notify that the tilemap has changed
+            map?.notifyTilemapChanged()
         }
     }
 
@@ -1118,6 +1121,9 @@ class TilemapEditor(
                 }
             }
         }
+
+        // Notify that the tilemap has changed
+        map?.notifyTilemapChanged()
     }
 
     private fun drawBrush(position: Vector3, side: Side, eraser: Boolean = false) {
@@ -1176,6 +1182,9 @@ class TilemapEditor(
                 }
             }
         }
+
+        // Notify that the tilemap has changed
+        map?.notifyTilemapChanged()
     }
 
     /**
@@ -1746,6 +1755,8 @@ class TilemapEditor(
         if (newTiles.isNotEmpty()) {
             // Set the tile at the calculated position
             tilemap.setTiles(newTiles)
+            // Notify that the tilemap has changed
+            map?.notifyTilemapChanged()
         }
     }
 

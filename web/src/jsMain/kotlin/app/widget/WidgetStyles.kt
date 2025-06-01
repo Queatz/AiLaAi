@@ -1,16 +1,45 @@
 package app.widget
 
+import StyleManager
+import Styles
 import app.dark
 import app.mobile
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.Position.Companion.Absolute
 import org.jetbrains.compose.web.css.Position.Companion.Relative
+import org.jetbrains.compose.web.css.StyleSheet
+import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.border
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.bottom
+import org.jetbrains.compose.web.css.color
+import org.jetbrains.compose.web.css.cursor
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.left
+import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.ms
+import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.position
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.right
+import org.jetbrains.compose.web.css.textAlign
+import org.jetbrains.compose.web.css.textDecoration
+import org.jetbrains.compose.web.css.top
+import org.jetbrains.compose.web.css.transitions
+import org.jetbrains.compose.web.css.whiteSpace
+import org.jetbrains.compose.web.css.width
 import r
 import shadow
 
+val WidgetStyles get() = StyleManager.style(WidgetStyleSheet::class)
+
 @OptIn(ExperimentalComposeWebApi::class)
-object WidgetStyles : StyleSheet() {
+class WidgetStyleSheet : StyleSheet() {
     val spaceContainer by style {
         position(Relative)
         width(100.percent)
@@ -28,7 +57,7 @@ object WidgetStyles : StyleSheet() {
         property("aspect-ratio", "2")
         borderRadius(1.r)
         shadow()
-        backgroundColor(Color.white)
+        backgroundColor(Styles.colors.white)
 
         dark(self) {
             backgroundColor(Styles.colors.dark.surface)
@@ -67,7 +96,7 @@ object WidgetStyles : StyleSheet() {
 
     val spacePathItem by style {
         cursor("pointer")
-        color(Color.black)
+        color(Styles.colors.black)
         property("pointer-events", "auto")
 
         hover(self) style {
@@ -75,7 +104,7 @@ object WidgetStyles : StyleSheet() {
         }
 
         dark(self) {
-            color(Color.white)
+            color(Styles.colors.white)
         }
     }
 
@@ -97,7 +126,7 @@ object WidgetStyles : StyleSheet() {
 
         dark(self) {
             child(self, selector("div")) style {
-                border(2.px, LineStyle.Solid, Color.black)
+                border(2.px, LineStyle.Solid, Styles.colors.black)
             }
         }
     }
@@ -143,7 +172,7 @@ object WidgetStyles : StyleSheet() {
 
         dark(self) {
             desc(self, selector("td")) style {
-                border(2.px, LineStyle.Solid, Color.black)
+                border(2.px, LineStyle.Solid, Styles.colors.black)
             }
         }
     }

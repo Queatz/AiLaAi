@@ -3,6 +3,7 @@ package com.queatz.db
 import com.queatz.widgets.Widgets
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 
 @Serializable
 data class Geo(val latitude: Double, val longitude: Double) {
@@ -144,6 +145,17 @@ class AiScriptRequest(
 @Serializable
 class AiScriptResponse(
     val code: String
+)
+
+@Serializable
+class AiJsonRequest(
+    val prompt: String,
+    val schema: JsonObject
+)
+
+@Serializable
+class AiJsonResponse(
+    val json: String
 )
 
 @Serializable

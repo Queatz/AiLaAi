@@ -19,6 +19,7 @@ import app.cards.CardsPage
 import app.components.Background
 import app.group.FeaturePreview
 import app.group.GroupPage
+import app.nav.AppNavPage
 import app.nav.CardNav
 import app.nav.CardsNavPage
 import app.nav.GroupNav
@@ -40,6 +41,7 @@ import app.platform.PlatformPage
 import app.scripts.ScriptsNav
 import app.scripts.ScriptsNavPage
 import app.scripts.ScriptsPage
+import app.widget.WidgetStyleSheet
 import app.widget.WidgetStyles
 import appString
 import application
@@ -80,6 +82,7 @@ import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.dom.Audio
 import org.jetbrains.compose.web.dom.Div
 import push
+import stories.StoryStyleSheet
 import stories.StoryStyles
 import stories.commentDialog
 
@@ -98,8 +101,10 @@ enum class NavPage {
 
 @Composable
 fun AppPage() {
-    Style(WidgetStyles)
-    Style(StoryStyles)
+    StyleManager.use(
+        WidgetStyleSheet::class,
+        StoryStyleSheet::class
+    )
 
     val scope = rememberCoroutineScope()
     val me by application.me.collectAsState()
@@ -390,6 +395,9 @@ fun AppPage() {
                         script = ScriptsNav.Script(it.script)
                     }
                 }
+                is AppNavigation.ExploreScenes -> {
+                    scene = SceneNav.Explore
+                }
                 is AppNavigation.GameScene -> {
                     // Handle GameScene navigation
                     val gameSceneId = it.id
@@ -558,7 +566,7 @@ fun AppPage() {
                             nav = NavPage.Profile
                         }
                     )
-                    NavPage.Apps -> FeaturePreview(listOf(NavPage.Scenes, NavPage.Scripts))
+                    NavPage.Apps -> AppNavPage()
                     NavPage.Scenes -> SceneNavPage(
                         selected = scene,
                         onSelected = { selectedScene ->

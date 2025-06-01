@@ -1,6 +1,7 @@
 package app.cards
 
 import MapView
+import StyleManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,7 +32,6 @@ import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.Position
-import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.display
@@ -55,7 +55,9 @@ fun CardsPage(
     onCard: (CardNav) -> Unit,
     onCardUpdated: (Card) -> Unit,
 ) {
-    Style(CardsPageStyles)
+    StyleManager.use(
+        CardsPageStyleSheet::class
+    )
 
     val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()

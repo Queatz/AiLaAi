@@ -1,6 +1,16 @@
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.RecomposeScope
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.currentRecomposeScope
+import androidx.compose.runtime.key
 import app.dark
 import app.desktop
 import app.mobile
+import app.theme.UserTheme
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.AlignContent
@@ -9,6 +19,7 @@ import org.jetbrains.compose.web.css.AlignSelf
 import org.jetbrains.compose.web.css.AnimationTimingFunction
 import org.jetbrains.compose.web.css.CSSBuilder
 import org.jetbrains.compose.web.css.Color
+import org.jetbrains.compose.web.css.CSSColorValue
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.FlexWrap
@@ -17,6 +28,7 @@ import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.Position.Companion.Absolute
 import org.jetbrains.compose.web.css.Position.Companion.Relative
+import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.StyleSheet
 import org.jetbrains.compose.web.css.alignContent
@@ -86,31 +98,109 @@ import org.jetbrains.compose.web.css.vw
 import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.css.width
 import org.w3c.dom.HTMLDivElement
+import kotlin.reflect.KClass
+import kotlin.reflect.createInstance
 
-@OptIn(ExperimentalComposeWebApi::class)
-object Styles : StyleSheet() {
-    object colors {
-        val background = Color("#E0F3FF")
-        val primary = Color("#006689")
-        val secondary = Color("#767676")
-        val tertiary = Color("#2e8900")
-        val red = Color("#761c1c")
-        val error = red
-        val green = Color("#1c7626")
-        val outline = Color("#fff6")
+object StyleManager {
+    var currentTheme: UserTheme? = null
+    private val themeFlow = MutableStateFlow(currentTheme)
 
-        object dark {
-            val background = Color("#18191a")
-            val surface = Color("#232526")
-            val outline = Color("#0006")
-        }
+    private val styles = mutableMapOf<KClass<out StyleSheet>, StyleSheet>()
+
+    // Method to update the current theme
+    fun setTheme(theme: UserTheme?) {
+        styles.clear()
+        currentTheme = theme
+        themeFlow.value = currentTheme
     }
 
+    @OptIn(ExperimentalJsReflectionCreateInstance::class)
+    fun <T : StyleSheet> style(kClass: KClass<T>): T {
+        return styles.getOrPut(kClass) { kClass.createInstance() } as T
+    }
+
+    @Composable
+    fun use(vararg kClass: KClass<out StyleSheet>) {
+        key(themeFlow.collectAsState().value) {
+            kClass.forEach {
+                Style(style(it))
+            }
+        }
+    }
+}
+
+val Styles get() = StyleManager.style(MainStyleSheet::class)
+
+@OptIn(ExperimentalComposeWebApi::class)
+class MainStyleSheet : StyleSheet() {
+    // Data class for dark theme colors
+    data class DarkColors(
+        // Dark theme colors with cascading fallback:
+        // 1. First try dark theme color
+        // 2. Then try light theme color
+        // 3. Finally fall back to default dark color
+        val background: CSSColorValue,
+        val surface: CSSColorValue,
+        val outline: CSSColorValue
+    )
+
+    // Data class for all theme colors
+    data class ThemeColors(
+        // Light theme colors with fallback to default
+        val background: CSSColorValue,
+        val surface: CSSColorValue,
+        val primary: CSSColorValue,
+        val secondary: CSSColorValue,
+        val tertiary: CSSColorValue,
+        val red: CSSColorValue,
+        val green: CSSColorValue,
+        val outline: CSSColorValue,
+        val white: CSSColorValue,
+        val black: CSSColorValue,
+        val gray: CSSColorValue,
+        val lightgray: CSSColorValue,
+        val darkgray: CSSColorValue,
+
+        // Dark theme colors
+        val dark: DarkColors
+    ) {
+        // Derived property
+        val error: CSSColorValue get() = red
+    }
+
+    // Initialize colors with current theme or defaults
+    val colors: ThemeColors = ThemeColors(
+        background = StyleManager.currentTheme?.light?.background?.let { Color(it) } ?: Color("#E0F3FF"),
+        surface = StyleManager.currentTheme?.light?.surface?.let { Color(it) } ?: StyleManager.currentTheme?.light?.background?.let { Color(it) } ?: Color("#E0F3FF"),
+        primary = StyleManager.currentTheme?.light?.primary?.let { Color(it) } ?: Color("#006689"),
+        secondary = StyleManager.currentTheme?.light?.secondary?.let { Color(it) } ?: Color("#767676"),
+        tertiary = StyleManager.currentTheme?.light?.tertiary?.let { Color(it) } ?: Color("#2e8900"),
+        red = StyleManager.currentTheme?.light?.red?.let { Color(it) } ?: Color("#761c1c"),
+        green = StyleManager.currentTheme?.light?.green?.let { Color(it) } ?: Color("#1c7626"),
+        outline = StyleManager.currentTheme?.light?.outline?.let { Color(it) } ?: Color("#fff6"),
+        white = StyleManager.currentTheme?.light?.white?.let { Color(it) } ?: Color("#fff"),
+        black = StyleManager.currentTheme?.light?.black?.let { Color(it) } ?: Color("#000"),
+        gray = StyleManager.currentTheme?.light?.gray?.let { Color(it) } ?: Color("#808080"),
+        lightgray = StyleManager.currentTheme?.light?.lightgray?.let { Color(it) } ?: Color("#fafafa"),
+        darkgray = StyleManager.currentTheme?.light?.darkgray?.let { Color(it) } ?: Color("#242424"),
+        dark = DarkColors(
+            background = StyleManager.currentTheme?.dark?.background?.let { Color(it) }
+                ?: StyleManager.currentTheme?.light?.background?.let { Color(it) }
+                ?: Color("#18191a"),
+            surface = StyleManager.currentTheme?.dark?.surface?.let { Color(it) }
+                ?: StyleManager.currentTheme?.light?.background?.let { Color(it) }
+                ?: Color("#232526"),
+            outline = StyleManager.currentTheme?.dark?.outline?.let { Color(it) }
+                ?: StyleManager.currentTheme?.light?.outline?.let { Color(it) }
+                ?: Color("#0006")
+        )
+    )
+
     val fullscreenContainer by style {
-        backgroundColor(Color.white)
+        backgroundColor(colors.white)
 
         dark(self) {
-            backgroundColor(Color.black)
+            backgroundColor(colors.black)
         }
     }
 
@@ -147,7 +237,7 @@ object Styles : StyleSheet() {
     val video by style {
         width(100.percent)
         property("z-index", "0")
-        backgroundColor(Styles.colors.background)
+        backgroundColor(colors.background)
         property("object-fit", "cover")
         borderRadius(1.r)
         overflow("hidden")
@@ -255,7 +345,7 @@ object Styles : StyleSheet() {
         padding(0.r, 1.r, 1.r, 1.r)
 
         dark(self) {
-            border(1.px, LineStyle.Solid, Color.black)
+            border(1.px, LineStyle.Solid, colors.black)
         }
     }
 
@@ -271,7 +361,7 @@ object Styles : StyleSheet() {
 
     fun CSSBuilder.elevated(elevation: Double = 1.0, hoverElevation: Double? = null) {
         property("box-shadow", "${elevation}px ${elevation}px ${elevation * 4.0}px rgba(0, 0, 0, 0.125)")
-        backgroundColor(Color.white)
+        backgroundColor(colors.white)
         borderRadius(1.r)
 
         hoverElevation?.let { hoverElevation ->
@@ -284,8 +374,23 @@ object Styles : StyleSheet() {
     }
 
     init {
+        "html, body" style {
+            backgroundColor(colors.white)
+        }
+
+        media("(prefers-color-scheme: dark)") {
+            "html, body" style {
+                backgroundColor(colors.black)
+                color(colors.white)
+            }
+        }
+
+        "button, textarea" style {
+            fontFamily("inherit")
+        }
+
         "a" style {
-            color(colors.primary)
+        color(colors.primary)
             fontWeight("bold")
             textDecoration("none")
         }
@@ -316,8 +421,8 @@ object Styles : StyleSheet() {
         flexDirection(FlexDirection.Column)
 
         dark(self) {
-            backgroundColor(Color.black)
-            color(Color.white)
+            backgroundColor(colors.black)
+            color(colors.white)
         }
     }
 
@@ -383,7 +488,7 @@ object Styles : StyleSheet() {
 
         dark(self) {
             backgroundColor(colors.dark.background)
-            color(Color.white)
+            color(colors.white)
         }
 
         child(self, selector("header")) style {
@@ -427,7 +532,7 @@ object Styles : StyleSheet() {
             left(.25.r)
             bottom(.25.r)
             borderRadius(1.5.r)
-            backgroundColor(Color.white)
+            backgroundColor(colors.white)
             property("transition", ".5s")
         }
     }
@@ -461,10 +566,10 @@ object Styles : StyleSheet() {
     }
 
     val switchBordered by style {
-        border(1.px, LineStyle.Solid, Color.white)
+        border(1.px, LineStyle.Solid, colors.white)
 
         dark(self) {
-            border(1.px, LineStyle.Solid, Color.black)
+            border(1.px, LineStyle.Solid, colors.black)
         }
     }
 
@@ -472,7 +577,7 @@ object Styles : StyleSheet() {
         borderRadius(1.r)
         property("color", "inherit")
         property("font", "inherit")
-        border(1.px, LineStyle.Solid, Color("#444444"))
+        border(1.px, LineStyle.Solid, colors.darkgray)
 
         dark(self) {
             backgroundColor(colors.dark.background)
@@ -509,7 +614,7 @@ object Styles : StyleSheet() {
         alignItems(AlignItems.Center)
         justifyContent(JustifyContent.Center)
         padding(1.r)
-        backgroundColor(Color("#f7f7f7"))
+        backgroundColor(colors.lightgray)
         property("z-index", "1")
         whiteSpace("nowrap")
         overflowX("auto")
@@ -521,38 +626,6 @@ object Styles : StyleSheet() {
 
         mobile(self) {
             justifyContent(JustifyContent.Start)
-        }
-    }
-
-    val mainHeader by style {
-        display(DisplayStyle.Flex)
-        alignItems(AlignItems.Center)
-        justifyContent(JustifyContent.Center)
-        padding(4.r, 2.r)
-        backgroundColor(Color("#2f0729"))
-        backgroundImage("url(/saigonnight-mobile.jpg)")
-        backgroundPosition("center")
-        textAlign("center")
-        backgroundSize("cover")
-        margin(1.r, 0.r)
-        fontSize(32.px)
-        color(Color.white)
-        borderRadius(2.r)
-        whiteSpace("pre-wrap")
-        fontFamily("Estonia")
-        lineHeight("1.25")
-        property("aspect-ratio", "6/1")
-        property("text-shadow", "#fff 0px 0px .5rem")
-        property("z-index", "1")
-
-        media(mediaMinWidth(641.px)) {
-            self style {
-                fontSize(42.px)
-                padding(4.r)
-                textAlign("end")
-                justifyContent(JustifyContent.FlexEnd)
-                backgroundImage("url(/saigonnight.jpg)")
-            }
         }
     }
 
@@ -580,7 +653,7 @@ object Styles : StyleSheet() {
         overflowX("hidden")
         overflowY("auto")
         property("box-shadow", "2px 2px 16px rgba(0, 0, 0, 0.125)")
-        backgroundColor(Color.white)
+        backgroundColor(colors.white)
         borderRadius(1.r)
         marginLeft(1.r)
         marginRight(1.r)
@@ -707,7 +780,7 @@ object Styles : StyleSheet() {
         backgroundColor(rgba(255, 255, 255, .92))
         padding(1.r)
         margin(1.r)
-        color(Color.black)
+        color(colors.black)
         borderRadius(1.r)
         maxHeight(50.percent)
         boxSizing("border-box")
@@ -716,7 +789,7 @@ object Styles : StyleSheet() {
 
         dark(self) {
             backgroundColor(rgba(0, 0, 0, .92))
-            color(Color.white)
+            color(colors.white)
         }
     }
 
@@ -724,12 +797,12 @@ object Styles : StyleSheet() {
         backgroundColor(rgba(255, 255, 255, .92))
         borderRadius(2.r)
         padding(1.r / 2, 1.r)
-        color(Color.black)
+        color(colors.black)
         property("z-index", "1")
 
         dark(self) {
             backgroundColor(rgba(0, 0, 0, .92))
-            color(Color.white)
+            color(colors.white)
         }
     }
 
@@ -739,7 +812,7 @@ object Styles : StyleSheet() {
         padding(0.r, 2.r)
         minHeight(3.r)
         backgroundColor(colors.primary)
-        color(Color.white)
+        color(colors.white)
         cursor("pointer")
         display(DisplayStyle.Flex)
         alignItems(AlignItems.Center)
@@ -780,7 +853,7 @@ object Styles : StyleSheet() {
         }
 
         self + className(outlineButtonAlt) style {
-            color(Color.black)
+            color(colors.black)
         }
 
         self + className(outlineButtonTonal) style {
@@ -798,7 +871,7 @@ object Styles : StyleSheet() {
 
         dark(self) {
             self + className(outlineButtonAlt) style {
-                color(Color.white)
+                color(colors.white)
             }
 
             self + className(outlineButtonTonal) style {
@@ -832,12 +905,12 @@ object Styles : StyleSheet() {
 
         self + className(floatingButtonSelected) style {
             backgroundColor(colors.primary)
-            color(Color.white)
+            color(colors.white)
         }
 
         dark(self) {
             backgroundColor(colors.dark.background)
-            color(Color.white)
+            color(colors.white)
         }
     }
 
@@ -875,7 +948,7 @@ object Styles : StyleSheet() {
         outline(colors.secondary, LineStyle.Solid.toString(), 2.px)
 
         dark(self) {
-            outlineColor(Color.white)
+            outlineColor(colors.white)
         }
     }
 
@@ -904,16 +977,16 @@ object Styles : StyleSheet() {
         property("font-size", "inherit")
         fontFamily("inherit")
         boxSizing("border-box")
-        backgroundColor(Color.white)
+        backgroundColor(colors.white)
 
         dark(self) {
             backgroundColor(colors.dark.background)
-            color(Color.white)
-            border(1.px, LineStyle.Solid, Color("#444444"))
+            color(colors.white)
+            border(1.px, LineStyle.Solid, colors.darkgray)
 
             self + selector("::placeholder") style {
                 dark(self) {
-                    color(Color.white)
+                    color(colors.white)
                     opacity(.5)
                 }
             }
@@ -935,7 +1008,7 @@ object Styles : StyleSheet() {
         flexShrink(0)
 
         dark(self) {
-            backgroundColor(Color.black)
+            backgroundColor(colors.black)
         }
     }
 
@@ -947,15 +1020,15 @@ object Styles : StyleSheet() {
         flexShrink(0)
 
         dark(self) {
-            backgroundColor(Color.black)
+            backgroundColor(colors.black)
         }
     }
 
     val profilePhotoBorder by style {
-        border(3.px, LineStyle.Solid, Color.white)
+        border(3.px, LineStyle.Solid, colors.white)
 
         dark(self) {
-            border(3.px, LineStyle.Solid, Color.black)
+            border(3.px, LineStyle.Solid, colors.black)
         }
     }
 
@@ -1089,14 +1162,14 @@ object Styles : StyleSheet() {
         maxWidth(100.percent)
         left(50.percent)
         property("transform", "translateX(-50%)")
-        backgroundColor(Color.white)
+        backgroundColor(colors.white)
         ellipsize()
         fontSize(10.px)
         boxSizing("border-box")
         property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.125)")
 
         dark(self) {
-            backgroundColor(Color.black)
+            backgroundColor(colors.black)
         }
     }
 
@@ -1104,11 +1177,11 @@ object Styles : StyleSheet() {
         position(Absolute)
         top(-11.px)
         right(-1.px)
-        color(Color.white)
+        color(colors.white)
         property("text-shadow", "1px 0px 0px black, -1px 0px 0px black, 0px 1px 0px black, 0px -1px 0px black")
 
         dark(self) {
-            color(Color.black)
+            color(colors.black)
             property("text-shadow", "1px 0px 0px white, -1px 0px 0px white, 0px 1px 0px white, 0px -1px 0px white")
         }
     }
@@ -1117,6 +1190,30 @@ object Styles : StyleSheet() {
         height(12.px)
         borderRadius(6.px)
         property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.125), rgba(255, 255, 255, 0.5) 0px 2px 4px inset")
+    }
+
+    val changedLine by style {
+        backgroundColor(rgba(255, 220, 0, 0.125))
+
+        dark(self) {
+            backgroundColor(rgba(255, 220, 0, 0.125))
+        }
+    }
+
+    val addedLine by style {
+        backgroundColor(rgba(0, 255, 0, 0.125))
+
+        dark(self) {
+            backgroundColor(rgba(0, 255, 0, 0.125))
+        }
+    }
+
+    val deletedLine by style {
+        backgroundColor(rgba(255, 0, 0, 0.125))
+
+        dark(self) {
+            backgroundColor(rgba(255, 0, 0, 0.125))
+        }
     }
 }
 

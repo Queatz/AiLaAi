@@ -101,12 +101,12 @@ fun ToolGrid(
                     // Apply styles based on selection state and dark mode
                     if (isDarkMode) {
                         backgroundColor(if (isSelected) Styles.colors.primary else Styles.colors.dark.background)
-                        color(Color.white)
-                        border(2.px, LineStyle.Solid, Color.darkgray)
+                        color(Styles.colors.white)
+                        border(2.px, LineStyle.Solid, Styles.colors.darkgray)
                     } else {
-                        backgroundColor(if (isSelected) Styles.colors.primary else Color.white)
-                        color(if (isSelected) Color.white else Color.black)
-                        border(2.px, LineStyle.Solid, Color.lightgray)
+                        backgroundColor(if (isSelected) Styles.colors.primary else Styles.colors.white)
+                        color(if (isSelected) Styles.colors.white else Styles.colors.black)
+                        border(2.px, LineStyle.Solid, Styles.colors.lightgray)
                     }
                 }
 
@@ -129,7 +129,7 @@ fun ToolGrid(
                             right(.5.r)
                             fontSize(12.px)
                             fontWeight("bold")
-                            color(Color.gray)
+                            color(Styles.colors.gray)
                             property("z-index", "1")
                         }
                     }) {

@@ -5,12 +5,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import app.compose.rememberMobileMode
 import app.AppStyles
 import app.appNav
 import app.call.CallLayout
 import app.call.CallStyles
 import app.components.Background
+import app.compose.rememberMobileMode
 import app.game.GameCoverPage
 import app.group.GroupCoverPage
 import app.info.PrivacyPage
@@ -18,13 +18,10 @@ import app.info.TosPage
 import app.invites.InvitePage
 import app.scripts.ScriptCoverPage
 import app.scripts.ScriptSourcePage
-import kotlinx.browser.window
-import org.jetbrains.compose.web.dom.Button
-import org.jetbrains.compose.web.dom.Span
-import org.jetbrains.compose.web.dom.Text
 import app.softwork.routingcompose.BrowserRouter
 import app.softwork.routingcompose.Router
-import event.EventPage
+import app.theme.ThemeManager
+import app.theme.ThemeSettingsPage
 import app.widget.WidgetStyles
 import components.AppFooter
 import components.AppHeader
@@ -35,18 +32,22 @@ import components.NotificationsLayout
 import components.ProfilePage
 import components.SigninPage
 import components.StoryPage
+import event.EventPage
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.js.Js
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
+import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.serialization.json.Json
 import lib.mapboxgl
-import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.dom.Button
+import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposableInBody
 import org.w3c.dom.HTMLLinkElement
 import org.w3c.dom.get
@@ -81,19 +82,27 @@ fun main() {
     mapboxgl.accessToken =
         "pk.eyJ1IjoiamFjb2JmZXJyZXJvIiwiYSI6ImNraXdyY211eTBlMmcycW02eDNubWNpZzcifQ.1KtSoMzrPCM0A8UVtI_gdg"
 
+    val savedTheme = ThemeManager.getCurrentTheme()
+    if (savedTheme != null) {
+        StyleManager.setTheme(savedTheme)
+    }
+
     renderComposableInBody {
-        Style(Styles)
-        Style(AppStyles)
-        Style(EffectStyles)
-        Style(WidgetStyles)
-        Style(CallStyles)
-        Style(StoryStyles)
+        StyleManager.use(
+            MainStyleSheet::class,
+            AppStyles::class,
+            EffectStyles::class,
+            WidgetStyles::class,
+            CallStyles::class,
+            StoryStyles::class
+        )
 
         var language by remember {
             mutableStateOf(
-                when ((localStorage["language"] ?: window.navigator.language).startsWith("vi")) {
-                    true -> "vi"
-                    false -> "en"
+                when {
+                    (localStorage["language"] ?: window.navigator.language).startsWith("vi") -> "vi"
+                    (localStorage["language"] ?: window.navigator.language).startsWith("ru") -> "ru"
+                    else -> "en"
                 }
             )
         }
@@ -349,6 +358,18 @@ fun main() {
                 route("terms") {
                     AppHeader(appName)
                     TosPage()
+                    AppFooter()
+                }
+
+                route("theme") {
+                    AppHeader(
+                        title = "Theme",
+                        showBack = true,
+                        onBack = {
+                            router.navigate("/")
+                        }
+                    )
+                    ThemeSettingsPage()
                     AppFooter()
                 }
 

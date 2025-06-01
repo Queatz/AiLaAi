@@ -1,5 +1,6 @@
 package app.platform
 
+import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -95,7 +96,7 @@ fun ConfigPlatformPage() {
                 }
             ) {
                 // todo: translate
-                Span({ style { color(Color.gray) } }) {
+                Span({ style { color(Styles.colors.gray) } }) {
                     Text("Invite only")
                 }
                 Switch(
@@ -115,7 +116,7 @@ fun ConfigPlatformPage() {
                 Div(
                     {
                         style {
-                            color(Color.gray)
+                            color(Styles.colors.gray)
                         }
                     }
                 ) {

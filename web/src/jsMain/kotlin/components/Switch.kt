@@ -1,5 +1,6 @@
 package components
 
+import Styles
 import androidx.compose.runtime.Composable
 import focusable
 import org.jetbrains.compose.web.css.StyleScope

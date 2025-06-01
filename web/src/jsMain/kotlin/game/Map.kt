@@ -7,6 +7,9 @@ import lib.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlin.js.asDynamic
 
 class Map(private val scene: Scene) {
@@ -63,6 +66,10 @@ class Map(private val scene: Scene) {
     // Reference to the player
     private lateinit var player: Player
 
+    // Flow to track tilemap changes
+    private val _tilemapChanges = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val tilemapChanges: SharedFlow<Unit> = _tilemapChanges.asSharedFlow()
+
     // Controls whether to use linear (NEAREST) or trilinear sampling for textures
     var linearSamplingEnabled: Boolean = false
         set(value) {
@@ -85,7 +92,7 @@ class Map(private val scene: Scene) {
         })
         val camera = Camera(scene) { tilemap.mesh }
         val post = Post(scene, camera)
-        val tilemapEditor = TilemapEditor(scene, tilemap, toolState)
+        val tilemapEditor = TilemapEditor(scene, tilemap, toolState, this)
         // Initialize TilemapEditor properties with values from toolState
         tilemapEditor.side = toolState.side
         tilemapEditor.drawPlane = toolState.drawPlane
@@ -629,5 +636,13 @@ class Map(private val scene: Scene) {
         tilemapEditor.currentGameMusic = gameMusic
         tilemapEditor.currentGameTile = null
         tilemapEditor.currentGameObject = null
+    }
+
+    /**
+     * Notifies that the tilemap has changed.
+     * This should be called whenever the tilemap is modified in any way.
+     */
+    fun notifyTilemapChanged() {
+        _tilemapChanges.tryEmit(Unit)
     }
 }

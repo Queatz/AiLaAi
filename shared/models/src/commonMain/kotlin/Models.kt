@@ -195,7 +195,8 @@ data class GroupConfig(
 )
 
 enum class PromptContext {
-    Scripts
+    Scripts,
+    Json
 }
 
 @Serializable

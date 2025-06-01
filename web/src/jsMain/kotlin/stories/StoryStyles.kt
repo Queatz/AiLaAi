@@ -5,7 +5,9 @@ import app.dark
 import org.jetbrains.compose.web.css.*
 import r
 
-object StoryStyles : StyleSheet() {
+val StoryStyles get() = StyleManager.style(StoryStyleSheet::class)
+
+class StoryStyleSheet : StyleSheet() {
     val contentTitle by style {
         boxSizing("border-box")
         display(DisplayStyle.Flex)
@@ -178,13 +180,13 @@ object StoryStyles : StyleSheet() {
         flexDirection(FlexDirection.Column)
         padding(.75.r)
         borderRadius(1.r)
-        outline("${1.px} ${LineStyle.Solid} ${Color.white}")
+        outline("${1.px} ${LineStyle.Solid} ${Styles.colors.white}")
         backgroundColor(Styles.colors.background)
         overflow("hidden")
 
         dark(self) {
             backgroundColor(Styles.colors.dark.background)
-            outline("${1.px} ${LineStyle.Solid} ${Color.black}")
+            outline("${1.px} ${LineStyle.Solid} ${Styles.colors.black}")
         }
     }
 

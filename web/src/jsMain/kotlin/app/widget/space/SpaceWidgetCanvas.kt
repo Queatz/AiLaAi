@@ -1,12 +1,12 @@
 package app.widget.space
 
+import Styles
 import app.widget.DrawInfo
 import baseUrl
 import com.queatz.db.Card
 import com.queatz.widgets.widgets.SpaceContent
 import com.queatz.widgets.widgets.SpaceItem
 import notBlank
-import org.jetbrains.compose.web.css.Color
 import org.w3c.dom.CENTER
 import org.w3c.dom.CanvasRenderingContext2D
 import org.w3c.dom.CanvasTextAlign
@@ -16,8 +16,6 @@ import org.w3c.dom.MIDDLE
 import org.w3c.dom.START
 import kotlin.math.PI
 import kotlin.math.absoluteValue
-import kotlin.math.max
-import kotlin.math.min
 
 fun drawCanvas(
     context: CanvasRenderingContext2D,
@@ -48,7 +46,7 @@ fun drawCanvas(
                     if (item.page == null || item.page == cardId) {
                         save()
                         lineWidth = if (selectedItem?.content == item) 3.0 else 1.0
-                        strokeStyle = Color.gray
+                        strokeStyle = Styles.colors.gray
                         beginPath()
                         moveTo(position.first, position.second)
                         lineTo(item.to.first, item.to.second)
@@ -61,7 +59,7 @@ fun drawCanvas(
                     if (item.page == null || item.page == cardId) {
                         save()
                         lineWidth = if (selectedItem?.content == item) 3.0 else 1.0
-                        strokeStyle = Color.gray
+                        strokeStyle = Styles.colors.gray
                         beginPath()
 
                         roundedRect(
@@ -80,7 +78,7 @@ fun drawCanvas(
                     if (item.page == null || item.page == cardId) {
                         save()
                         lineWidth = if (selectedItem?.content == item) 3.0 else 1.0
-                        strokeStyle = Color.gray
+                        strokeStyle = Styles.colors.gray
                         beginPath()
                         ellipse(
                             x = position.first,
@@ -101,7 +99,7 @@ fun drawCanvas(
                         val fontSize = 24
                         val lineHeight = fontSize * 1.5f
 
-                        fillStyle = if (darkMode) Color.white else Color.black
+                        fillStyle = if (darkMode) Styles.colors.white else Styles.colors.black
                         font = if (selectedItem?.content == item) {
                             "bold ${fontSize}px ${font.split(" ").last()}"
                         } else {
@@ -158,13 +156,13 @@ fun drawCanvas(
                     beginPath()
                     arc(x, y, 24.0, 0.0, 2 * PI)
                     lineWidth = if (selectedItem?.content == item) 3.0 else 1.0
-                    strokeStyle = if (darkMode) Color.gray else Styles.colors.primary
+                    strokeStyle = if (darkMode) Styles.colors.gray else Styles.colors.primary
                     stroke()
 
                     restore()
 
                     // Draw the page name
-                    fillStyle = if (darkMode) Color.white else Color.black
+                    fillStyle = if (darkMode) Styles.colors.white else Styles.colors.black
                     font = "18px ${font.split(" ").last()}"
                     textAlign = CanvasTextAlign.CENTER
                     textBaseline = CanvasTextBaseline.MIDDLE
@@ -182,7 +180,7 @@ fun drawCanvas(
                         drawInfo.to?.let { to ->
                             save()
                             lineWidth = 2.0
-                            strokeStyle = if (darkMode) Color.gray else Styles.colors.primary
+                            strokeStyle = if (darkMode) Styles.colors.gray else Styles.colors.primary
                             beginPath()
                             moveTo(from.first, from.second)
                             lineTo(to.first, to.second)
@@ -196,7 +194,7 @@ fun drawCanvas(
                         drawInfo.to?.let { to ->
                             save()
                             lineWidth = 2.0
-                            strokeStyle = if (darkMode) Color.gray else Styles.colors.primary
+                            strokeStyle = if (darkMode) Styles.colors.gray else Styles.colors.primary
                             beginPath()
                             roundedRect(
                                 x1 = from.first,
@@ -214,7 +212,7 @@ fun drawCanvas(
                         drawInfo.to?.let { to ->
                             save()
                             lineWidth = 2.0
-                            strokeStyle = if (darkMode) Color.gray else Styles.colors.primary
+                            strokeStyle = if (darkMode) Styles.colors.gray else Styles.colors.primary
                             beginPath()
                             ellipse(
                                 x = from.first,

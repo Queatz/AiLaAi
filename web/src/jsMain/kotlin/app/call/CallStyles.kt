@@ -1,5 +1,7 @@
 package app.call
 
+import Styles
+import app.AppStyleSheet
 import app.AppStyles
 import app.dark
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
@@ -30,8 +32,10 @@ import org.jetbrains.compose.web.css.transitions
 import org.jetbrains.compose.web.css.width
 import r
 
+val CallStyles get() = StyleManager.style(CallStyleSheet::class)
+
 @OptIn(ExperimentalComposeWebApi::class)
-object CallStyles : StyleSheet() {
+class CallStyleSheet : StyleSheet() {
     val participantControls by style {
         position(Position.Absolute)
         display(DisplayStyle.Flex)
@@ -69,7 +73,7 @@ object CallStyles : StyleSheet() {
         position(Position.Fixed)
         display(DisplayStyle.Flex)
         borderRadius(1.r)
-        backgroundColor(Color.black)
+        backgroundColor(Styles.colors.black)
         cursor("pointer")
         property("z-index", "100")
         property("box-shadow", "2px 2px 8px rgba(0, 0, 0, .25)")

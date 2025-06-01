@@ -1,7 +1,7 @@
 package app.widget.form
 
+import Styles
 import androidx.compose.runtime.Composable
-import appString
 import application
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.fontSize

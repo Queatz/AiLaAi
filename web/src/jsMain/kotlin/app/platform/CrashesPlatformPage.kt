@@ -1,5 +1,6 @@
 package app.platform
 
+import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -90,15 +91,15 @@ fun CrashesPlatformPage() {
                     style { marginBottom(1.r) }
                 }) {
                     Div {
-                        Span({ style { color(Color.gray) } }) { Text("App version ") }
+                        Span({ style { color(Styles.colors.gray) } }) { Text("App version ") }
                         Text(details["APP_VERSION_NAME"]?.jsonPrimitive?.content.orEmpty())
                     }
                     Div {
-                        Span({ style { color(Color.gray) } }) { Text("Android version ") }
+                        Span({ style { color(Styles.colors.gray) } }) { Text("Android version ") }
                         Text(details["ANDROID_VERSION"]?.jsonPrimitive?.content.orEmpty())
                     }
                     Div {
-                        Span({ style { color(Color.gray) } }) { Text("Device ") }
+                        Span({ style { color(Styles.colors.gray) } }) { Text("Device ") }
                         Text(details["PHONE_MODEL"]?.jsonPrimitive?.content.orEmpty())
                     }
                 }
@@ -108,7 +109,7 @@ fun CrashesPlatformPage() {
                         padding(1.r)
                         overflowX("auto")
                         borderRadius(1.r)
-                        border(1.px, LineStyle.Solid, Color.gray)
+                        border(1.px, LineStyle.Solid, Styles.colors.gray)
                     }
                 }) {
                     Text(details["STACK_TRACE"]?.jsonPrimitive?.content.orEmpty())

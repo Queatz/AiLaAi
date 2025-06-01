@@ -17,13 +17,17 @@ import app.ailaai.api.gameScenes
 import app.appNav
 import app.components.PreventNavigation
 import app.components.TopBarSearch
+import app.game.editor.SceneEditTracker
 import app.nav.SceneNav
+import game.Game
 import appString
 import appText
 import baseUrl
 import bulletedString
 import com.queatz.db.GameScene
 import components.Loading
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import notBlank
 import org.jetbrains.compose.web.css.AlignItems
@@ -68,9 +72,32 @@ fun ScenePage(
         mutableStateOf<GameScene?>(null)
     }
 
-    // Add state to track edits
-    var isEdited by remember {
-        mutableStateOf(false)
+    // Create a SceneEditTracker to track edits
+    val editTracker = remember { SceneEditTracker() }
+    val isEdited by editTracker.isEdited
+
+    // Store the Game instance
+    var gameInstance by remember {
+        mutableStateOf<Game?>(null)
+    }
+
+    // Create a LaunchedEffect to observe state flows
+    LaunchedEffect(gameInstance) {
+        gameInstance?.let { game ->
+            // Observe tilemap changes
+            launch {
+                game.map.tilemapChanges.drop(1).collectLatest {
+                    editTracker.markEdited(SceneEditTracker.EditType.Tiles)
+                }
+            }
+
+            // Observe animation data changes (markers, keyframes, positions, captions)
+            launch {
+                game.animationDataChanged.drop(1).collectLatest {
+                    editTracker.markEdited(SceneEditTracker.EditType.Animation)
+                }
+            }
+        }
     }
 
     // Prevent navigation when scene is edited
@@ -237,7 +264,7 @@ fun ScenePage(
                     gameScene = scene,
                     onSceneDeleted = {
                         // Reset edited flag when scene is deleted
-                        isEdited = false
+                        editTracker.markSaved()
                         onSceneSelected(SceneNav.None)
                     },
                     onScenePublished = {
@@ -249,14 +276,14 @@ fun ScenePage(
                                 api.gameScene(currentScene.id!!) { updatedScene ->
                                     scene = updatedScene
                                     // Reset edited flag when scene is published
-                                    isEdited = false
+                                    editTracker.markSaved()
                                 }
                             }
                         }
                     },
                     onSceneForked = { newScene ->
                         // Reset edited flag when scene is forked
-                        isEdited = false
+                        editTracker.markSaved()
                         scope.launch {
                             appNav.navigate(
                                 AppNavigation.GameScene(
@@ -269,8 +296,18 @@ fun ScenePage(
                     onSceneUpdated = { updatedScene ->
                         scene = updatedScene
                         onSceneUpdated(updatedScene)
-                        // Mark as edited when scene is updated
-                        isEdited = true
+                        // Mark as edited when scene is updated by user actions
+                        editTracker.markEdited()
+                    },
+                    onSceneSaved = { savedScene ->
+                        scene = savedScene
+                        onSceneUpdated(savedScene)
+                        // Reset edited flag when scene is saved
+                        editTracker.markSaved()
+                    },
+                    onGameCreated = { game ->
+                        // Store the game instance
+                        gameInstance = game
                     }
                 )
             }

@@ -19,6 +19,24 @@ external object Monaco {
         fun getValue(): String
         fun updateOptions(options: EditorOptions)
         fun onDidChangeModelContent(listener: () -> Unit)
+        fun deltaDecorations(oldDecorations: Array<String>, newDecorations: Array<LineDecoration>): Array<String>
+    }
+
+    interface Range {
+        var startLineNumber: Int
+        var startColumn: Int
+        var endLineNumber: Int
+        var endColumn: Int
+    }
+
+    interface DecorationOptions {
+        var isWholeLine: Boolean
+        var className: String
+    }
+
+    interface LineDecoration {
+        var range: Range
+        var options: DecorationOptions
     }
 
     interface EditorOptions {
