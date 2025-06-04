@@ -50,7 +50,6 @@ import components.getConversation
 import focusable
 import hint
 import json
-import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -63,32 +62,22 @@ import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexShrink
-import org.jetbrains.compose.web.css.fontSize
-import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginRight
-import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.paddingBottom
 import org.jetbrains.compose.web.css.percent
-import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.vh
 import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.dom.Br
-import org.jetbrains.compose.web.dom.CheckboxInput
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
-import org.jetbrains.compose.web.dom.Label
-import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.TextInput
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
-import org.w3c.dom.get
-import org.w3c.dom.set
 import pickPhotos
 import qr
 import r
@@ -160,55 +149,6 @@ fun ExplorePage(
         scope.launch {
             api.generateCardPhoto(card.id!!) {
                 oldPhoto = card.photo ?: ""
-                if (localStorage["app.config.ai.disclaimer.show"] != json.encodeToString(false)) {
-                    dialog(
-                        title = application.appString { generating },
-                        cancelButton = null
-                    ) {
-                        Div {
-                            appText { pageUpdatedWhenPhotoGenerated }
-                            Br()
-                            Br()
-                            appText { pageTitleHintDetailsSharedWithThirdParty }
-                        }
-                        Div({
-                            style {
-                                marginTop(1.r)
-                            }
-                        }) {
-                            Label {
-                                var dontShow by remember {
-                                    mutableStateOf(false)
-                                }
-                                CheckboxInput(dontShow) {
-                                    style {
-                                        margin(0.r, .5.r, 0.r, 0.r)
-                                    }
-
-                                    onInput {
-                                        if (!it.value) {
-                                            localStorage["app.config.ai.disclaimer.show"] = json.encodeToString(false)
-                                        } else {
-                                            localStorage.removeItem("app.config.ai.disclaimer.skip")
-                                        }
-                                    }
-
-                                    onChange {
-                                        dontShow = it.value
-                                    }
-                                }
-                                Span({
-                                    style {
-                                        fontWeight("bold")
-                                        fontSize(14.px)
-                                    }
-                                }) {
-                                    appText { dontShowThisAgain }
-                                }
-                            }
-                        }
-                    }
-                }
             }
         }
     }

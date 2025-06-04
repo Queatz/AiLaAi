@@ -51,12 +51,12 @@ fun PlatformNavPage(
         onSelected(PlatformNav.Config)
         }
         // todo: translate
-        NavMenuItem("report", "Reports", selected = selected == PlatformNav.Reports, iconColor = Color("#6060BF")) {
-        onSelected(PlatformNav.Reports)
-        }
-        // todo: translate
         NavMenuItem("bar_chart", "Stats", selected = selected == PlatformNav.Stats, iconColor = Color("#60BF60")) {
         onSelected(PlatformNav.Stats)
+        }
+        // todo: translate
+        NavMenuItem("report", "Reports", selected = selected == PlatformNav.Reports, iconColor = Color("#6060BF")) {
+            onSelected(PlatformNav.Reports)
         }
         // todo: translate
         NavMenuItem("feedback", "Feedback", selected = selected == PlatformNav.Feedback, iconColor = Color("#BF9060")) {

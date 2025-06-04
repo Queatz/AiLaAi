@@ -1,6 +1,7 @@
 package com.queatz
 
 import app.ailaai.shared.resources.ScriptsResources
+import com.fasterxml.jackson.annotation.JsonAlias
 import com.queatz.db.AiScriptResponse
 import com.queatz.plugins.json
 import com.queatz.plugins.secrets
@@ -27,6 +28,8 @@ import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Serializable
 data class OpenAiSpeakBody(
@@ -60,6 +63,9 @@ data class OpenAiOutput(
     val type: String,
     val status: String? = null,
     val role: String? = null,
+    @JsonAlias("revised_prompt")
+    val revisedPrompt: String? = null,
+    val result: String? = null,
     val content: List<OpenAiOutputFormat> = emptyList(),
 )
 
@@ -78,6 +84,20 @@ data class OpenAiStructuredCodeOutput(
 @Serializable
 data class OpenAiTranscriptionResponse(
     val text: String
+)
+
+@Serializable
+data class OpenAiTool(
+    val type: String,
+    val background: String? = null,
+    val quality: String = "high"
+)
+
+@Serializable
+data class OpenAiImageGenerationBody(
+    val model: String = "gpt-4.1-mini",
+    val input: List<OpenAiCompletionsMessage>,
+    val tools: List<OpenAiTool>
 )
 
 private val SCRIPT_SYSTEM_PROMPT = """
@@ -283,4 +303,36 @@ class OpenAi {
                 ?.text
         }
     }
+
+    // Generate image using OpenAI Responses API
+    @OptIn(ExperimentalEncodingApi::class)
+    suspend fun image(
+        prompt: String,
+        transparentBackground: Boolean = false
+    ): ByteArray? = runCatching {
+        val tool = OpenAiTool(
+            type = "image_generation",
+            background = if (transparentBackground) "transparent" else null
+        )
+        val body = OpenAiImageGenerationBody(
+            model = "gpt-4.1-mini",
+            input = listOf(OpenAiCompletionsMessage(role = "user", content = prompt)),
+            tools = listOf(tool)
+        )
+        http.post("https://api.openai.com/v1/responses") {
+            bearerAuth(secrets.openAi.key)
+            contentType(ContentType.Application.Json.withCharset(UTF_8))
+            setBody(body)
+        }.also {
+            getAnonymousLogger().info("OpenAI image response: ${it.bodyAsText()}")
+        }.body<OpenAiResponsesResponse>()
+            .output
+            .firstOrNull { it.result != null }
+            ?.result
+            ?.let { image ->
+                Base64.decode(image)
+            } ?: throw IllegalStateException("No image URL returned from OpenAI")
+    }.onFailure {
+        it.printStackTrace()
+    }.getOrNull()
 }

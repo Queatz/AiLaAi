@@ -276,6 +276,7 @@ fun CurrentSelectionSection(map: Map) {
                                         flexDirection(FlexDirection.Column)
                                         gap(0.25.r)
                                         marginBottom(0.5.r)
+                                        width(100.percent)
                                     }
                                 }) {
                                     Text("Name")

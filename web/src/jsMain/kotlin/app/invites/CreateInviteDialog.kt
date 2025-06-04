@@ -8,9 +8,10 @@ import api
 import app.ailaai.api.createInvite
 import app.dialog.inputDialog
 import app.reminder.ReminderDateTime
-import appText
+import appString
 import application
 import com.queatz.db.Invite
+import components.LabeledCheckbox
 import kotlinx.datetime.toKotlinInstant
 import lib.addDays
 import notBlank
@@ -21,8 +22,6 @@ import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.dom.CheckboxInput
-import org.jetbrains.compose.web.dom.Label
 import org.jetbrains.compose.web.dom.TextInput
 import parseDateTime
 import r
@@ -47,18 +46,16 @@ suspend fun createInviteDialog(
         confirmButton = application.appString { create },
         singleLine = false,
         content = { resolve, _, _ ->
-            Label(attrs = {
-                style {
+            LabeledCheckbox(
+                value = hasTotal,
+                onValue = {
+                    hasTotal = it
+                },
+                text = appString { multipleUses },
+                styles = {
                     padding(1.r, .5.r)
                 }
-            }) {
-                CheckboxInput(hasTotal) {
-                    onChange {
-                        hasTotal = it.value
-                    }
-                }
-                appText { multipleUses }
-            }
+            )
 
             if (hasTotal) {
                 TextInput(total.toString()) {
@@ -86,18 +83,14 @@ suspend fun createInviteDialog(
                 }
             }
 
-            Label(attrs = {
-                style {
+            LabeledCheckbox(
+                value = expires,
+                onValue = { expires = it },
+                text = appString { this.expires },
+                styles = {
                     padding(0.r, .5.r, 1.r, .5.r)
                 }
-            }) {
-                CheckboxInput(expires) {
-                    onChange {
-                        expires = it.value
-                    }
-                }
-                appText { this.expires }
-            }
+            )
 
             if (expires) {
                 ReminderDateTime(

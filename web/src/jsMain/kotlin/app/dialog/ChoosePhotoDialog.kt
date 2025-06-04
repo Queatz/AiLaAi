@@ -57,7 +57,6 @@ import org.w3c.files.FileReader
 import pickPhotos
 import r
 import toBytes
-import web.cssom.Overflow
 
 class ChoosePhotoDialogControl(
     private val scope: CoroutineScope,
@@ -77,7 +76,10 @@ class ChoosePhotoDialogControl(
     private var count = MutableStateFlow(1)
     private var aspect = MutableStateFlow(aspectRatio)
 
-    fun launch(multiple: Boolean = false, onPhoto: suspend (String, Int?, Int?) -> Unit) {
+    fun launch(
+        multiple: Boolean = false,
+        onPhoto: suspend (String, Int?, Int?) -> Unit
+    ) {
         scope.launch {
             if (aiStyles.value.isEmpty()) {
                 scope.launch {
@@ -208,6 +210,12 @@ private suspend fun choosePhotoDialog(
         confirmButton = application.appString { confirm },
         defaultValue = aiPrompt,
         singleLine = false,
+        enablePhotoPasting = true,
+        onPhotoFiles = { resolve, photos ->
+            photos.forEach(onFile)
+            resolve(null)
+
+        },
         inputStyles = {
             width(32.r)
         },

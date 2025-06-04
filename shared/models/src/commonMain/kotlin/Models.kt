@@ -51,7 +51,8 @@ class Report(
     var reporterMessage: String? = null,
     var urgent: Boolean? = null,
     var entity: String? = null,
-    var type: ReportType? = null
+    var type: ReportType? = null,
+    var resolved: Boolean? = null
 ) : Model()
 
 @Serializable
@@ -123,14 +124,16 @@ class LinkDeviceToken(
 @Serializable
 class Crash(
     var details: String? = null,
-    var person: String? = null
+    var person: String? = null,
+    var resolved: Boolean? = null
 ) : Model()
 
 @Serializable
 class AppFeedback(
     var feedback: String? = null,
     var person: String? = null,
-    var type: AppFeedbackType? = null
+    var type: AppFeedbackType? = null,
+    var resolved: Boolean? = null
 ) : Model()
 
 @Serializable
@@ -490,6 +493,12 @@ class Script(
 data class ScriptData(
     var script: String? = null,
     var secret: String? = null
+) : Model()
+
+@Serializable
+data class ScriptStats(
+    var script: String? = null,
+    var runCount: Int = 0
 ) : Model()
 
 @Serializable

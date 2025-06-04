@@ -3,9 +3,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
+import api
 import app.AppStyles
 import app.ailaai.api.statsFeedback
+import app.ailaai.api.resolveFeedback
+import components.IconButton
 import com.queatz.db.AppFeedback
 import kotlinx.browser.window
 import org.jetbrains.compose.web.css.*
@@ -17,8 +22,10 @@ fun FeedbackPlatformPage() {
     var feedback by remember {
         mutableStateOf(emptyList<AppFeedback>())
     }
+    var refreshTrigger by remember { mutableStateOf(0) }
+    val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(refreshTrigger) {
         api.statsFeedback {
             feedback = it
         }
@@ -84,7 +91,9 @@ fun FeedbackPlatformPage() {
                             style {
                                 fontSize(14.px)
                                 color(Styles.colors.secondary)
-                                property("text-align", "right")
+                                display(DisplayStyle.Flex)
+                                justifyContent(JustifyContent.SpaceBetween)
+                                alignItems(AlignItems.Center)
                             }
                         }) {
                             val date = try {
@@ -94,6 +103,20 @@ fun FeedbackPlatformPage() {
                             }
 
                             Text(date?.toLocaleDateString() ?: item.createdAt.toString())
+
+                            IconButton(
+                                "check",
+                                // todo: translate
+                                "Resolve",
+                                onClick = { event ->
+                                    event.stopPropagation()
+                                    scope.launch {
+                                        api.resolveFeedback(item.id!!) {
+                                            refreshTrigger++
+                                        }
+                                    }
+                                }
+                            )
                         }
                     }
                 }

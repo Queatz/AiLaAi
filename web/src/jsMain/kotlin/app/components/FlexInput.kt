@@ -14,7 +14,6 @@ import api
 import app.dialog.rememberChoosePhotoDialog
 import com.queatz.db.AiTranscribeResponse
 import components.IconButton
-import getImageDimensions
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.InputType
@@ -120,6 +119,7 @@ fun FlexInput(
     var stream by remember { mutableStateOf<MediaStream?>(null) }
     var focus by remember { mutableStateOf<(() -> Unit)?>(null) }
     var valueChanged by remember { mutableStateOf(false) }
+    var textareaRef by remember { mutableStateOf<HTMLTextAreaElement?>(null) }
 
     // Photo dialog if photo upload is enabled
     val photoDialog = if (enablePhotoUpload && onPhotos != null) {
@@ -155,7 +155,7 @@ fun FlexInput(
         }
     }
 
-    fun stopRecording(isCancel: Boolean = false) {
+    fun stopRecording(isCancel: Boolean = false, onComplete: (() -> Unit)? = null) {
         if (!isRecording || !enableVoiceInput) return
 
         recorder?.let { rec ->
@@ -186,6 +186,7 @@ fun FlexInput(
                                     if (text.isNotBlank()) {
                                         onChange(if (value.isNotBlank()) "$value $text" else text)
                                         focus?.invoke()
+                                        onComplete?.invoke()
                                     }
                                 }
                                 isTranscribingAudio = false
@@ -209,6 +210,13 @@ fun FlexInput(
     DisposableEffect(Unit) {
         onDispose {
             stopRecording(isCancel = true)
+        }
+    }
+
+    if (autoSize) {
+        LaunchedEffect(value) {
+            delay(1)
+            textareaRef?.resize()
         }
     }
 
@@ -400,6 +408,8 @@ fun FlexInput(
                 }
 
                 ref { element ->
+                    textareaRef = element
+
                     if (autoFocus) {
                         element.focus()
                     }
@@ -419,6 +429,7 @@ fun FlexInput(
                     focus = { element.focus() }
 
                     onDispose {
+                        textareaRef = null
                         control.requestFocus = {}
                         focus = null
                     }
@@ -463,7 +474,8 @@ fun FlexInput(
                 }
             ) {
                 photoDialog?.launch(
-                    multiple = false, onPhoto = { photo, width, height ->
+                    multiple = false,
+                    onPhoto = { photo, width, height ->
                         onPhotos(listOf(Triple(photo, width, height)))
                     }
                 )

@@ -36,5 +36,16 @@ fun Route.reportRoutes() {
                 HttpStatusCode.NoContent
             }
         }
+
+        post("/report/{id}/resolve") {
+            hosts {
+                val report = db.document(Report::class, call.parameters["id"]!!)
+                    ?: return@hosts HttpStatusCode.NotFound
+
+                report.resolved = true
+                db.update(report)
+                HttpStatusCode.NoContent
+            }
+        }
     }
 }

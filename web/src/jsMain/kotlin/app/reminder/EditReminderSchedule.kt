@@ -7,10 +7,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import app.components.MultiSelect
 import appString
-import appText
 import application
 import com.queatz.db.ReminderSchedule
 import com.queatz.db.ReminderStickiness
+import components.LabeledCheckbox
 import format
 import kotlinx.datetime.toKotlinInstant
 import lib.addHours
@@ -28,9 +28,7 @@ import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.dom.CheckboxInput
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Label
 import parseDateTime
 import r
 import time.format
@@ -112,22 +110,17 @@ fun EditReminderSchedule(
         }
     )
 
-    Label(attrs = {
-        style {
+    LabeledCheckbox(
+        value = schedule.reoccurs,
+        onValue = {
+            schedule.reoccurs = it
+        },
+        enabled = !disabled,
+        text = appString { reoccurs },
+        styles = {
             padding(0.r, .5.r, 1.r, .5.r)
         }
-    }) {
-        CheckboxInput(schedule.reoccurs) {
-            onChange {
-                schedule.reoccurs = it.value
-            }
-
-            if (disabled) {
-                disabled()
-            }
-        }
-        appText { reoccurs }
-    }
+    )
     if (schedule.reoccurs) {
         Div({
             style {
@@ -206,24 +199,19 @@ fun EditReminderSchedule(
         }
     }
 
-    Label(attrs = {
-        style {
+    LabeledCheckbox(
+        value = schedule.until,
+        onValue = {
+            schedule.until = it
+            schedule.untilDate = schedule.date
+            schedule.untilTime = schedule.time
+        },
+        enabled = !disabled,
+        text = appString { until },
+        styles = {
             padding(0.r, .5.r, 1.r, .5.r)
         }
-    }) {
-        CheckboxInput(schedule.until) {
-            onChange {
-                schedule.until = it.value
-                schedule.untilDate = schedule.date
-                schedule.untilTime = schedule.time
-            }
-
-            if (disabled) {
-                disabled()
-            }
-        }
-        appText { until }
-    }
+    )
 
     if (schedule.until) {
         ReminderDateTime(
@@ -239,22 +227,17 @@ fun EditReminderSchedule(
         )
     }
 
-    Label(attrs = {
-        style {
+    LabeledCheckbox(
+        value = schedule.hasStickiness,
+        onValue = {
+            schedule.hasStickiness = it
+        },
+        enabled = !disabled,
+        text = appString { stickiness },
+        styles = {
             padding(0.r, .5.r, 1.r, .5.r)
         }
-    }) {
-        CheckboxInput(schedule.hasStickiness) {
-            onChange {
-                schedule.hasStickiness = it.value
-            }
-
-            if (disabled) {
-                disabled()
-            }
-        }
-        appText { stickiness }
-    }
+    )
 
     if (schedule.hasStickiness) {
         Div({
@@ -273,7 +256,6 @@ fun EditReminderSchedule(
                     }
                 }, attrs = {
                     style {
-                        marginTop(.5.r)
                         width(100.percent)
                     }
 

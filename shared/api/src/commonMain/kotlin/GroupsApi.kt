@@ -4,13 +4,12 @@ import com.queatz.db.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.datetime.Instant
-import kotlinx.serialization.encodeToString
 
 suspend fun Api.groupTopReactions(
     group: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<ReactionCount>>,
-) = get("/groups/$group/reactions/top", onError = onError, onSuccess = onSuccess)
+) = get("groups/$group/reactions/top", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.messages(
     group: String,

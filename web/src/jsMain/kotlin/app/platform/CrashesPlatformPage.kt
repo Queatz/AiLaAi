@@ -6,9 +6,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import api
 import app.ailaai.api.crashes
+import app.ailaai.api.resolveCrash
 import com.queatz.db.Crash
 import components.IconButton
 import components.LazyColumn
@@ -46,13 +49,15 @@ fun CrashesPlatformPage() {
         mutableStateOf(emptyList<Crash>())
     }
     var isLoading by remember { mutableStateOf(false) }
+    var refreshTrigger by remember { mutableStateOf(0) }
+    val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(refreshTrigger) {
         isLoading = true
         api.crashes {
             crashes = it
+            isLoading = false
         }
-        isLoading = false
     }
 
     if (isLoading) {
@@ -85,6 +90,19 @@ fun CrashesPlatformPage() {
                             }
                         )
                     }
+
+                    IconButton(
+                        "check",
+                        // todo: translate
+                        "Resolve",
+                        onClick = {
+                            scope.launch {
+                                api.resolveCrash(crash.id!!) {
+                                    refreshTrigger++
+                                }
+                            }
+                        }
+                    )
                 }
 
                 Div({

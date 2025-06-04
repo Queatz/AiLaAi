@@ -124,10 +124,7 @@ fun StoriesPage(
     }
 
     LaunchedEffect(selected, search) {
-        isLoading = true
-
         reload()
-
         isLoading = false
     }
 
@@ -211,7 +208,6 @@ fun StoriesPage(
                         Div({
                             style {
                                 width(100.percent)
-                                minHeight(9.r)
                             }
                         }) {
                             FlexInput(

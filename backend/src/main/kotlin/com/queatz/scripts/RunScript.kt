@@ -11,6 +11,7 @@ import com.queatz.db.Script
 import com.queatz.db.ScriptResult
 import com.queatz.db.StoryContent
 import com.queatz.db.equippedItemsOfInventory
+import com.queatz.db.incrementScriptRunCount
 import com.queatz.db.inventoryOfPerson
 import com.queatz.db.scriptData
 import com.queatz.plugins.db
@@ -132,7 +133,7 @@ class RunScript(
                 content = listOf(
                     StoryContent.Text(
                         """Script compile error:  
-                            
+
                             ```${
                             compiledScript.reports.joinToString("\n")
                             }
@@ -163,7 +164,7 @@ class RunScript(
                 content = listOf(
                     StoryContent.Text(
                         """Script run error:  
-                            
+
                             ```
                             ${resultError?.let { "$it\n\n" }}${
                             result.reports.joinToString("\n")
@@ -174,6 +175,8 @@ class RunScript(
                 )
             )
         } else {
+            // Increment the run count for successful script execution
+            db.incrementScriptRunCount(script.id!!)
             ScriptResult(content = content)
         }
     }

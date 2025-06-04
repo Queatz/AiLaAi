@@ -26,6 +26,8 @@ class Ai {
 
     companion object {
         val styles = listOf(
+            // OpenAI image generation via Responses API
+            "OpenAI" to "openai",
             "Flux (Text Rendering, HD)" to ":flux",
             "Dreaming (HD)" to "dreamshaperxl_lightning_1024px",
             "Starlight (HD)" to "envy_starlight_xl_01_lightning_1024px",
@@ -100,6 +102,22 @@ class Ai {
         val model = style?.takeIf { it in defaultStylePresets } ?: defaultStylePresets.filter {
             it.isXlLightning || it.isXl
         }.random()
+
+        // Handle OpenAI image generation
+        if (model == "openai") {
+            val openAiClient = OpenAi()
+            val promptText = prompts.joinToString { it.text }
+            val imageBytesRaw = openAiClient.image(promptText, transparentBackground)
+                ?: throw IllegalStateException("OpenAI image generation failed")
+            val processedBytes = processBytes(imageBytesRaw, ContentType.Image.PNG)
+            val (finalBytes, dimensions) = if (transparentBackground && crop) {
+                processedBytes.cropTransparentBackground()
+            } else {
+                Pair(processedBytes, null)
+            }
+            val path = save("$prefix-$model", finalBytes, "png")
+            return Pair(path, dimensions)
+        }
 
         val isFlux = model.isFlux
         val isXlLightning = model.isXlLightning

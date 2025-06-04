@@ -473,6 +473,18 @@ object Strings {
         ru = "Меню"
     )
 
+    val statistics = Translation(
+        en = "Statistics",
+        vn = "Thống kê",
+        ru = "Статистика"
+    )
+
+    val timesRun = Translation(
+        en = "Times run",
+        vn = "Số lần chạy",
+        ru = "Запусков"
+    )
+
     val descriptionOptional = Translation(
         en = "Description (optional)",
         vn = "Mô tả (tùy chọn)",
@@ -501,18 +513,6 @@ object Strings {
         en = "Generating",
         vn = "Đang tạo",
         ru = "Генерация"
-    )
-
-    val pageUpdatedWhenPhotoGenerated = Translation(
-        en = "The page will be updated when the photo is generated.",
-        vn = "Trang sẽ được cập nhật khi ảnh được tạo.",
-        ru = "Страница будет обновлена после создания фотографии."
-    )
-
-    val pageTitleHintDetailsSharedWithThirdParty = Translation(
-        en = "Page title, hint, and details are shared with a 3rd party.",
-        vn = "Tiêu đề trang, gợi ý và chi tiết được chia sẻ với bên thứ ba.",
-        ru = "Заголовок страницы, подсказка и детали передаются третьей стороне."
     )
 
     val dontShowThisAgain = Translation(
@@ -1549,6 +1549,11 @@ object Strings {
         en = "Groups",
         vn = "Nhóm",
         ru = "Группы"
+    )
+    val group = Translation(
+        en = "Group",
+        vn = "Nhóm",
+        ru = "Груп"
     )
     val groupName = Translation(
         "Group name",

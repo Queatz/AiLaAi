@@ -1,5 +1,6 @@
 package com.queatz.api
 
+import com.queatz.db.AppFeedback
 import com.queatz.db.AppStats
 import com.queatz.db.StatsHealth
 import com.queatz.db.activePeople
@@ -16,9 +17,16 @@ import com.queatz.db.totalPublishedStories
 import com.queatz.db.totalReminders
 import com.queatz.plugins.db
 import com.queatz.plugins.respond
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.call
+import io.ktor.server.auth.authenticate
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import java.io.File
+
+// Import hosts function
+import com.queatz.api.hosts
 
 fun Route.statsRoutes() {
     get("/stats") {
@@ -46,6 +54,19 @@ fun Route.statsRoutes() {
     get("/stats/feedback") {
         respond {
             db.recentFeedback(call.parameters["limit"]?.toInt() ?: 20)
+        }
+    }
+
+    authenticate {
+        post("/stats/feedback/{id}/resolve") {
+            hosts {
+                val feedback = db.document(AppFeedback::class, call.parameters["id"]!!)
+                    ?: return@hosts HttpStatusCode.NotFound
+
+                feedback.resolved = true
+                db.update(feedback)
+                HttpStatusCode.NoContent
+            }
         }
     }
 

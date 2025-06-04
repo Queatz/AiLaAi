@@ -3,9 +3,11 @@ package com.queatz.api
 import com.queatz.db.RunScriptBody
 import com.queatz.db.Script
 import com.queatz.db.ScriptData
+import com.queatz.db.ScriptStats
 import com.queatz.db.allScripts
 import com.queatz.db.pinScript
 import com.queatz.db.scriptData
+import com.queatz.db.scriptStats
 import com.queatz.db.scriptsOfPerson
 import com.queatz.db.searchScripts
 import com.queatz.db.unpinScript
@@ -187,6 +189,17 @@ fun Route.scriptRoutes() {
             respond {
                 db.unpinScript(me.id!!, parameter("id"))
                 HttpStatusCode.OK
+            }
+        }
+    }
+
+    authenticate(optional = true) {
+        get("/scripts/{id}/stats") {
+            respond {
+                val scriptId = parameter("id")
+                db.document(Script::class, scriptId) ?: return@respond HttpStatusCode.NotFound
+
+                db.scriptStats(scriptId) ?: ScriptStats(script = scriptId, runCount = 0)
             }
         }
     }

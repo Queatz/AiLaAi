@@ -31,4 +31,17 @@ fun Route.crashRoutes() {
             db.recentCrashes(call.parameters["limit"]?.toInt() ?: 20)
         }
     }
+
+    authenticate {
+        post("/crash/{id}/resolve") {
+            hosts {
+                val crash = db.document(Crash::class, call.parameters["id"]!!)
+                    ?: return@hosts HttpStatusCode.NotFound
+
+                crash.resolved = true
+                db.update(crash)
+                HttpStatusCode.NoContent
+            }
+        }
+    }
 }

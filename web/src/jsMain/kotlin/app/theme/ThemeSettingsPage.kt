@@ -25,7 +25,7 @@ fun ThemeSettingsPage() {
         }
 
         P {
-            Text("Customize the appearance of the application by selecting or creating a theme.")
+            Text("Customize the appearance by selecting or creating a new theme.")
         }
 
         if (showEditor) {

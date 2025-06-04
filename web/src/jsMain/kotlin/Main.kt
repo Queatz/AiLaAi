@@ -341,9 +341,9 @@ fun main() {
 
                 route("info") {
                     string { page ->
-                        AppHeader(appName, showBack = true) {
+                        AppHeader(appName, showBack = true, onBack = {
                             router.navigate("/")
-                        }
+                        })
                         InfoPage(page)
                         AppFooter()
                     }

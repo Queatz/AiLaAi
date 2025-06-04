@@ -4,6 +4,7 @@ fun Db.recentCrashes(limit: Int = 50) = list(
     Crash::class,
     """
         for x in @@collection
+            filter x.${f(Crash::resolved)} != true
             sort x.${f(Card::createdAt)} desc
             limit @limit
             return x
@@ -17,6 +18,7 @@ fun Db.recentReports(limit: Int = 50) = list(
     Report::class,
     """
         for x in @@collection
+            filter x.${f(Report::resolved)} != true
             sort x.${f(Card::createdAt)} desc
             limit @limit
             return x
@@ -30,6 +32,7 @@ fun Db.recentFeedback(limit: Int = 50) = list(
     AppFeedback::class,
     """
         for x in @@collection
+            filter x.${f(AppFeedback::resolved)} != true
             sort x.${f(AppFeedback::createdAt)} desc
             limit @limit
             return x

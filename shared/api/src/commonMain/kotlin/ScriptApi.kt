@@ -4,6 +4,7 @@ import com.queatz.db.RunScriptBody
 import com.queatz.db.Script
 import com.queatz.db.ScriptData
 import com.queatz.db.ScriptResult
+import com.queatz.db.ScriptStats
 import io.ktor.http.HttpStatusCode
 
 suspend fun Api.scripts(
@@ -120,3 +121,13 @@ suspend fun Api.unpinScript(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) = post("scripts/$id/unpin", onError = onError, onSuccess = onSuccess)
+
+suspend fun Api.scriptStats(
+    id: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<ScriptStats>,
+) = get(
+    "scripts/$id/stats",
+    onError = onError,
+    onSuccess = onSuccess
+)

@@ -15,8 +15,8 @@ fun PlatformPage(selected: PlatformNav) {
             is PlatformNav.People -> PeoplePlatformPage()
             is PlatformNav.Health -> HealthPlatformPage()
             is PlatformNav.Config -> ConfigPlatformPage()
-            is PlatformNav.Reports -> ReportsPlatformPage()
             is PlatformNav.Stats -> StatsPlatformPage()
+            is PlatformNav.Reports -> ReportsPlatformPage()
             is PlatformNav.Feedback -> FeedbackPlatformPage()
             is PlatformNav.Crashes -> CrashesPlatformPage()
             else -> Empty { Text("Not yet implemented.") }

@@ -18,6 +18,7 @@ import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
+import org.w3c.files.File
 import r
 
 suspend fun inputDialog(
@@ -27,6 +28,8 @@ suspend fun inputDialog(
     cancelButton: String? = application.appString { cancel },
     defaultValue: String = "",
     singleLine: Boolean = true,
+    enablePhotoPasting: Boolean = false,
+    onPhotoFiles: (suspend (resolve: (Boolean?) -> Unit, List<File>) -> Unit)? = null,
     maxLength: Int? = null,
     type: InputType<*>? = null,
     inputStyles: StyleScope.() -> Unit = {},
@@ -72,6 +75,10 @@ suspend fun inputDialog(
                 selectAll = singleLine, // Only select all for single line inputs
                 inputType = type,
                 inputEndPadding = inputEndPadding,
+                enablePhotoPasting = enablePhotoPasting,
+                onPhotoFiles = {
+                    onPhotoFiles?.invoke(resolve, it)
+                },
                 styles = {
                     margin(0.r)
                     maxWidth(100.percent)

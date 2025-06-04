@@ -27,6 +27,7 @@ import app.ailaai.api.scripts
 import app.ailaai.api.unpinScript
 import app.ailaai.api.updateScript
 import app.ailaai.api.updateScriptData
+import app.ailaai.api.scriptStats
 import app.dialog.rememberChoosePhotoDialog
 import app.ailaai.shared.resources.ScriptsResources
 import app.components.PreventNavigation
@@ -712,6 +713,44 @@ fun ScriptsPage(
                                 }
                             }
                         )
+                        item(
+                            title = appString { statistics },
+                            icon = "analytics",
+                            onClick = {
+                                menuTarget = null
+                                scope.launch {
+                                    api.scriptStats(
+                                        id = script.id!!,
+                                        onSuccess = { stats ->
+                                            dialog(
+                                                title = application.appString { statistics },
+                                                cancelButton = null,
+                                                content = {
+                                                    Div({
+                                                        style {
+                                                            padding(1.r)
+                                                            display(DisplayStyle.Flex)
+                                                            flexDirection(FlexDirection.Column)
+                                                            gap(1.r)
+                                                        }
+                                                    }) {
+                                                        Div({
+                                                            style {
+                                                                fontSize(18.px)
+                                                                fontWeight("bold")
+                                                            }
+                                                        }) {
+                                                            Text("${application.appString { timesRun }}: ${stats.runCount}")
+                                                        }
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    )
+                                }
+                            }
+                        )
+
                         item(
                             // todo: translate
                             title = "Background",

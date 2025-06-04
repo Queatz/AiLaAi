@@ -6,9 +6,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import api
 import app.ailaai.api.reports
+import app.ailaai.api.resolveReport
 import com.queatz.db.Report
 import components.IconButton
 import components.LazyColumn
@@ -45,13 +48,15 @@ fun ReportsPlatformPage() {
         mutableStateOf(emptyList<Report>())
     }
     var isLoading by remember { mutableStateOf(false) }
+    var refreshTrigger by remember { mutableStateOf(0) }
+    val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(refreshTrigger) {
         isLoading = true
         api.reports {
             reports = it
+            isLoading = false
         }
-        isLoading = false
     }
 
     if (isLoading) {
@@ -85,6 +90,19 @@ fun ReportsPlatformPage() {
                                 }
                             )
                         }
+
+                        IconButton(
+                            "check",
+                            // todo: translate
+                            "Resolve",
+                            onClick = {
+                                scope.launch {
+                                    api.resolveReport(report.id!!) {
+                                        refreshTrigger++
+                                    }
+                                }
+                            }
+                        )
                     }
 
                     if (report.urgent == true) {

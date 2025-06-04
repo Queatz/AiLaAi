@@ -61,6 +61,27 @@ fun Db.scriptData(script: String) = one(
     mapOf("script" to script)
 )
 
+fun Db.scriptStats(script: String) = one(
+    ScriptStats::class,
+    """
+        for scriptStats in @@collection
+            filter scriptStats.${f(ScriptStats::script)} == @script
+            return scriptStats
+    """,
+    mapOf("script" to script)
+)
+
+fun Db.incrementScriptRunCount(script: String) = query(
+    ScriptStats::class,
+    """
+        upsert { ${f(ScriptStats::script)}: @script }
+            insert { ${f(ScriptStats::script)}: @script, ${f(ScriptStats::runCount)}: 1, ${f(ScriptStats::createdAt)}: DATE_ISO8601(DATE_NOW()) }
+            update { ${f(ScriptStats::runCount)}: OLD.${f(ScriptStats::runCount)} + 1 }
+            in @@collection
+    """,
+    mapOf("script" to script)
+)
+
 fun Db.scriptsOfPerson(person: String) = list(
     Script::class,
     """

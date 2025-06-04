@@ -11,7 +11,11 @@ fun MainPage() {
             classes(Styles.mainContainer)
         }) {
             MapView {
-                AppHeader(appString { appName }, background = false, showDownloadApp = true)
+                AppHeader(
+                    title = appString { appName },
+                    background = false,
+                    showDownloadApp = true
+                )
             }
             AppFooter()
         }
