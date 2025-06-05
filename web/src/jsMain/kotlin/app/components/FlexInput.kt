@@ -443,6 +443,7 @@ fun FlexInput(
                 name = if (isRecording) "stop" else "mic",
                 title = if (isRecording) "Finish voice input" else "Voice input",
                 isLoading = !isRecording && isTranscribingAudio,
+                enabled = enabled,
                 styles = {
                     position(Position.Absolute)
                     right(.5.r)
@@ -465,6 +466,7 @@ fun FlexInput(
             IconButton(
                 name = "photo",
                 title = "Upload photo",
+                enabled = enabled,
                 styles = {
                     position(Position.Absolute)
                     right(if (enableVoiceInput) 2.r else .5.r)
@@ -520,18 +522,20 @@ fun FlexInput(
                 Text(buttonText)
             }
 
-            Button({
-                classes(Styles.outlineButton)
+            if (showDiscard) {
+                Button({
+                    classes(Styles.outlineButton)
 
-                onClick {
-                    onChange(initialValue)
-                }
+                    onClick {
+                        onChange(initialValue)
+                    }
 
-                if (!enabled) {
-                    disabled()
+                    if (!enabled) {
+                        disabled()
+                    }
+                }) {
+                    Text(discardText)
                 }
-            }) {
-                Text(discardText)
             }
         }
     }

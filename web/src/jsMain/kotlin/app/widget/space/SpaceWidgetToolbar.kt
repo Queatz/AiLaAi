@@ -15,6 +15,8 @@ sealed class SpaceWidgetTool {
     object Box : SpaceWidgetTool()
     object Text : SpaceWidgetTool()
     object Circle : SpaceWidgetTool()
+    object Scribble : SpaceWidgetTool()
+    object Photo : SpaceWidgetTool()
 }
 
 @Composable
@@ -95,6 +97,34 @@ fun SpaceWidgetToolbar(
             },
             onClick = {
                 onTool(SpaceWidgetTool.Text)
+            }
+        )
+        IconButton(
+            name = "gesture",
+            // todo: translate
+            title = "Scribble",
+            styles = {
+                borderRadius(1.r)
+                if (tool == SpaceWidgetTool.Scribble) {
+                    backgroundColor(Styles.colors.primary)
+                }
+            },
+            onClick = {
+                onTool(SpaceWidgetTool.Scribble)
+            }
+        )
+        IconButton(
+            name = "photo",
+            // todo: translate
+            title = "Photo",
+            styles = {
+                borderRadius(1.r)
+                if (tool == SpaceWidgetTool.Photo) {
+                    backgroundColor(Styles.colors.primary)
+                }
+            },
+            onClick = {
+                onTool(SpaceWidgetTool.Photo)
             }
         )
     }

@@ -83,6 +83,26 @@ class WidgetStyleSheet : StyleSheet() {
         }
     }
 
+    val spaceSidePanel by style {
+        position(Absolute)
+        top(0.r)
+        right(0.r)
+        padding(1.r)
+        property("z-index", 1)
+        display(DisplayStyle.Flex)
+        property("flex-direction", "column")
+        property("gap", "0.5rem")
+
+        transitions {
+            "color" {
+                duration = 100.ms
+            }
+            "background-color" {
+                duration = 100.ms
+            }
+        }
+    }
+
     val spacePathWidget by style {
         position(Absolute)
         top(0.r)

@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import app.AppStyles
 import app.appNav
+import app.tabStateManager
 import app.call.CallLayout
 import app.call.CallStyles
 import app.components.Background
@@ -144,7 +145,15 @@ fun main() {
 
                 LaunchedEffect(Unit) {
                     appNav.route.collectLatest {
-                        router.navigate(it)
+                        if (it == "/") {
+                            if (router.currentPath.path.startsWith("/tab/")) {
+                                // Do nothing
+                            } else {
+                                router.navigate(it)
+                            }
+                        } else {
+                            router.navigate(it)
+                        }
                     }
                 }
 
@@ -341,9 +350,13 @@ fun main() {
 
                 route("info") {
                     string { page ->
-                        AppHeader(appName, showBack = true, onBack = {
-                            router.navigate("/")
-                        })
+                        AppHeader(
+                            title = appName,
+                            showBack = true,
+                            onBack = {
+                                router.navigate("/")
+                            }
+                        )
                         InfoPage(page)
                         AppFooter()
                     }
@@ -384,6 +397,16 @@ fun main() {
                 route("scene") {
                     string { sceneId ->
                         GameCoverPage(sceneId)
+                    }
+                }
+
+                route("tab") {
+                    string { tabId ->
+                        MainPage(tabId)
+                    }
+
+                    noMatch {
+                        MainPage()
                     }
                 }
 

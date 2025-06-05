@@ -43,6 +43,7 @@ fun IconButton(
     isLoading: Boolean = false,
     small: Boolean = false,
     circular: Boolean = false,
+    enabled: Boolean = true,
     styles: (StyleScope.() -> Unit)? = null,
     iconStyles: (StyleScope.() -> Unit)? = null,
     onClick: (SyntheticMouseEvent) -> Unit
@@ -69,6 +70,10 @@ fun IconButton(
             classes(AppStyles.iconButtonOutlined)
         }
 
+        if (!enabled) {
+            classes(AppStyles.iconButtonDisabled)
+        }
+
         focusable()
         style {
             if (backgroundColor != null) {
@@ -89,7 +94,9 @@ fun IconButton(
         title(title)
         onClick {
             it.stopPropagation()
-            onClick(it)
+            if (enabled) {
+                onClick(it)
+            }
         }
     }) {
         Span({

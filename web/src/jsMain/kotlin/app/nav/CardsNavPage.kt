@@ -25,11 +25,21 @@ import org.w3c.dom.HTMLElement
 import r
 import saves
 
+@kotlinx.serialization.Serializable
 sealed class CardNav {
+    @kotlinx.serialization.Serializable
     data object Map : CardNav()
+
+    @kotlinx.serialization.Serializable
     data object Friends : CardNav()
+
+    @kotlinx.serialization.Serializable
     data object Local : CardNav()
+
+    @kotlinx.serialization.Serializable
     data object Saved : CardNav()
+
+    @kotlinx.serialization.Serializable
     data class Selected(val card: Card, val subCard: Card? = null) : CardNav()
 }
 

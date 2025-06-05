@@ -50,6 +50,7 @@ fun NpcDialog(
                     photo = npc.photo.orEmpty(),
                     aspect = .75,
                     transparentBackground = true,
+                    crop = true,
                     onPhoto = {
                         npc = npc.copy(photo = it)
                     }

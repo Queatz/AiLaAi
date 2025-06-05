@@ -7,5 +7,4 @@ enum class Widgets {
     Web,
     Form,
     Space,
-    Shop,
 }

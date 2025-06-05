@@ -9,7 +9,7 @@ buildscript {
             load(file("local.properties").inputStream())
         }
         val agpVersion = properties.getProperty("AGP_VERSION").orEmpty().ifBlank {
-            "8.10.0-alpha05"
+            "8.10.0"
         }
         classpath("com.android.tools.build:gradle:$agpVersion")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20")

@@ -23,7 +23,11 @@ This document outlines the core guidelines for development in the Junie project.
 ## Code Style Guidelines
 
 1. General
+    - You are building for the long term, and keep technical debt to a minimum
     - Never duplicate code, always refactor to make code reusable
+    - Always strive to reduce code duplication, creating new components and reusable functions every time it's possible
+    - Lean towards crating new files for new components
+    - Refactor as you go, improve the code and make it more reusable
 
 2. Kotlin
     - Follow official Kotlin coding conventions

@@ -8,23 +8,28 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.web.events.SyntheticMouseEvent
 import api
 import app.ailaai.api.card
 import app.ailaai.api.cardsCards
 import app.ailaai.api.newCard
+import app.ailaai.api.uploadPhotos
 import app.compose.rememberDarkMode
 import app.dialog.inputDialog
+import app.dialog.rememberChoosePhotoDialog
 import app.widget.space.SpacePathItem
 import app.widget.space.SpaceWidgetPath
+import app.widget.space.SpaceWidgetSidePanel
 import app.widget.space.SpaceWidgetTool
 import app.widget.space.SpaceWidgetToolbar
 import app.widget.space.drawCanvas
+import app.widget.space.rememberSpaceWidgetInputControl
 import application
 import com.queatz.db.Card
 import com.queatz.db.Widget
 import com.queatz.widgets.widgets.SpaceContent
-import com.queatz.widgets.widgets.SpaceData
 import com.queatz.widgets.widgets.SpaceItem
+import getImageDimensions
 import json
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -36,9 +41,14 @@ import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Canvas
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.events.SyntheticClipboardEvent
+import org.jetbrains.compose.web.events.SyntheticTouchEvent
 import org.w3c.dom.CanvasRenderingContext2D
 import org.w3c.dom.HTMLCanvasElement
+import org.w3c.dom.get
+import org.w3c.files.File
 import r
+import toBytes
 import updateWidget
 import widget
 import kotlin.math.pow
@@ -84,28 +94,33 @@ data class DrawInfo(
     val tool: SpaceWidgetTool,
     val from: Pair<Double, Double>? = null,
     val to: Pair<Double, Double>? = null,
+    val points: List<Pair<Double, Double>> = emptyList()
 )
 
 @Composable
 fun SpaceWidget(widgetId: String) {
     val me by application.me.collectAsState()
-    var dirty by remember(widgetId) { mutableStateOf<Int?>(null) }
-    var data by remember(widgetId) { mutableStateOf<SpaceData?>(null) }
-    var cardId by remember(widgetId) { mutableStateOf<String?>(null) }
     var path by remember { mutableStateOf(emptyList<SpacePathItem>()) }
-    var tool by remember { mutableStateOf<SpaceWidgetTool>(SpaceWidgetTool.Default) }
 
-    LaunchedEffect(widgetId) {
-        api.widget(widgetId) {
-            data = json.decodeFromString(it.data ?: return@widget) ?: return@widget
-            cardId = data?.card
-        }
-    }
+    // Create the control as the single source of truth for state
+    val control = rememberSpaceWidgetInputControl()
 
-    // todo: loading
-    // todo: error
-
-    cardId ?: return
+    // Observe all state at the top level
+    val tool = control.collectTool()
+    val drawInfo = control.collectDrawInfo()
+    val draggedIndex = control.collectDraggedIndex()
+    val resizeHandleIndex = control.collectResizeHandleIndex()
+    val draggingCanvas = control.collectDraggingCanvas()
+    val selectedItem = control.collectSelectedItem()
+    val draggedOffset = control.collectDraggedOffset()
+    val offset = control.collectOffset()
+    val scribblePoints = control.collectScribblePoints()
+    val mousePosition = control.collectMousePosition()
+    val data = control.collectData()
+    val cardId = control.collectCardId()
+    val canEdit = control.collectCanEdit()
+    val dirty = control.collectDirty()
+    val drawFunc = control.collectDrawFunc()
 
     var cards by remember(cardId) { mutableStateOf(listOf<Card>()) }
     var card by remember(cardId) { mutableStateOf<Card?>(null) }
@@ -113,15 +128,29 @@ fun SpaceWidget(widgetId: String) {
         mutableStateOf(emptyMap<String, Card>())
     }
 
-    LaunchedEffect(cardId) {
-        cardId?.let { cardId ->
-            api.card(cardId) {
-                card = it
-            }
+    val darkMode = rememberDarkMode()
+    var context by remember { mutableStateOf<CanvasRenderingContext2D?>(null) }
+    var canvasRef by remember { mutableStateOf<HTMLCanvasElement?>(null) }
+    val scope = rememberCoroutineScope()
+    val photoDialog = rememberChoosePhotoDialog(showUpload = true)
+
+    // todo: loading
+    // todo: error
+
+    LaunchedEffect(widgetId) {
+        api.widget(widgetId) {
+            control.updateData(json.decodeFromString(it.data ?: return@widget) ?: return@widget)
+            control.updateCardId(control.data?.card)
         }
     }
 
-    val canEdit = card?.person == me?.id
+    LaunchedEffect(cardId, me) {
+        api.card(cardId ?: return@LaunchedEffect) {
+            card = it
+        }
+
+        control.updateCanEdit(card?.person == me?.id)
+    }
 
     LaunchedEffect(dirty) {
         if (dirty != null) {
@@ -129,57 +158,46 @@ fun SpaceWidget(widgetId: String) {
             api.updateWidget(widgetId, Widget(data = json.encodeToString(data))) {
                 // todo: notify saved
             }
-            dirty = null
+            control.updateDirty(null)
         }
     }
 
     LaunchedEffect(cardId) {
-        api.cardsCards(cardId!!) {
+        api.cardsCards(cardId ?: return@LaunchedEffect) {
             cards = it
             cardsById = cards.associateBy { it.id!! }
         }
     }
 
-    val darkMode = rememberDarkMode()
-    var draggingCanvas: Pair<Pair<Double, Double>, Pair<Double, Double>>? by remember { mutableStateOf(null) }
-    var selectedItem by remember { mutableStateOf<SpaceItem?>(null) }
-    var draggedIndex by remember { mutableStateOf<Int?>(null) }
-    var draggedOffset by remember { mutableStateOf(0.0 to 0.0) }
-    var offset by remember { mutableStateOf(0.0 to 0.0) }
-    var drawInfo by remember { mutableStateOf<DrawInfo?>(null) }
-    var context by remember { mutableStateOf<CanvasRenderingContext2D?>(null) }
-    val scope = rememberCoroutineScope()
-
-    val items = data?.items ?: listOf()
-
-    var drawFunc by remember {
-        mutableStateOf({})
-    }
-
-    // todo: kotlin/js bug, if we don't recreate the function, the function uses old values of these variables!
     LaunchedEffect(
         context,
         offset,
+        cardId,
+        cards,
         cardsById,
-        items,
+        data,
         selectedItem,
         darkMode,
-        drawInfo
+        drawInfo,
+        mousePosition
     ) {
-        drawFunc = {
+        control.updateDrawFunc {
             context?.let {
                 drawCanvas(
                     context = it,
                     offset = offset,
                     cardId = cardId,
                     cardsById = cardsById,
-                    items = items,
+                    items = data?.items ?: listOf(),
                     selectedItem = selectedItem,
                     darkMode = darkMode,
                     drawInfo = drawInfo,
+                    mousePosition = mousePosition,
                 )
             }
         }
+
+        control.drawFunc()
     }
 
     // Auto-insert newly added cards
@@ -187,34 +205,28 @@ fun SpaceWidget(widgetId: String) {
         data ?: return@LaunchedEffect
 
         cards.filter { card ->
-            (data!!.items ?: emptyList())
+            (data.items ?: emptyList())
                 .map { it.content }
                 .filterIsInstance<SpaceContent.Page>()
                 .none { it.id == card.id }
         }.onEachIndexed { index, card ->
-            data = data!!.copy(
-                items = (data!!.items ?: emptyList()) + SpaceItem(
-                    content = SpaceContent.Page(card.id!!),
-                    position = (200.0 + 200.0 * index) to 200.0
+            control.updateData(
+                data.copy(
+                    items = (data.items ?: emptyList()) + SpaceItem(
+                        content = SpaceContent.Page(card.id!!),
+                        position = (200.0 + 200.0 * index) to 200.0
+                    )
                 )
             )
         }.also {
             if (it.isNotEmpty()) {
-                dirty = nextInt()
+                control.updateDirty(nextInt())
                 drawFunc()
             }
         }
     }
 
-    LaunchedEffect(data) {
-        drawFunc()
-    }
-
-    LaunchedEffect(cards, darkMode) {
-        context ?: return@LaunchedEffect
-
-        drawFunc()
-    }
+    cardId ?: return
 
     Div(
         attrs = {
@@ -233,166 +245,125 @@ fun SpaceWidget(widgetId: String) {
 
                 tabIndex(1)
 
-                onMouseDown { event ->
-                    when (tool) {
-                        SpaceWidgetTool.Default -> {
-                            var foundItem = false
-                            items.forEachIndexed { index, (item, position) ->
-                                val (x, y) = position
-                                val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
-                                val mouseX = event.clientX - rect.left - offset.first
-                                val mouseY = event.clientY - rect.top - offset.second
+                onPaste { clipboardEvent: SyntheticClipboardEvent ->
+                    if (!canEdit) return@onPaste
 
-                                if ((sqrt((mouseX - x).pow(2) + (mouseY - y).pow(2)) <= 24.0) || when (item) {
-                                        is SpaceContent.Line -> sqrt(
-                                            (mouseX - item.to.first).pow(2) + (mouseY - item.to.second).pow(
-                                                2
-                                            )
-                                        ) <= 24.0
+                    // Get clipboard data
+                    val clipboardData = clipboardEvent.clipboardData ?: return@onPaste
 
-                                        is SpaceContent.Box -> sqrt(
-                                            (mouseX - item.to.first).pow(2) + (mouseY - item.to.second).pow(
-                                                2
-                                            )
-                                        ) <= 24.0 || sqrt(
-                                            (mouseX - item.to.first).pow(2) + (mouseY - y).pow(
-                                                2
-                                            )
-                                        ) <= 24.0 || sqrt(
-                                            (mouseX - x).pow(2) + (mouseY - item.to.second).pow(
-                                                2
-                                            )
-                                        ) <= 24.0
+                    // Check for images
+                    val items = clipboardData.items
+                    val photos = mutableListOf<File>()
 
-                                        else -> false
-                                    }
-                                ) {
-                                    foundItem = true
-                                    if (canEdit) {
-                                        draggedIndex = index
-                                        draggedOffset = (mouseX - x) to (mouseY - y)
-                                    }
-                                    selectedItem = items[index]
-                                }
-                            }
+                    for (i in 0 until items.length) {
+                        val item = items[i] ?: continue
+                        val type = item.type
 
-                            if (!foundItem) {
-                                draggingCanvas = offset to (event.clientX.toDouble() to event.clientY.toDouble())
-                                selectedItem = null
-                            }
-
-                            drawFunc()
-                        }
-
-                        SpaceWidgetTool.Text -> Unit
-
-                        SpaceWidgetTool.Line,
-                        SpaceWidgetTool.Box,
-                        SpaceWidgetTool.Circle,
-                            -> {
-                            val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
-                            val mouseX = event.clientX - rect.left - offset.first
-                            val mouseY = event.clientY - rect.top - offset.second
-                            drawInfo = DrawInfo(tool = tool, from = mouseX to mouseY)
+                        if (type.startsWith("image/")) {
+                            val file = item.getAsFile() ?: continue
+                            photos.add(file)
                         }
                     }
-                }
 
-                onMouseMove { event ->
-                    when (tool) {
-                        SpaceWidgetTool.Default -> {
-                            if (canEdit) {
-                                draggedIndex?.let { index ->
-                                    val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
-                                    val newX = event.clientX - rect.left - offset.first - draggedOffset.first
-                                    val newY = event.clientY - rect.top - offset.second - draggedOffset.second
-                                    data = data!!.copy(
-                                        items = data!!.items!!.toMutableList().apply {
-                                            val item = removeAt(index)
-                                            add(index, item.move(newX to newY))
+                    if (photos.isNotEmpty()) {
+                        // Handle pasted image
+                        clipboardEvent.preventDefault() // Prevent default paste behavior
+
+                        // Process all photos
+                        photos.forEach { photo ->
+                            scope.launch {
+                                try {
+                                    // Get image dimensions
+                                    val dimensions = photo.getImageDimensions()
+
+                                    // Convert File to ByteArray
+                                    val photoBytes = photo.toBytes()
+
+                                    // Upload the image
+                                    api.uploadPhotos(
+                                        photos = listOf(photoBytes),
+                                        onSuccess = { response ->
+                                            val photoUrl = response.urls.firstOrNull() ?: return@uploadPhotos
+
+                                            // Add the photo to the canvas using the control
+                                            val canvas = context?.canvas
+                                            val canvasWidth = canvas?.width?.toDouble() ?: 800.0
+                                            val canvasHeight = canvas?.height?.toDouble() ?: 600.0
+
+                                            control.addPhotoAtCenter(
+                                                photoUrl = photoUrl,
+                                                width = dimensions.width,
+                                                height = dimensions.height,
+                                                canvasWidth = canvasWidth,
+                                                canvasHeight = canvasHeight
+                                            )
                                         }
                                     )
-                                    dirty = nextInt()
-                                    drawFunc()
+                                } catch (e: Exception) {
+                                    console.error("Error processing pasted image", e)
                                 }
-                            }
-
-                            draggingCanvas?.let { (initialOffset, initialMouse) ->
-                                offset =
-                                    (initialOffset.first + (event.clientX - initialMouse.first)) to (initialOffset.second + (event.clientY - initialMouse.second))
-                                drawFunc()
-                            }
-                        }
-
-                        SpaceWidgetTool.Text -> Unit
-
-                        SpaceWidgetTool.Line,
-                        SpaceWidgetTool.Box,
-                        SpaceWidgetTool.Circle,
-                            -> {
-                            drawInfo?.let {
-                                val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
-                                val newX = event.clientX - rect.left - offset.first
-                                val newY = event.clientY - rect.top - offset.second
-                                drawInfo = it.copy(to = newX to newY)
-                                drawFunc()
                             }
                         }
                     }
-
                 }
 
-                onMouseUp {
-                    when (tool) {
-                        SpaceWidgetTool.Default -> {
-                            draggedIndex = null
-                            draggingCanvas = null
-                            drawFunc()
-                        }
+                onMouseEnter {
+                    canvasRef?.focus()
+                }
 
-                        SpaceWidgetTool.Text -> Unit
-
-                        SpaceWidgetTool.Line,
-                        SpaceWidgetTool.Box,
-                        SpaceWidgetTool.Circle,
-                            -> {
-                            drawInfo?.from?.let { from ->
-                                drawInfo?.to?.let { to ->
-                                    data = data!!.copy(
-                                        items = items + SpaceItem(
-                                            content = when (drawInfo?.tool) {
-                                                SpaceWidgetTool.Box -> {
-                                                    SpaceContent.Box(
-                                                        page = cardId,
-                                                        to = to
-                                                    )
-                                                }
-
-                                                SpaceWidgetTool.Circle -> {
-                                                    SpaceContent.Circle(
-                                                        page = cardId,
-                                                        to = to
-                                                    )
-                                                }
-
-                                                else -> {
-                                                    SpaceContent.Line(
-                                                        page = cardId,
-                                                        to = to
-                                                    )
-                                                }
-                                            },
-                                            position = from
-                                        )
-                                    )
-                                    dirty = nextInt()
-                                }
-                            }
-
-                            drawInfo = null
-                            drawFunc()
-                        }
+                onTouchStart { event: SyntheticTouchEvent ->
+                    event.preventDefault()
+                    event.touches[0]?.let {
+                        control.onMouseDown(
+                            (event.target as HTMLCanvasElement).getBoundingClientRect(),
+                            it.clientX.toDouble(),
+                            it.clientY.toDouble()
+                        )
                     }
+                }
+
+                onTouchMove { event: SyntheticTouchEvent ->
+                    event.preventDefault()
+                    event.touches[0]?.let {
+                        control.onMouseMove(
+                            (event.target as HTMLCanvasElement).getBoundingClientRect(),
+                            it.clientX.toDouble(),
+                            it.clientY.toDouble()
+                        )
+                    }
+                }
+
+                onTouchEnd { event: SyntheticTouchEvent ->
+                    event.preventDefault()
+                    control.onMouseUp()
+                }
+
+                onMouseLeave {
+                    control.updateMousePosition(null)
+                    drawFunc()
+                }
+
+                onMouseDown { event: SyntheticMouseEvent ->
+                    event.preventDefault()
+                    control.onMouseDown(
+                        (event.target as HTMLCanvasElement).getBoundingClientRect(),
+                        event.clientX.toDouble(),
+                        event.clientY.toDouble()
+                    )
+                }
+
+                onMouseMove { event: SyntheticMouseEvent ->
+                    event.preventDefault()
+                    control.onMouseMove(
+                        (event.target as HTMLCanvasElement).getBoundingClientRect(),
+                        event.clientX.toDouble(),
+                        event.clientY.toDouble()
+                    )
+                }
+
+                onMouseUp { event: SyntheticMouseEvent ->
+                    event.preventDefault()
+                    control.onMouseUp()
                 }
 
                 onClick { event ->
@@ -412,13 +383,19 @@ fun SpaceWidget(widgetId: String) {
                                     )
 
                                     if (!text.isNullOrBlank()) {
-                                        data = data!!.copy(
-                                            items = data!!.items!!.toMutableList().apply {
-                                                add(SpaceItem(SpaceContent.Text(page = cardId, text), mouseX to mouseY))
-                                            }
-                                        )
-                                        dirty = nextInt()
+                                        control.addText(mouseX, mouseY, text)
                                     }
+                                }
+                            }
+
+                            SpaceWidgetTool.Photo -> {
+                                scope.launch {
+                                    photoDialog.launch(
+                                        multiple = false,
+                                        onPhoto = { photoUrl: String, width: Int?, height: Int? ->
+                                            control.addPhoto(mouseX, mouseY, photoUrl, width, height)
+                                        }
+                                    )
                                 }
                             }
 
@@ -436,12 +413,8 @@ fun SpaceWidget(widgetId: String) {
                                         active = card?.active == true,
                                     )
                                 ) { newCard ->
-                                    data = data!!.copy(
-                                        items = data!!.items!!.toMutableList().apply {
-                                            add(SpaceItem(SpaceContent.Page(newCard.id!!), mouseX to mouseY))
-                                        }
-                                    )
-                                    dirty = nextInt()
+                                    control.addCard(mouseX, mouseY, newCard.id!!)
+
                                     api.cardsCards(cardId ?: return@newCard) {
                                         cards = it
                                         cardsById = cards.associateBy { it.id!! }
@@ -453,6 +426,8 @@ fun SpaceWidget(widgetId: String) {
                 }
 
                 onDoubleClick { event ->
+                    val items = data?.items ?: return@onDoubleClick
+
                     items.forEachIndexed { index, (item, position) ->
                         val (x, y) = position
                         val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
@@ -463,16 +438,18 @@ fun SpaceWidget(widgetId: String) {
                             is SpaceContent.Page -> {
                                 if (sqrt((mouseX - x).pow(2) + (mouseY - y).pow(2)) <= 24.0) {
                                     // Enter into page
-                                    cardId?.let { cardId ->
-                                        path += SpacePathItem(
-                                            id = cardId,
+                                    cardId?.let { currentCardId ->
+                                        val pathItem = SpacePathItem(
+                                            id = currentCardId,
                                             card = card ?: return@forEachIndexed,
                                             offset = offset,
                                             selectedItem = selectedItem
                                         )
+                                        path += pathItem
+
+                                        // Update cardId in control
+                                        control.navigateToCard(item.id, pathItem)
                                     }
-                                    cardId = item.id
-                                    offset = 0.0 to 0.0
                                 }
                             }
 
@@ -487,19 +464,7 @@ fun SpaceWidget(widgetId: String) {
                                             )
 
                                             if (!text.isNullOrBlank()) {
-                                                data = data!!.copy(
-                                                    items = data!!.items!!.toMutableList().apply {
-                                                        removeAt(index)
-                                                        add(
-                                                            index,
-                                                            SpaceItem(
-                                                                SpaceContent.Text(page = item.page, text),
-                                                                position
-                                                            )
-                                                        )
-                                                    }
-                                                )
-                                                dirty = nextInt()
+                                                control.updateText(index, text)
                                             }
                                         }
                                     }
@@ -515,24 +480,18 @@ fun SpaceWidget(widgetId: String) {
                     if (event.key == "Delete") {
                         if (canEdit) {
                             if (selectedItem != null) {
-                                data = data!!.copy(
-                                    items = data!!.items!!.filter { it.content != selectedItem?.content }
-                                )
-                                dirty = nextInt()
-                                selectedItem = null
+                                control.deleteSelectedItem()
                             }
                         }
                     } else if (event.key == "Escape") {
                         if (drawInfo != null) {
-                            drawInfo = null
+                            control.updateDrawInfo(null)
                             drawFunc()
                         } else {
                             // Exit from page
                             if (path.isNotEmpty()) {
-                                val item = path.last()
-                                cardId = item.id
-                                offset = item.offset
-                                selectedItem = item.selectedItem
+                                val pathItem = path.last()
+                                control.navigateBack(pathItem)
                                 path = path.dropLast(1)
                             }
                         }
@@ -540,6 +499,7 @@ fun SpaceWidget(widgetId: String) {
                 }
 
                 ref { canvas ->
+                    canvasRef = canvas
                     context = canvas.getContext("2d") as CanvasRenderingContext2D
 
                     canvas.width = canvas.clientWidth
@@ -573,9 +533,9 @@ fun SpaceWidget(widgetId: String) {
             ) { index ->
                 val item = path[index]
                 path = path.take(index)
-                cardId = item.id
-                offset = item.offset
-                selectedItem = item.selectedItem
+                control.updateCardId(item.id)
+                control.updateOffset(item.offset)
+                control.updateSelectedItem(item.selectedItem)
                 drawFunc()
             }
         }
@@ -584,44 +544,45 @@ fun SpaceWidget(widgetId: String) {
             SpaceWidgetToolbar(
                 tool = tool,
                 onTool = {
-                    tool = it
+                    control.updateTool(it)
                 }
             )
+
+            // Show side panel when an item is selected
+            selectedItem?.let {
+                SpaceWidgetSidePanel(
+                    onSendToBack = {
+                        // Move the selected item to the beginning of the list (back)
+                        data?.items?.let { items ->
+                            val selectedItem = selectedItem
+                            val selectedItemIndex = items.indexOfFirst { item -> item.content == selectedItem?.content }
+                            if (selectedItemIndex > 0) {
+                                val newItems = items.toMutableList()
+                                val item = newItems.removeAt(selectedItemIndex)
+                                newItems.add(0, item)
+                                val newData = data!!.copy(items = newItems)
+                                control.updateData(newData)
+                                control.updateDirty(nextInt())
+                            }
+                        }
+                    },
+                    onBringToFront = {
+                        // Move the selected item to the end of the list (front)
+                        data?.items?.let { items ->
+                            val selectedItem = selectedItem
+                            val selectedItemIndex = items.indexOfFirst { item -> item.content == selectedItem?.content }
+                            if (selectedItemIndex >= 0 && selectedItemIndex < items.size - 1) {
+                                val newItems = items.toMutableList()
+                                val item = newItems.removeAt(selectedItemIndex)
+                                newItems.add(item)
+                                val newData = data!!.copy(items = newItems)
+                                control.updateData(newData)
+                                control.updateDirty(nextInt())
+                            }
+                        }
+                    }
+                )
+            }
         }
     }
-}
-
-private fun SpaceItem.move(position: Pair<Double, Double>): SpaceItem {
-    val offset = (position.first - this.position.first) to (position.second - this.position.second)
-
-    return when (val content = content) {
-        is SpaceContent.Box -> {
-            copy(
-                content = SpaceContent.Box(
-                    page = content.page,
-                    to = (content.to.first + offset.first) to (content.to.second + offset.second)
-                )
-            )
-        }
-
-        is SpaceContent.Line -> {
-            copy(
-                content = SpaceContent.Line(
-                    page = content.page,
-                    to = (content.to.first + offset.first) to (content.to.second + offset.second)
-                )
-            )
-        }
-
-        is SpaceContent.Circle -> {
-            copy(
-                content = SpaceContent.Circle(
-                    page = content.page,
-                    to = (content.to.first + offset.first) to (content.to.second + offset.second)
-                )
-            )
-        }
-
-        else -> this@move
-    }.copy(position = position)
 }

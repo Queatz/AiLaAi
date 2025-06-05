@@ -34,9 +34,15 @@ import org.w3c.dom.HTMLElement
 import r
 import sortedDistinct
 
+@kotlinx.serialization.Serializable
 sealed class ScriptsNav {
+    @kotlinx.serialization.Serializable
     data object None : ScriptsNav()
+
+    @kotlinx.serialization.Serializable
     data class Script(val script: com.queatz.db.Script) : ScriptsNav()
+
+    @kotlinx.serialization.Serializable
     data object Explore: ScriptsNav()
 }
 

@@ -77,6 +77,7 @@ fun ChoosePhotoDialog(
     aspect: Double = 1.5,
     allowGenerateMultiple: Boolean = false,
     transparentBackground: Boolean = false,
+    crop: Boolean = false,
     onDismissRequest: () -> Unit,
     onRemove: (() -> Unit)? = null,
     onIsGeneratingPhoto: (Boolean) -> Unit = {},
@@ -448,9 +449,10 @@ fun ChoosePhotoDialog(
                         scope.launch {
                             onIsGeneratingPhoto(true)
                             api.uploadPhotosFromUris(
-                                context,
-                                bitmap.asAndroidBitmap().uri(context).inList(),
+                                context = context,
+                                photos = bitmap.asAndroidBitmap().uri(context).inList(),
                                 removeBackground = transparentBackground,
+                                crop = crop,
                             ) { response ->
                                 onGeneratedPhoto(response.urls.first())
                             }
@@ -478,7 +480,8 @@ fun ChoosePhotoDialog(
                         prompt = prompt,
                         style = selectedStyle,
                         aspect = aspect,
-                        removeBackground = transparentBackground.takeIf { it }
+                        removeBackground = transparentBackground.takeIf { it },
+                        crop = crop
                     )
                 ) { response ->
                     onGeneratedPhoto(response.photo)

@@ -10,16 +10,36 @@ import appString
 import application
 import org.jetbrains.compose.web.css.Color
 
+@kotlinx.serialization.Serializable
 sealed class PlatformNav {
+    @kotlinx.serialization.Serializable
     data object None : PlatformNav()
+
+    @kotlinx.serialization.Serializable
     data object Accounts : PlatformNav()
+
+    @kotlinx.serialization.Serializable
     data object People : PlatformNav()
+
+    @kotlinx.serialization.Serializable
     data object Reviews : PlatformNav()
+
+    @kotlinx.serialization.Serializable
     data object Reports : PlatformNav()
+
+    @kotlinx.serialization.Serializable
     data object Stats : PlatformNav()
+
+    @kotlinx.serialization.Serializable
     data object Feedback : PlatformNav()
+
+    @kotlinx.serialization.Serializable
     data object Crashes : PlatformNav()
+
+    @kotlinx.serialization.Serializable
     data object Config : PlatformNav()
+
+    @kotlinx.serialization.Serializable
     data object Health : PlatformNav()
 }
 

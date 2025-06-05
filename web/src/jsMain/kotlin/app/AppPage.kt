@@ -2,6 +2,7 @@ package app
 
 import Notification
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,6 +42,7 @@ import app.platform.PlatformPage
 import app.scripts.ScriptsNav
 import app.scripts.ScriptsNavPage
 import app.scripts.ScriptsPage
+import app.softwork.routingcompose.Router
 import app.widget.WidgetStyleSheet
 import app.widget.WidgetStyles
 import appString
@@ -100,7 +102,7 @@ enum class NavPage {
 }
 
 @Composable
-fun AppPage() {
+fun AppPage(tabId: String? = null) {
     StyleManager.use(
         WidgetStyleSheet::class,
         StoryStyleSheet::class
@@ -108,23 +110,89 @@ fun AppPage() {
 
     val scope = rememberCoroutineScope()
     val me by application.me.collectAsState()
+    val router = Router.current
 
+    LaunchedEffect(tabId) {
+        if (tabId != null) {
+            val savedState = AppPageStateManager.loadState(tabId)
+            if (savedState != null) {
+                AppPageStateManager.updateState { savedState }
+            }
+        } else {
+            val newTabId = tabStateManager.generateTabId()
+            router.navigate("/tab/$newTabId")
+        }
+    }
+
+    // Get state from AppPageStateManager
+    val state by AppPageStateManager.state.collectAsState()
+
+    // Create individual state variables for backward compatibility
     var nav by remember {
-        mutableStateOf(application.navPage)
+        mutableStateOf(state.nav)
     }
 
     var group by remember {
-        mutableStateOf<GroupNav>(GroupNav.None)
+        mutableStateOf(state.groupNav)
     }
 
     var card by remember {
-        mutableStateOf<CardNav>(CardNav.Map)
+        mutableStateOf(state.cardNav)
+    }
+
+    var story by remember {
+        mutableStateOf(state.storyNav)
+    }
+
+    var platform by remember {
+        mutableStateOf(state.platformNav)
+    }
+
+    var script by remember {
+        mutableStateOf(state.scriptsNav)
+    }
+
+    var scene by remember {
+        mutableStateOf(state.sceneNav)
+    }
+
+    var scheduleView by remember {
+        mutableStateOf(state.scheduleView)
+    }
+
+    var scheduleViewType by remember {
+        mutableStateOf(state.scheduleViewType)
+    }
+
+    var reminderSearch by remember {
+        mutableStateOf(state.reminderSearch)
     }
 
     var reminder by remember {
-        mutableStateOf<Reminder?>(null)
+        mutableStateOf(state.reminder)
     }
 
+    var sideLayoutVisible by remember {
+        mutableStateOf(state.sideLayoutVisible)
+    }
+
+    // Update individual state variables when state changes
+    LaunchedEffect(state) {
+        nav = state.nav
+        group = state.groupNav
+        card = state.cardNav
+        story = state.storyNav
+        platform = state.platformNav
+        script = state.scriptsNav
+        scene = state.sceneNav
+        scheduleView = state.scheduleView
+        scheduleViewType = state.scheduleViewType
+        reminderSearch = state.reminderSearch
+        reminder = state.reminder
+        sideLayoutVisible = state.sideLayoutVisible
+    }
+
+    // Create flow objects for updates
     val cardUpdates = remember {
         MutableSharedFlow<Card>()
     }
@@ -149,22 +217,6 @@ fun AppPage() {
         MutableSharedFlow<GameScene>()
     }
 
-    var reminderSearch by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var story by remember {
-        mutableStateOf<StoryNav>(StoryNav.Friends)
-    }
-
-    var scheduleView by remember {
-        mutableStateOf(ScheduleView.Daily)
-    }
-
-    var scheduleViewType by remember {
-        mutableStateOf(ScheduleViewType.Schedule)
-    }
-
     val goToToday = remember {
         MutableSharedFlow<Unit>()
     }
@@ -181,24 +233,32 @@ fun AppPage() {
         mutableStateOf(false)
     }
 
-    var sideLayoutVisible by remember {
-        mutableStateOf(true) // Default to visible
+    // Save state when it changes
+    LaunchedEffect(state) {
+        if (tabId != null) {
+            tabStateManager.saveState(tabId, state)
+        }
     }
 
-    var platform by remember {
-        mutableStateOf<PlatformNav>(PlatformNav.None)
+    LaunchedEffect(state.nav) {
+        application.setNavPage(state.nav)
     }
 
-    var script by remember {
-        mutableStateOf<ScriptsNav>(ScriptsNav.None)
-    }
+    // Add window event listener for tab lifecycle
+    DisposableEffect(tabId) {
+        var handler: ((dynamic) -> dynamic)? = null
 
-    var scene by remember {
-        mutableStateOf<SceneNav>(SceneNav.None)
-    }
+        if (tabId != null) {
+            handler = AppPageStateManager.setupBeforeUnloadHandler(tabId) {
+                AppPageStateManager.state.value
+            }
+        }
 
-    LaunchedEffect(nav) {
-        application.setNavPage(nav)
+        onDispose {
+            if (handler != null && tabId != null) {
+                window.removeEventListener("beforeunload", handler)
+            }
+        }
     }
 
     val someone = appString { someone }
@@ -255,7 +315,9 @@ fun AppPage() {
                         }
                     ) {
                         playNotificationSound = false
-                        nav = NavPage.Schedule
+                        AppPageStateManager.updateState { currentState ->
+                            currentState.copy(nav = NavPage.Schedule)
+                        }
                     }
                 )
             }
@@ -359,44 +421,70 @@ fun AppPage() {
         appNav.navigate.collectLatest {
             when (it) {
                 is AppNavigation.Nav -> {
-                    nav = it.nav
+                    AppPageStateManager.updateState { currentState ->
+                        currentState.copy(nav = it.nav)
+                    }
                 }
                 is AppNavigation.Group -> {
                     if (it.groupExtended == null) {
-                        api.group(it.id) {
-                            nav = NavPage.Groups
-                            group = GroupNav.Selected(it)
+                        api.group(it.id) { group ->
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(
+                                    nav = NavPage.Groups,
+                                    groupNav = GroupNav.Selected(group)
+                                )
+                            }
                         }
                     } else {
-                        nav = NavPage.Groups
-                        group = GroupNav.Selected(it.groupExtended)
+                        AppPageStateManager.updateState { currentState ->
+                            currentState.copy(
+                                nav = NavPage.Groups,
+                                groupNav = GroupNav.Selected(it.groupExtended)
+                            )
+                        }
                     }
                 }
                 is AppNavigation.Page -> {
                     if (it.card == null) {
-                        api.card(it.id) {
-                            nav = NavPage.Cards
-                            card = CardNav.Selected(it)
+                        api.card(it.id) { card ->
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(
+                                    nav = NavPage.Cards,
+                                    cardNav = CardNav.Selected(card)
+                                )
+                            }
                         }
                     } else {
-                        nav = NavPage.Cards
-                        card = CardNav.Selected(it.card)
+                        AppPageStateManager.updateState { currentState ->
+                            currentState.copy(
+                                nav = NavPage.Cards,
+                                cardNav = CardNav.Selected(it.card)
+                            )
+                        }
                     }
                 }
                 is AppNavigation.ExploreScripts -> {
-                    script = ScriptsNav.Explore
+                    AppPageStateManager.updateState { currentState ->
+                        currentState.copy(scriptsNav = ScriptsNav.Explore)
+                    }
                 }
                 is AppNavigation.Script -> {
                     if (it.script == null) {
-                        api.script(it.id) {
-                            script = ScriptsNav.Script(it)
+                        api.script(it.id) { script ->
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(scriptsNav = ScriptsNav.Script(script))
+                            }
                         }
                     } else {
-                        script = ScriptsNav.Script(it.script)
+                        AppPageStateManager.updateState { currentState ->
+                            currentState.copy(scriptsNav = ScriptsNav.Script(it.script))
+                        }
                     }
                 }
                 is AppNavigation.ExploreScenes -> {
-                    scene = SceneNav.Explore
+                    AppPageStateManager.updateState { currentState ->
+                        currentState.copy(sceneNav = SceneNav.Explore)
+                    }
                 }
                 is AppNavigation.GameScene -> {
                     // Handle GameScene navigation
@@ -405,13 +493,21 @@ fun AppPage() {
                     if (it.gameScene == null) {
                         // If gameScene is null, fetch it by ID
                         api.gameScene(gameSceneId) { fetchedScene ->
-                            nav = NavPage.Scenes
-                            scene = SceneNav.Selected(fetchedScene)
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(
+                                    nav = NavPage.Scenes,
+                                    sceneNav = SceneNav.Selected(fetchedScene)
+                                )
+                            }
                         }
                     } else {
                         // If gameScene is provided, use it directly
-                        nav = NavPage.Scenes
-                        scene = SceneNav.Selected(it.gameScene)
+                        AppPageStateManager.updateState { currentState ->
+                            currentState.copy(
+                                nav = NavPage.Scenes,
+                                sceneNav = SceneNav.Selected(it.gameScene)
+                            )
+                        }
                     }
                 }
             }
@@ -453,12 +549,16 @@ fun AppPage() {
             classes(AppStyles.sideLayout)
             style {
                 // Add conditional styling based on visibility
-                if (!sideLayoutVisible) {
+                if (!state.sideLayoutVisible) {
                     display(DisplayStyle.None)
                 }
             }
         }) {
-            AppBottomBar(nav) { nav = it }
+            AppBottomBar(nav) { newNav ->
+                AppPageStateManager.updateState { currentState ->
+                    currentState.copy(nav = newNav)
+                }
+            }
             Div({
                 style {
                     flexGrow(1)
@@ -471,18 +571,26 @@ fun AppPage() {
                     NavPage.Groups -> GroupsNavPage(
                         groupUpdates = groupUpdates,
                         selected = group,
-                        onSelected = {
-                            group = it
+                        onSelected = { newGroup ->
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(groupNav = newGroup)
+                            }
                         },
                         onProfileClick = {
-                            nav = NavPage.Profile
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(nav = NavPage.Profile)
+                            }
                         }
                     )
 
                     NavPage.Schedule -> ScheduleNavPage(
                         reminderUpdates = reminderUpdates,
                         reminder = reminder,
-                        onReminder = { reminder = it },
+                        onReminder = { newReminder ->
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(reminder = newReminder)
+                            }
+                        },
                         onUpdate = {
                             scope.launch {
                                 reminderUpdates.emit(it)
@@ -492,67 +600,117 @@ fun AppPage() {
                             }
                         },
                         view = scheduleView,
-                        onViewClick = {
-                            reminder = null
+                        onViewClick = { newView ->
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(reminder = null)
+                            }
 
-                            if (scheduleView == it) {
+                            if (scheduleView == newView) {
                                 scope.launch { goToToday.emit(Unit) }
                             } else {
-                                scheduleView = it
+                                AppPageStateManager.updateState { currentState ->
+                                    currentState.copy(scheduleView = newView)
+                                }
                             }
                         },
                         viewType = scheduleViewType,
-                        onViewTypeClick = {
-                            scheduleViewType = it
+                        onViewTypeClick = { newViewType ->
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(scheduleViewType = newViewType)
+                            }
                         },
                         onProfileClick = {
-                            nav = NavPage.Profile
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(nav = NavPage.Profile)
+                            }
                         },
-                        onSearchChange = {
-                            reminderSearch = it.notBlank
+                        onSearchChange = { newSearch ->
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(reminderSearch = newSearch.notBlank)
+                            }
                         }
                     )
 
-                    NavPage.Cards -> CardsNavPage(cardUpdates, card, { card = it }, {
-                        nav = NavPage.Profile
-                    })
+                    NavPage.Cards -> CardsNavPage(
+                        cardUpdates, 
+                        card, 
+                        { newCard ->
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(cardNav = newCard)
+                            }
+                        }, 
+                        {
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(nav = NavPage.Profile)
+                            }
+                        }
+                    )
 
-                    NavPage.Stories -> StoriesNavPage(storyUpdates, story, { story = it }, { nav = NavPage.Profile })
+                    NavPage.Stories -> StoriesNavPage(
+                        storyUpdates, 
+                        story, 
+                        { newStory ->
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(storyNav = newStory)
+                            }
+                        }, 
+                        {
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(nav = NavPage.Profile)
+                            }
+                        }
+                    )
                     NavPage.Profile -> ProfileNavPage(
                         onProfileClick = {
-                            nav = NavPage.Groups
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(nav = NavPage.Groups)
+                            }
                         },
                         onPlatformClick = {
-                            nav = NavPage.Platform
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(nav = NavPage.Platform)
+                            }
                         },
                         onScriptsClick = {
-                            nav = NavPage.Scripts
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(nav = NavPage.Scripts)
+                            }
                         },
                         onScenesClick = {
-                            nav = NavPage.Scenes
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(nav = NavPage.Scenes)
+                            }
                         }
                     )
                     NavPage.Platform -> PlatformNavPage(
                         onProfileClick = {
-                            nav = NavPage.Profile
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(nav = NavPage.Profile)
+                            }
                         },
                         selected = platform,
-                        onSelected = { platform = it }
+                        onSelected = { newPlatform ->
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(platformNav = newPlatform)
+                            }
+                        }
                     )
                     NavPage.Scripts -> ScriptsNavPage(
                         updates = scriptUpdates,
                         selected = script,
-                        onSelected = {
+                        onSelected = { newScript ->
                             scope.launch {
-                                when (it) {
+                                when (newScript) {
                                     is ScriptsNav.Explore -> {
                                         appNav.navigate(AppNavigation.ExploreScripts)
                                     }
                                     is ScriptsNav.Script -> {
-                                        appNav.navigate(AppNavigation.Script(it.script.id!!, it.script))
+                                        appNav.navigate(AppNavigation.Script(newScript.script.id!!, newScript.script))
                                     }
                                     else -> {
-                                        script = it
+                                        AppPageStateManager.updateState { currentState ->
+                                            currentState.copy(scriptsNav = newScript)
+                                        }
                                     }
                                 }
                             }
@@ -563,17 +721,23 @@ fun AppPage() {
                             }
                         },
                         onProfileClick = {
-                            nav = NavPage.Profile
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(nav = NavPage.Profile)
+                            }
                         }
                     )
                     NavPage.Apps -> AppNavPage()
                     NavPage.Scenes -> SceneNavPage(
                         selected = scene,
                         onSelected = { selectedScene ->
-                            scene = selectedScene
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(sceneNav = selectedScene)
+                            }
                         },
                         onBackClick = {
-                            nav = NavPage.Profile
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(nav = NavPage.Profile)
+                            }
                         },
                         updates = sceneUpdates
                     )
@@ -597,7 +761,9 @@ fun AppPage() {
 
                 ) {
                     // Toggle the visibility state
-                    sideLayoutVisible = !sideLayoutVisible
+                    AppPageStateManager.updateState { currentState ->
+                        currentState.copy(sideLayoutVisible = !currentState.sideLayoutVisible)
+                    }
                 }
             }
             when (nav) {
@@ -607,8 +773,10 @@ fun AppPage() {
 
                 NavPage.Groups -> GroupPage(
                     nav = group,
-                    onGroup = {
-                        group = GroupNav.Selected(it)
+                    onGroup = { newGroup ->
+                        AppPageStateManager.updateState { currentState ->
+                            currentState.copy(groupNav = GroupNav.Selected(newGroup))
+                        }
                     },
                     onGroupUpdated = {
                         scope.launch {
@@ -618,7 +786,9 @@ fun AppPage() {
                     onGroupGone = {
                         scope.launch {
                             groupUpdates.emit(Unit)
-                            group = GroupNav.None
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(groupNav = GroupNav.None)
+                            }
                         }
                     }
                 )
@@ -629,7 +799,11 @@ fun AppPage() {
                     reminder = reminder,
                     search = reminderSearch,
                     goToToday = goToToday,
-                    onReminder = { reminder = it },
+                    onReminder = { newReminder ->
+                        AppPageStateManager.updateState { currentState ->
+                            currentState.copy(reminder = newReminder)
+                        }
+                    },
                     onUpdate = {
                         scope.launch {
                             reminderUpdates.emit(it)
@@ -637,13 +811,22 @@ fun AppPage() {
                     },
                     onDelete = {
                         scope.launch {
-                            reminder = null
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(reminder = null)
+                            }
                             reminderUpdates.emit(it)
                         }
                     }
                 )
 
-                NavPage.Cards -> CardsPage(card, { card = it }) {
+                NavPage.Cards -> CardsPage(
+                    card, 
+                    { newCard ->
+                        AppPageStateManager.updateState { currentState ->
+                            currentState.copy(cardNav = newCard)
+                        }
+                    }
+                ) {
                     scope.launch {
                         cardUpdates.emit(it)
                     }
@@ -656,9 +839,13 @@ fun AppPage() {
                             storyUpdates.emit(it)
                         }
                     },
-                    onGroupClick = {
-                        group = GroupNav.Selected(it)
-                        nav = NavPage.Groups
+                    onGroupClick = { clickedGroup ->
+                        AppPageStateManager.updateState { currentState ->
+                            currentState.copy(
+                                groupNav = GroupNav.Selected(clickedGroup),
+                                nav = NavPage.Groups
+                            )
+                        }
                     }
                 )
                 NavPage.Apps -> {
@@ -679,13 +866,17 @@ fun AppPage() {
                     },
                     onScriptDeleted = {
                          scope.launch {
-                             script = ScriptsNav.None
+                             AppPageStateManager.updateState { currentState ->
+                                 currentState.copy(scriptsNav = ScriptsNav.None)
+                             }
                              scriptUpdates.emit(it)
                         }
                     },
                     onScriptCreated = {
                         scope.launch {
-                            script = ScriptsNav.Script(it)
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(scriptsNav = ScriptsNav.Script(it))
+                            }
                             scriptUpdates.emit(it)
                         }
                     }
@@ -695,10 +886,14 @@ fun AppPage() {
                     ScenePage(
                         nav = scene,
                         onBackClick = {
-                            scene = SceneNav.None
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(sceneNav = SceneNav.None)
+                            }
                         },
                         onSceneSelected = { selectedScene ->
-                            scene = selectedScene
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(sceneNav = selectedScene)
+                            }
                         },
                         onSceneUpdated = {
                             scope.launch {

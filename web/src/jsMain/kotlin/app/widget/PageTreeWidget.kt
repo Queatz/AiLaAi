@@ -48,8 +48,10 @@ import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.FlexWrap
 import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.border
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.cursor
@@ -237,6 +239,23 @@ fun PageTreeWidget(widgetId: String) {
         mutableStateOf(false)
     }
 
+    var isInBulkEditMode by remember(widgetId) {
+        mutableStateOf(false)
+    }
+
+    var pendingChange by remember(widgetId) {
+        mutableStateOf<PageTreeData?>(null)
+    }
+
+    var changeCount by remember(widgetId) {
+        mutableStateOf(0)
+    }
+
+    // Store the original data to restore when discarding changes
+    var originalData by remember(widgetId) {
+        mutableStateOf<PageTreeData?>(null)
+    }
+
     var showAll by remember(widgetId) {
         mutableStateOf(false)
     }
@@ -264,18 +283,39 @@ fun PageTreeWidget(widgetId: String) {
             ) {
                 isEditingTagCategories = !isEditingTagCategories
             }
+
+            item(
+                // todo: translate
+                title = "Bulk change",
+            ) {
+                isInBulkEditMode = !isInBulkEditMode
+                // Store original data when entering bulk edit mode
+                if (isInBulkEditMode) {
+                    originalData = data
+                } else {
+                    // Clear pending change when exiting bulk edit mode
+                    pendingChange = null
+                    changeCount = 0
+                }
+            }
         }
     }
 
     suspend fun reload() {
-        api.cardsCards(data?.card ?: return) {
-            cards = it
+        // Skip reloading cards when in bulk edit mode to prevent unnecessary API calls
+        if (!isInBulkEditMode) {
+            api.cardsCards(data?.card ?: return) {
+                cards = it
+            }
         }
     }
 
     suspend fun saveCard(cardId: String, card: Card) {
-        api.updateCard(cardId, card) {
-            reload()
+        // Skip updating card when in bulk edit mode to prevent unnecessary API calls
+        if (!isInBulkEditMode) {
+            api.updateCard(cardId, card) {
+                reload()
+            }
         }
     }
 
@@ -285,39 +325,58 @@ fun PageTreeWidget(widgetId: String) {
         saveCard(card.id!!, Card(conversation = json.encodeToString(conversation)))
     }
 
-    suspend fun addTagsToCard(card: Card, tags: List<String>) {
-        api.updateWidget(
-            id = widgetId,
-            widget = Widget(
-                data = json.encodeToString(
-                    data!!.copy(
-                        tags = data!!.tags.toMutableMap().apply {
-                            put(card.id!!, (getOrElse(card.id!!) { emptyList() } + tags).distinct())
-                        }
-                    )
-                )
-            )
-        ) {
-            widget = it
-            data = json.decodeFromString<PageTreeData>(it.data!!)
+    fun queueChange(widgetData: PageTreeData) {
+        pendingChange = widgetData
+        changeCount++
+    }
+
+    suspend fun save(widgetData: PageTreeData) {
+        if (isInBulkEditMode) {
+            queueChange(widgetData)
+            // Update the UI state with the pending change
+            data = widgetData
+        } else {
+            api.updateWidget(widgetId, Widget(data = json.encodeToString(widgetData))) {
+                widget = it
+                data = json.decodeFromString<PageTreeData>(it.data!!)
+            }
         }
+    }
+
+    suspend fun addTagsToCard(card: Card, tags: List<String>) {
+        val updatedData = data!!.copy(
+            tags = data!!.tags.toMutableMap().apply {
+                put(card.id!!, (getOrElse(card.id!!) { emptyList() } + tags).distinct())
+            }
+        )
+        save(updatedData)
     }
 
     fun newSubCard(inCardId: String, name: String, active: Boolean) {
         val newPageTags = newPageTags
         scope.launch {
-            api.newCard(Card(name = name, parent = inCardId, active = active)) {
-                reload()
-                if (newPageTags.isNotEmpty()) {
-                    addTagsToCard(it, newPageTags)
+            // Skip creating new card when in bulk edit mode to prevent unnecessary API calls
+            if (!isInBulkEditMode) {
+                api.newCard(Card(name = name, parent = inCardId, active = active)) {
+                    reload()
+                    if (newPageTags.isNotEmpty()) {
+                        addTagsToCard(it, newPageTags)
+                    }
                 }
             }
         }
     }
 
-    LaunchedEffect(widgetId, me, data) {
-        api.card(data?.card ?: return@LaunchedEffect) {
-            isMine = it.isMine(me?.id)
+    LaunchedEffect(widgetId, me, data?.card) {
+        if (!isInBulkEditMode) {
+            if (widget?.person == me?.id) {
+                // Disabled adding new cards
+                api.card(data?.card ?: return@LaunchedEffect) {
+                    isMine = it.isMine(me?.id)
+                }
+            } else {
+                isMine = false
+            }
         }
     }
 
@@ -333,24 +392,14 @@ fun PageTreeWidget(widgetId: String) {
         }
     }
 
-    suspend fun save(widgetData: PageTreeData) {
-        api.updateWidget(widgetId, Widget(data = json.encodeToString(widgetData))) {
-            widget = it
-            data = json.decodeFromString<PageTreeData>(it.data!!)
-        }
-    }
-
     fun removeTag(card: Card, tag: String) {
         scope.launch {
-            api.updateWidget(
-                widgetId,
-                Widget(data = json.encodeToString(data!!.copy(tags = data!!.tags.toMutableMap().apply {
+            val updatedData = data!!.copy(
+                tags = data!!.tags.toMutableMap().apply {
                     put(card.id!!, getOrElse(card.id!!) { emptyList() } - tag)
-                })))
-            ) {
-                widget = it
-                data = json.decodeFromString<PageTreeData>(it.data!!)
-            }
+                }
+            )
+            save(updatedData)
         }
     }
 
@@ -363,19 +412,16 @@ fun PageTreeWidget(widgetId: String) {
             )
 
             if (stage != null) {
-                api.updateWidget(
-                    widgetId,
-                    Widget(data = json.encodeToString(data!!.copy(stages = data!!.stages.toMutableMap().apply {
+                val updatedData = data!!.copy(
+                    stages = data!!.stages.toMutableMap().apply {
                         if (stage.isNotBlank()) {
                             put(card.id!!, stage.trim())
                         } else {
                             remove(card.id!!)
                         }
-                    })))
-                ) {
-                    widget = it
-                    data = json.decodeFromString<PageTreeData>(it.data!!)
-                }
+                    }
+                )
+                save(updatedData)
             }
         }
     }
@@ -416,21 +462,12 @@ fun PageTreeWidget(widgetId: String) {
             )
 
             if (!category.isNullOrBlank()) {
-                api.updateWidget(
-                    id = widgetId,
-                    widget = Widget(
-                        data = json.encodeToString(
-                            data!!.copy(
-                                categories = data!!.categories.toMutableMap().apply {
-                                    put(tag, category.inList())
-                                }
-                            )
-                        )
-                    )
-                ) {
-                    widget = it
-                    data = json.decodeFromString<PageTreeData>(it.data!!)
-                }
+                val updatedData = data!!.copy(
+                    categories = data!!.categories.toMutableMap().apply {
+                        put(tag, category.inList())
+                    }
+                )
+                save(updatedData)
             }
         }
     }
@@ -546,27 +583,30 @@ fun PageTreeWidget(widgetId: String) {
             }
 
             if (confirmed == true) {
-                // Create cards one by one via the API
-                cards.forEach { (name, description) ->
-                    api.newCard(Card(
-                        name = name,
-                        parent = data?.card ?: return@forEach,
-                        active = true
-                    )) { card ->
-                        // If there's a description, update the card with it
-                        if (description != null) {
-                            saveConversation(card, description)
-                        }
+                // Skip creating cards when in bulk edit mode to prevent unnecessary API calls
+                if (!isInBulkEditMode) {
+                    // Create cards one by one via the API
+                    cards.forEach { (name, description) ->
+                        api.newCard(Card(
+                            name = name,
+                            parent = data?.card ?: return@forEach,
+                            active = true
+                        )) { card ->
+                            // If there's a description, update the card with it
+                            if (description != null) {
+                                saveConversation(card, description)
+                            }
 
-                        // Add tags to the card if there are any
-                        if (newPageTags.isNotEmpty()) {
-                            addTagsToCard(card, newPageTags)
+                            // Add tags to the card if there are any
+                            if (newPageTags.isNotEmpty()) {
+                                addTagsToCard(card, newPageTags)
+                            }
                         }
                     }
-                }
 
-                // Refresh the page
-                reload()
+                    // Refresh the page
+                    reload()
+                }
             }
         }
     }
@@ -576,6 +616,67 @@ fun PageTreeWidget(widgetId: String) {
             classes(WidgetStyles.pageTree)
         }
     ) {
+        if (isInBulkEditMode) {
+            Div({
+                style {
+                    display(DisplayStyle.Flex)
+                    alignItems(AlignItems.Center)
+                    gap(1.r)
+                    marginBottom(1.r)
+                    padding(.5.r)
+                    border(1.px, LineStyle.Solid, Styles.colors.outline)
+                    borderRadius(1.r)
+                }
+            }) {
+                Div({
+                    style {
+                        flexGrow(1)
+                        opacity(.5)
+                        padding(1.r)
+                    }
+                }) {
+                    // todo: translate
+                    Text("Bulk edit mode is on: ${if (changeCount > 0) "$changeCount pending ${if (changeCount == 1) "change" else "changes"}" else "No changes"}")
+                }
+
+                Button({
+                    classes(Styles.outlineButton)
+                    onClick {
+                        // Discard all pending changes
+                        pendingChange = null
+                        changeCount = 0
+                        // Restore original data
+                        originalData?.let { data = it }
+                        isInBulkEditMode = false
+                    }
+                }) {
+                    // todo: translate
+                    Text("Discard")
+                }
+
+                Button({
+                    classes(Styles.button)
+                    onClick {
+                        scope.launch {
+                            // Apply pending change
+                            pendingChange?.let { lastChange ->
+                                api.updateWidget(widgetId, Widget(data = json.encodeToString(lastChange))) {
+                                    widget = it
+                                    data = json.decodeFromString<PageTreeData>(it.data!!)
+                                    reload()
+                                }
+                            }
+                            pendingChange = null
+                            changeCount = 0
+                            isInBulkEditMode = false
+                        }
+                    }
+                }) {
+                    // todo: translate
+                    Text("Save changes")
+                }
+            }
+        }
         if (isMine) {
             Div(
                 {
@@ -586,9 +687,13 @@ fun PageTreeWidget(widgetId: String) {
                     }
                 }
             ) {
-                NewCardInput(defaultMargins = false, styles = {
-                    flexGrow(1)
-                }) { name, active ->
+                NewCardInput(
+                    defaultMargins = false,
+                    enabled = !isInBulkEditMode,
+                    styles = {
+                        flexGrow(1)
+                    }
+                ) { name, active ->
                     newSubCard(data?.card ?: return@NewCardInput, name, active)
                 }
 
@@ -596,6 +701,7 @@ fun PageTreeWidget(widgetId: String) {
                     name = "list",
                     title = appString { multiple },
                     background = true,
+                    enabled = !isInBulkEditMode,
                     styles = {
                         marginTop(.5.r)
                     },

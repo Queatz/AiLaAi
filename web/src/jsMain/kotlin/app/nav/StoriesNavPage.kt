@@ -33,10 +33,18 @@ import r
 import stories.storyStatus
 import stories.textContent
 
+@kotlinx.serialization.Serializable
 sealed class StoryNav {
+    @kotlinx.serialization.Serializable
     data object Friends : StoryNav()
+
+    @kotlinx.serialization.Serializable
     data object Local : StoryNav()
+
+    @kotlinx.serialization.Serializable
     data object Saved : StoryNav()
+
+    @kotlinx.serialization.Serializable
     data class Selected(val story: Story) : StoryNav()
 }
 

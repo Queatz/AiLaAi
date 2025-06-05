@@ -47,9 +47,15 @@ import org.w3c.dom.HTMLElement
 import r
 import sortedDistinct
 
+@kotlinx.serialization.Serializable
 sealed class SceneNav {
+    @kotlinx.serialization.Serializable
     data object None : SceneNav()
+
+    @kotlinx.serialization.Serializable
     data object Explore : SceneNav()
+
+    @kotlinx.serialization.Serializable
     data class Selected(val scene: GameScene) : SceneNav()
 }
 @Composable

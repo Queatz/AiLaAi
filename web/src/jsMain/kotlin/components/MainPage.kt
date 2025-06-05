@@ -5,7 +5,7 @@ import components.AppHeader
 import org.jetbrains.compose.web.dom.Div
 
 @Composable
-fun MainPage() {
+fun MainPage(tabId: String? = null) {
     if (application.me.value == null) {
         Div({
             classes(Styles.mainContainer)
@@ -20,6 +20,6 @@ fun MainPage() {
             AppFooter()
         }
     } else {
-        AppPage()
+        AppPage(tabId)
     }
 }

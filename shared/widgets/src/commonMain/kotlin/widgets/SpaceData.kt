@@ -45,4 +45,20 @@ sealed class SpaceContent {
         val page: String? = null,
         val to: Pair<Double, Double>
     ) : SpaceContent()
+
+    @Serializable
+    class Scribble(
+        val page: String? = null,
+        val points: List<Pair<Double, Double>>,
+        val to: Pair<Double, Double>
+    ) : SpaceContent()
+
+    @Serializable
+    class Photo(
+        val page: String? = null,
+        val photo: String,
+        val width: Int? = null,
+        val height: Int? = null,
+        val to: Pair<Double, Double>
+    ) : SpaceContent()
 }

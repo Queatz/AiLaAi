@@ -1,5 +1,6 @@
 package com.queatz.api
 
+import com.queatz.cropTransparentBackground
 import com.queatz.db.UploadResponse
 import com.queatz.hasTransparency
 import com.queatz.plugins.ai
@@ -20,9 +21,11 @@ fun Route.uploadRoutes() {
             respond {
                 var urls = emptyList<String>()
                 var removeBackground = false
+                var crop = false
                 call.receiveFiles("photo", "upload-${meOrNull?.id}") { it, params ->
                     urls = it
                     removeBackground = params.containsKey("removeBackground")
+                    crop = params.containsKey("crop")
                 }
 
                 if (removeBackground) {
@@ -42,6 +45,35 @@ fun Route.uploadRoutes() {
                             println("Remove background error:")
                             println(it.response.bodyAsText())
                         }
+                    }
+                }
+
+                if (crop) {
+                    runCatching {
+                        urls = urls.map { url ->
+                            val file = File(".$url")
+
+                            if (file.hasTransparency()) {
+                                // Read the file bytes
+                                val bytes = file.readBytes()
+
+                                // Crop the transparent background
+                                val (croppedBytes, _) = bytes.cropTransparentBackground()
+
+                                // Save the cropped image
+                                val croppedPath = url.substringBeforeLast(".") + "-cropped.png"
+                                val croppedFile = File(".$croppedPath")
+                                croppedFile.writeBytes(croppedBytes)
+
+                                croppedPath
+                            } else {
+                                url
+                            }
+                        }
+                    }.onFailure {
+                        it.printStackTrace()
+                        println("Crop transparent background error:")
+                        println(it.message)
                     }
                 }
 

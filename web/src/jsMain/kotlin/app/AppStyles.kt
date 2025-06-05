@@ -688,6 +688,10 @@ class AppStyleSheet : StyleSheet() {
         border(1.px, LineStyle.Solid, Styles.colors.primary)
     }
 
+    val iconButtonDisabled by style {
+        opacity(.5)
+    }
+
     val iconButtonCount by style {
         position(Position.Absolute)
         fontSize(12.px)

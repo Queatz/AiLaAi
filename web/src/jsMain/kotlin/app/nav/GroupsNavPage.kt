@@ -97,11 +97,21 @@ import sortedDistinct
 import kotlin.js.Date
 import kotlin.time.Duration.Companion.minutes
 
+@kotlinx.serialization.Serializable
 sealed class GroupNav {
+    @kotlinx.serialization.Serializable
     data object None : GroupNav()
+
+    @kotlinx.serialization.Serializable
     data object Friends : GroupNav()
+
+    @kotlinx.serialization.Serializable
     data object Local : GroupNav()
+
+    @kotlinx.serialization.Serializable
     data object Saved : GroupNav()
+
+    @kotlinx.serialization.Serializable
     data class Selected(val group: GroupExtended) : GroupNav()
 }
 

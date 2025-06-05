@@ -27,6 +27,7 @@ import r
 @Composable
 fun NewCardInput(
     defaultMargins: Boolean = true,
+    enabled: Boolean = true,
     styles: StyleScope.() -> Unit = {},
     onSubmit: (name: String, active: Boolean) -> Unit,
 ) {
@@ -46,6 +47,7 @@ fun NewCardInput(
             onChange = { newCardTitle = it },
             placeholder = appString { newCard },
             autoFocus = false,
+            enabled = enabled,
             defaultMargins = defaultMargins,
             styles = {
                 flexGrow(1)
@@ -62,6 +64,7 @@ fun NewCardInput(
         IconButton(
             name = if (publishNow) "toggle_on" else "toggle_off",
             title = appString { publish },
+            enabled = enabled,
             onClick = {
                 publishNow = !publishNow
             },

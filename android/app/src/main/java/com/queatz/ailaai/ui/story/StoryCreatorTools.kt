@@ -16,7 +16,6 @@ import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.PlayCircle
-import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.material.icons.outlined.TableChart
 import androidx.compose.material.icons.outlined.Title
 import androidx.compose.material3.Card
@@ -60,7 +59,6 @@ import com.queatz.db.Group
 import com.queatz.db.StoryContent
 import com.queatz.widgets.Widgets
 import com.queatz.widgets.widgets.ImpactEffortTableData
-import com.queatz.widgets.widgets.ShopData
 import com.queatz.widgets.widgets.SpaceData
 import createWidget
 import kotlinx.coroutines.launch
@@ -263,20 +261,6 @@ fun StoryCreatorTools(
         }) {
             // todo add search here
             Toolbar {
-                item(
-                    icon = Icons.Outlined.Storefront,
-                    name = Widgets.Shop.stringResource
-                ) {
-                    scope.launch {
-                        api.createWidget(
-                            widget = Widgets.Shop,
-                            data = json.encodeToString(ShopData())
-                        ) {
-                            addPart(StoryContent.Widget(it.widget!!, it.id!!))
-                        }
-                    }
-                    showWidgetsMenu = false
-                }
 
                 item(
                     icon = Icons.Outlined.HistoryEdu,

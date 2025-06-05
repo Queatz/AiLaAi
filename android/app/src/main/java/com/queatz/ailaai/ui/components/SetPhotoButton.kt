@@ -53,6 +53,7 @@ fun SetPhotoButton(
     modifier: Modifier = Modifier,
     aspect: Double = 1.5,
     transparentBackground: Boolean = false,
+    crop: Boolean = false,
     imagesOnly: Boolean = true,
     onRemove: (() -> Unit)? = null,
     onVideo: (String) -> Unit = {},
@@ -89,6 +90,7 @@ fun SetPhotoButton(
             imagesOnly = imagesOnly,
             aspect = aspect,
             transparentBackground = transparentBackground,
+            crop = crop,
             onRemove = onRemove?.takeIf { photo.orEmpty().isNotBlank() }?.let { onRemove ->
                 {
                     onRemove()

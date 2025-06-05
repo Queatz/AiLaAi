@@ -10,7 +10,6 @@ import com.queatz.ailaai.ui.story.StorySource
 import com.queatz.ailaai.ui.story.Stub
 import com.queatz.ailaai.ui.story.stringResource
 import com.queatz.ailaai.ui.widget.WebWidgetContent
-import com.queatz.ailaai.ui.widget.shop.ShopContent
 import com.queatz.db.StoryContent
 import com.queatz.widgets.Widgets
 
@@ -27,10 +26,6 @@ fun LazyGridScope.widgetItem(
 
         Widgets.Web -> {
             WebWidgetContent(content.id, fullscreenWebView)
-        }
-
-        Widgets.Shop -> {
-            ShopContent(content.id)
         }
 
         else -> {

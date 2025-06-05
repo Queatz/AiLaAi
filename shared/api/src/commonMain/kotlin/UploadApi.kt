@@ -7,6 +7,7 @@ import io.ktor.http.*
 suspend fun Api.uploadPhotos(
     photos: List<ByteArray>,
     removeBackground: Boolean = false,
+    crop: Boolean = false,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<UploadResponse>,
 ) {
@@ -15,6 +16,9 @@ suspend fun Api.uploadPhotos(
         formData {
             if (removeBackground) {
                 append("removeBackground", true)
+            }
+            if (crop) {
+                append("crop", true)
             }
 
             photos.forEachIndexed { index, photo ->

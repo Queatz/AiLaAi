@@ -16,6 +16,7 @@ suspend fun Api.uploadPhotosFromUris(
     context: Context,
     photos: List<Uri>,
     removeBackground: Boolean = false,
+    crop: Boolean = false,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<UploadResponse> = {},
 ) {
@@ -25,6 +26,7 @@ suspend fun Api.uploadPhotosFromUris(
     return uploadPhotos(
         photos = scaledPhotos,
         removeBackground = removeBackground,
+        crop = crop,
         onError = onError,
         onSuccess = onSuccess
     )
