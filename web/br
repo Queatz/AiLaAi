@@ -1,1 +1,7 @@
-./b && ./push-js-hitown-chat
+./gradlew clean
+if ! ./b; then
+    echo "Cancelled"
+    exit 1
+fi
+read -n 1 -s -r -p "Press any key to continue..."
+./push-js-hitown-chat

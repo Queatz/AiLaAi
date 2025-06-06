@@ -15,6 +15,8 @@ import org.jetbrains.compose.web.css.right
 import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.dom.Div
 import r
+import web.cssom.PropertyName.Companion.pointerEvents
+import web.cssom.atrule.pointer
 
 /**
  * Side panel that appears when content is selected in the Space Widget.
@@ -34,6 +36,7 @@ fun SpaceWidgetSidePanel(
                 top(1.r)
                 bottom(1.r)
                 overflow("auto")
+                property("pointer-events", "none")
             }
         }
     ) {
@@ -44,6 +47,7 @@ fun SpaceWidgetSidePanel(
             styles = {
                 borderRadius(1.r)
                 backgroundColor(Styles.colors.primary)
+                property("pointer-events", "initial")
             },
             onClick = {
                 onSendToBack()
@@ -57,6 +61,7 @@ fun SpaceWidgetSidePanel(
             styles = {
                 borderRadius(1.r)
                 backgroundColor(Styles.colors.primary)
+                property("pointer-events", "initial")
             },
             onClick = {
                 onBringToFront()

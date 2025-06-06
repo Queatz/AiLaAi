@@ -1,6 +1,7 @@
 package app
 
 import Notification
+import StyleManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -30,13 +31,9 @@ import app.nav.SceneNav
 import app.nav.SceneNavPage
 import app.nav.ScheduleNavPage
 import app.nav.StoriesNavPage
-import app.nav.StoryNav
 import app.page.ScenePage
 import app.page.SchedulePage
-import app.page.ScheduleView
-import app.page.ScheduleViewType
 import app.page.StoriesPage
-import app.platform.PlatformNav
 import app.platform.PlatformNavPage
 import app.platform.PlatformPage
 import app.scripts.ScriptsNav
@@ -44,7 +41,6 @@ import app.scripts.ScriptsNavPage
 import app.scripts.ScriptsPage
 import app.softwork.routingcompose.Router
 import app.widget.WidgetStyleSheet
-import app.widget.WidgetStyles
 import appString
 import application
 import asNaturalList
@@ -69,13 +65,14 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import lib.hidden
 import notBlank
 import notifications
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
-import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexGrow
@@ -85,8 +82,8 @@ import org.jetbrains.compose.web.dom.Audio
 import org.jetbrains.compose.web.dom.Div
 import push
 import stories.StoryStyleSheet
-import stories.StoryStyles
 import stories.commentDialog
+import kotlin.time.Duration.Companion.seconds
 
 @Serializable
 enum class NavPage {
@@ -747,9 +744,28 @@ fun AppPage(tabId: String? = null) {
         Div({
             classes(AppStyles.mainLayout)
         }) {
+            var isFullscreenHovered by remember { mutableStateOf(false) }
+            var isFullscreenHoveredTime by remember { mutableStateOf(Instant.DISTANT_PAST) }
             // Add toggle button at the top of mainLayout
             Div({
                 classes(AppStyles.fullscreenButton)
+
+                if (isFullscreenHovered) {
+                    classes(AppStyles.fullscreenButtonHovered)
+                }
+
+                onMouseEnter {
+                    if (!isFullscreenHovered) {
+                        isFullscreenHovered = true
+                        isFullscreenHoveredTime = Clock.System.now()
+                    }
+                }
+
+                onMouseLeave {
+                    if (isFullscreenHoveredTime < Clock.System.now() - 1.seconds) {
+                        isFullscreenHovered = false
+                    }
+                }
             }) {
                 IconButton(
                     name = if (sideLayoutVisible) "fullscreen" else "fullscreen_exit",

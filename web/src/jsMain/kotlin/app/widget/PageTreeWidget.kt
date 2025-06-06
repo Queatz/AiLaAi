@@ -624,6 +624,7 @@ fun PageTreeWidget(widgetId: String) {
                     gap(1.r)
                     marginBottom(1.r)
                     padding(.5.r)
+                    backgroundColor(Styles.colors.background)
                     border(1.px, LineStyle.Solid, Styles.colors.outline)
                     borderRadius(1.r)
                 }

@@ -41,9 +41,7 @@ import com.queatz.db.GroupExtended
 import com.queatz.db.Pay
 import com.queatz.db.PayFrequency
 import com.queatz.db.asGeo
-import components.CardContent
 import components.CardItem
-import components.CardPhotoOrVideo
 import components.Content
 import components.IconButton
 import components.Loading
@@ -97,6 +95,10 @@ import com.queatz.widgets.Widgets
 import com.queatz.widgets.widgets.PageTreeData
 import com.queatz.widgets.widgets.SpaceData
 import com.queatz.widgets.widgets.WebData
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.justifyContent
 
 @Composable
 fun ExplorePage(
@@ -705,20 +707,23 @@ fun ExplorePage(
                 }
             )
 
-            var menuTarget by remember { mutableStateOf<DOMRect?>(null) }
+            var addContentMenuTarget by remember { mutableStateOf<DOMRect?>(null) }
 
             Div({
                 style {
                     margin(1.r)
+                    display(DisplayStyle.Flex)
+                    justifyContent(JustifyContent.Center)
+                    alignItems(AlignItems.Center)
                 }
             }) {
                 IconButton("add", "Add") {
-                    menuTarget = if (menuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
+                    addContentMenuTarget = if (addContentMenuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
                 }
             }
 
-            if (menuTarget != null) {
-                Menu({ menuTarget = null }, menuTarget!!) {
+            if (addContentMenuTarget != null) {
+                Menu({ addContentMenuTarget = null }, addContentMenuTarget!!) {
                     item(appString { section }, icon = "title") {
                         scope.launch {
                             val sectionText = inputDialog(

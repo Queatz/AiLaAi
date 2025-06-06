@@ -55,11 +55,11 @@ import org.w3c.dom.get
 import org.w3c.dom.set
 import stories.StoryStyles
 
-const val baseUrl = "http://0.0.0.0:8080"
-//const val baseUrl = "https://api.ailaai.app"
-//
-const val webBaseUrl = "http://0.0.0.0:4040"
-//const val webBaseUrl = "https://hitown.chat"
+//const val baseUrl = "http://0.0.0.0:8080"
+const val baseUrl = "https://api.ailaai.app"
+
+//const val webBaseUrl = "http://0.0.0.0:4040"
+const val webBaseUrl = "https://hitown.chat"
 
 val json = Json {
     encodeDefaults = true

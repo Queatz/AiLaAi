@@ -72,6 +72,8 @@ class AppStyleSheet : StyleSheet() {
         }
     }
 
+    val fullscreenButtonHovered by style {}
+
     @OptIn(ExperimentalComposeWebApi::class)
     val fullscreenButton by style {
         position(Position.Fixed)
@@ -83,15 +85,15 @@ class AppStyleSheet : StyleSheet() {
         property("z-index", "200")
         cursor("pointer")
 
-        hover(self) style {
-            top(2.r)
-        }
-
         transitions {
             "top" {
                 delay = 500.ms
                 duration = 250.ms
             }
+        }
+
+        self + className(fullscreenButtonHovered) style {
+            top(2.r)
         }
     }
 
