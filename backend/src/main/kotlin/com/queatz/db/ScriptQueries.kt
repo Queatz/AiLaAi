@@ -77,7 +77,7 @@ fun Db.incrementScriptRunCount(script: String) = query(
         upsert { ${f(ScriptStats::script)}: @script }
             insert { ${f(ScriptStats::script)}: @script, ${f(ScriptStats::runCount)}: 1, ${f(ScriptStats::createdAt)}: DATE_ISO8601(DATE_NOW()) }
             update { ${f(ScriptStats::runCount)}: OLD.${f(ScriptStats::runCount)} + 1 }
-            in @@collection
+            in `${ScriptStats::class.collection()}`
     """,
     mapOf("script" to script)
 )
