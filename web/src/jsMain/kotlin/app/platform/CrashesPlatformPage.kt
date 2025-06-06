@@ -23,7 +23,6 @@ import kotlinx.datetime.toJSDate
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.web.css.AlignItems
-import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.alignItems
@@ -48,12 +47,11 @@ fun CrashesPlatformPage() {
     var crashes by remember {
         mutableStateOf(emptyList<Crash>())
     }
-    var isLoading by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
     var refreshTrigger by remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(refreshTrigger) {
-        isLoading = true
         api.crashes {
             crashes = it
             isLoading = false

@@ -47,12 +47,11 @@ fun ReportsPlatformPage() {
     var reports by remember {
         mutableStateOf(emptyList<Report>())
     }
-    var isLoading by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
     var refreshTrigger by remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(refreshTrigger) {
-        isLoading = true
         api.reports {
             reports = it
             isLoading = false
