@@ -56,6 +56,7 @@ import r
 import toBytes
 import toggleFullscreen
 import updateWidget
+import web.animations.awaitAnimationFrame
 import widget
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -220,6 +221,11 @@ fun SpaceWidget(widgetId: String) {
         }
 
         control.drawFunc()
+    }
+
+    LaunchedEffect(isFullscreen) {
+        awaitAnimationFrame()
+        drawFunc()
     }
 
     // Auto-insert newly added cards

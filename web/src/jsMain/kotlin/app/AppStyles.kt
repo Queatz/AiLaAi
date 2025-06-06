@@ -251,8 +251,9 @@ class AppStyleSheet : StyleSheet() {
         cursor("pointer")
         whiteSpace("nowrap")
         display(DisplayStyle.Flex)
+        alignItems(AlignItems.Center)
 
-        child(self, selector("span") + firstChild) style {
+        child(self, selector("div") + firstChild) style {
             flex(1)
         }
 

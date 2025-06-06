@@ -382,7 +382,7 @@ fun ExplorePage(
                         InlineMenu({
                             it(true)
                         }) {
-                            item(appString { onProfile }, selected = card.equipped == true, "account_circle") {
+                            item(appString { onProfile }, selected = card.equipped == true, icon = "account_circle") {
                                 scope.launch {
                                     api.updateCard(
                                         card.id!!,
@@ -395,18 +395,18 @@ fun ExplorePage(
                             item(
                                 appString { inAGroup },
                                 selected = card.parent == null && card.offline != true && card.equipped != true && card.group != null,
-                                "group"
+                                icon = "group"
                             ) {
                                 moveToGroup()
                             }
                             item(
                                 appString { atALocation },
                                 selected = card.parent == null && card.offline != true && card.equipped != true && card.geo != null,
-                                "location_on"
+                                icon = "location_on"
                             ) {
                                 // todo: needs map
                             }
-                            item(inAPage, selected = card.parent != null, "description") {
+                            item(inAPage, selected = card.parent != null, icon = "description") {
                                 moveToPage()
                             }
                             item(appString { offline }, selected = card.offline == true) {
@@ -785,7 +785,7 @@ fun ExplorePage(
                                 InlineMenu({
                                     it(true)
                                 }) {
-                                    item("Script", icon = "code") {
+                                    item("Script", description = "Embed dynamic content into your page", icon = "code") {
                                         scope.launch {
                                             selectScriptDialog(scope) { scriptId, scriptData ->
                                                 scope.launch {
@@ -814,7 +814,7 @@ fun ExplorePage(
                                         }
                                     }
 
-                                    item("Page Tree", icon = "account_tree") {
+                                    item("Page Tree", description = "Organize small projects and track progress", icon = "account_tree") {
                                         scope.launch {
                                             api.createWidget(
                                                 widget = Widgets.PageTree,
@@ -839,7 +839,7 @@ fun ExplorePage(
                                         }
                                     }
 
-                                    item("Space", icon = "space_dashboard") {
+                                    item("Space", "Create a sketch or presentation", icon = "space_dashboard") {
                                         scope.launch {
                                             api.createWidget(
                                                 widget = Widgets.Space,
@@ -864,7 +864,7 @@ fun ExplorePage(
                                         }
                                     }
 
-                                    item("Website", icon = "language") {
+                                    item("Website", "Embed a URL", icon = "language") {
                                         scope.launch {
                                             val url = inputDialog(
                                                 title = "Website URL",
@@ -900,7 +900,7 @@ fun ExplorePage(
                                         }
                                     }
 
-                                    item("Form", icon = "list_alt") {
+                                    item("Form", description = "Collect and organize responses to a form", icon = "list_alt") {
                                         scope.launch {
                                             val result = editFormDialog(
                                                 initialFormData = FormData(

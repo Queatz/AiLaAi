@@ -32,6 +32,7 @@ class MenuScope(val onDismissRequest: () -> Unit) {
     @Composable
     fun item(
         title: String,
+        description: String? = null,
         selected: Boolean = false,
         icon: String? = null,
         textIcon: String? = null,
@@ -56,8 +57,19 @@ class MenuScope(val onDismissRequest: () -> Unit) {
                 onClick()
             }
         }) {
-            Span {
+            Div {
                 Text(title)
+                if (description.isNullOrBlank().not()) {
+                    Div(
+                        attrs = {
+                            style {
+                                opacity(.5)
+                            }
+                        }
+                    ) {
+                        Text(description!!)
+                    }
+                }
             }
             if (textIcon != null) {
                 Div(

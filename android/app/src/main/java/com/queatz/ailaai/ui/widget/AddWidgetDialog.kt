@@ -18,7 +18,6 @@ import com.queatz.widgets.widgets.PageTreeData
 import com.queatz.widgets.widgets.WebData
 import createWidget
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 
 @Composable
 fun AddWidgetDialog(

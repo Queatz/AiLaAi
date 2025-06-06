@@ -141,11 +141,17 @@ fun collections() = listOf(
         ensurePersistentIndex(listOf(Member::gone.name), PersistentIndexOptions())
     },
     Message::class.db {},
-    Crash::class.db {},
+    Crash::class.db {
+        ensurePersistentIndex(listOf(Crash::resolved.name), PersistentIndexOptions())
+    }
+    ,
     Report::class.db {
         ensurePersistentIndex(listOf(Report::type.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Report::resolved.name), PersistentIndexOptions())
     },
-    AppFeedback::class.db {},
+    AppFeedback::class.db {
+        ensurePersistentIndex(listOf(AppFeedback::resolved.name), PersistentIndexOptions())
+    },
     Sticker::class.db {
         ensurePersistentIndex(listOf(Sticker::pack.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Sticker::name.name), PersistentIndexOptions())
