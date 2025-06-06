@@ -29,6 +29,7 @@ import app.bots.groupBotsDialog
 import app.bots.updateGroupBotDialog
 import app.dialog.dialog
 import app.dialog.inputDialog
+import app.dialog.rememberChoosePhotoDialog
 import app.invites.createInviteDialog
 import app.menu.InlineMenu
 import app.menu.Menu
@@ -119,9 +120,13 @@ fun GroupTopBar(
 
     val closeStr = appString { close }
 
+    val choosePhotoDialog = rememberChoosePhotoDialog(showUpload = true)
+
     var menuTarget by remember {
         mutableStateOf<DOMRect?>(null)
     }
+
+    var isMenuLoading = choosePhotoDialog.isGenerating.collectAsState().value
 
     var showDescription by remember(group) {
         mutableStateOf(true)
@@ -674,6 +679,17 @@ fun GroupTopBar(
                     item(appString { introduction }) {
                         updateIntroduction()
                     }
+                    item(appString { photo }) {
+                        scope.launch {
+                            choosePhotoDialog.launch { photoUrl, _, _ ->
+                                scope.launch {
+                                    api.updateGroup(group.group!!.id!!, Group(photo = photoUrl)) {
+                                        onGroupUpdated()
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 if (myMember.member?.host == true) {
                     item(appString { manage }) {
@@ -720,15 +736,13 @@ fun GroupTopBar(
                     }
                 }
 
-                if (myMember != null) {
-                    if (isSnoozed) {
-                        item("Unsnooze", icon = "notifications_active") {
-                            snooze(false)
-                        }
-                    } else {
-                        item("Snooze", icon = "notifications_paused") {
-                            showSnoozeDialog()
-                        }
+                if (isSnoozed) {
+                    item("Unsnooze", icon = "notifications_active") {
+                        snooze(false)
+                    }
+                } else {
+                    item("Snooze", icon = "notifications_paused") {
+                        showSnoozeDialog()
                     }
                 }
                 item(appString { hide }) {
@@ -841,6 +855,7 @@ fun GroupTopBar(
         } else {
             active
         },
+        isMenuLoading = isMenuLoading,
         onTitleClick = {
             renameGroup()
         },

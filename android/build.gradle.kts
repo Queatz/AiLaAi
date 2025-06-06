@@ -8,9 +8,11 @@ buildscript {
         val properties = java.util.Properties().apply {
             load(file("local.properties").inputStream())
         }
-        val agpVersion = properties.getProperty("AGP_VERSION").orEmpty().ifBlank {
-            "8.10.0"
-        }
+        val agpVersion = properties.getProperty("AGP_VERSION")
+            .orEmpty()
+            .ifBlank {
+                "8.10.1"
+            }
         classpath("com.android.tools.build:gradle:$agpVersion")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20")
         classpath("com.huawei.agconnect:agcp:1.9.1.300")

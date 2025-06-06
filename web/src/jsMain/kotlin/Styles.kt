@@ -1,16 +1,11 @@
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.RecomposeScope
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.key
 import app.dark
 import app.desktop
 import app.mobile
 import app.theme.UserTheme
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.drop
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.AlignContent
@@ -18,8 +13,8 @@ import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.AlignSelf
 import org.jetbrains.compose.web.css.AnimationTimingFunction
 import org.jetbrains.compose.web.css.CSSBuilder
-import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.CSSColorValue
+import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.FlexWrap
@@ -58,7 +53,6 @@ import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.left
-import org.jetbrains.compose.web.css.lineHeight
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginLeft

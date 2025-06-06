@@ -21,6 +21,7 @@ fun PageTopBar(
     navActions: @Composable ElementScope<HTMLDivElement>.() -> Unit = {},
     onTitleClick: (() -> Unit)? = null,
     onDescriptionClick: (() -> Unit)? = null,
+    isMenuLoading: Boolean = false,
     onMenu: ((SyntheticMouseEvent) -> Unit)? = null
 ) {
     Div({
@@ -80,10 +81,15 @@ fun PageTopBar(
         }
         actions()
         onMenu?.let { onMenu ->
-            IconButton("more_vert", appString { options }, styles = {
-                flexShrink(0)
-                fontWeight("bold")
-            }) {
+            IconButton(
+                name = "more_vert",
+                title = appString { options },
+                isLoading = isMenuLoading,
+                styles = {
+                    flexShrink(0)
+                    fontWeight("bold")
+                }
+            ) {
                 onMenu(it)
             }
         }

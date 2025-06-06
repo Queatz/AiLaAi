@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -23,12 +22,11 @@ import app.ailaai.api.pinScript
 import app.ailaai.api.prompts
 import app.ailaai.api.runScript
 import app.ailaai.api.scriptData
+import app.ailaai.api.scriptStats
 import app.ailaai.api.scripts
 import app.ailaai.api.unpinScript
 import app.ailaai.api.updateScript
 import app.ailaai.api.updateScriptData
-import app.ailaai.api.scriptStats
-import app.dialog.rememberChoosePhotoDialog
 import app.ailaai.shared.resources.ScriptsResources
 import app.components.PreventNavigation
 import app.components.TopBarSearch
@@ -36,16 +34,17 @@ import app.dialog.categoryDialog
 import app.dialog.dialog
 import app.dialog.inputDialog
 import app.dialog.inputSelectDialog
-import components.SearchField
+import app.dialog.rememberChoosePhotoDialog
+import app.dialog.addScriptDependencyDialog
 import app.menu.Menu
 import app.messaages.inList
 import app.nav.appFeedbackDialog
 import appString
 import appText
 import application
+import baseUrl
 import bulletedString
 import com.queatz.db.AiScriptRequest
-import com.queatz.db.AppFeedback
 import com.queatz.db.AppFeedbackType
 import com.queatz.db.Card
 import com.queatz.db.CardOptions
@@ -76,6 +75,7 @@ import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.Position.Companion.Absolute
 import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.bottom
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flex
@@ -107,13 +107,11 @@ import org.jetbrains.compose.web.css.right
 import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
-import baseUrl
 import org.w3c.dom.HTMLElement
 import r
 import sortedDistinct
@@ -176,193 +174,6 @@ suspend fun scriptSecretDialog(secret: String) = inputDialog(
     singleLine = false
 )
 
-suspend fun selectScriptDialog(
-    scope: kotlinx.coroutines.CoroutineScope,
-    state: MonacoEditorState,
-    editedScript: String?,
-    script: Script
-) {
-    dialog(
-        title = application.appString { dependOnScript },
-        confirmButton = null,
-        cancelButton = application.appString { cancel },
-        content = { resolve ->
-            var scripts by remember { mutableStateOf<List<Script>>(emptyList()) }
-            var isLoading by remember { mutableStateOf(true) }
-            var search by remember { mutableStateOf("") }
-
-            var hasMore by remember { mutableStateOf(true) }
-            var isLoadingMore by remember { mutableStateOf(false) }
-            var offset by remember { mutableStateOf(0) }
-            val limit = 20
-
-            fun loadMore() {
-                if (!hasMore || isLoadingMore) return
-                isLoadingMore = true
-                scope.launch {
-                    api.scripts(
-                        search = search.notBlank,
-                        offset = offset,
-                        limit = limit
-                    ) {
-                        val newScripts = it.filter { it.id != script.id }
-                        if (offset == 0) {
-                            scripts = newScripts
-                        } else {
-                            scripts = (scripts + newScripts).distinctBy { it.id }
-                            offset += limit
-                        }
-                        hasMore = newScripts.size >= limit
-                        offset += limit
-                    }
-                    isLoadingMore = false
-                    isLoading = false
-                }
-            }
-
-            LaunchedEffect(search) {
-                offset = 0
-                isLoading = true
-                hasMore = true
-                loadMore()
-            }
-
-            Div({
-                style {
-                    display(DisplayStyle.Flex)
-                    flexDirection(FlexDirection.Column)
-                    gap(1.r)
-                    width(32.r)
-                    height(24.r)
-                }
-            }) {
-                SearchField(
-                    value = search,
-                    placeholder = appString { this.search },
-                    shadow = false,
-                    styles = {
-                        margin(.5.r)
-                    },
-                    onValue = {
-                        search = it
-                    }
-                )
-
-                if (isLoading) {
-                    Loading()
-                } else if (scripts.isNotEmpty()) {
-                    Div({
-                        style {
-                            display(DisplayStyle.Flex)
-                            flexDirection(FlexDirection.Column)
-                            gap(.5.r)
-                            padding(0.r, .5.r)
-                            property("overflow-y", "auto")
-                            flex(1)
-                        }
-                    }) {
-                        scripts.forEach { selectedScript ->
-                            Div({
-                                classes(AppStyles.scriptItem)
-
-                                onClick {
-                                    scope.launch {
-                                        val currentSource = editedScript ?: script.source.orEmpty()
-                                        val description = if (selectedScript.description.isNullOrBlank()) {
-                                            ""
-                                        } else {
-                                            "\n/* ${selectedScript.description.orEmpty()}\n */\n"
-                                        }
-                                        val dependsOnLine =
-                                            "$description@file:DependsOnScript(\"${selectedScript.id}\") // ${selectedScript.name}"
-
-                                        // Check if the script already has a @file:DependsOnScript annotation
-                                        val newSource = if (currentSource.contains("@file:DependsOnScript")) {
-                                            // Insert the new annotation after the last @file:DependsOnScript annotation
-                                            val lines = currentSource.lines()
-                                            val lastAnnotationIndex =
-                                                lines.indexOfLast { it.contains("@file:DependsOnScript") }
-
-                                            if (lastAnnotationIndex >= 0) {
-                                                val updatedLines = lines.toMutableList()
-                                                updatedLines.add(lastAnnotationIndex + 1, dependsOnLine)
-                                                updatedLines.joinToString("\n")
-                                            } else {
-                                                "$dependsOnLine\n$currentSource"
-                                            }
-                                        } else {
-                                            "$dependsOnLine\n$currentSource"
-                                        }
-
-                                        state.setValue(newSource)
-                                        resolve(false)
-                                    }
-                                }
-                            }) {
-                                Div({
-                                    style {
-                                        fontSize(18.px)
-                                        fontWeight("bold")
-                                        marginBottom(.5.r)
-                                    }
-                                }) {
-                                    Text(selectedScript.name?.notBlank ?: appString { newScript })
-                                }
-                                Div({
-                                    style {
-                                        opacity(.5)
-                                    }
-                                }) {
-                                    Text(
-                                        bulletedString(
-                                            selectedScript.author?.name?.let { "By $it" },
-                                            selectedScript.categories?.firstOrNull(),
-                                            selectedScript.id!!
-                                        )
-                                    )
-                                }
-                                selectedScript.description?.notBlank?.let { description ->
-                                    Div({
-                                        style {
-                                            marginTop(.5.r)
-                                            overflow("auto")
-                                        }
-                                    }) {
-                                        LinkifyText(description)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else if (search.isNotBlank()) {
-                    Div({
-                        style {
-                            display(DisplayStyle.Flex)
-                            alignItems(AlignItems.Center)
-                            justifyContent(JustifyContent.Center)
-                            opacity(.5)
-                            padding(1.r)
-                        }
-                    }) {
-                        appText { noScripts }
-                    }
-                } else {
-                    Div({
-                        style {
-                            display(DisplayStyle.Flex)
-                            alignItems(AlignItems.Center)
-                            justifyContent(JustifyContent.Center)
-                            opacity(.5)
-                            padding(1.r)
-                        }
-                    }) {
-                        appText { noScripts }
-                    }
-                }
-            }
-        }
-    )
-}
 
 @Composable
 fun ScriptsPage(
@@ -1200,7 +1011,7 @@ fun ScriptsPage(
                             }
                         ) {
                             scope.launch {
-                                selectScriptDialog(scope, state, editedScript, script)
+                                addScriptDependencyDialog(scope, state, editedScript, script)
                             }
                         }
 

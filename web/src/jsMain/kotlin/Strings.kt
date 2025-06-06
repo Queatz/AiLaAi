@@ -480,7 +480,7 @@ object Strings {
     )
 
     val timesRun = Translation(
-        en = "Times run",
+        en = "Run count",
         vn = "Số lần chạy",
         ru = "Запусков"
     )
@@ -1710,6 +1710,12 @@ object Strings {
         vn = "Không có",
         ru = "Нет"
     )
+    val photo = Translation(
+        en = "Photo",
+        vn = "Ảnh",
+        ru = "Фото"
+    )
+
     val choosePhoto = Translation(
         en = "Choose photo",
         vn = "Chọn ảnh",
@@ -1961,14 +1967,14 @@ object Strings {
         ru = "Загрузка комментариев…"
     )
     val addPay = Translation(
-        en = "Add pay",
-        vn = "Thêm lương",
-        ru = "Добавить оплату"
+        en = "Add pay / price",
+        vn = "Thêm lương / giá",
+        ru = "Добавить оплату / цену"
     )
     val changePay = Translation(
-        en = "Change pay",
-        vn = "Đổi lương",
-        ru = "Изменить оплату"
+        en = "Change pay / price",
+        vn = "Đổi lương / giá",
+        ru = "Изменить оплату / цену"
     )
     val pay = Translation(
         en = "Pay",

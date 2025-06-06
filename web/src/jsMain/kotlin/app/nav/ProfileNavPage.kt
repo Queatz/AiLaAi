@@ -21,6 +21,7 @@ import app.ailaai.api.updateProfile
 import app.components.FlexInput
 import app.dialog.dialog
 import app.dialog.inputDialog
+import app.dialog.rememberChoosePhotoDialog
 import app.softwork.routingcompose.Router
 import appString
 import appText
@@ -32,6 +33,7 @@ import com.queatz.db.PersonProfile
 import com.queatz.db.Profile
 import components.IconButton
 import components.Loading
+import components.ProfilePhoto
 import components.QrImg
 import components.Wbr
 import kotlinx.browser.window
@@ -52,8 +54,10 @@ import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.textAlign
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
@@ -205,10 +209,50 @@ fun ProfileNavPage(
         }
     }
 
+    // Remember the ChoosePhotoDialog control
+    val choosePhotoDialog = rememberChoosePhotoDialog(showUpload = true)
+
+    // Track if photo is being updated
+    val isPhotoLoading by choosePhotoDialog.isGenerating.collectAsState()
+
     NavMenu {
         val yourName = appString { yourName }
         val update = appString { update }
         val yourUrl = appString { yourProfileUrl }
+
+        // Add large centered profile photo
+        Div({
+            style {
+                display(DisplayStyle.Flex)
+                justifyContent(JustifyContent.Center)
+                padding(1.r)
+            }
+        }) {
+            me?.let { currentUser ->
+                ProfilePhoto(
+                    person = currentUser,
+                    size = 120.px,
+                    fontSize = 48.px,
+                    border = true,
+                    onClick = {
+                        scope.launch {
+                            choosePhotoDialog.launch { photoUrl, width, height ->
+                                scope.launch {
+                                    api.updateMe(Person(photo = photoUrl)) {
+                                        application.setMe(it)
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    styles = {
+                        if (isPhotoLoading) {
+                            opacity(0.5)
+                        }
+                    }
+                )
+            }
+        }
 
         NavMenuItem("account_circle", me?.name?.notBlank ?: yourName) {
             scope.launch {
