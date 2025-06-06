@@ -1,6 +1,7 @@
 package app.widget
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,6 +34,8 @@ import getImageDimensions
 import json
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import lib.FullscreenApi
+import lib.FullscreenApi.isFullscreen
 import lib.ResizeObserver
 import notBlank
 import org.jetbrains.compose.web.css.borderRadius
@@ -45,10 +48,13 @@ import org.jetbrains.compose.web.events.SyntheticClipboardEvent
 import org.jetbrains.compose.web.events.SyntheticTouchEvent
 import org.w3c.dom.CanvasRenderingContext2D
 import org.w3c.dom.HTMLCanvasElement
+import org.w3c.dom.HTMLElement
+import org.w3c.dom.events.EventListener
 import org.w3c.dom.get
 import org.w3c.files.File
 import r
 import toBytes
+import toggleFullscreen
 import updateWidget
 import widget
 import kotlin.math.pow
@@ -131,8 +137,24 @@ fun SpaceWidget(widgetId: String) {
     val darkMode = rememberDarkMode()
     var context by remember { mutableStateOf<CanvasRenderingContext2D?>(null) }
     var canvasRef by remember { mutableStateOf<HTMLCanvasElement?>(null) }
+    var spaceRef by remember { mutableStateOf<HTMLElement?>(null) }
     val scope = rememberCoroutineScope()
     val photoDialog = rememberChoosePhotoDialog(showUpload = true)
+
+    var isFullscreen by remember { mutableStateOf(false) }
+
+    // Listen for fullscreen change events
+    DisposableEffect(Unit) {
+        val fullscreenChangeListener = EventListener {
+            isFullscreen = FullscreenApi.isFullscreen
+        }
+
+        FullscreenApi.addFullscreenChangeListener(fullscreenChangeListener)
+
+        onDispose {
+            FullscreenApi.removeFullscreenChangeListener(fullscreenChangeListener)
+        }
+    }
 
     // todo: loading
     // todo: error
@@ -231,6 +253,14 @@ fun SpaceWidget(widgetId: String) {
     Div(
         attrs = {
             classes(WidgetStyles.spaceContainer)
+
+            ref {
+                spaceRef = it
+
+                onDispose {
+                    spaceRef = null
+                }
+            }
         }
     ) {
         Canvas(
@@ -415,7 +445,7 @@ fun SpaceWidget(widgetId: String) {
                                 ) { newCard ->
                                     control.addCard(mouseX, mouseY, newCard.id!!)
 
-                                    api.cardsCards(cardId ?: return@newCard) {
+                                    api.cardsCards(cardId) {
                                         cards = it
                                         cardsById = cards.associateBy { it.id!! }
                                     }
@@ -549,40 +579,41 @@ fun SpaceWidget(widgetId: String) {
             )
 
             // Show side panel when an item is selected
-            selectedItem?.let {
-                SpaceWidgetSidePanel(
-                    onSendToBack = {
-                        // Move the selected item to the beginning of the list (back)
-                        data?.items?.let { items ->
-                            val selectedItem = selectedItem
-                            val selectedItemIndex = items.indexOfFirst { item -> item.content == selectedItem?.content }
-                            if (selectedItemIndex > 0) {
-                                val newItems = items.toMutableList()
-                                val item = newItems.removeAt(selectedItemIndex)
-                                newItems.add(0, item)
-                                val newData = data!!.copy(items = newItems)
-                                control.updateData(newData)
-                                control.updateDirty(nextInt())
-                            }
-                        }
-                    },
-                    onBringToFront = {
-                        // Move the selected item to the end of the list (front)
-                        data?.items?.let { items ->
-                            val selectedItem = selectedItem
-                            val selectedItemIndex = items.indexOfFirst { item -> item.content == selectedItem?.content }
-                            if (selectedItemIndex >= 0 && selectedItemIndex < items.size - 1) {
-                                val newItems = items.toMutableList()
-                                val item = newItems.removeAt(selectedItemIndex)
-                                newItems.add(item)
-                                val newData = data!!.copy(items = newItems)
-                                control.updateData(newData)
-                                control.updateDirty(nextInt())
-                            }
+            SpaceWidgetSidePanel(
+                onFullscreen = {
+                    spaceRef.toggleFullscreen()
+                },
+                isFullscreen = isFullscreen,
+                showContentTools = selectedItem != null,
+                onSendToBack = {
+                    // Move the selected item to the beginning of the list (back)
+                    data?.items?.let { items ->
+                        val selectedItemIndex = items.indexOfFirst { item -> item.content == selectedItem?.content }
+                        if (selectedItemIndex > 0) {
+                            val newItems = items.toMutableList()
+                            val item = newItems.removeAt(selectedItemIndex)
+                            newItems.add(0, item)
+                            val newData = data.copy(items = newItems)
+                            control.updateData(newData)
+                            control.updateDirty(nextInt())
                         }
                     }
-                )
-            }
+                },
+                onBringToFront = {
+                    // Move the selected item to the end of the list (front)
+                    data?.items?.let { items ->
+                        val selectedItemIndex = items.indexOfFirst { item -> item.content == selectedItem?.content }
+                        if (selectedItemIndex >= 0 && selectedItemIndex < items.size - 1) {
+                            val newItems = items.toMutableList()
+                            val item = newItems.removeAt(selectedItemIndex)
+                            newItems.add(item)
+                            val newData = data.copy(items = newItems)
+                            control.updateData(newData)
+                            control.updateDirty(nextInt())
+                        }
+                    }
+                }
+            )
         }
     }
 }

@@ -10,13 +10,10 @@ import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.bottom
 import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.position
-import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.right
 import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.dom.Div
 import r
-import web.cssom.PropertyName.Companion.pointerEvents
-import web.cssom.atrule.pointer
 
 /**
  * Side panel that appears when content is selected in the Space Widget.
@@ -24,6 +21,9 @@ import web.cssom.atrule.pointer
  */
 @Composable
 fun SpaceWidgetSidePanel(
+    onFullscreen: () -> Unit,
+    isFullscreen: Boolean = false,
+    showContentTools: Boolean = false,
     onSendToBack: () -> Unit,
     onBringToFront: () -> Unit,
 ) {
@@ -32,40 +32,56 @@ fun SpaceWidgetSidePanel(
             classes(WidgetStyles.spaceSidePanel)
             style {
                 position(Absolute)
-                right(1.r)
-                top(1.r)
-                bottom(1.r)
+                right(0.r)
+                top(0.r)
+                bottom(0.r)
                 overflow("auto")
                 property("pointer-events", "none")
             }
         }
     ) {
         IconButton(
-            name = "flip_to_back",
+            name = if (isFullscreen) "fullscreen_exit" else "fullscreen",
             // todo: translate
-            title = "Send to back",
+            title = if (isFullscreen) "Exit Fullscreen" else "Enter Fullscreen",
+            background = true,
             styles = {
                 borderRadius(1.r)
-                backgroundColor(Styles.colors.primary)
                 property("pointer-events", "initial")
             },
             onClick = {
-                onSendToBack()
+                onFullscreen()
             }
         )
 
-        IconButton(
-            name = "flip_to_front",
-            // todo: translate
-            title = "Bring to front",
-            styles = {
-                borderRadius(1.r)
-                backgroundColor(Styles.colors.primary)
-                property("pointer-events", "initial")
-            },
-            onClick = {
-                onBringToFront()
-            }
-        )
+        if (showContentTools) {
+            IconButton(
+                name = "flip_to_back",
+                // todo: translate
+                title = "Send to back",
+                styles = {
+                    borderRadius(1.r)
+                    backgroundColor(Styles.colors.primary)
+                    property("pointer-events", "initial")
+                },
+                onClick = {
+                    onSendToBack()
+                }
+            )
+
+            IconButton(
+                name = "flip_to_front",
+                // todo: translate
+                title = "Bring to front",
+                styles = {
+                    borderRadius(1.r)
+                    backgroundColor(Styles.colors.primary)
+                    property("pointer-events", "initial")
+                },
+                onClick = {
+                    onBringToFront()
+                }
+            )
+        }
     }
 }

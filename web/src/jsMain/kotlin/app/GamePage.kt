@@ -43,7 +43,6 @@ import lib.ResizeObserver
 import lib.Vector3
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.AlignItems
-import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.Position
@@ -86,6 +85,7 @@ import org.w3c.dom.get
 import org.w3c.files.File
 import r
 import toBytes
+import toggleFullscreen
 import web.cssom.ImageRendering
 import kotlin.js.Date
 
@@ -388,6 +388,7 @@ fun GamePage(
     val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()
     var canvasRef by remember { mutableStateOf<HTMLCanvasElement?>(null) }
+    var fullscreenContainerRef by remember { mutableStateOf<HTMLElement?>(null) }
     val router = Router.current
 
     // Create a mutable state for gameScene to update it when renamed
@@ -412,25 +413,6 @@ fun GamePage(
     LaunchedEffect(isPlaying) {
         if (isPlaying) {
             showPlayButton = false
-        }
-    }
-
-    // Function to toggle fullscreen mode
-    fun toggleFullscreen(element: HTMLElement) {
-        if (!isFullscreen) {
-            // Enter fullscreen
-            try {
-                FullscreenApi.requestFullscreen(element)
-            } catch (e: Exception) {
-                console.error("Error entering fullscreen mode: ${e.message}")
-            }
-        } else {
-            // Exit fullscreen
-            try {
-                FullscreenApi.exitFullscreen()
-            } catch (e: Exception) {
-                console.error("Error exiting fullscreen mode: ${e.message}")
-            }
         }
     }
 
@@ -610,6 +592,14 @@ fun GamePage(
                 property("scrollbar-width", "none") // Firefox
             }
             styles()
+        }
+
+        ref {
+            fullscreenContainerRef = it
+
+            onDispose {
+                fullscreenContainerRef = null
+            }
         }
     }) {
         Div(
@@ -877,16 +867,7 @@ fun GamePage(
                         property("margin-right", "0.5rem")
                     }
                 ) {
-                    // Get the game container element to make fullscreen
-                    val gameContainer = document.querySelector(".game-container") as? HTMLElement
-
-                    if (gameContainer != null) {
-                        toggleFullscreen(gameContainer)
-                    } else {
-                        // Fallback to document element if game container not found
-                        val element = document.documentElement as HTMLElement
-                        toggleFullscreen(element)
-                    }
+                    fullscreenContainerRef.toggleFullscreen()
                 }
 
                 // Play/Pause button

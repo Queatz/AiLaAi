@@ -75,7 +75,6 @@ import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Text
-import org.jetbrains.compose.web.dom.TextInput
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import pickPhotos
@@ -103,6 +102,7 @@ import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.justifyContent
 import app.dialog.selectScriptDialog
 import app.dialog.editFormDialog
+import org.jetbrains.compose.web.css.gap
 
 @Composable
 fun ExplorePage(
@@ -462,35 +462,21 @@ fun ExplorePage(
                             updatedPay.frequency = payFrequency
                         }
 
-                        TextInput(pay) {
-                            classes(Styles.textarea)
-                            style {
+                        FlexInput(
+                            value = pay,
+                            onChange = { pay = it },
+                            singleLine = true,
+                            autoFocus = true,
+                            selectAll = true,
+                            styles = {
                                 width(100.percent)
                                 marginBottom(1.r)
+                            },
+                            onSubmit = {
+                                resolve(true)
+                                true
                             }
-
-                            onKeyDown {
-                                if (it.key == "Enter") {
-                                    it.preventDefault()
-                                    it.stopPropagation()
-                                    resolve(true)
-                                }
-                            }
-
-                            onInput {
-                                pay = it.value
-                            }
-
-                            autoFocus()
-
-                            ref {
-                                it.select()
-
-                                onDispose {
-
-                                }
-                            }
-                        }
+                        )
 
                         PayFrequency.entries.forEach { frequency ->
                             Div({
@@ -694,6 +680,9 @@ fun ExplorePage(
         Div({
             style {
                 margin(1.r, 1.r, .5.r, 1.r)
+                display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.Column)
+                gap(1.r)
             }
         }) {
             Content(

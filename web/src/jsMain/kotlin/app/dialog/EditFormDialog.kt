@@ -13,7 +13,6 @@ import com.queatz.widgets.widgets.FormOptions
 import components.LabeledCheckbox
 import components.Loading
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.web.attributes.placeholder
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.display
@@ -23,9 +22,12 @@ import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
-import org.jetbrains.compose.web.dom.TextInput
+import app.components.FlexInput
+import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.fontWeight
 import r
 import token
+import web.cssom.PropertyName.Companion.fontWeight
 
 private fun generateRandomKey(): String = (1..8).token()
 
@@ -38,8 +40,7 @@ suspend fun editFormDialog(
     return dialog(
         title = "Form",
         confirmButton = null,
-        cancelButton = null,
-        cancellable = false
+        cancelButton = null
     ) { resolve ->
         var formData by mutableStateOf(initialFormData)
         var isLoading by mutableStateOf(false)
@@ -55,74 +56,6 @@ suspend fun editFormDialog(
                     padding(1.r)
                 }
             }) {
-                // Simple form editor
-                Text("Form Editor")
-
-                // Add field buttons
-                Div({
-                    style {
-                        display(DisplayStyle.Flex)
-                        flexDirection(FlexDirection.Row)
-                        gap(1.r)
-                    }
-                }) {
-                    Button({
-                        classes(Styles.button)
-                        onClick {
-                            formData = formData.copy(
-                                fields = formData.fields + FormField(
-                                    type = FormFieldType.Text,
-                                    data = FormFieldData.Text(generateRandomKey(), "", "")
-                                )
-                            )
-                        }
-                    }) {
-                        Text("Add Text")
-                    }
-
-                    Button({
-                        classes(Styles.button)
-                        onClick {
-                            formData = formData.copy(
-                                fields = formData.fields + FormField(
-                                    type = FormFieldType.Input,
-                                    data = FormFieldData.Input(generateRandomKey(), true, "", "", "", "")
-                                )
-                            )
-                        }
-                    }) {
-                        Text("Add Input")
-                    }
-
-                    Button({
-                        classes(Styles.button)
-                        onClick {
-                            formData = formData.copy(
-                                fields = formData.fields + FormField(
-                                    type = FormFieldType.Checkbox,
-                                    data = FormFieldData.Checkbox(generateRandomKey(), false, "", "", "", false)
-                                )
-                            )
-                        }
-                    }) {
-                        Text("Add Checkbox")
-                    }
-
-                    Button({
-                        classes(Styles.button)
-                        onClick {
-                            formData = formData.copy(
-                                fields = formData.fields + FormField(
-                                    type = FormFieldType.Photos,
-                                    data = FormFieldData.Photos(generateRandomKey(), true, "", "", listOf())
-                                )
-                            )
-                        }
-                    }) {
-                        Text("Add Photos")
-                    }
-                }
-
                 // Display current fields
                 Div({
                     style {
@@ -133,7 +66,6 @@ suspend fun editFormDialog(
                 }) {
                     formData.fields.forEachIndexed { index, field ->
                         Div({
-                            classes(Styles.card)
                             style {
                                 display(DisplayStyle.Flex)
                                 flexDirection(FlexDirection.Column)
@@ -141,7 +73,14 @@ suspend fun editFormDialog(
                             }
                         }) {
                             // todo: translate
-                            Text(field.type.toString())
+                            Div({
+                                style {
+                                    fontWeight("bold")
+                                    fontSize(1.2.r)
+                                }
+                            }) {
+                                Text(field.type.toString())
+                            }
 
                             when (field.type) {
                                 FormFieldType.Text -> {
@@ -162,21 +101,22 @@ suspend fun editFormDialog(
                                             }
                                         }) {
                                             Text("Title")
-                                            TextInput {
-                                                value(textData.title)
-                                                placeholder("Title")
-                                                onChange {
+                                            FlexInput(
+                                                value = textData.title,
+                                                placeholder = "Title",
+                                                singleLine = true,
+                                                onChange = {
                                                     formData = formData.copy(
                                                         fields = formData.fields.toMutableList().apply {
                                                             this[index] = field.copy(
                                                                 data = textData.copy(
-                                                                    title = it.value
+                                                                    title = it
                                                                 )
                                                             )
                                                         }
                                                     )
                                                 }
-                                            }
+                                            )
                                         }
 
                                         // Description input
@@ -188,21 +128,22 @@ suspend fun editFormDialog(
                                             }
                                         }) {
                                             Text("Description")
-                                            TextInput {
-                                                value(textData.description)
-                                                placeholder("Description")
-                                                onChange {
+                                            FlexInput(
+                                                value = textData.description,
+                                                placeholder = "Description",
+                                                singleLine = true,
+                                                onChange = {
                                                     formData = formData.copy(
                                                         fields = formData.fields.toMutableList().apply {
                                                             this[index] = field.copy(
                                                                 data = textData.copy(
-                                                                    description = it.value
+                                                                    description = it
                                                                 )
                                                             )
                                                         }
                                                     )
                                                 }
-                                            }
+                                            )
                                         }
                                     }
                                 }
@@ -224,21 +165,22 @@ suspend fun editFormDialog(
                                             }
                                         }) {
                                             Text("Title")
-                                            TextInput {
-                                                value(checkboxData.title)
-                                                placeholder("Title")
-                                                onChange {
+                                            FlexInput(
+                                                value = checkboxData.title,
+                                                placeholder = "Title",
+                                                singleLine = true,
+                                                onChange = {
                                                     formData = formData.copy(
                                                         fields = formData.fields.toMutableList().apply {
                                                             this[index] = field.copy(
                                                                 data = checkboxData.copy(
-                                                                    title = it.value
+                                                                    title = it
                                                                 )
                                                             )
                                                         }
                                                     )
                                                 }
-                                            }
+                                            )
                                         }
 
                                         // Description input
@@ -250,21 +192,22 @@ suspend fun editFormDialog(
                                             }
                                         }) {
                                             Text("Description")
-                                            TextInput {
-                                                value(checkboxData.description)
-                                                placeholder("Description")
-                                                onChange {
+                                            FlexInput(
+                                                value = checkboxData.description,
+                                                placeholder = "Description",
+                                                singleLine = true,
+                                                onChange = {
                                                     formData = formData.copy(
                                                         fields = formData.fields.toMutableList().apply {
                                                             this[index] = field.copy(
                                                                 data = checkboxData.copy(
-                                                                    description = it.value
+                                                                    description = it
                                                                 )
                                                             )
                                                         }
                                                     )
                                                 }
-                                            }
+                                            )
                                         }
 
                                         // Label input
@@ -276,21 +219,22 @@ suspend fun editFormDialog(
                                             }
                                         }) {
                                             Text("Label")
-                                            TextInput {
-                                                value(checkboxData.label)
-                                                placeholder("Label")
-                                                onChange {
+                                            FlexInput(
+                                                value = checkboxData.label,
+                                                placeholder = "Label",
+                                                singleLine = true,
+                                                onChange = {
                                                     formData = formData.copy(
                                                         fields = formData.fields.toMutableList().apply {
                                                             this[index] = field.copy(
                                                                 data = checkboxData.copy(
-                                                                    label = it.value
+                                                                    label = it
                                                                 )
                                                             )
                                                         }
                                                     )
                                                 }
-                                            }
+                                            )
                                         }
 
                                         // Initially checked option
@@ -346,21 +290,22 @@ suspend fun editFormDialog(
                                             }
                                         }) {
                                             Text("Title")
-                                            TextInput {
-                                                value(photosData.title)
-                                                placeholder("Title")
-                                                onChange {
+                                            FlexInput(
+                                                value = photosData.title,
+                                                placeholder = "Title",
+                                                singleLine = true,
+                                                onChange = {
                                                     formData = formData.copy(
                                                         fields = formData.fields.toMutableList().apply {
                                                             this[index] = field.copy(
                                                                 data = photosData.copy(
-                                                                    title = it.value
+                                                                    title = it
                                                                 )
                                                             )
                                                         }
                                                     )
                                                 }
-                                            }
+                                            )
                                         }
 
                                         // Description input
@@ -372,21 +317,22 @@ suspend fun editFormDialog(
                                             }
                                         }) {
                                             Text("Description")
-                                            TextInput {
-                                                value(photosData.description)
-                                                placeholder("Description")
-                                                onChange {
+                                            FlexInput(
+                                                value = photosData.description,
+                                                placeholder = "Description",
+                                                singleLine = true,
+                                                onChange = {
                                                     formData = formData.copy(
                                                         fields = formData.fields.toMutableList().apply {
                                                             this[index] = field.copy(
                                                                 data = photosData.copy(
-                                                                    description = it.value
+                                                                    description = it
                                                                 )
                                                             )
                                                         }
                                                     )
                                                 }
-                                            }
+                                            )
                                         }
 
                                         // Required option
@@ -425,21 +371,22 @@ suspend fun editFormDialog(
                                             }
                                         }) {
                                             Text("Title")
-                                            TextInput {
-                                                value(inputData.title)
-                                                placeholder("Title")
-                                                onChange {
+                                            FlexInput(
+                                                value = inputData.title,
+                                                placeholder = "Title",
+                                                singleLine = true,
+                                                onChange = {
                                                     formData = formData.copy(
                                                         fields = formData.fields.toMutableList().apply {
                                                             this[index] = field.copy(
                                                                 data = inputData.copy(
-                                                                    title = it.value
+                                                                    title = it
                                                                 )
                                                             )
                                                         }
                                                     )
                                                 }
-                                            }
+                                            )
                                         }
 
                                         // Description input
@@ -451,21 +398,22 @@ suspend fun editFormDialog(
                                             }
                                         }) {
                                             Text("Description")
-                                            TextInput {
-                                                value(inputData.description)
-                                                placeholder("Description")
-                                                onChange {
+                                            FlexInput(
+                                                value = inputData.description,
+                                                placeholder = "Description",
+                                                singleLine = true,
+                                                onChange = {
                                                     formData = formData.copy(
                                                         fields = formData.fields.toMutableList().apply {
                                                             this[index] = field.copy(
                                                                 data = inputData.copy(
-                                                                    description = it.value
+                                                                    description = it
                                                                 )
                                                             )
                                                         }
                                                     )
                                                 }
-                                            }
+                                            )
                                         }
 
                                         // Placeholder input
@@ -477,21 +425,49 @@ suspend fun editFormDialog(
                                             }
                                         }) {
                                             Text("Placeholder")
-                                            TextInput {
-                                                value(inputData.placeholder)
-                                                placeholder("Placeholder")
-                                                onChange {
+                                            FlexInput(
+                                                value = inputData.placeholder,
+                                                placeholder = "Placeholder",
+                                                singleLine = true,
+                                                onChange = {
                                                     formData = formData.copy(
                                                         fields = formData.fields.toMutableList().apply {
                                                             this[index] = field.copy(
                                                                 data = inputData.copy(
-                                                                    placeholder = it.value
+                                                                    placeholder = it
                                                                 )
                                                             )
                                                         }
                                                     )
                                                 }
+                                            )
+                                        }
+
+                                        // Initial value input
+                                        Div({
+                                            style {
+                                                display(DisplayStyle.Flex)
+                                                flexDirection(FlexDirection.Column)
+                                                gap(0.5.r)
                                             }
+                                        }) {
+                                            Text("Initial Value")
+                                            FlexInput(
+                                                value = inputData.initialValue,
+                                                placeholder = "Initial Value",
+                                                singleLine = true,
+                                                onChange = {
+                                                    formData = formData.copy(
+                                                        fields = formData.fields.toMutableList().apply {
+                                                            this[index] = field.copy(
+                                                                data = inputData.copy(
+                                                                    initialValue = it
+                                                                )
+                                                            )
+                                                        }
+                                                    )
+                                                }
+                                            )
                                         }
 
                                         // Required option
@@ -515,7 +491,7 @@ suspend fun editFormDialog(
                             }
 
                             Button({
-                                classes(Styles.textButton)
+                                classes(Styles.outlineButton)
                                 onClick {
                                     formData = formData.copy(
                                         fields = formData.fields.toMutableList().apply {
@@ -527,6 +503,70 @@ suspend fun editFormDialog(
                                 Text("Remove")
                             }
                         }
+                    }
+                }
+                // Add field buttons
+                Div({
+                    style {
+                        display(DisplayStyle.Flex)
+                        flexDirection(FlexDirection.Row)
+                        gap(1.r)
+                    }
+                }) {
+                    Button({
+                        classes(Styles.outlineButton, Styles.outlineButtonTonal)
+                        onClick {
+                            formData = formData.copy(
+                                fields = formData.fields + FormField(
+                                    type = FormFieldType.Text,
+                                    data = FormFieldData.Text(generateRandomKey(), "", "")
+                                )
+                            )
+                        }
+                    }) {
+                        Text("Add Text")
+                    }
+
+                    Button({
+                        classes(Styles.outlineButton, Styles.outlineButtonTonal)
+                        onClick {
+                            formData = formData.copy(
+                                fields = formData.fields + FormField(
+                                    type = FormFieldType.Input,
+                                    data = FormFieldData.Input(generateRandomKey(), true, "", "", "", "")
+                                )
+                            )
+                        }
+                    }) {
+                        Text("Add Input")
+                    }
+
+                    Button({
+                        classes(Styles.outlineButton, Styles.outlineButtonTonal)
+                        onClick {
+                            formData = formData.copy(
+                                fields = formData.fields + FormField(
+                                    type = FormFieldType.Checkbox,
+                                    data = FormFieldData.Checkbox(generateRandomKey(), false, "", "", "", false)
+                                )
+                            )
+                        }
+                    }) {
+                        Text("Add Checkbox")
+                    }
+
+                    Button({
+                        classes(Styles.outlineButton, Styles.outlineButtonTonal)
+                        onClick {
+                            formData = formData.copy(
+                                fields = formData.fields + FormField(
+                                    type = FormFieldType.Photos,
+                                    data = FormFieldData.Photos(generateRandomKey(), true, "", "", listOf())
+                                )
+                            )
+                        }
+                    }) {
+                        Text("Add Photos")
                     }
                 }
 

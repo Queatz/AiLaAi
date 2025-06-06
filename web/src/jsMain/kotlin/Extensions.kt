@@ -6,6 +6,8 @@ import kotlinx.browser.window
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
+import lib.FullscreenApi
+import lib.FullscreenApi.isFullscreen
 import lib.Qr
 import lib.intlFormat
 import lib.parse
@@ -32,6 +34,36 @@ import kotlin.js.Promise
 import kotlin.math.min
 import kotlin.math.round
 import kotlin.random.Random
+
+
+
+// Function to toggle fullscreen mode
+fun toggleFullscreen(element: HTMLElement) {
+    if (!isFullscreen) {
+        // Enter fullscreen
+        try {
+            FullscreenApi.requestFullscreen(element)
+        } catch (e: Exception) {
+            console.error("Error entering fullscreen mode: ${e.message}")
+        }
+    } else {
+        // Exit fullscreen
+        try {
+            FullscreenApi.exitFullscreen()
+        } catch (e: Exception) {
+            console.error("Error exiting fullscreen mode: ${e.message}")
+        }
+    }
+}
+
+fun HTMLElement?.toggleFullscreen() {
+    if (this != null) {
+        toggleFullscreen(this)
+    } else {
+        // Fallback to document element if game container not found
+        toggleFullscreen(document.documentElement as HTMLElement)
+    }
+}
 
 fun Double.toRem(): Double {
     val rootFontSizePx = document.documentElement?.let {
