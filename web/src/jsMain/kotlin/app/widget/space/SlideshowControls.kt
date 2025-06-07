@@ -4,9 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.web.events.SyntheticMouseEvent
 import app.widget.WidgetStyles
 import components.IconButton
+import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.rgb
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
@@ -26,6 +30,7 @@ fun SlideshowControls(
     onExit: (SyntheticMouseEvent) -> Unit,
     onCreate: (SyntheticMouseEvent) -> Unit,
     onRename: (SyntheticMouseEvent) -> Unit,
+    onDuration: (SyntheticMouseEvent) -> Unit,
     onDelete: (SyntheticMouseEvent) -> Unit
 ) {
     Div(
@@ -47,12 +52,30 @@ fun SlideshowControls(
                 onClick = { event -> onRename(event) }
             )
             IconButton(
+                name = "timer",
+                title = "Edit Duration",
+                styles = { color(rgb(255, 255, 255)) },
+                onClick = { event -> onDuration(event) }
+            )
+            IconButton(
                 name = "delete",
                 title = "Delete Slide",
                 styles = { color(rgb(255, 255, 255)) },
                 onClick = { event -> onDelete(event) }
             )
         }
+
+        Div(
+            attrs = {
+                style {
+                    margin(.5.r)
+                    backgroundColor(rgb(255, 255, 255))
+                    width(1.px)
+                    opacity(.25f)
+                }
+            }
+        )
+
         // Navigation and play/pause only when more than one slide
         if (totalSlides > 1) {
             IconButton(
@@ -60,12 +83,6 @@ fun SlideshowControls(
                 title = "Previous Slide",
                 styles = { color(rgb(255, 255, 255)) },
                 onClick = { event -> onPrevious(event) }
-            )
-            IconButton(
-                name = if (isPaused) "play_arrow" else "pause",
-                title = if (isPaused) "Resume Slideshow" else "Pause Slideshow",
-                styles = { color(rgb(255, 255, 255)) },
-                onClick = { event -> onPause(event) }
             )
         }
         // Slide counter
@@ -81,13 +98,33 @@ fun SlideshowControls(
                 onClick = { event -> onNext(event) }
             )
         }
+
+        Div(
+            attrs = {
+                style {
+                    margin(8.px)
+                    backgroundColor(rgb(255, 255, 255))
+                    width(1.px)
+                    opacity(.25f)
+                }
+            }
+        )
+
+        if (totalSlides > 1) {
+            IconButton(
+                name = if (isPaused) "play_arrow" else "pause",
+                title = if (isPaused) "Resume Slideshow" else "Pause Slideshow",
+                styles = { color(rgb(255, 255, 255)) },
+                onClick = { event -> onPause(event) }
+            )
+        }
+
         // Exit slideshow
         IconButton(
             name = "close",
             title = "Exit Slideshow",
             styles = {
                 color(rgb(255, 255, 255))
-                margin(0.r, 0.r, 0.r, 1.r)
             },
             onClick = { event -> onExit(event) }
         )

@@ -39,10 +39,7 @@ import kotlinx.coroutines.launch
 import lib.FullscreenApi
 import lib.ResizeObserver
 import notBlank
-import org.jetbrains.compose.web.css.borderRadius
-import org.jetbrains.compose.web.css.height
-import org.jetbrains.compose.web.css.percent
-import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.dom.Canvas
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.events.SyntheticClipboardEvent
@@ -53,7 +50,6 @@ import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.EventListener
 import org.w3c.dom.get
 import org.w3c.files.File
-import r
 import toBytes
 import toggleFullscreen
 import updateWidget
@@ -202,8 +198,10 @@ fun SpaceWidget(widgetId: String) {
     // Handle slide transitions (auto-advance when active and not paused)
     LaunchedEffect(slideshowMode, currentSlideIndex, slideshowPaused) {
         if (slideshowMode && !slideshowPaused) {
+            // Determine duration for current slide (default to controller interval)
+            val slideDuration = control.getSlideDuration(currentSlideIndex) ?: control.slideshowInterval
             // Wait for the transition to complete (500ms) and then wait for display time
-            delay(500 + control.slideshowInterval)
+            delay(500 + slideDuration)
             control.nextSlide()
         }
     }
@@ -529,6 +527,26 @@ fun SpaceWidget(widgetId: String) {
                 }
 
                 onKeyDown { event ->
+                    // Slideshow navigation via keyboard
+                    if (slideshowMode) {
+                        when (event.key) {
+                            "ArrowLeft" -> {
+                                event.preventDefault()
+                                control.previousSlide()
+                            }
+                            "ArrowRight" -> {
+                                event.preventDefault()
+                                control.nextSlide()
+                            }
+                            " " -> {
+                                event.preventDefault()
+                                if (slideshowPaused) control.resumeSlideshow() else control.pauseSlideshow()
+                            }
+                            else -> {}
+                        }
+                        return@onKeyDown
+                    }
+                    // Delete or escape handling
                     if (event.key == "Delete") {
                         if (canEdit) {
                             if (selectedItem != null) {
@@ -660,15 +678,9 @@ fun SpaceWidget(widgetId: String) {
                 onNext = { _ -> control.nextSlide() },
                 onExit = { _ -> control.stopSlideshow() },
                 onCreate = { _ ->
-                    scope.launch {
-                        val slideTitle = inputDialog(
-                            title = "Slide Title",
-                            singleLine = true
-                        )
-                        if (!slideTitle.isNullOrBlank()) {
-                            control.createSlide(slideTitle)
-                        }
-                    }
+                    // Auto-generate slide name
+                    val newTitle = "Slide ${slides.size + 1}"
+                    control.createSlide(newTitle)
                 },
                 onRename = { _ ->
                     scope.launch {
@@ -681,6 +693,22 @@ fun SpaceWidget(widgetId: String) {
                         )
                         if (!newTitle.isNullOrBlank()) {
                             control.renameSlide(currentSlideIndex, newTitle)
+                        }
+                    }
+                },
+                onDuration = { _ ->
+                    scope.launch {
+                        // Prompt for duration in seconds
+                        val currentDuration = control.getSlideDuration(currentSlideIndex) ?: 5000L
+                        val input = inputDialog(
+                            title = "Slide Duration (seconds)",
+                            defaultValue = (currentDuration / 1000).toString(),
+                            singleLine = true,
+                            type = InputType.Number
+                        )
+                        val seconds = input?.toLongOrNull()
+                        seconds?.let { sec ->
+                            control.updateSlideDuration(currentSlideIndex, sec * 1000)
                         }
                     }
                 },

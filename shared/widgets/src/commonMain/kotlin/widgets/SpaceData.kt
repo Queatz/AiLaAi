@@ -66,6 +66,10 @@ sealed class SpaceContent {
     data class Slide(
         val page: String? = null,
         val title: String? = null,
-        val items: List<String> = emptyList()
+        val items: List<String> = emptyList(),
+        /**
+         * Duration to display this slide in milliseconds
+         */
+        val duration: Long = 5000L
     ) : SpaceContent()
 }

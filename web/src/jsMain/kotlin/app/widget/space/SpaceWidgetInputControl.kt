@@ -44,9 +44,10 @@ class SpaceWidgetInputControl {
 
     // Slideshow state
     private val _slideshowMode = MutableStateFlow(false)
-    private val _currentSlideIndex = MutableStateFlow(0)
+    private val _currentSlideIndex = MutableStateFlow(-1)
     private val _slides = MutableStateFlow<List<SpaceItem>>(emptyList())
-    private val _slideshowInterval = MutableStateFlow(5000L) // 5 seconds default
+    // Fallback slide interval when slide.duration is unavailable
+    private val defaultSlideInterval = 5000L
     private val _slideshowPaused = MutableStateFlow(false)
     private val _savedViewState = MutableStateFlow<ViewState?>(null)
     private val _itemVisibility = MutableStateFlow<Map<String, Boolean>>(emptyMap())
@@ -60,9 +61,12 @@ class SpaceWidgetInputControl {
 
     val slides: List<SpaceItem>
         get() = _slides.value
+    /**
+     * Get durations map for slides by stable ID
+     */
 
     val slideshowInterval: Long
-        get() = _slideshowInterval.value
+        get() = defaultSlideInterval
 
     val slideshowPaused: Boolean
         get() = _slideshowPaused.value
@@ -166,6 +170,29 @@ class SpaceWidgetInputControl {
     fun updateCanEdit(value: Boolean) { _canEdit.value = value }
     fun updateDirty(value: Int?) { _dirty.value = value }
     fun updateDrawFunc(value: () -> Unit) { _drawFunc.value = value }
+    /**
+     * Updates the duration (in milliseconds) for the slide at the given index.
+     */
+    fun updateSlideDuration(index: Int, durationMs: Long) {
+        val slideItem = _slides.value.getOrNull(index) ?: return
+        val content = slideItem.content as? SpaceContent.Slide ?: return
+        val updatedSlide = slideItem.copy(content = content.copy(duration = durationMs))
+        val idx = items.indexOf(slideItem)
+        if (idx >= 0) {
+            val newItems = items.toMutableList().apply { set(idx, updatedSlide) }
+            updateData(data?.copy(items = newItems) ?: SpaceData(items = newItems))
+            updateDirty(nextInt())
+            _slides.value = collectAllSlides()
+        }
+    }
+    /**
+     * Gets the duration (in milliseconds) for the slide at the given index.
+     */
+    fun getSlideDuration(index: Int): Long? {
+        val slideItem = _slides.value.getOrNull(index) ?: return null
+        val content = slideItem.content as? SpaceContent.Slide ?: return null
+        return content.duration
+    }
 
     @Composable
     fun collectTool() = _tool.collectAsState().value
@@ -255,6 +282,8 @@ class SpaceWidgetInputControl {
         val newIndex = updatedSlides.lastIndex
         _currentSlideIndex.value = newIndex
         showSlide(newIndex)
+        // Set default duration for new slide
+        val slideItem = _slides.value.getOrNull(newIndex)
     }
 
     /**
@@ -284,7 +313,9 @@ class SpaceWidgetInputControl {
         val updatedSlides = collectAllSlides()
         _slides.value = updatedSlides
         if (updatedSlides.isEmpty()) {
-            stopSlideshow()
+            // Remain in slideshow mode even if no slides remain
+            // Clear visibility to show all page items
+            _itemVisibility.value = emptyMap()
         } else {
             val newIndex = if (index < updatedSlides.size) index else updatedSlides.lastIndex
             _currentSlideIndex.value = newIndex
@@ -360,7 +391,7 @@ class SpaceWidgetInputControl {
         val slides = collectAllSlides()
         _slideshowMode.value = true
         _slideshowPaused.value = true
-        _currentSlideIndex.value = 0
+        _currentSlideIndex.value = if (slides.isNotEmpty()) 0 else -1
         _slides.value = slides
 
         // Save current view state to restore later

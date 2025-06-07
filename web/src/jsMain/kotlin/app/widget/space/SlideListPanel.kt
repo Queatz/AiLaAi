@@ -6,7 +6,11 @@ import app.widget.WidgetStyles
 import com.queatz.widgets.widgets.SpaceContent
 import com.queatz.widgets.widgets.SpaceItem
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
+import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.marginLeft
+import r
 
 /**
  * Panel that displays a list of slides and allows users to select a specific slide
@@ -35,15 +39,27 @@ fun SlideListPanel(
                 Div(
                     attrs = {
                         classes(WidgetStyles.slideListPanelItem)
-
                         if (index == currentSlideIndex) {
                             classes(WidgetStyles.slideListPanelItemSelected)
                         }
-
                         onClick { event -> onSelectSlide(index, event) }
                     }
                 ) {
-                    Text(slideContent?.title ?: "Slide ${index + 1}")
+                    val title = slideContent?.title ?: "Slide ${index + 1}"
+                    val durationSec = slideContent?.duration?.div(1000) ?: 0L
+                    Span {
+                        Text(title)
+                    }
+                    Span(
+                        attrs = {
+                            style {
+                                opacity(.5f)
+                                marginLeft(0.5.r)
+                            }
+                        }
+                    ) {
+                        Text("(${durationSec}s)")
+                    }
                 }
             }
         }

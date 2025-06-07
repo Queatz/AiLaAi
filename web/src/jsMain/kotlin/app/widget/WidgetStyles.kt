@@ -250,6 +250,7 @@ class WidgetStyleSheet : StyleSheet() {
     val slideListPanelItem by style {
         display(DisplayStyle.Flex)
         alignItems(AlignItems.Center)
+        justifyContent(JustifyContent.SpaceBetween)
         padding(0.5.r)
         borderRadius(0.5.r)
         cursor("pointer")
@@ -275,12 +276,13 @@ class WidgetStyleSheet : StyleSheet() {
     // Controls overlay for slideshow navigation
     val slideshowControls by style {
         position(Absolute)
-        bottom(1.r)
-        left(0.r)
-        right(0.r)
+        bottom(4.r)
+        borderRadius(1.r)
+        property("left", "50%")
+        property("transform", "translateX(-50%)")
         display(DisplayStyle.Flex)
         justifyContent(JustifyContent.Center)
-        padding(1.r)
+        padding(.5.r)
         backgroundColor(rgba(0, 0, 0, 0.5))
 
         dark(self) {
@@ -290,7 +292,7 @@ class WidgetStyleSheet : StyleSheet() {
 
     val slideshowControlsCounter by style {
         color(Styles.colors.white)
-        margin(0.r, 1.r)
+        margin(0.r, 0.5.r)
         display(DisplayStyle.Flex)
         alignItems(AlignItems.Center)
     }
