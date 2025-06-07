@@ -1036,7 +1036,7 @@ fun PageTreeWidget(widgetId: String) {
 
         PageTreeHeader(
             // todo: translate
-            title = "Pages"
+            title = "Pages (${shownCards.size})"
         ) {
             IconButton(
                 name = "download",

@@ -255,7 +255,7 @@ class WidgetStyleSheet : StyleSheet() {
         borderRadius(0.5.r)
         cursor("pointer")
 
-        property("transition", "background-color 0.2s")
+        property("transition", "background-color 0.1s")
 
         hover(self) style {
             backgroundColor(Styles.colors.white)
@@ -271,6 +271,18 @@ class WidgetStyleSheet : StyleSheet() {
     val slideListPanelItemSelected by style {
         backgroundColor(Styles.colors.primary)
         color(Styles.colors.white)
+
+        hover(self) style {
+            backgroundColor(Styles.colors.primary)
+            color(Styles.colors.white)
+        }
+
+        dark(self) {
+            hover(self) style {
+                backgroundColor(Styles.colors.primary)
+                color(Styles.colors.white)
+            }
+        }
     }
 
     // Controls overlay for slideshow navigation

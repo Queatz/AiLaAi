@@ -58,7 +58,7 @@ fun SlideListPanel(
                             }
                         }
                     ) {
-                        Text("(${durationSec}s)")
+                        Text("${durationSec}s")
                     }
                 }
             }

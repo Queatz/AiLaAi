@@ -417,6 +417,8 @@ fun Number.format1Decimal(): String {
     }
 }
 
+fun Number.pad(length: Int = 2, padChar: Char = '0') = toString().padStart(length, padChar)
+
 /**
  * Formats a number to 3 decimal places
  */

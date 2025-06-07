@@ -32,6 +32,20 @@ import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
+import api
+import app.ailaai.api.newCard
+import app.ailaai.api.updateCard
+import com.queatz.db.Card
+import com.queatz.widgets.Widgets
+import com.queatz.widgets.widgets.SpaceData
+import com.queatz.widgets.widgets.PageTreeData
+import com.queatz.widgets.widgets.FormData
+import com.queatz.widgets.widgets.ImpactEffortTableData
+import createWidget
+import json
+import com.queatz.db.StoryContent
+import kotlinx.serialization.json.buildJsonArray
+import com.queatz.db.toJsonStoryPart
 
 // Data class to hold feature button information
 data class FeatureButtonInfo(
@@ -151,6 +165,34 @@ fun FeaturePreview(
             createTitle = "Create a scene",
             description = "Create a new interactive scene",
             targetPage = NavPage.Scenes
+        ),
+        FeatureButtonInfo(
+            icon = "space_dashboard",
+            title = "Spaces",
+            createTitle = "Create a space",
+            description = "Create a sketch or presentation",
+            targetPage = NavPage.Cards
+        ),
+        FeatureButtonInfo(
+            icon = "account_tree",
+            title = "Page Trees",
+            createTitle = "Create a page tree",
+            description = "Organize small projects and track progress",
+            targetPage = NavPage.Cards
+        ),
+        FeatureButtonInfo(
+            icon = "list_alt",
+            title = "Forms",
+            createTitle = "Create a form",
+            description = "Collect and organize responses",
+            targetPage = NavPage.Cards
+        ),
+        FeatureButtonInfo(
+            icon = "table_chart",
+            title = "Impact-Effort Tables",
+            createTitle = "Create an impact-effort table",
+            description = "Prioritize tasks based on impact and effort",
+            targetPage = NavPage.Cards
         )
     )
 
@@ -203,7 +245,83 @@ fun FeaturePreview(
                     description = buttonInfo.description,
                     onClick = {
                         scope.launch {
-                            appNav.navigate(AppNavigation.Nav(buttonInfo.targetPage))
+                            when (buttonInfo.createTitle) {
+                                "Create a space" -> {
+                                    api.newCard(Card(name = "New Space")) { newCard ->
+                                        api.createWidget(
+                                            widget = Widgets.Space,
+                                            data = json.encodeToString(SpaceData(card = newCard.id!!))
+                                        ) { widget ->
+                                            val contentJson = buildJsonArray {
+                                                add(StoryContent.Widget(widget.widget!!, widget.id!!).toJsonStoryPart(json))
+                                            }
+                                            api.updateCard(
+                                                id = newCard.id!!,
+                                                card = Card(content = json.encodeToString(contentJson))
+                                            ) {
+                                                appNav.navigate(AppNavigation.Page(newCard.id!!, newCard))
+                                            }
+                                        }
+                                    }
+                                }
+                                "Create a page tree" -> {
+                                    api.newCard(Card(name = "New Page Tree")) { newCard ->
+                                        api.createWidget(
+                                            widget = Widgets.PageTree,
+                                            data = json.encodeToString(PageTreeData(card = newCard.id!!))
+                                        ) { widget ->
+                                            val contentJson = buildJsonArray {
+                                                add(StoryContent.Widget(widget.widget!!, widget.id!!).toJsonStoryPart(json))
+                                            }
+                                            api.updateCard(
+                                                id = newCard.id!!,
+                                                card = Card(content = json.encodeToString(contentJson))
+                                            ) {
+                                                appNav.navigate(AppNavigation.Page(newCard.id!!, newCard))
+                                            }
+                                        }
+                                    }
+                                }
+                                "Create a form" -> {
+                                    api.newCard(Card(name = "New Form")) { newCard ->
+                                        api.createWidget(
+                                            widget = Widgets.Form,
+                                            data = json.encodeToString(FormData(page = newCard.id!!))
+                                        ) { widget ->
+                                            val contentJson = buildJsonArray {
+                                                add(StoryContent.Widget(widget.widget!!, widget.id!!).toJsonStoryPart(json))
+                                            }
+                                            api.updateCard(
+                                                id = newCard.id!!,
+                                                card = Card(content = json.encodeToString(contentJson))
+                                            ) {
+                                                appNav.navigate(AppNavigation.Page(newCard.id!!, newCard))
+                                            }
+                                        }
+                                    }
+                                }
+                                "Create an impact-effort table" -> {
+                                    api.newCard(Card(name = "New Impact-Effort Table")) { newCard ->
+                                        api.createWidget(
+                                            widget = Widgets.ImpactEffortTable,
+                                            data = json.encodeToString(ImpactEffortTableData(card = newCard.id!!))
+                                        ) { widget ->
+                                            val contentJson = buildJsonArray {
+                                                add(StoryContent.Widget(widget.widget!!, widget.id!!).toJsonStoryPart(json))
+                                            }
+                                            api.updateCard(
+                                                id = newCard.id!!,
+                                                card = Card(content = json.encodeToString(contentJson))
+                                            ) {
+                                                appNav.navigate(AppNavigation.Page(newCard.id!!, newCard))
+                                            }
+                                        }
+                                    }
+                                }
+                                else -> {
+                                    appNav.navigate(AppNavigation.Nav(buttonInfo.targetPage))
+                                }
+                            }
                         }
                     }
                 )

@@ -17,7 +17,9 @@ import app.ailaai.api.sendMedia
 import app.ailaai.api.sendMessage
 import app.components.FlexInput
 import app.components.FlexInputControl
+import app.dialog.dialog
 import app.dialog.rememberChoosePhotoDialog
+import app.menu.Menu
 import app.messaages.attachmentText
 import appString
 import com.queatz.db.AiTranscribeResponse
@@ -40,15 +42,37 @@ import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.opacity
-import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
+import org.w3c.dom.DOMRect
+import org.w3c.dom.HTMLElement
 import org.w3c.files.File
 import pickAudio
 import r
 import toBytes
+import web.blob.Blob
+import web.events.EventHandler
+import web.media.recorder.BlobEvent
+import web.media.recorder.MediaRecorder
+import web.media.streams.MediaStream
+import web.media.streams.MediaStreamConstraints
+import web.media.streams.MediaTrackConstraints
+import web.navigator.navigator
+import Styles
+import format
+import format1Decimal
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.gap
+import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.px
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import org.jetbrains.compose.web.css.alignItems
+import pad
+import kotlin.js.Date
 
 @Composable
 fun GroupMessageBar(
@@ -77,8 +101,12 @@ fun GroupMessageBar(
     }
 
     var audioBlob by remember(group) {
-        mutableStateOf<web.blob.Blob?>(null)
+        mutableStateOf<Blob?>(null)
     }
+    // Audio menu state
+    var showAudioMenu by remember { mutableStateOf(false) }
+    var audioMenuTarget by remember { mutableStateOf<DOMRect?>(null) }
+    var audioIconRef by remember { mutableStateOf<HTMLElement?>(null) }
 
     val choosePhoto = rememberChoosePhotoDialog(showUpload = true)
     val isGenerating = choosePhoto.isGenerating.collectAsState().value
@@ -146,9 +174,9 @@ fun GroupMessageBar(
                 val photos = files.map { it.toBytes() }
 
                 api.sendMedia(
-                    group.group!!.id!!,
-                    photos,
-                    replyMessage?.let { replyMessage ->
+                    group = group.group!!.id!!,
+                    photos = photos,
+                    message = replyMessage?.let { replyMessage ->
                         Message(
                             attachments = replyMessage.id?.let {
                                 listOf(json.encodeToString(ReplyAttachment(it)))
@@ -196,6 +224,93 @@ fun GroupMessageBar(
             }
 
             isSendingAudio = false
+        }
+    }
+
+    fun recordAudioDialog() {
+        showAudioMenu = false
+        scope.launch {
+            val enableConfirm = MutableStateFlow(false)
+            var recordedFile: File? = null
+            val result = dialog(
+                title = "Record audio",
+                confirmButton = "Send",
+                cancelButton = "Cancel",
+                enableConfirm = {
+                    enableConfirm.collectAsState().value
+                }
+            ) { _ ->
+                var isRecording by remember { mutableStateOf(false) }
+                var recorder by remember { mutableStateOf<MediaRecorder?>(null) }
+                val chunks = remember { mutableListOf<Blob>() }
+                // Recording timer state
+                var startTime by remember { mutableStateOf(0.0) }
+                var elapsedSecs by remember { mutableStateOf(0) }
+
+                LaunchedEffect(isRecording) {
+                    if (isRecording) {
+                        startTime = Date.now()
+                        while (isRecording) {
+                            elapsedSecs = ((Date.now() - startTime) / 1000).toInt()
+                            delay(200)
+                        }
+                    }
+                }
+
+                LaunchedEffect(isRecording, recordedFile) {
+                    enableConfirm.value = !isRecording && recordedFile != null
+                }
+
+                // Recording controls
+                Div({ style {
+                    display(DisplayStyle.Flex)
+                    alignItems(AlignItems.Center)
+                    gap(1.r)
+                } }) {
+                    // Record/stop button
+                    IconButton(
+                        name = if (!isRecording) "mic" else "stop",
+                        title = if (!isRecording) "Start recording" else "Stop recording",
+                        background = isRecording,
+                        backgroundColor = Styles.colors.red,
+                        styles = { fontSize(32.px) },
+                        onClick = {
+                            if (!isRecording) {
+                                scope.launch {
+                                    chunks.clear()
+                                    val constraints = MediaStreamConstraints(
+                                        audio = MediaTrackConstraints(),
+                                        video = null
+                                    )
+                                    val stream: MediaStream = navigator.mediaDevices.getUserMedia(constraints)
+                                    val rec = MediaRecorder(stream)
+                                    recorder = rec
+                                    rec.ondataavailable = EventHandler { event: BlobEvent ->
+                                        chunks.add(event.data)
+                                    }
+                                    rec.onstop = EventHandler {
+                                        recordedFile = File(chunks.toTypedArray(), "recording.webm")
+                                    }
+                                    rec.start()
+                                    isRecording = true
+                                    // Start timer
+                                    startTime = Date.now()
+                                }
+                            } else {
+                                recorder?.stop()
+                                isRecording = false
+                            }
+                        }
+                    )
+                    // Timer display
+                    if (isRecording) {
+                        Text("${(elapsedSecs / 60)}:${(elapsedSecs % 60).pad()}")
+                    }
+                }
+            }
+            if (result == true && recordedFile != null) {
+                sendAudio(recordedFile!!)
+            }
         }
     }
 
@@ -282,15 +397,44 @@ fun GroupMessageBar(
             }
         }) {
             if (messageText.isBlank()) {
-                IconButton(
-                    name = "play_circle",
-                    // todo: translate
-                    title = "Send audio",
-                    isLoading = isSendingAudio,
-                    styles = { marginLeft(1.r) }
-                ) {
-                    pickAudio { file ->
-                        sendAudio(file)
+                // Audio menu icon
+                Span({
+                    style { marginLeft(1.r) }
+                    ref {
+                        audioIconRef = it
+                        onDispose { }
+                    }
+                }) {
+                    IconButton(
+                        name = "play_circle",
+                        // todo: translate
+                        title = "Send audio",
+                        isLoading = isSendingAudio,
+                    ) {
+                        audioIconRef?.getBoundingClientRect()?.let { rect ->
+                            audioMenuTarget = rect
+                            showAudioMenu = true
+                        }
+                    }
+                    if (showAudioMenu && audioMenuTarget != null) {
+                        Menu(
+                            onDismissRequest = { showAudioMenu = false },
+                            above = true,
+                            target = audioMenuTarget!!
+                        ) {
+                            item(
+                                title = "Upload audio",
+                                onClick = {
+                                    pickAudio { file -> sendAudio(file) }
+                                }
+                            )
+                            item(
+                                title = "Record audio",
+                                onClick = {
+                                    recordAudioDialog()
+                                }
+                            )
+                        }
                     }
                 }
                 IconButton(

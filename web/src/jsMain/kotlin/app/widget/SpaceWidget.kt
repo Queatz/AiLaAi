@@ -660,7 +660,10 @@ fun SpaceWidget(widgetId: String) {
                         control.startSlideshow()
                     }
                 },
-                isSlideshowActive = slideshowMode
+                isSlideshowActive = slideshowMode,
+                onDelete = {
+                    control.deleteSelectedItem()
+                }
             )
         }
 

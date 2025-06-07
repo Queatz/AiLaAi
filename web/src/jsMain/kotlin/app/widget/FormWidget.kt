@@ -68,7 +68,7 @@ import widget
 import kotlin.random.Random.Default.nextInt
 
 @Composable
-fun FormWidget(widgetId: String) {
+fun FormWidget(widgetId: String, reloadKey: Int = 0) {
     val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()
     var isLoading by remember {
@@ -91,7 +91,7 @@ fun FormWidget(widgetId: String) {
         mutableStateOf(0)
     }
 
-    LaunchedEffect(widgetId) {
+    LaunchedEffect(widgetId, reloadKey) {
         isLoading = true
         api.widget(widgetId) {
             it.data ?: return@widget

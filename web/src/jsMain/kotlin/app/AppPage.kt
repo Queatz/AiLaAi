@@ -867,10 +867,6 @@ fun AppPage(tabId: String? = null) {
                 NavPage.Apps -> {
                 }
 
-                NavPage.Profile -> {
-
-                }
-
                 NavPage.Platform -> PlatformPage(platform)
 
                 NavPage.Scripts -> ScriptsPage(

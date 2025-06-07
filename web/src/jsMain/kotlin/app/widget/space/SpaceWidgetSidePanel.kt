@@ -28,6 +28,7 @@ fun SpaceWidgetSidePanel(
     onBringToFront: () -> Unit,
     onToggleSlideshow: () -> Unit,
     isSlideshowActive: Boolean,
+    onDelete: () -> Unit,
 ) {
     Div(
         attrs = {
@@ -99,6 +100,20 @@ fun SpaceWidgetSidePanel(
                 },
                 onClick = {
                     onBringToFront()
+                }
+            )
+
+            IconButton(
+                name = "delete",
+                // todo: translate
+                title = "Delete",
+                styles = {
+                    borderRadius(1.r)
+                    backgroundColor(Styles.colors.primary)
+                    property("pointer-events", "initial")
+                },
+                onClick = {
+                    onDelete()
                 }
             )
         }

@@ -1,7 +1,6 @@
 package app.cards
 
 import LocalConfiguration
-import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -23,6 +22,8 @@ import app.ailaai.api.myCollaborations
 import app.ailaai.api.newCard
 import app.ailaai.api.updateCard
 import app.ailaai.api.uploadCardPhoto
+import widget
+import updateWidget
 import app.components.FlexInput
 import app.dialog.categoryDialog
 import app.dialog.dialog
@@ -37,6 +38,7 @@ import appString
 import appText
 import application
 import com.queatz.db.Card
+import com.queatz.db.Widget
 import com.queatz.db.GroupExtended
 import com.queatz.db.Pay
 import com.queatz.db.PayFrequency
@@ -54,7 +56,6 @@ import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import notBlank
-import org.jetbrains.compose.web.attributes.autoFocus
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.borderRadius
@@ -128,6 +129,7 @@ fun ExplorePage(
     var menuTarget by remember {
         mutableStateOf<DOMRect?>(null)
     }
+    var formReloadKey by remember { mutableStateOf(0) }
 
     suspend fun reload() {
         if (me == null) return
@@ -697,7 +699,114 @@ fun ExplorePage(
                             }
                         }
                     }
-                }
+                },
+                actions = @Composable { index, part ->
+                    if (me?.id == card.person) {
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                gap(1.r)
+                            }
+                        }) {
+                            if (part is StoryContent.Section) {
+                                IconButton("edit", appString { edit }) {
+                                    scope.launch {
+                                        val result = inputDialog(
+                                            title = application.appString { section },
+                                            placeholder = "",
+                                            confirmButton = application.appString { save },
+                                            defaultValue = part.section
+                                        )
+                                        if (result != null) {
+                                            val current = card.content?.asStoryContents() ?: emptyList()
+                                            val newList = current.toMutableList()
+                                            newList[index] = StoryContent.Section(result)
+                                            api.updateCard(
+                                                card.id!!,
+                                                Card(
+                                                    content = json.encodeToString(buildJsonArray {
+                                                        newList.filter { it.isPart() }.forEach { p ->
+                                                            add(p.toJsonStoryPart(json))
+                                                        }
+                                                    })
+                                                )
+                                            ) { onCardUpdated(it) }
+                                        }
+                                    }
+                                }
+                            }
+                            if (part is StoryContent.Text) {
+                                IconButton("edit", appString { edit }) {
+                                    scope.launch {
+                                        val result = inputDialog(
+                                            title = application.appString { text },
+                                            placeholder = "",
+                                            confirmButton = application.appString { save },
+                                            defaultValue = part.text
+                                        )
+                                        if (result != null) {
+                                            val current = card.content?.asStoryContents() ?: emptyList()
+                                            val newList = current.toMutableList()
+                                            newList[index] = StoryContent.Text(result)
+                                            api.updateCard(
+                                                card.id!!,
+                                                Card(
+                                                    content = json.encodeToString(buildJsonArray {
+                                                        newList.filter { it.isPart() }.forEach { p ->
+                                                            add(p.toJsonStoryPart(json))
+                                                        }
+                                                    })
+                                                )
+                                            ) { onCardUpdated(it) }
+                                        }
+                                    }
+                                }
+                            }
+                            if (part is StoryContent.Widget && part.widget == Widgets.Form) {
+                                IconButton("edit", appString { edit }) {
+                                    scope.launch {
+                                        api.widget(part.id) { w ->
+                                            val dataJson = w.data ?: return@widget
+                                            val initialForm = try {
+                                                json.decodeFromString<FormData>(dataJson)
+                                            } catch (e: Exception) {
+                                                return@widget
+                                            }
+                                            editFormDialog(
+                                                initialFormData = initialForm,
+                                                isEdit = true
+                                            ) { updatedForm ->
+                                                api.updateWidget(
+                                                    part.id,
+                                                    Widget(data = json.encodeToString(updatedForm))
+                                                ) {
+                                                    formReloadKey++
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            IconButton("delete", appString { remove }) {
+                                scope.launch {
+                                    val current = card.content?.asStoryContents() ?: emptyList()
+                                    val newList = current.toMutableList().apply { removeAt(index) }
+                                    api.updateCard(
+                                        card.id!!,
+                                        Card(
+                                            content = json.encodeToString(buildJsonArray {
+                                                newList.filter { it.isPart() }.forEach { p ->
+                                                    add(p.toJsonStoryPart(json))
+                                                }
+                                            })
+                                        )
+                                    ) { onCardUpdated(it) }
+                                }
+                            }
+                        }
+                    }
+                },
+                formReloadKey = formReloadKey
             )
 
             var addContentMenuTarget by remember { mutableStateOf<DOMRect?>(null) }
@@ -711,7 +820,8 @@ fun ExplorePage(
                 }
             }) {
                 IconButton("add", "Add") {
-                    addContentMenuTarget = if (addContentMenuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
+                    addContentMenuTarget =
+                        if (addContentMenuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
                 }
             }
 
@@ -785,7 +895,11 @@ fun ExplorePage(
                                 InlineMenu({
                                     it(true)
                                 }) {
-                                    item("Script", description = "Embed dynamic content into your page", icon = "code") {
+                                    item(
+                                        "Script",
+                                        description = "Embed dynamic content into your page",
+                                        icon = "code"
+                                    ) {
                                         scope.launch {
                                             selectScriptDialog(scope) { scriptId, scriptData ->
                                                 scope.launch {
@@ -793,8 +907,12 @@ fun ExplorePage(
                                                         widget = Widgets.Script,
                                                         data = scriptData
                                                     ) { widget ->
-                                                        val currentContent = card.content?.asStoryContents() ?: emptyList()
-                                                        val newContent = currentContent + StoryContent.Widget(widget.widget!!, widget.id!!)
+                                                        val currentContent =
+                                                            card.content?.asStoryContents() ?: emptyList()
+                                                        val newContent = currentContent + StoryContent.Widget(
+                                                            widget.widget!!,
+                                                            widget.id!!
+                                                        )
 
                                                         api.updateCard(
                                                             card.id!!,
@@ -814,14 +932,19 @@ fun ExplorePage(
                                         }
                                     }
 
-                                    item("Page Tree", description = "Organize small projects and track progress", icon = "account_tree") {
+                                    item(
+                                        "Page Tree",
+                                        description = "Organize small projects and track progress",
+                                        icon = "account_tree"
+                                    ) {
                                         scope.launch {
                                             api.createWidget(
                                                 widget = Widgets.PageTree,
                                                 data = json.encodeToString(PageTreeData(card = card.id!!))
                                             ) { widget ->
                                                 val currentContent = card.content?.asStoryContents() ?: emptyList()
-                                                val newContent = currentContent + StoryContent.Widget(widget.widget!!, widget.id!!)
+                                                val newContent =
+                                                    currentContent + StoryContent.Widget(widget.widget!!, widget.id!!)
 
                                                 api.updateCard(
                                                     card.id!!,
@@ -846,7 +969,8 @@ fun ExplorePage(
                                                 data = json.encodeToString(SpaceData(card = card.id))
                                             ) { widget ->
                                                 val currentContent = card.content?.asStoryContents() ?: emptyList()
-                                                val newContent = currentContent + StoryContent.Widget(widget.widget!!, widget.id!!)
+                                                val newContent =
+                                                    currentContent + StoryContent.Widget(widget.widget!!, widget.id!!)
 
                                                 api.updateCard(
                                                     card.id!!,
@@ -882,7 +1006,8 @@ fun ExplorePage(
                                                 data = json.encodeToString(WebData(url = url))
                                             ) { widget ->
                                                 val currentContent = card.content?.asStoryContents() ?: emptyList()
-                                                val newContent = currentContent + StoryContent.Widget(widget.widget!!, widget.id!!)
+                                                val newContent =
+                                                    currentContent + StoryContent.Widget(widget.widget!!, widget.id!!)
 
                                                 api.updateCard(
                                                     card.id!!,
@@ -900,7 +1025,11 @@ fun ExplorePage(
                                         }
                                     }
 
-                                    item("Form", description = "Collect and organize responses to a form", icon = "list_alt") {
+                                    item(
+                                        "Form",
+                                        description = "Collect and organize responses to a form",
+                                        icon = "list_alt"
+                                    ) {
                                         scope.launch {
                                             val result = editFormDialog(
                                                 initialFormData = FormData(
@@ -913,8 +1042,12 @@ fun ExplorePage(
                                                         widget = Widgets.Form,
                                                         data = json.encodeToString(formData)
                                                     ) { widget ->
-                                                        val currentContent = card.content?.asStoryContents() ?: emptyList()
-                                                        val newContent = currentContent + StoryContent.Widget(widget.widget!!, widget.id!!)
+                                                        val currentContent =
+                                                            card.content?.asStoryContents() ?: emptyList()
+                                                        val newContent = currentContent + StoryContent.Widget(
+                                                            widget.widget!!,
+                                                            widget.id!!
+                                                        )
 
                                                         api.updateCard(
                                                             card.id!!,

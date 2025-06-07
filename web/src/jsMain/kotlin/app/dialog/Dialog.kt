@@ -8,6 +8,7 @@ import kotlinx.browser.document
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import org.jetbrains.compose.web.attributes.autoFocus
+import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.CSSSizeValue
 import org.jetbrains.compose.web.css.CSSUnit
@@ -36,6 +37,7 @@ suspend fun dialog(
     maxWidth: CSSSizeValue<out CSSUnit>? = null,
     actions: (@Composable (resolve: (Boolean?) -> Unit) -> Unit)? = null,
     extraButtons: (@Composable (resolve: (Boolean?) -> Unit) -> Unit)? = null,
+    enableConfirm: (@Composable () -> Boolean) = { true },
     content: @Composable (resolve: (Boolean?) -> Unit) -> Unit = {}
 ): Boolean? {
     val result = CompletableDeferred<Boolean?>()
@@ -93,10 +95,15 @@ suspend fun dialog(
         }
         Footer {
             if (confirmButton != null) {
+                val enableConfirm = enableConfirm()
                 Button({
                     classes(Styles.button)
                     onClick {
                         result.complete(true)
+                    }
+
+                    if (!enableConfirm) {
+                        disabled()
                     }
 
                     if (cancelButton == null) {

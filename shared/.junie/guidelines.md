@@ -35,5 +35,7 @@ This document outlines the core guidelines for development in the Junie project.
     - Use KotlinX DateTime library for date and time handling
     - Implement proper null safety
     - Use sealed classes for finite state handling
-    - Aggressively reuse code when possible
+    - Aggressively refactor and reuse code when possible
     - Always create new components in their own files
+    - Always put function arguments on a new line
+    - Always use named arguments

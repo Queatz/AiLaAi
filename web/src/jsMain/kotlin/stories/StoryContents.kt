@@ -98,6 +98,8 @@ fun StoryContents(
     openInNewWindow: Boolean = false,
     editable: Boolean = false,
     onEdited: ((index: Int, part: StoryContent) -> Unit)? = null,
+    actions: @Composable (index: Int, part: StoryContent) -> Unit = { _, _ -> },
+    formReloadKey: Int = 0,
     onSave: ((List<StoryContent>) -> Unit)? = {},
 ) {
     StyleManager.use(
@@ -438,7 +440,7 @@ fun StoryContents(
                     }
 
                     Widgets.Form -> {
-                        FormWidget(part.id)
+                        FormWidget(part.id, formReloadKey)
                     }
 
                     Widgets.Space -> {
@@ -580,10 +582,11 @@ fun StoryContents(
                     part.profiles.forEach { personId ->
                         ProfileCard(personId) {
                             window.open("/profile/$personId", "_blank")
-                        }
+         }
                     }
                 }
             }
         }
+        actions(index, part)
     }
 }
