@@ -26,6 +26,8 @@ fun SpaceWidgetSidePanel(
     showContentTools: Boolean = false,
     onSendToBack: () -> Unit,
     onBringToFront: () -> Unit,
+    onToggleSlideshow: () -> Unit,
+    isSlideshowActive: Boolean,
 ) {
     Div(
         attrs = {
@@ -53,6 +55,23 @@ fun SpaceWidgetSidePanel(
                 onFullscreen()
             }
         )
+
+
+        // Slideshow button
+        IconButton(
+            name = if (isSlideshowActive) "stop" else "slideshow",
+            // todo: translate
+            title = if (isSlideshowActive) "Stop Slideshow" else "Start Slideshow",
+            styles = {
+                borderRadius(1.r)
+                backgroundColor(Styles.colors.primary)
+                property("pointer-events", "initial")
+            },
+            onClick = {
+                onToggleSlideshow()
+            }
+        )
+
 
         if (showContentTools) {
             IconButton(

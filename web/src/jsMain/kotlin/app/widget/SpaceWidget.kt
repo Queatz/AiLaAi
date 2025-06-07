@@ -18,6 +18,8 @@ import app.ailaai.api.uploadPhotos
 import app.compose.rememberDarkMode
 import app.dialog.inputDialog
 import app.dialog.rememberChoosePhotoDialog
+import app.widget.space.SlideListPanel
+import app.widget.space.SlideshowControls
 import app.widget.space.SpacePathItem
 import app.widget.space.SpaceWidgetPath
 import app.widget.space.SpaceWidgetSidePanel
@@ -35,7 +37,6 @@ import json
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import lib.FullscreenApi
-import lib.FullscreenApi.isFullscreen
 import lib.ResizeObserver
 import notBlank
 import org.jetbrains.compose.web.css.borderRadius
@@ -192,6 +193,21 @@ fun SpaceWidget(widgetId: String) {
         }
     }
 
+    // Observe slideshow state
+    val slideshowMode = control.collectSlideshowMode()
+    val slideshowPaused = control.collectSlideshowPaused()
+    val itemVisibility = control.collectItemVisibility()
+    val currentSlideIndex = control.collectCurrentSlideIndex()
+
+    // Handle slide transitions (auto-advance when active and not paused)
+    LaunchedEffect(slideshowMode, currentSlideIndex, slideshowPaused) {
+        if (slideshowMode && !slideshowPaused) {
+            // Wait for the transition to complete (500ms) and then wait for display time
+            delay(500 + control.slideshowInterval)
+            control.nextSlide()
+        }
+    }
+
     LaunchedEffect(
         context,
         offset,
@@ -202,7 +218,10 @@ fun SpaceWidget(widgetId: String) {
         selectedItem,
         darkMode,
         drawInfo,
-        mousePosition
+        mousePosition,
+        slideshowMode,
+        itemVisibility,
+        tool
     ) {
         control.updateDrawFunc {
             context?.let {
@@ -216,6 +235,8 @@ fun SpaceWidget(widgetId: String) {
                     darkMode = darkMode,
                     drawInfo = drawInfo,
                     mousePosition = mousePosition,
+                    isItemVisible = control::isItemVisible,
+                    itemVisibility = itemVisibility
                 )
             }
         }
@@ -272,12 +293,6 @@ fun SpaceWidget(widgetId: String) {
         Canvas(
             attrs = {
                 classes(WidgetStyles.space)
-
-                style {
-                    width(100.percent)
-                    height(100.percent)
-                    borderRadius(1.r)
-                }
 
                 tabIndex(1)
 
@@ -435,6 +450,7 @@ fun SpaceWidget(widgetId: String) {
                                 }
                             }
 
+
                             else -> Unit
                         }
                     } else {
@@ -474,7 +490,7 @@ fun SpaceWidget(widgetId: String) {
                             is SpaceContent.Page -> {
                                 if (sqrt((mouseX - x).pow(2) + (mouseY - y).pow(2)) <= 24.0) {
                                     // Enter into page
-                                    cardId?.let { currentCardId ->
+                                    cardId.let { currentCardId ->
                                         val pathItem = SpacePathItem(
                                             id = currentCardId,
                                             card = card ?: return@forEachIndexed,
@@ -618,6 +634,69 @@ fun SpaceWidget(widgetId: String) {
                             control.updateDirty(nextInt())
                         }
                     }
+                },
+                onToggleSlideshow = {
+                    if (slideshowMode) {
+                        control.stopSlideshow()
+                    } else {
+                        control.startSlideshow()
+                    }
+                },
+                isSlideshowActive = slideshowMode
+            )
+        }
+
+        // Show slideshow controls when in slideshow mode
+        if (slideshowMode) {
+            val slides = control.collectSlides()
+            SlideshowControls(
+                currentSlide = currentSlideIndex,
+                totalSlides = slides.size,
+                isPaused = slideshowPaused,
+                onPrevious = { _ -> control.previousSlide() },
+                onPause = { _ ->
+                    if (slideshowPaused) control.resumeSlideshow() else control.pauseSlideshow()
+                },
+                onNext = { _ -> control.nextSlide() },
+                onExit = { _ -> control.stopSlideshow() },
+                onCreate = { _ ->
+                    scope.launch {
+                        val slideTitle = inputDialog(
+                            title = "Slide Title",
+                            singleLine = true
+                        )
+                        if (!slideTitle.isNullOrBlank()) {
+                            control.createSlide(slideTitle)
+                        }
+                    }
+                },
+                onRename = { _ ->
+                    scope.launch {
+                        val current = slides.getOrNull(currentSlideIndex)
+                        val currentTitle = (current?.content as? SpaceContent.Slide)?.title.orEmpty()
+                        val newTitle = inputDialog(
+                            title = "Rename Slide",
+                            defaultValue = currentTitle,
+                            singleLine = true
+                        )
+                        if (!newTitle.isNullOrBlank()) {
+                            control.renameSlide(currentSlideIndex, newTitle)
+                        }
+                    }
+                },
+                onDelete = { _ -> control.deleteSlide(currentSlideIndex) }
+            )
+        }
+
+        // Always show slide list panel when in slideshow mode
+        if (slideshowMode) {
+            val slides = control.collectSlides()
+            SlideListPanel(
+                slides = slides,
+                currentSlideIndex = currentSlideIndex,
+                onSelectSlide = { index, _ ->
+                    control.showSlide(index)
+                    control.updateCurrentSlideIndex(index)
                 }
             )
         }

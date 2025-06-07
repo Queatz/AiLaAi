@@ -18,47 +18,54 @@ data class SpaceItem(
 @Serializable
 sealed class SpaceContent {
     @Serializable
-    class Page(
+    data class Page(
         val id: String
     ) : SpaceContent()
 
     @Serializable
-    class Text(
+    data class Text(
         val page: String? = null,
         val text: String? = null
     ) : SpaceContent()
 
     @Serializable
-    class Line(
+    data class Line(
         val page: String? = null,
         val to: Pair<Double, Double>
     ) : SpaceContent()
 
     @Serializable
-    class Box(
+    data class Box(
         val page: String? = null,
         val to: Pair<Double, Double>
     ) : SpaceContent()
 
     @Serializable
-    class Circle(
+    data class Circle(
         val page: String? = null,
         val to: Pair<Double, Double>
     ) : SpaceContent()
 
     @Serializable
-    class Scribble(
+    data class Scribble(
         val page: String? = null,
         val points: List<Pair<Double, Double>>,
         val to: Pair<Double, Double>
     ) : SpaceContent()
 
     @Serializable
-    class Photo(
+    data class Photo(
         val page: String? = null,
         val photo: String,
         val width: Int? = null,
         val height: Int? = null,
         val to: Pair<Double, Double>
+    ) : SpaceContent()
+
+    @Serializable
+    data class Slide(
+        val page: String? = null,
+        val title: String? = null,
+        val items: List<String> = emptyList()
     ) : SpaceContent()
 }

@@ -5,11 +5,15 @@ import Styles
 import app.dark
 import app.mobile
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
+import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.Position.Companion.Absolute
 import org.jetbrains.compose.web.css.Position.Companion.Relative
 import org.jetbrains.compose.web.css.StyleSheet
+import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.border
 import org.jetbrains.compose.web.css.borderRadius
@@ -17,15 +21,24 @@ import org.jetbrains.compose.web.css.bottom
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.fontWeight
+import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.left
+import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.ms
 import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.rgba
 import org.jetbrains.compose.web.css.right
 import org.jetbrains.compose.web.css.textAlign
 import org.jetbrains.compose.web.css.textDecoration
@@ -195,5 +208,90 @@ class WidgetStyleSheet : StyleSheet() {
                 border(2.px, LineStyle.Solid, Styles.colors.black)
             }
         }
+    }
+
+    // Slide list panel (thumbnails)
+    val slideListPanel by style {
+        position(Absolute)
+        top(4.r)
+        right(1.r)
+        width(12.r)
+        property("max-height", "calc(100% - 6rem)")
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        gap(0.5.r)
+        padding(0.5.r)
+        backgroundColor(Styles.colors.background)
+        borderRadius(1.r)
+        overflow("auto")
+        property("pointer-events", "initial")
+        property("z-index", "10")
+        property("box-shadow", "0 4px 8px rgba(0, 0, 0, 0.1)")
+        dark(self) {
+            backgroundColor(Styles.colors.dark.surface)
+        }
+    }
+
+    val slideListPanelHeader by style {
+        padding(0.5.r)
+        fontSize(16.px)
+        fontWeight("bold")
+        border(0.px, LineStyle.Solid, Styles.colors.outline)
+        property("border-bottom-width", "1px")
+        marginBottom(0.5.r)
+    }
+
+    val slideListPanelEmpty by style {
+        padding(1.r)
+        color(Styles.colors.secondary)
+        textAlign("center")
+    }
+
+    val slideListPanelItem by style {
+        display(DisplayStyle.Flex)
+        alignItems(AlignItems.Center)
+        padding(0.5.r)
+        borderRadius(0.5.r)
+        cursor("pointer")
+
+        property("transition", "background-color 0.2s")
+
+        hover(self) style {
+            backgroundColor(Styles.colors.white)
+        }
+
+        dark(self) {
+            hover(self) style {
+                backgroundColor(Styles.colors.black)
+            }
+        }
+    }
+
+    val slideListPanelItemSelected by style {
+        backgroundColor(Styles.colors.primary)
+        color(Styles.colors.white)
+    }
+
+    // Controls overlay for slideshow navigation
+    val slideshowControls by style {
+        position(Absolute)
+        bottom(1.r)
+        left(0.r)
+        right(0.r)
+        display(DisplayStyle.Flex)
+        justifyContent(JustifyContent.Center)
+        padding(1.r)
+        backgroundColor(rgba(0, 0, 0, 0.5))
+
+        dark(self) {
+            backgroundColor(rgba(255, 255, 255, 0.1))
+        }
+    }
+
+    val slideshowControlsCounter by style {
+        color(Styles.colors.white)
+        margin(0.r, 1.r)
+        display(DisplayStyle.Flex)
+        alignItems(AlignItems.Center)
     }
 }

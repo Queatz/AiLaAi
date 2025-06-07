@@ -8,11 +8,19 @@ import com.queatz.widgets.widgets.SpaceContent
 import com.queatz.widgets.widgets.SpaceData
 import com.queatz.widgets.widgets.SpaceItem
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.w3c.dom.DOMRect
 import kotlin.math.absoluteValue
 import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.random.Random.Default.nextInt
+
+// Class to store view state before entering slideshow mode
+data class ViewState(
+    val offset: Pair<Double, Double>,
+    val selectedItem: SpaceItem?
+)
 
 class SpaceWidgetInputControl {
     private val _tool = MutableStateFlow<SpaceWidgetTool>(SpaceWidgetTool.Default)
@@ -26,10 +34,41 @@ class SpaceWidgetInputControl {
     private val _scribblePoints = MutableStateFlow(mutableListOf<Pair<Double, Double>>())
     private val _mousePosition = MutableStateFlow<Pair<Double, Double>?>(null)
     private val _data = MutableStateFlow<SpaceData?>(null)
+    // Stable IDs for items, aligned by index in data.items
+    private val _stableIds = MutableStateFlow<List<String>>(emptyList())
+    private var nextStableId = 0
     private val _cardId = MutableStateFlow<String?>(null)
     private val _canEdit = MutableStateFlow(false)
     private val _dirty = MutableStateFlow<Int?>(null)
     private val _drawFunc = MutableStateFlow {}
+
+    // Slideshow state
+    private val _slideshowMode = MutableStateFlow(false)
+    private val _currentSlideIndex = MutableStateFlow(0)
+    private val _slides = MutableStateFlow<List<SpaceItem>>(emptyList())
+    private val _slideshowInterval = MutableStateFlow(5000L) // 5 seconds default
+    private val _slideshowPaused = MutableStateFlow(false)
+    private val _savedViewState = MutableStateFlow<ViewState?>(null)
+    private val _itemVisibility = MutableStateFlow<Map<String, Boolean>>(emptyMap())
+
+    // Public accessors for slideshow state
+    val slideshowMode: Boolean
+        get() = _slideshowMode.value
+
+    val currentSlideIndex: Int
+        get() = _currentSlideIndex.value
+
+    val slides: List<SpaceItem>
+        get() = _slides.value
+
+    val slideshowInterval: Long
+        get() = _slideshowInterval.value
+
+    val slideshowPaused: Boolean
+        get() = _slideshowPaused.value
+
+    val itemVisibility: Map<String, Boolean>
+        get() = _itemVisibility.value
 
     // Public properties that access the .value of the MutableStateFlow
     var tool: SpaceWidgetTool
@@ -92,6 +131,8 @@ class SpaceWidgetInputControl {
         get() = _drawFunc.value
         private set(value) { _drawFunc.value = value }
 
+    // Generate a new stable ID
+    private fun generateStableId(): String = (nextStableId++).toString()
     // Methods to update state from SpaceWidget
     fun updateTool(value: SpaceWidgetTool) { _tool.value = value }
     fun updateDrawInfo(value: DrawInfo?) { _drawInfo.value = value }
@@ -103,7 +144,24 @@ class SpaceWidgetInputControl {
     fun updateOffset(value: Pair<Double, Double>) { _offset.value = value }
     fun updateScribblePoints(value: MutableList<Pair<Double, Double>>) { _scribblePoints.value = value }
     fun updateMousePosition(value: Pair<Double, Double>?) { _mousePosition.value = value }
-    fun updateData(value: SpaceData?) { _data.value = value }
+    /**
+     * Updates the entire data and manages stable item IDs by index.
+     */
+    fun updateData(value: SpaceData?) {
+        val oldItems = _data.value?.items ?: emptyList()
+        val oldStable = _stableIds.value
+        val newItems = value?.items ?: emptyList()
+        val newStable = mutableListOf<String>()
+        for (i in newItems.indices) {
+            if (i < oldItems.size) {
+                newStable.add(oldStable.getOrNull(i) ?: generateStableId())
+            } else {
+                newStable.add(generateStableId())
+            }
+        }
+        _stableIds.value = newStable
+        _data.value = value
+    }
     fun updateCardId(value: String?) { _cardId.value = value }
     fun updateCanEdit(value: Boolean) { _canEdit.value = value }
     fun updateDirty(value: Int?) { _dirty.value = value }
@@ -154,7 +212,309 @@ class SpaceWidgetInputControl {
     @Composable
     fun collectDrawFunc() = _drawFunc.collectAsState().value
 
+    // Slideshow state collection methods
+    @Composable
+    fun collectSlideshowMode() = _slideshowMode.collectAsState().value
+
+    @Composable
+    fun collectCurrentSlideIndex() = _currentSlideIndex.collectAsState().value
+
+    @Composable
+    fun collectSlides() = _slides.collectAsState().value
+
+    @Composable
+    fun collectItemVisibility() = _itemVisibility.collectAsState().value
+
+    @Composable
+    fun collectSlideshowPaused() = _slideshowPaused.collectAsState().value
+
+    // Helper property to access items
     private val items get() = data?.items ?: listOf()
+
+    // Slideshow management methods
+
+    /**
+     * Creates a new slide with the given title and selected items
+     */
+    fun createSlide(title: String) {
+        val newSlide = SpaceItem(
+            content = SpaceContent.Slide(
+                page = cardId,
+                title = title,
+                items = selectedItem?.let { listOf(getItemId(it)) } ?: emptyList()
+            ),
+            position = 0.0 to 0.0 // Position doesn't matter for slides
+        )
+
+        val newItems = items + newSlide
+        updateData(data?.copy(items = newItems) ?: SpaceData(items = newItems))
+        updateDirty(nextInt())
+        // Update slideshow slides and select the new slide
+        val updatedSlides = collectAllSlides()
+        _slides.value = updatedSlides
+        val newIndex = updatedSlides.lastIndex
+        _currentSlideIndex.value = newIndex
+        showSlide(newIndex)
+    }
+
+    /**
+     * Renames the slide at the given index.
+     */
+    fun renameSlide(index: Int, newTitle: String) {
+        val slideItem = _slides.value.getOrNull(index) ?: return
+        val content = (slideItem.content as? SpaceContent.Slide) ?: return
+        val updatedSlide = slideItem.copy(content = content.copy(title = newTitle))
+        val idx = items.indexOf(slideItem)
+        if (idx >= 0) {
+            val newItems = items.toMutableList().apply { set(idx, updatedSlide) }
+            updateData(data?.copy(items = newItems) ?: SpaceData(items = newItems))
+            updateDirty(nextInt())
+            _slides.value = collectAllSlides()
+        }
+    }
+
+    /**
+     * Deletes the slide at the given index.
+     */
+    fun deleteSlide(index: Int) {
+        val slideItem = _slides.value.getOrNull(index) ?: return
+        val newItems = items.filter { it != slideItem }
+        updateData(data?.copy(items = newItems) ?: SpaceData(items = newItems))
+        updateDirty(nextInt())
+        val updatedSlides = collectAllSlides()
+        _slides.value = updatedSlides
+        if (updatedSlides.isEmpty()) {
+            stopSlideshow()
+        } else {
+            val newIndex = if (index < updatedSlides.size) index else updatedSlides.lastIndex
+            _currentSlideIndex.value = newIndex
+            showSlide(newIndex)
+        }
+    }
+
+    /**
+     * Adds an item to the current slide
+     */
+    fun addItemToSlide(slideItem: SpaceItem, itemToAdd: SpaceItem) {
+        val slideContent = slideItem.content as? SpaceContent.Slide ?: return
+        val itemId = getItemId(itemToAdd)
+
+        if (slideContent.items.contains(itemId)) return
+
+        val updatedSlide = SpaceItem(
+            content = slideContent.copy(
+                items = slideContent.items + itemId
+            ),
+            position = slideItem.position
+        )
+
+        val index = items.indexOf(slideItem)
+        if (index >= 0) {
+            val newItems = items.toMutableList()
+            newItems[index] = updatedSlide
+            updateData(data?.copy(items = newItems) ?: SpaceData(items = newItems))
+            updateDirty(nextInt())
+            // Update slide list and refresh visibility to include the new item
+            _slides.value = collectAllSlides()
+            showSlide(_currentSlideIndex.value)
+        }
+    }
+
+    /**
+     * Removes an item from the current slide
+     */
+    fun removeItemFromSlide(slideItem: SpaceItem, itemToRemove: SpaceItem) {
+        val slideContent = slideItem.content as? SpaceContent.Slide ?: return
+        val itemId = getItemId(itemToRemove)
+
+        val updatedSlide = SpaceItem(
+            content = slideContent.copy(
+                items = slideContent.items.filter { it != itemId }
+            ),
+            position = slideItem.position
+        )
+
+        val index = items.indexOf(slideItem)
+        if (index >= 0) {
+            val newItems = items.toMutableList()
+            newItems[index] = updatedSlide
+            updateData(data?.copy(items = newItems) ?: SpaceData(items = newItems))
+            updateDirty(nextInt())
+        }
+    }
+
+    /**
+     * Collects all slides for the current page
+     */
+    fun collectAllSlides(): List<SpaceItem> {
+        return items.filter { 
+            val content = it.content as? SpaceContent.Slide ?: return@filter false
+            content.page == null || content.page == cardId
+        }
+    }
+
+    /**
+     * Starts the slideshow
+     */
+    fun startSlideshow() {
+        val slides = collectAllSlides()
+        _slideshowMode.value = true
+        _slideshowPaused.value = true
+        _currentSlideIndex.value = 0
+        _slides.value = slides
+
+        // Save current view state to restore later
+        _savedViewState.value = ViewState(
+            offset = offset,
+            selectedItem = selectedItem
+        )
+
+        // Clear selection
+        updateSelectedItem(null)
+
+        // Show the first slide if available
+        if (slides.isNotEmpty()) {
+            showSlide(0)
+        } else {
+            // No slides: reset visibility map
+            _itemVisibility.value = emptyMap()
+        }
+    }
+
+    /**
+     * Stops the slideshow
+     */
+    fun stopSlideshow() {
+        _slideshowMode.value = false
+        _slideshowPaused.value = false
+
+        // Reset item visibility
+        _itemVisibility.value = emptyMap()
+
+        // Restore previous view state
+        _savedViewState.value?.let {
+            updateOffset(it.offset)
+            updateSelectedItem(it.selectedItem)
+        }
+    }
+
+    /**
+     * Pauses the slideshow without exiting slideshow mode
+     */
+    fun pauseSlideshow() {
+        _slideshowPaused.value = true
+    }
+
+    /**
+     * Resumes the slideshow from paused state
+     */
+    fun resumeSlideshow() {
+        _slideshowPaused.value = false
+    }
+
+    /**
+     * Shows the next slide
+     */
+    fun nextSlide() {
+        val nextIndex = (_currentSlideIndex.value + 1) % _slides.value.size
+        _currentSlideIndex.value = nextIndex
+        showSlide(nextIndex)
+    }
+
+    /**
+     * Shows the previous slide
+     */
+    fun previousSlide() {
+        val prevIndex = if (_currentSlideIndex.value > 0) 
+                          _currentSlideIndex.value - 1 
+                        else 
+                          _slides.value.size - 1
+        _currentSlideIndex.value = prevIndex
+        showSlide(prevIndex)
+    }
+
+    /**
+     * Updates the current slide index
+     */
+    fun updateCurrentSlideIndex(index: Int) {
+        _currentSlideIndex.value = index
+    }
+
+    /**
+     * Shows a specific slide by index
+     */
+    fun showSlide(index: Int) {
+        val slide = _slides.value.getOrNull(index) ?: return
+        val content = slide.content as? SpaceContent.Slide ?: return
+
+        // Create a new visibility map
+        val newVisibility = mutableMapOf<String, Boolean>()
+
+        // Set visibility for all items
+        items.forEach { item ->
+            if (item.content is SpaceContent.Slide) return@forEach
+
+            // Only process items visible on current page
+            if (item.content !is SpaceContent.Page && 
+                (getItemPage(item) == null || getItemPage(item) == cardId)) {
+
+                val itemId = getItemId(item)
+                val isInSlide = content.items.contains(itemId)
+
+                // Set visibility in the map
+                newVisibility[itemId] = isInSlide
+            }
+        }
+
+        // Update the visibility map
+        _itemVisibility.value = newVisibility
+    }
+
+    /**
+     * Gets the stable ID of an item based on its index.
+     */
+    private fun getItemId(item: SpaceItem): String {
+        val items = _data.value?.items ?: return ""
+        val idx = items.indexOf(item)
+        return _stableIds.value.getOrNull(idx) ?: ""
+    }
+
+    /**
+     * Gets the page of an item
+     */
+    private fun getItemPage(item: SpaceItem): String? {
+        return when (val content = item.content) {
+            is SpaceContent.Text -> content.page
+            is SpaceContent.Line -> content.page
+            is SpaceContent.Box -> content.page
+            is SpaceContent.Circle -> content.page
+            is SpaceContent.Scribble -> content.page
+            is SpaceContent.Photo -> content.page
+            is SpaceContent.Slide -> content.page
+            is SpaceContent.Page -> null
+        }
+    }
+
+    // Helper method to check if an item should be visible
+    fun isItemVisible(item: SpaceItem): Boolean {
+        val itemId = getItemId(item)
+        if (slideshowMode) {
+            // In slideshow mode, only show page items and those in the current slide
+            if (item.content is SpaceContent.Slide) return false
+            if (item.content is SpaceContent.Page) return true
+            return itemVisibility[itemId] ?: false
+        } else {
+            // In normal mode, hide slide definitions and any items belonging to slides
+            if (item.content is SpaceContent.Slide) return false
+            if (item.content is SpaceContent.Page) return true
+            // Collect all slide item IDs
+            val slideItemIds = items
+                .mapNotNull { it.content as? SpaceContent.Slide }
+                .flatMap { it.items }
+                .toSet()
+            return !slideItemIds.contains(itemId)
+        }
+    }
 
     fun onMouseDown(rect: DOMRect, clientX: Double, clientY: Double) {
         val mouseX = clientX - rect.left - offset.first
@@ -367,12 +727,12 @@ class SpaceWidgetInputControl {
                                 val height = item.height?.toDouble() ?: 150.0
                                 val scaleX = (item.to.first - x).absoluteValue / width
                                 val scaleY = (item.to.second - y).absoluteValue / height
-                                val scaledWidth = width * scaleX.toDouble()
-                                val scaledHeight = height * scaleY.toDouble()
+                                val scaledWidth = width * scaleX
+                                val scaledHeight = height * scaleY
 
                                 // Check if mouse is within the photo bounds
-                                (mouseX >= x && mouseX <= x + scaledWidth.toDouble() &&
-                                        mouseY >= y && mouseY <= y + scaledHeight.toDouble()) ||
+                                (mouseX >= x && mouseX <= x + scaledWidth &&
+                                        mouseY >= y && mouseY <= y + scaledHeight) ||
                                 // Or near the corners for resizing
                                 sqrt((mouseX - item.to.first).pow(2) + (mouseY - item.to.second).pow(2)) <= 24.0 ||
                                 sqrt((mouseX - item.to.first).pow(2) + (mouseY - y).pow(2)) <= 24.0 ||
@@ -417,6 +777,7 @@ class SpaceWidgetInputControl {
                 -> {
                 drawInfo = DrawInfo(tool = tool, from = mouseX to mouseY)
             }
+
         }
     }
 
@@ -1089,6 +1450,7 @@ class SpaceWidgetInputControl {
                     drawFunc()
                 }
             }
+
         }
 
     }
@@ -1098,30 +1460,27 @@ class SpaceWidgetInputControl {
             SpaceWidgetTool.Scribble -> {
                 drawInfo?.from?.let { from ->
                     if (scribblePoints.size > 1) {
-                        // Calculate bounding box for the scribble
                         val minX = scribblePoints.minOf { it.first }
                         val minY = scribblePoints.minOf { it.second }
                         val maxX = scribblePoints.maxOf { it.first }
                         val maxY = scribblePoints.maxOf { it.second }
-
-                        // Create a to point that represents the bottom-right of the bounding box
                         val to = maxX to maxY
-
-                        // Add the scribble to the data
-                        data = data!!.copy(
-                            items = items + SpaceItem(
-                                content = SpaceContent.Scribble(
-                                    page = cardId,
-                                    points = scribblePoints.toList(),
-                                    to = to
-                                ),
-                                position = minX to minY
-                            )
+                        val newItem = SpaceItem(
+                            content = SpaceContent.Scribble(
+                                page = cardId,
+                                points = scribblePoints.toList(),
+                                to = to
+                            ),
+                            position = minX to minY
                         )
-                        dirty = nextInt()
+                        updateData(data!!.copy(items = items + newItem))
+                        updateDirty(nextInt())
+                        if (slideshowMode) {
+                            slides.getOrNull(currentSlideIndex)?.let { slideItem ->
+                                addItemToSlide(slideItem, newItem)
+                            }
+                        }
                     }
-
-                    // Clear the points and drawing info
                     scribblePoints.clear()
                     drawInfo = null
                     drawFunc()
@@ -1144,75 +1503,67 @@ class SpaceWidgetInputControl {
                 -> {
                 drawInfo?.from?.let { from ->
                     drawInfo?.to?.let { to ->
-                        data = data!!.copy(
-                            items = items + SpaceItem(
-                                content = when (drawInfo?.tool) {
-                                    SpaceWidgetTool.Box -> {
-                                        SpaceContent.Box(
-                                            page = cardId,
-                                            to = to
-                                        )
-                                    }
-
-                                    SpaceWidgetTool.Circle -> {
-                                        SpaceContent.Circle(
-                                            page = cardId,
-                                            to = to
-                                        )
-                                    }
-
-                                    else -> {
-                                        SpaceContent.Line(
-                                            page = cardId,
-                                            to = to
-                                        )
-                                    }
-                                },
-                                position = from
-                            )
-                        )
-                        dirty = nextInt()
+                        val content = when (drawInfo?.tool) {
+                            SpaceWidgetTool.Box -> SpaceContent.Box(page = cardId, to = to)
+                            SpaceWidgetTool.Circle -> SpaceContent.Circle(page = cardId, to = to)
+                            else -> SpaceContent.Line(page = cardId, to = to)
+                        }
+                        val newItem = SpaceItem(content = content, position = from)
+                        updateData(data!!.copy(items = items + newItem))
+                        updateDirty(nextInt())
+                        if (slideshowMode) {
+                            slides.getOrNull(currentSlideIndex)?.let { slideItem ->
+                                addItemToSlide(slideItem, newItem)
+                            }
+                        }
                     }
                 }
-
                 drawInfo = null
                 drawFunc()
             }
+
         }
     }
 
     // Function to handle text input dialog and add text to the canvas
     fun addText(mouseX: Double, mouseY: Double, text: String) {
         if (text.isNotBlank()) {
-            data = data!!.copy(
-                items = data!!.items!!.toMutableList().apply {
-                    add(SpaceItem(SpaceContent.Text(page = cardId, text), mouseX to mouseY))
-                }
-            )
-            dirty = nextInt()
-            drawFunc()
+        val newItem = SpaceItem(
+            content = SpaceContent.Text(page = cardId, text),
+            position = mouseX to mouseY
+        )
+        val newItems = data!!.items!!.toMutableList().apply { add(newItem) }
+        updateData(data!!.copy(items = newItems))
+        updateDirty(nextInt())
+        if (slideshowMode) {
+            slides.getOrNull(currentSlideIndex)?.let { slideItem ->
+                addItemToSlide(slideItem, newItem)
+            }
+        }
+        drawFunc()
         }
     }
 
     // Function to add a photo to the canvas
     fun addPhoto(mouseX: Double, mouseY: Double, photoUrl: String, width: Int?, height: Int?) {
-        data = data!!.copy(
-            items = data!!.items!!.toMutableList().apply {
-                add(
-                    SpaceItem(
-                        SpaceContent.Photo(
-                            page = cardId,
-                            photo = photoUrl,
-                            width = width,
-                            height = height,
-                            to = (mouseX + 200) to (mouseY + 150)
-                        ),
-                        mouseX to mouseY
-                    )
-                )
-            }
+        val newItem = SpaceItem(
+            content = SpaceContent.Photo(
+                page = cardId,
+                photo = photoUrl,
+                width = width,
+                height = height,
+                to = (mouseX + 200) to (mouseY + 150)
+            ),
+            position = mouseX to mouseY
         )
-        dirty = nextInt()
+        val newItems = data!!.items!!.toMutableList().apply { add(newItem) }
+        updateData(data!!.copy(items = newItems))
+        updateDirty(nextInt())
+        if (slideshowMode) {
+            slides.getOrNull(currentSlideIndex)?.let { slideItem ->
+                addItemToSlide(slideItem, newItem)
+            }
+        }
         drawFunc()
     }
 
@@ -1222,23 +1573,24 @@ class SpaceWidgetInputControl {
         val centerX = canvasWidth / 2 - offset.first
         val centerY = canvasHeight / 2 - offset.second
 
-        data = data!!.copy(
-            items = data!!.items!!.toMutableList().apply {
-                add(
-                    SpaceItem(
-                        SpaceContent.Photo(
-                            page = cardId,
-                            photo = photoUrl,
-                            width = width,
-                            height = height,
-                            to = (centerX + 200) to (centerY + 150)
-                        ),
-                        centerX to centerY
-                    )
-                )
-            }
+        val newItem = SpaceItem(
+            content = SpaceContent.Photo(
+                page = cardId,
+                photo = photoUrl,
+                width = width,
+                height = height,
+                to = (centerX + 200) to (centerY + 150)
+            ),
+            position = centerX to centerY
         )
-        dirty = nextInt()
+        val newItems = data!!.items!!.toMutableList().apply { add(newItem) }
+        updateData(data!!.copy(items = newItems))
+        updateDirty(nextInt())
+        if (slideshowMode) {
+            slides.getOrNull(currentSlideIndex)?.let { slideItem ->
+                addItemToSlide(slideItem, newItem)
+            }
+        }
         drawFunc()
     }
 
@@ -1256,22 +1608,34 @@ class SpaceWidgetInputControl {
     // Function to update text content
     fun updateText(index: Int, text: String) {
         if (text.isNotBlank()) {
-            val item = data!!.items!![index]
-            val content = item.content as? SpaceContent.Text ?: return
-
-            data = data!!.copy(
-                items = data!!.items!!.toMutableList().apply {
-                    removeAt(index)
-                    add(
-                        index,
-                        SpaceItem(
-                            SpaceContent.Text(page = content.page, text),
-                            item.position
-                        )
+            // Preserve slide membership when updating text
+            val oldItem = data!!.items!![index]
+            val oldId = getItemId(oldItem)
+            val content = oldItem.content as? SpaceContent.Text ?: return
+            val newItem = SpaceItem(
+                content = SpaceContent.Text(page = content.page, text),
+                position = oldItem.position
+            )
+            // Replace item in main data list
+            val updatedItems = data!!.items!!.toMutableList().apply {
+                removeAt(index)
+                add(index, newItem)
+            }
+            updateData(data!!.copy(items = updatedItems))
+            updateDirty(nextInt())
+            // If in slideshow, update current slide definition to replace oldId with newId
+            if (slideshowMode) {
+                val slidesList = collectAllSlides()
+                _slides.value = slidesList
+                slidesList.getOrNull(_currentSlideIndex.value)?.let { slideItem ->
+                    // Remove old ID and add new one
+                    removeItemFromSlide(slideItem, oldItem)
+                    addItemToSlide(
+                        slidesList[_currentSlideIndex.value],
+                        newItem
                     )
                 }
-            )
-            dirty = nextInt()
+            }
             drawFunc()
         }
     }

@@ -10,13 +10,13 @@ import org.jetbrains.compose.web.dom.Div
 import r
 
 sealed class SpaceWidgetTool {
-    object Default : SpaceWidgetTool()
-    object Line : SpaceWidgetTool()
-    object Box : SpaceWidgetTool()
-    object Text : SpaceWidgetTool()
-    object Circle : SpaceWidgetTool()
-    object Scribble : SpaceWidgetTool()
-    object Photo : SpaceWidgetTool()
+    data object Default : SpaceWidgetTool()
+    data object Line : SpaceWidgetTool()
+    data object Box : SpaceWidgetTool()
+    data object Text : SpaceWidgetTool()
+    data object Circle : SpaceWidgetTool()
+    data object Scribble : SpaceWidgetTool()
+    data object Photo : SpaceWidgetTool()
 }
 
 @Composable

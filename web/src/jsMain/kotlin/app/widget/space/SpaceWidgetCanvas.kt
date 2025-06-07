@@ -27,6 +27,8 @@ fun drawCanvas(
     darkMode: Boolean,
     drawInfo: DrawInfo?,
     mousePosition: Pair<Double, Double>? = null,
+    isItemVisible: (SpaceItem) -> Boolean,
+    itemVisibility: Map<String, Boolean>
 ) {
     with(context) {
         clearRect(
@@ -41,7 +43,7 @@ fun drawCanvas(
         translate(offset.first, offset.second)
 
         // Draw the pages
-        items.forEachIndexed { index, (item, position) ->
+        items.filter { isItemVisible(it) }.forEachIndexed { index, (item, position) ->
             when (item) {
                 is SpaceContent.Line -> {
                     if (item.page == null || item.page == cardId) {
@@ -512,6 +514,10 @@ fun drawCanvas(
                     textBaseline = CanvasTextBaseline.MIDDLE
 
                     fillText(card.name ?: "New page", x, y - 24 - 18)
+                }
+
+                is SpaceContent.Slide -> {
+
                 }
             }
         }
