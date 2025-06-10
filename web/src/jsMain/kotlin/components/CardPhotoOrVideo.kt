@@ -13,7 +13,11 @@ import org.jetbrains.compose.web.dom.Video
 import org.w3c.dom.HTMLVideoElement
 
 @Composable
-fun CardPhotoOrVideo(card: Card, styles: StyleScope.() -> Unit = {}) {
+fun CardPhotoOrVideo(
+    card: Card,
+    defaultWidth: Boolean = true,
+    styles: StyleScope.() -> Unit = {}
+) {
     val scope = rememberCoroutineScope()
 
     card.photo?.let {
@@ -21,7 +25,9 @@ fun CardPhotoOrVideo(card: Card, styles: StyleScope.() -> Unit = {}) {
 
         Div({
             style {
-                width(100.percent)
+                if (defaultWidth) {
+                    width(100.percent)
+                }
                 backgroundColor(Styles.colors.background)
                 backgroundImage("url($url)")
                 backgroundPosition("center")

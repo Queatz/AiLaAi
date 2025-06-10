@@ -403,6 +403,7 @@ fun SpaceWidget(widgetId: String) {
 
                 onMouseMove { event: SyntheticMouseEvent ->
                     event.preventDefault()
+                    control.updateShiftDown(event.shiftKey)
                     control.onMouseMove(
                         (event.target as HTMLCanvasElement).getBoundingClientRect(),
                         event.clientX.toDouble(),

@@ -103,7 +103,9 @@ import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.justifyContent
 import app.dialog.selectScriptDialog
 import app.dialog.editFormDialog
+import components.CardPhotoOrVideo
 import org.jetbrains.compose.web.css.gap
+import web.cssom.PropertyName.Companion.borderRadius
 
 @Composable
 fun ExplorePage(
@@ -679,6 +681,15 @@ fun ExplorePage(
             overflowX("hidden")
         }
     }) {
+        if (!card.photo.isNullOrBlank() || !card.video.isNullOrBlank()) {
+            CardPhotoOrVideo(
+                card = card,
+                defaultWidth = false
+            ) {
+                borderRadius(1.r)
+                margin(0.r, 1.r)
+            }
+        }
         Div({
             style {
                 margin(1.r, 1.r, .5.r, 1.r)

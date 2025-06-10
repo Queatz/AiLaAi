@@ -51,6 +51,15 @@ class SpaceWidgetInputControl {
     private val _slideshowPaused = MutableStateFlow(false)
     private val _savedViewState = MutableStateFlow<ViewState?>(null)
     private val _itemVisibility = MutableStateFlow<Map<String, Boolean>>(emptyMap())
+    // Tracks shift key state for aspect-ratio constrained resizing
+    private val _shiftDown = MutableStateFlow(false)
+
+    // Accessor for shift key state
+    val shiftDown: Boolean
+        get() = _shiftDown.value
+
+    /** Updates the shift key state (for aspect-ratio resizing) */
+    fun updateShiftDown(value: Boolean) { _shiftDown.value = value }
 
     // Public accessors for slideshow state
     val slideshowMode: Boolean
@@ -891,22 +900,46 @@ class SpaceWidgetInputControl {
                                 }
 
                                 is SpaceContent.Box -> {
+                                    val origW = (content.to.first - position.first).absoluteValue
+                                    val origH = (content.to.second - position.second).absoluteValue
                                     when (resizeHandleIndex) {
                                         "topLeft" -> {
-                                            // Update the top-left corner (position)
-                                            updateData(
-                                                data!!.copy(
-                                                    items = data!!.items!!.toMutableList().apply {
-                                                        removeAt(index)
-                                                        add(
-                                                            index, SpaceItem(
-                                                                content = content,
-                                                                position = mouseX to mouseY
-                                                            )
-                                                        )
-                                                    }
+                                            if (shiftDown) {
+                                                val anchorX = content.to.first
+                                                val anchorY = content.to.second
+                                                val dx = anchorX - mouseX
+                                                val dy = anchorY - mouseY
+                                                val s = (dx.absoluteValue / origW).coerceAtMost(dy.absoluteValue / origH)
+                                                val newW = origW * s
+                                                val newH = origH * s
+                                                val signX = if (dx >= 0) 1.0 else -1.0
+                                                val signY = if (dy >= 0) 1.0 else -1.0
+                                                val newPosX = anchorX - signX * newW
+                                                val newPosY = anchorY - signY * newH
+                                                updateData(
+                                                    data!!.copy(
+                                                        items = data!!.items!!.toMutableList().apply {
+                                                            removeAt(index)
+                                                            add(index, SpaceItem(content = content, position = newPosX to newPosY))
+                                                        }
+                                                    )
                                                 )
-                                            )
+                                            } else {
+                                                // Update the top-left corner (position)
+                                                updateData(
+                                                    data!!.copy(
+                                                        items = data!!.items!!.toMutableList().apply {
+                                                            removeAt(index)
+                                                            add(
+                                                                index, SpaceItem(
+                                                                    content = content,
+                                                                    position = mouseX to mouseY
+                                                                )
+                                                            )
+                                                        }
+                                                    )
+                                                )
+                                            }
                                         }
 
                                         "topRight" -> {
@@ -1094,94 +1127,228 @@ class SpaceWidgetInputControl {
                                 }
 
                                 is SpaceContent.Photo -> {
-                                    val width = content.width?.toDouble() ?: 200.0
-                                    val height = content.height?.toDouble() ?: 150.0
+                                    val origW = content.width?.toDouble() ?: 200.0
+                                    val origH = content.height?.toDouble() ?: 150.0
 
                                     when (resizeHandleIndex) {
                                         "topLeft" -> {
-                                            // Update the top-left corner (position)
-                                            updateData(
-                                                data!!.copy(
-                                                    items = data!!.items!!.toMutableList().apply {
-                                                        removeAt(index)
-                                                        add(
-                                                            index, SpaceItem(
-                                                                content = content,
-                                                                position = mouseX to mouseY
+                                            if (shiftDown) {
+                                                val anchorX = content.to.first
+                                                val anchorY = content.to.second
+                                                val dx = anchorX - mouseX
+                                                val dy = anchorY - mouseY
+                                                val s = (dx.absoluteValue / origW).coerceAtMost(dy.absoluteValue / origH)
+                                                val newW = origW * s
+                                                val newH = origH * s
+                                                val signX = if (dx >= 0) 1.0 else -1.0
+                                                val signY = if (dy >= 0) 1.0 else -1.0
+                                                val newPosX = anchorX - signX * newW
+                                                val newPosY = anchorY - signY * newH
+                                                updateData(
+                                                    data!!.copy(
+                                                        items = data!!.items!!.toMutableList().apply {
+                                                            removeAt(index)
+                                                            add(
+                                                                index, SpaceItem(
+                                                                    content = SpaceContent.Photo(
+                                                                        page = content.page,
+                                                                        photo = content.photo,
+                                                                        width = content.width,
+                                                                        height = content.height,
+                                                                        to = content.to
+                                                                    ),
+                                                                    position = newPosX to newPosY
+                                                                )
                                                             )
-                                                        )
-                                                    }
+                                                        }
+                                                    )
                                                 )
-                                            )
+                                            } else {
+                                                // Update the top-left corner (position)
+                                                updateData(
+                                                    data!!.copy(
+                                                        items = data!!.items!!.toMutableList().apply {
+                                                            removeAt(index)
+                                                            add(
+                                                                index, SpaceItem(
+                                                                    content = content,
+                                                                    position = mouseX to mouseY
+                                                                )
+                                                            )
+                                                        }
+                                                    )
+                                                )
+                                            }
                                         }
 
                                         "topRight" -> {
-                                            // Update the top-right corner
-                                            updateData(
-                                                data!!.copy(
-                                                    items = data!!.items!!.toMutableList().apply {
-                                                        removeAt(index)
-                                                        add(
-                                                            index, SpaceItem(
-                                                                content = SpaceContent.Photo(
-                                                                    page = content.page,
-                                                                    photo = content.photo,
-                                                                    width = content.width,
-                                                                    height = content.height,
-                                                                    to = mouseX to content.to.second
-                                                                ),
-                                                                position = position.first to mouseY
+                                            if (shiftDown) {
+                                                val anchorX = position.first
+                                                val anchorY = content.to.second
+                                                val dx = mouseX - anchorX
+                                                val dy = anchorY - mouseY
+                                                val s = (dx.absoluteValue / origW).coerceAtMost(dy.absoluteValue / origH)
+                                                val newW = origW * s
+                                                val newH = origH * s
+                                                val signX = if (dx >= 0) 1.0 else -1.0
+                                                val signY = if (dy >= 0) 1.0 else -1.0
+                                                val newToX = anchorX + signX * newW
+                                                val newPosY = anchorY - signY * newH
+                                                updateData(
+                                                    data!!.copy(
+                                                        items = data!!.items!!.toMutableList().apply {
+                                                            removeAt(index)
+                                                            add(
+                                                                index,
+                                                                SpaceItem(
+                                                                    content = SpaceContent.Photo(
+                                                                        page = content.page,
+                                                                        photo = content.photo,
+                                                                        width = content.width,
+                                                                        height = content.height,
+                                                                        to = newToX to anchorY
+                                                                    ),
+                                                                    position = anchorX to newPosY
+                                                                )
                                                             )
-                                                        )
-                                                    }
+                                                        }
+                                                    )
                                                 )
-                                            )
+                                            } else {
+                                                // Update the top-right corner
+                                                updateData(
+                                                    data!!.copy(
+                                                        items = data!!.items!!.toMutableList().apply {
+                                                            removeAt(index)
+                                                            add(
+                                                                index, SpaceItem(
+                                                                    content = SpaceContent.Photo(
+                                                                        page = content.page,
+                                                                        photo = content.photo,
+                                                                        width = content.width,
+                                                                        height = content.height,
+                                                                        to = mouseX to content.to.second
+                                                                    ),
+                                                                    position = position.first to mouseY
+                                                                )
+                                                            )
+                                                        }
+                                                    )
+                                                )
+                                            }
                                         }
 
                                         "bottomLeft" -> {
-                                            // Update the bottom-left corner
-                                            updateData(
-                                                data!!.copy(
-                                                    items = data!!.items!!.toMutableList().apply {
-                                                        removeAt(index)
-                                                        add(
-                                                            index, SpaceItem(
-                                                                content = SpaceContent.Photo(
-                                                                    page = content.page,
-                                                                    photo = content.photo,
-                                                                    width = content.width,
-                                                                    height = content.height,
-                                                                    to = content.to.first to mouseY
-                                                                ),
-                                                                position = mouseX to position.second
+                                            if (shiftDown) {
+                                                val anchorX = content.to.first
+                                                val anchorY = position.second
+                                                val dx = anchorX - mouseX
+                                                val dy = mouseY - anchorY
+                                                val s = (dx.absoluteValue / origW).coerceAtMost(dy.absoluteValue / origH)
+                                                val newW = origW * s
+                                                val newH = origH * s
+                                                val signX = if (dx >= 0) 1.0 else -1.0
+                                                val signY = if (dy >= 0) 1.0 else -1.0
+                                                val newPosX = anchorX - signX * newW
+                                                val newToY = anchorY + signY * newH
+                                                updateData(
+                                                    data!!.copy(
+                                                        items = data!!.items!!.toMutableList().apply {
+                                                            removeAt(index)
+                                                            add(
+                                                                index,
+                                                                SpaceItem(
+                                                                    content = SpaceContent.Photo(
+                                                                        page = content.page,
+                                                                        photo = content.photo,
+                                                                        width = content.width,
+                                                                        height = content.height,
+                                                                        to = anchorX to newToY
+                                                                    ),
+                                                                    position = newPosX to anchorY
+                                                                )
                                                             )
-                                                        )
-                                                    }
+                                                        }
+                                                    )
                                                 )
-                                            )
+                                            } else {
+                                                // Update the bottom-left corner
+                                                updateData(
+                                                    data!!.copy(
+                                                        items = data!!.items!!.toMutableList().apply {
+                                                            removeAt(index)
+                                                            add(
+                                                                index, SpaceItem(
+                                                                    content = SpaceContent.Photo(
+                                                                        page = content.page,
+                                                                        photo = content.photo,
+                                                                        width = content.width,
+                                                                        height = content.height,
+                                                                        to = content.to.first to mouseY
+                                                                    ),
+                                                                    position = mouseX to position.second
+                                                                )
+                                                            )
+                                                        }
+                                                    )
+                                                )
+                                            }
                                         }
 
                                         "bottomRight" -> {
-                                            // Update the bottom-right corner (to)
-                                            updateData(
-                                                data!!.copy(
-                                                    items = data!!.items!!.toMutableList().apply {
-                                                        removeAt(index)
-                                                        add(
-                                                            index, SpaceItem(
-                                                                content = SpaceContent.Photo(
-                                                                    page = content.page,
-                                                                    photo = content.photo,
-                                                                    width = content.width,
-                                                                    height = content.height,
-                                                                    to = mouseX to mouseY
-                                                                ),
-                                                                position = position
+                                            if (shiftDown) {
+                                                val anchorX = position.first
+                                                val anchorY = position.second
+                                                val dx = mouseX - anchorX
+                                                val dy = mouseY - anchorY
+                                                val s = (dx.absoluteValue / origW).coerceAtMost(dy.absoluteValue / origH)
+                                                val newW = origW * s
+                                                val newH = origH * s
+                                                val signX = if (dx >= 0) 1.0 else -1.0
+                                                val signY = if (dy >= 0) 1.0 else -1.0
+                                                val newToX = anchorX + signX * newW
+                                                val newToY = anchorY + signY * newH
+                                                updateData(
+                                                    data!!.copy(
+                                                        items = data!!.items!!.toMutableList().apply {
+                                                            removeAt(index)
+                                                            add(
+                                                                index, SpaceItem(
+                                                                    content = SpaceContent.Photo(
+                                                                        page = content.page,
+                                                                        photo = content.photo,
+                                                                        width = content.width,
+                                                                        height = content.height,
+                                                                        to = newToX to newToY
+                                                                    ),
+                                                                    position = position
+                                                                )
                                                             )
-                                                        )
-                                                    }
+                                                        }
+                                                    )
                                                 )
-                                            )
+                                            } else {
+                                                // Update the bottom-right corner (to)
+                                                updateData(
+                                                    data!!.copy(
+                                                        items = data!!.items!!.toMutableList().apply {
+                                                            removeAt(index)
+                                                            add(
+                                                                index, SpaceItem(
+                                                                    content = SpaceContent.Photo(
+                                                                        page = content.page,
+                                                                        photo = content.photo,
+                                                                        width = content.width,
+                                                                        height = content.height,
+                                                                        to = mouseX to mouseY
+                                                                    ),
+                                                                    position = position
+                                                                )
+                                                            )
+                                                        }
+                                                    )
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -1577,13 +1744,21 @@ class SpaceWidgetInputControl {
 
     // Function to add a photo to the canvas
     fun addPhoto(mouseX: Double, mouseY: Double, photoUrl: String, width: Int?, height: Int?) {
+        // Calculate display size preserving original aspect, fitting within default bounds
+        val origW = width?.toDouble() ?: 200.0
+        val origH = height?.toDouble() ?: 150.0
+        val maxW = 200.0
+        val maxH = 200.0
+        val scale = (maxW / origW).coerceAtMost(maxH / origH)
+        val displayW = origW * scale
+        val displayH = origH * scale
         val newItem = SpaceItem(
             content = SpaceContent.Photo(
                 page = cardId,
                 photo = photoUrl,
                 width = width,
                 height = height,
-                to = (mouseX + 200) to (mouseY + 150)
+                to = (mouseX + displayW) to (mouseY + displayH)
             ),
             position = mouseX to mouseY
         )
@@ -1604,13 +1779,21 @@ class SpaceWidgetInputControl {
         val centerX = canvasWidth / 2 - offset.first
         val centerY = canvasHeight / 2 - offset.second
 
+        // Calculate display size preserving original aspect, fitting within default bounds
+        val origW = width?.toDouble() ?: 200.0
+        val origH = height?.toDouble() ?: 150.0
+        val maxW = 200.0
+        val maxH = 200.0
+        val scale = (maxW / origW).coerceAtMost(maxH / origH)
+        val displayW = origW * scale
+        val displayH = origH * scale
         val newItem = SpaceItem(
             content = SpaceContent.Photo(
                 page = cardId,
                 photo = photoUrl,
                 width = width,
                 height = height,
-                to = (centerX + 200) to (centerY + 150)
+                to = (centerX + displayW) to (centerY + displayH)
             ),
             position = centerX to centerY
         )

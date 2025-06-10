@@ -231,10 +231,10 @@ fun GroupMessageBar(
         showAudioMenu = false
         scope.launch {
             val enableConfirm = MutableStateFlow(false)
-            var recordedFile: File? = null
+            var recordedFile = MutableStateFlow<File?>(null)
             val result = dialog(
-                title = "Record audio",
-                confirmButton = "Send",
+                title = null,
+                confirmButton = "Send audio",
                 cancelButton = "Cancel",
                 enableConfirm = {
                     enableConfirm.collectAsState().value
@@ -242,7 +242,6 @@ fun GroupMessageBar(
             ) { _ ->
                 var isRecording by remember { mutableStateOf(false) }
                 var recorder by remember { mutableStateOf<MediaRecorder?>(null) }
-                val chunks = remember { mutableListOf<Blob>() }
                 // Recording timer state
                 var startTime by remember { mutableStateOf(0.0) }
                 var elapsedSecs by remember { mutableStateOf(0) }
@@ -257,8 +256,10 @@ fun GroupMessageBar(
                     }
                 }
 
-                LaunchedEffect(isRecording, recordedFile) {
-                    enableConfirm.value = !isRecording && recordedFile != null
+                val r = recordedFile.collectAsState().value
+
+                LaunchedEffect(isRecording, r) {
+                    enableConfirm.value = !isRecording && r != null
                 }
 
                 // Recording controls
@@ -277,7 +278,6 @@ fun GroupMessageBar(
                         onClick = {
                             if (!isRecording) {
                                 scope.launch {
-                                    chunks.clear()
                                     val constraints = MediaStreamConstraints(
                                         audio = MediaTrackConstraints(),
                                         video = null
@@ -286,10 +286,7 @@ fun GroupMessageBar(
                                     val rec = MediaRecorder(stream)
                                     recorder = rec
                                     rec.ondataavailable = EventHandler { event: BlobEvent ->
-                                        chunks.add(event.data)
-                                    }
-                                    rec.onstop = EventHandler {
-                                        recordedFile = File(chunks.toTypedArray(), "recording.webm")
+                                        recordedFile.value = File(arrayOf(event.data), "recording.webm")
                                     }
                                     rec.start()
                                     isRecording = true
@@ -305,11 +302,13 @@ fun GroupMessageBar(
                     // Timer display
                     if (isRecording) {
                         Text("${(elapsedSecs / 60)}:${(elapsedSecs % 60).pad()}")
+                    } else {
+                        Text("Click to record")
                     }
                 }
             }
-            if (result == true && recordedFile != null) {
-                sendAudio(recordedFile!!)
+            if (result == true && recordedFile.value != null) {
+                sendAudio(recordedFile.value!!)
             }
         }
     }
@@ -424,12 +423,14 @@ fun GroupMessageBar(
                         ) {
                             item(
                                 title = "Upload audio",
+                                icon = "upload",
                                 onClick = {
                                     pickAudio { file -> sendAudio(file) }
                                 }
                             )
                             item(
                                 title = "Record audio",
+                                icon = "mic",
                                 onClick = {
                                     recordAudioDialog()
                                 }
