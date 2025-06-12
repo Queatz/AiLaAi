@@ -2,6 +2,7 @@ package app.components
 
 import Styles
 import aiTranscribe
+import aiJson
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -13,6 +14,11 @@ import androidx.compose.runtime.setValue
 import api
 import app.dialog.rememberChoosePhotoDialog
 import com.queatz.db.AiTranscribeResponse
+import app.dialog.inputDialog
+import com.queatz.db.AiJsonRequest
+import com.queatz.db.AiJsonResponse
+import kotlinx.serialization.json.buildJsonObject
+import org.w3c.dom.HTMLInputElement
 import components.IconButton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -229,6 +235,8 @@ fun FlexInput(
             else width(100.percent)
             styles()
         }
+
+        title("Use Alt+Enter to insert text with AI")
     }) {
         // Choose the appropriate input component based on singleLine
         if (singleLine) {
@@ -259,8 +267,36 @@ fun FlexInput(
                 }
 
                 onKeyDown {
-                    when (it.key) {
-                        "Enter" -> {
+                    when {
+                        it.key == "Enter" && it.altKey -> {
+                            it.preventDefault()
+                            it.stopPropagation()
+                            val element = it.target as HTMLInputElement
+                            val start = element.selectionStart ?: element.value.length
+                            val end = element.selectionEnd ?: element.value.length
+                            val defaultPrompt = if (start < end) element.value.substring(start, end) else ""
+                            scope.launch {
+                                val prompt = inputDialog("AI Prompt", defaultValue = defaultPrompt, singleLine = false)
+                                if (prompt != null) {
+                                    isTranscribingAudio = true
+                                    api.aiJson(
+                                        AiJsonRequest(prompt, buildJsonObject {}),
+                                        onError = { error: Throwable ->
+                                            console.error("AI generation error: " + error.message)
+                                            isTranscribingAudio = false
+                                        }
+                                    ) { response: AiJsonResponse ->
+                                        val generated = response.json
+                                        onChange(element.value.substring(0, start) + generated + element.value.substring(end))
+                                        element.focus()
+                                        val pos = start + generated.length
+                                        element.setSelectionRange(pos, pos)
+                                        isTranscribingAudio = false
+                                    }
+                                }
+                            }
+                        }
+                        it.key == "Enter" -> {
                             it.preventDefault()
                             it.stopPropagation()
                             scope.launch {
@@ -269,8 +305,7 @@ fun FlexInput(
                                 }
                             }
                         }
-
-                        "Escape" -> {
+                        it.key == "Escape" -> {
                             it.preventDefault()
                             it.stopPropagation()
                             if (isRecording) {
@@ -341,6 +376,34 @@ fun FlexInput(
 
                 onKeyDown {
                     when {
+                        it.key == "Enter" && it.altKey -> {
+                            it.preventDefault()
+                            it.stopPropagation()
+                            val element = it.target as HTMLTextAreaElement
+                            val start = element.selectionStart ?: element.value.length
+                            val end = element.selectionEnd ?: element.value.length
+                            val defaultPrompt = if (start < end) element.value.substring(start, end) else ""
+                            scope.launch {
+                                val prompt = inputDialog("AI Prompt", defaultValue = defaultPrompt, singleLine = false)
+                                if (prompt != null) {
+                                    isTranscribingAudio = true
+                                    api.aiJson(
+                                        AiJsonRequest(prompt, buildJsonObject {}),
+                                        onError = { error: Throwable ->
+                                            console.error("AI generation error: " + error.message)
+                                            isTranscribingAudio = false
+                                        }
+                                    ) { response: AiJsonResponse ->
+                                        val generated = response.json
+                                        onChange(element.value.substring(0, start) + generated + element.value.substring(end))
+                                        element.focus()
+                                        val pos = start + generated.length
+                                        element.setSelectionRange(pos, pos)
+                                        isTranscribingAudio = false
+                                    }
+                                }
+                            }
+                        }
                         it.key == "Enter" && !it.shiftKey -> {
                             it.preventDefault()
                             it.stopPropagation()
@@ -352,7 +415,6 @@ fun FlexInput(
                                 (it.target as HTMLTextAreaElement).resize()
                             }
                         }
-
                         it.key == "Escape" -> {
                             it.preventDefault()
                             it.stopPropagation()

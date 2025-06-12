@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import api
 import app.FullPageLayout
 import app.PageTopBar
+import app.ailaai.api.runScript
 import app.components.FlexInput
 import app.components.TopBarSearch
 import app.dialog.dialog
@@ -25,15 +26,18 @@ import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.api.updateStory
 import com.queatz.db.GroupExtended
+import com.queatz.db.RunScriptBody
 import com.queatz.db.Story
 import com.queatz.db.StoryContent
 import com.queatz.db.asGeo
 import com.queatz.db.toJsonStoryContent
+import components.ContentActions
 import components.Loading
 import defaultGeo
 import json
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
+import notBlank
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -43,7 +47,6 @@ import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.height
-import org.jetbrains.compose.web.css.minHeight
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
@@ -266,37 +269,67 @@ fun StoriesPage(
                     }) {
                         appText { noStories }
                     }
-                } else {
-                    val editable = (selected as? StoryNav.Selected)?.story?.let {
-                        it.person == me?.id && it.published != true
-                    } == true
-                    StoryContents(
-                        content = storyContent,
-                        onGroupClick = onGroupClick,
-                        openInNewWindow = true,
-                        editable = editable,
-                        onEdited = { index, part ->
-                            storyContent = storyContent.toMutableList().apply {
-                                set(index, part)
-                            }
-                            edited = true
-                        }
-                    ) {
-                        (selected as? StoryNav.Selected)?.story?.let { story ->
-                            save(story)
-                        }
-                    }
-                    if (editable) {
-                        // todo: add section
-                    }
                 }
+
+                val editable = (selected as? StoryNav.Selected)?.story?.let {
+                    it.person == me?.id && it.published != true
+                } == true
+                // Editable story content with drag, drop, and inline editing
+                StoryContents(
+                    content = storyContent,
+                    onGroupClick = onGroupClick,
+                    onButtonClick = { script, data, input ->
+                        api.runScript(
+                            id = script,
+                            data = RunScriptBody(
+                                data = data,
+                                input = input
+                            )
+                        ) {
+                            // Handle script result if needed
+                            // This could update the story content or show results
+                        }
+                    },
+                    openInNewWindow = true,
+                    editable = editable,
+                    // Inline edits for individual parts
+                    onEdited = { index, part ->
+                        storyContent = storyContent.toMutableList().apply { set(index, part) }
+                        edited = true
+                    },
+                    // Reorder via drag-and-drop
+                    onReorder = { fromIndex, toIndex ->
+                        storyContent = storyContent.toMutableList().apply {
+                            val item = removeAt(fromIndex)
+                            add(if (fromIndex < toIndex) toIndex - 1 else toIndex, item)
+                        }
+                        edited = true
+                    },
+                    // Add or delete via ContentAdder or delete action
+                    onSave = { newList ->
+                        storyContent = newList
+                        edited = true
+                    },
+                    // Per-item action toolbar (edit/delete)
+                    actions = { index, part ->
+                        ContentActions(
+                            index = index,
+                            part = part,
+                            isEditable = editable,
+                            currentContent = storyContent,
+                            onContentUpdated = { newList ->
+                                storyContent = newList
+                                edited = true
+                            }
+                        )
+                    }
+                )
             }
         }
     }
     if (selected is StoryNav.Selected) {
         PageTopBar(
-            title = "",
-//                story.title?.notBlank ?: "New story"
+            title = (selected.story).title?.notBlank ?: "New story",
             actions = {
                 if (edited) {
                     Button({

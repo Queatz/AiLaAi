@@ -22,11 +22,10 @@ import app.ailaai.api.myCollaborations
 import app.ailaai.api.newCard
 import app.ailaai.api.updateCard
 import app.ailaai.api.uploadCardPhoto
-import widget
-import updateWidget
 import app.components.FlexInput
 import app.dialog.categoryDialog
 import app.dialog.dialog
+import app.dialog.editFormDialog
 import app.dialog.inputDialog
 import app.dialog.searchDialog
 import app.group.GroupInfo
@@ -38,13 +37,20 @@ import appString
 import appText
 import application
 import com.queatz.db.Card
-import com.queatz.db.Widget
 import com.queatz.db.GroupExtended
 import com.queatz.db.Pay
 import com.queatz.db.PayFrequency
+import com.queatz.db.StoryContent
+import com.queatz.db.Widget
 import com.queatz.db.asGeo
+import com.queatz.db.isPart
+import com.queatz.db.toJsonStoryPart
+import com.queatz.widgets.Widgets
+import com.queatz.widgets.widgets.FormData
 import components.CardItem
+import components.CardPhotoOrVideo
 import components.Content
+import components.ContentActions
 import components.IconButton
 import components.Loading
 import components.Switch
@@ -55,6 +61,7 @@ import json
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.buildJsonArray
 import notBlank
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -63,6 +70,7 @@ import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexShrink
+import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginRight
@@ -82,30 +90,20 @@ import pickPhotos
 import qr
 import r
 import saves
-import toScaledBytes
-import webBaseUrl
-import kotlin.time.Duration.Companion.seconds
-import createWidget
 import stories.asStoryContents
-import com.queatz.db.StoryContent
-import kotlinx.serialization.json.buildJsonArray
-import com.queatz.db.isPart
-import com.queatz.db.toJsonStoryPart
-import com.queatz.widgets.Widgets
-import com.queatz.widgets.widgets.PageTreeData
-import com.queatz.widgets.widgets.SpaceData
-import com.queatz.widgets.widgets.WebData
-import com.queatz.widgets.widgets.FormData
-import com.queatz.widgets.widgets.FormOptions
-import org.jetbrains.compose.web.css.AlignItems
-import org.jetbrains.compose.web.css.JustifyContent
-import org.jetbrains.compose.web.css.alignItems
-import org.jetbrains.compose.web.css.justifyContent
-import app.dialog.selectScriptDialog
-import app.dialog.editFormDialog
-import components.CardPhotoOrVideo
-import org.jetbrains.compose.web.css.gap
-import web.cssom.PropertyName.Companion.borderRadius
+import toScaledBytes
+import updateWidget
+import webBaseUrl
+import widget
+import kotlin.time.Duration.Companion.seconds
+
+fun serializeStoryContent(content: List<StoryContent>): String {
+    return json.encodeToString(buildJsonArray {
+        content.filter { it.isPart() }.forEach { part ->
+            add(part.toJsonStoryPart(json))
+        }
+    })
+}
 
 @Composable
 fun ExplorePage(
@@ -700,6 +698,7 @@ fun ExplorePage(
         }) {
             Content(
                 content = card.content,
+                cardId = card.id,
                 onCardClick = { cardId, openInNewWindow ->
                     if (openInNewWindow) {
                         window.open("/page/$cardId", target = "_blank")
@@ -711,68 +710,55 @@ fun ExplorePage(
                         }
                     }
                 },
+                editable = me?.id == card.person,
+                onEdited = { index, part ->
+                    scope.launch {
+                        val current = card.content?.asStoryContents() ?: emptyList()
+                        val newContent = current.toMutableList()
+                        newContent[index] = part
+                        api.updateCard(
+                            card.id!!,
+                            Card(content = serializeStoryContent(newContent))
+                        ) { onCardUpdated(it) }
+                    }
+                },
+                onReorder = { fromIndex, toIndex ->
+                    scope.launch {
+                        val current = card.content?.asStoryContents() ?: emptyList()
+                        val newContent = current.toMutableList()
+                        val item = newContent.removeAt(fromIndex)
+                        newContent.add(if (fromIndex < toIndex) toIndex - 1 else toIndex, item)
+                        api.updateCard(
+                            id = card.id!!,
+                            card = Card(content = serializeStoryContent(newContent))
+                        ) { onCardUpdated(it) }
+                    }
+                },
+                onSave = { newContent ->
+                    scope.launch {
+                        api.updateCard(
+                            card.id!!,
+                            Card(content = serializeStoryContent(newContent))
+                        ) { onCardUpdated(it) }
+                    }
+                },
                 actions = @Composable { index, part ->
-                    if (me?.id == card.person) {
-                        Div({
-                            style {
-                                display(DisplayStyle.Flex)
-                                gap(1.r)
+                    val current = card.content?.asStoryContents() ?: emptyList()
+                    ContentActions(
+                        index = index,
+                        part = part,
+                        isEditable = me?.id == card.person,
+                        currentContent = current,
+                        onContentUpdated = { newContent ->
+                            scope.launch {
+                                api.updateCard(
+                                    id = card.id!!,
+                                    card = Card(content = serializeStoryContent(newContent))
+                                ) { onCardUpdated(it) }
                             }
-                        }) {
-                            if (part is StoryContent.Section) {
-                                IconButton("edit", appString { edit }) {
-                                    scope.launch {
-                                        val result = inputDialog(
-                                            title = application.appString { section },
-                                            placeholder = "",
-                                            confirmButton = application.appString { save },
-                                            defaultValue = part.section
-                                        )
-                                        if (result != null) {
-                                            val current = card.content?.asStoryContents() ?: emptyList()
-                                            val newList = current.toMutableList()
-                                            newList[index] = StoryContent.Section(result)
-                                            api.updateCard(
-                                                card.id!!,
-                                                Card(
-                                                    content = json.encodeToString(buildJsonArray {
-                                                        newList.filter { it.isPart() }.forEach { p ->
-                                                            add(p.toJsonStoryPart(json))
-                                                        }
-                                                    })
-                                                )
-                                            ) { onCardUpdated(it) }
-                                        }
-                                    }
-                                }
-                            }
-                            if (part is StoryContent.Text) {
-                                IconButton("edit", appString { edit }) {
-                                    scope.launch {
-                                        val result = inputDialog(
-                                            title = application.appString { text },
-                                            placeholder = "",
-                                            confirmButton = application.appString { save },
-                                            defaultValue = part.text
-                                        )
-                                        if (result != null) {
-                                            val current = card.content?.asStoryContents() ?: emptyList()
-                                            val newList = current.toMutableList()
-                                            newList[index] = StoryContent.Text(result)
-                                            api.updateCard(
-                                                card.id!!,
-                                                Card(
-                                                    content = json.encodeToString(buildJsonArray {
-                                                        newList.filter { it.isPart() }.forEach { p ->
-                                                            add(p.toJsonStoryPart(json))
-                                                        }
-                                                    })
-                                                )
-                                            ) { onCardUpdated(it) }
-                                        }
-                                    }
-                                }
-                            }
+                        },
+                        additionalActions = {
+                            // Form widget specific actions
                             if (part is StoryContent.Widget && part.widget == Widgets.Form) {
                                 IconButton("edit", appString { edit }) {
                                     scope.launch {
@@ -788,8 +774,8 @@ fun ExplorePage(
                                                 isEdit = true
                                             ) { updatedForm ->
                                                 api.updateWidget(
-                                                    part.id,
-                                                    Widget(data = json.encodeToString(updatedForm))
+                                                    id = part.id,
+                                                    widget = Widget(data = json.encodeToString(updatedForm))
                                                 ) {
                                                     formReloadKey++
                                                 }
@@ -798,291 +784,11 @@ fun ExplorePage(
                                     }
                                 }
                             }
-                            IconButton("delete", appString { remove }) {
-                                scope.launch {
-                                    val current = card.content?.asStoryContents() ?: emptyList()
-                                    val newList = current.toMutableList().apply { removeAt(index) }
-                                    api.updateCard(
-                                        card.id!!,
-                                        Card(
-                                            content = json.encodeToString(buildJsonArray {
-                                                newList.filter { it.isPart() }.forEach { p ->
-                                                    add(p.toJsonStoryPart(json))
-                                                }
-                                            })
-                                        )
-                                    ) { onCardUpdated(it) }
-                                }
-                            }
                         }
-                    }
+                    )
                 },
                 formReloadKey = formReloadKey
             )
-
-            var addContentMenuTarget by remember { mutableStateOf<DOMRect?>(null) }
-
-            Div({
-                style {
-                    margin(1.r)
-                    display(DisplayStyle.Flex)
-                    justifyContent(JustifyContent.Center)
-                    alignItems(AlignItems.Center)
-                }
-            }) {
-                IconButton("add", "Add") {
-                    addContentMenuTarget =
-                        if (addContentMenuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
-                }
-            }
-
-            if (addContentMenuTarget != null) {
-                Menu({ addContentMenuTarget = null }, addContentMenuTarget!!) {
-                    item(appString { section }, icon = "title") {
-                        scope.launch {
-                            val sectionText = inputDialog(
-                                title = "Section",
-                                placeholder = "",
-                                confirmButton = "Add",
-                                defaultValue = ""
-                            )
-
-                            if (sectionText == null) {
-                                return@launch
-                            }
-
-                            val currentContent = card.content?.asStoryContents() ?: emptyList()
-                            val newContent = currentContent + StoryContent.Section(sectionText)
-
-                            api.updateCard(
-                                card.id!!,
-                                Card(
-                                    content = json.encodeToString(buildJsonArray {
-                                        newContent.filter { it.isPart() }.forEach { part ->
-                                            add(part.toJsonStoryPart(json))
-                                        }
-                                    })
-                                )
-                            ) {
-                                onCardUpdated(it)
-                            }
-                        }
-                    }
-
-                    item(appString { text }, icon = "notes") {
-                        scope.launch {
-                            val textContent = inputDialog(
-                                title = "Text",
-                                placeholder = "",
-                                confirmButton = "Add",
-                                defaultValue = ""
-                            )
-
-                            if (textContent == null) {
-                                return@launch
-                            }
-
-                            val currentContent = card.content?.asStoryContents() ?: emptyList()
-                            val newContent = currentContent + StoryContent.Text(textContent)
-
-                            api.updateCard(
-                                card.id!!,
-                                Card(
-                                    content = json.encodeToString(buildJsonArray {
-                                        newContent.filter { it.isPart() }.forEach { part ->
-                                            add(part.toJsonStoryPart(json))
-                                        }
-                                    })
-                                )
-                            ) {
-                                onCardUpdated(it)
-                            }
-                        }
-                    }
-
-                    item("Widget", icon = "widgets") {
-                        scope.launch {
-                            dialog("", cancelButton = null) {
-                                InlineMenu({
-                                    it(true)
-                                }) {
-                                    item(
-                                        "Script",
-                                        description = "Embed dynamic content into your page",
-                                        icon = "code"
-                                    ) {
-                                        scope.launch {
-                                            selectScriptDialog(scope) { scriptId, scriptData ->
-                                                scope.launch {
-                                                    api.createWidget(
-                                                        widget = Widgets.Script,
-                                                        data = scriptData
-                                                    ) { widget ->
-                                                        val currentContent =
-                                                            card.content?.asStoryContents() ?: emptyList()
-                                                        val newContent = currentContent + StoryContent.Widget(
-                                                            widget.widget!!,
-                                                            widget.id!!
-                                                        )
-
-                                                        api.updateCard(
-                                                            card.id!!,
-                                                            Card(
-                                                                content = json.encodeToString(buildJsonArray {
-                                                                    newContent.filter { it.isPart() }.forEach { part ->
-                                                                        add(part.toJsonStoryPart(json))
-                                                                    }
-                                                                })
-                                                            )
-                                                        ) {
-                                                            onCardUpdated(it)
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    item(
-                                        "Page Tree",
-                                        description = "Organize small projects and track progress",
-                                        icon = "account_tree"
-                                    ) {
-                                        scope.launch {
-                                            api.createWidget(
-                                                widget = Widgets.PageTree,
-                                                data = json.encodeToString(PageTreeData(card = card.id!!))
-                                            ) { widget ->
-                                                val currentContent = card.content?.asStoryContents() ?: emptyList()
-                                                val newContent =
-                                                    currentContent + StoryContent.Widget(widget.widget!!, widget.id!!)
-
-                                                api.updateCard(
-                                                    card.id!!,
-                                                    Card(
-                                                        content = json.encodeToString(buildJsonArray {
-                                                            newContent.filter { it.isPart() }.forEach { part ->
-                                                                add(part.toJsonStoryPart(json))
-                                                            }
-                                                        })
-                                                    )
-                                                ) {
-                                                    onCardUpdated(it)
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    item("Space", "Create a sketch or presentation", icon = "space_dashboard") {
-                                        scope.launch {
-                                            api.createWidget(
-                                                widget = Widgets.Space,
-                                                data = json.encodeToString(SpaceData(card = card.id))
-                                            ) { widget ->
-                                                val currentContent = card.content?.asStoryContents() ?: emptyList()
-                                                val newContent =
-                                                    currentContent + StoryContent.Widget(widget.widget!!, widget.id!!)
-
-                                                api.updateCard(
-                                                    card.id!!,
-                                                    Card(
-                                                        content = json.encodeToString(buildJsonArray {
-                                                            newContent.filter { it.isPart() }.forEach { part ->
-                                                                add(part.toJsonStoryPart(json))
-                                                            }
-                                                        })
-                                                    )
-                                                ) {
-                                                    onCardUpdated(it)
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    item("Website", "Embed a URL", icon = "language") {
-                                        scope.launch {
-                                            val url = inputDialog(
-                                                title = "Website URL",
-                                                placeholder = "https://",
-                                                confirmButton = "Add",
-                                                defaultValue = ""
-                                            )
-
-                                            if (url == null) {
-                                                return@launch
-                                            }
-
-                                            api.createWidget(
-                                                widget = Widgets.Web,
-                                                data = json.encodeToString(WebData(url = url))
-                                            ) { widget ->
-                                                val currentContent = card.content?.asStoryContents() ?: emptyList()
-                                                val newContent =
-                                                    currentContent + StoryContent.Widget(widget.widget!!, widget.id!!)
-
-                                                api.updateCard(
-                                                    card.id!!,
-                                                    Card(
-                                                        content = json.encodeToString(buildJsonArray {
-                                                            newContent.filter { it.isPart() }.forEach { part ->
-                                                                add(part.toJsonStoryPart(json))
-                                                            }
-                                                        })
-                                                    )
-                                                ) {
-                                                    onCardUpdated(it)
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    item(
-                                        "Form",
-                                        description = "Collect and organize responses to a form",
-                                        icon = "list_alt"
-                                    ) {
-                                        scope.launch {
-                                            val result = editFormDialog(
-                                                initialFormData = FormData(
-                                                    page = card.id,
-                                                    options = FormOptions(enableAnonymousReplies = true)
-                                                )
-                                            ) { formData ->
-                                                scope.launch {
-                                                    api.createWidget(
-                                                        widget = Widgets.Form,
-                                                        data = json.encodeToString(formData)
-                                                    ) { widget ->
-                                                        val currentContent =
-                                                            card.content?.asStoryContents() ?: emptyList()
-                                                        val newContent = currentContent + StoryContent.Widget(
-                                                            widget.widget!!,
-                                                            widget.id!!
-                                                        )
-
-                                                        api.updateCard(
-                                                            card.id!!,
-                                                            Card(
-                                                                content = json.encodeToString(buildJsonArray {
-                                                                    newContent.filter { it.isPart() }.forEach { part ->
-                                                                        add(part.toJsonStoryPart(json))
-                                                                    }
-                                                                })
-                                                            )
-                                                        ) {
-                                                            onCardUpdated(it)
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         // Todo full conversation support

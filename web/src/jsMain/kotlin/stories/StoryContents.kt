@@ -37,8 +37,11 @@ import com.queatz.db.CommentExtended
 import com.queatz.db.GroupExtended
 import com.queatz.db.InputType
 import com.queatz.db.StoryContent
+import com.queatz.db.isPart
 import com.queatz.widgets.Widgets
 import components.CardItem
+import components.ContentAdder
+import components.DraggableContentItem
 import components.Icon
 import components.IconButton
 import components.LinkifyText
@@ -98,8 +101,10 @@ fun StoryContents(
     openInNewWindow: Boolean = false,
     editable: Boolean = false,
     onEdited: ((index: Int, part: StoryContent) -> Unit)? = null,
+    onReorder: ((fromIndex: Int, toIndex: Int) -> Unit)? = null,
     actions: @Composable (index: Int, part: StoryContent) -> Unit = { _, _ -> },
     formReloadKey: Int = 0,
+    cardId: String? = null, // for creating widgets
     onSave: ((List<StoryContent>) -> Unit)? = {},
 ) {
     StyleManager.use(
@@ -109,10 +114,11 @@ fun StoryContents(
     )
 
     val scope = rememberCoroutineScope()
+    var isGlobalDragActive by remember { mutableStateOf(false) }
 
     var input by remember(key, content) {
         mutableStateOf(
-            buildMap<String, String?> {
+            buildMap {
                 content.filterIsInstance<StoryContent.Input>().forEach {
                     put(it.key, it.value)
                 }
@@ -120,473 +126,498 @@ fun StoryContents(
         )
     }
 
-    content.forEachIndexed { index, part ->
-        when (part) {
-            is StoryContent.Title -> {
-                Div({
-                    classes(StoryStyles.contentTitle)
-                }) {
-                    Text(part.title)
+    key(content.size) {
+        content.forEachIndexed { index, part ->
+            DraggableContentItem(
+                index = index,
+                editable = editable && part.isPart(),
+                onReorder = { fromIndex, toIndex ->
+                    onReorder?.invoke(fromIndex, toIndex)
+                },
+                onDragStateChange = { isDragging ->
+                    isGlobalDragActive = isDragging
                 }
-            }
+            ) {
+                when (part) {
+                    is StoryContent.Title -> {
+                        Div({
+                            classes(StoryStyles.contentTitle)
+                        }) {
+                            Text(part.title)
+                        }
+                    }
 
-            is StoryContent.Authors -> {
-                Div({
-                    classes(StoryStyles.contentAuthors)
-                }) {
-                    Span({
-                        title("${part.publishDate?.let { Date(it.toEpochMilliseconds()) }}")
-                    }) {
-                        Text("${storyStatus(part.publishDate)} ${appString { inlineBy }} ")
-                        part.authors.forEachIndexed { index, person ->
-                            if (index > 0) {
-                                Text(", ")
-                            }
-                            val str = appString { viewProfile }
-                            A(href = "/profile/${person.id}", {
-                                if (openInNewWindow) {
-                                    target(ATarget.Blank)
-                                }
-                                title(str)
+                    is StoryContent.Authors -> {
+                        Div({
+                            classes(StoryStyles.contentAuthors)
+                        }) {
+                            Span({
+                                title("${part.publishDate?.let { Date(it.toEpochMilliseconds()) }}")
                             }) {
-                                Text(person.name ?: appString { someone })
-                            }
-                        }
-                    }
-                }
-            }
-
-            is StoryContent.Reactions -> {
-
-            }
-
-            is StoryContent.Comments -> {
-                val me by application.me.collectAsState()
-                var comments by remember(part.story) {
-                    mutableStateOf<List<CommentExtended>?>(null)
-                }
-
-                suspend fun reloadComments() {
-                    api.storyComments(part.story) {
-                        comments = it
-                    }
-                }
-
-                LaunchedEffect(part.story) {
-                    reloadComments()
-                }
-
-                Div({
-                    style {
-                        width(100.percent)
-                    }
-                }) {
-                    key(part.story) {
-                        var comment by remember {
-                            mutableStateOf("")
-                        }
-                        FlexInput(
-                            value = comment,
-                            onChange = {
-                                comment = it
-                            },
-                            placeholder = appString { if (me == null) signInToComment else shareAComment },
-                            styles = {
-                                width(100.percent)
-                            },
-                            buttonText = appString { post },
-                            enabled = me != null,
-                            onSubmit = {
-                                var success = false
-                                api.commentOnStory(
-                                    id = part.story,
-                                    comment = Comment(comment = comment)
-                                ) {
-                                    success = true
+                                Text("${storyStatus(part.publishDate)} ${appString { inlineBy }} ")
+                                part.authors.forEachIndexed { index, person ->
+                                    if (index > 0) {
+                                        Text(", ")
+                                    }
+                                    val str = appString { viewProfile }
+                                    A(href = "/profile/${person.id}", {
+                                        if (openInNewWindow) {
+                                            target(ATarget.Blank)
+                                        }
+                                        title(str)
+                                    }) {
+                                        Text(person.name ?: appString { someone })
+                                    }
                                 }
-                                reloadComments()
-                                success
-                            }
-                        )
-
-                        LoadingText(
-                            comments != null,
-                            appString { loadingComments }
-                        ) {
-                            StoryComments(comments!!, max = 2) {
-                                reloadComments()
                             }
                         }
                     }
-                }
-            }
 
-            is StoryContent.Section -> {
-                if (editable) {
-                    var value by remember(content) { mutableStateOf(part.section) }
-                    FlexInput(
-                        value = value,
-                        onChange = {
-                            value = it
-                            onEdited?.invoke(index, part.copy(section = it))
-                        },
-                        singleLine = true,
-                        placeholder = appString { section },
-                        styles = {
-                            margin(0.r)
-                            width(100.percent)
-                            fontSize(24.px)
-                            fontWeight("bold")
-                        },
-                        onSubmit = {
-                            onSave?.invoke(content)
-                            true
-                        }
-                    )
-                } else {
-                    Div({
-                        classes(StoryStyles.contentSection)
-                    }) {
-                        Text(part.section)
+                    is StoryContent.Reactions -> {
+
                     }
-                }
-            }
 
-            is StoryContent.Text -> {
-                if (editable) {
-                    var value by remember(content) { mutableStateOf(part.text) }
-                    FlexInput(
-                        value = value,
-                        onChange = {
-                            value = it
-                            onEdited?.invoke(index, part.copy(text = it))
-                        },
-                        singleLine = true,
-                        placeholder = appString { write },
-                        styles = {
-                            margin(0.r)
-                            width(100.percent)
-                            fontSize(16.px)
-                        },
-                        onSubmit = {
-                            onSave?.invoke(content)
-                            true
-                        }
-                    )
-                } else {
-                    Div({
-                        classes(StoryStyles.contentText)
-                    }) {
-                        LinkifyText(part.text)
-                    }
-                }
-            }
-
-            is StoryContent.Groups -> {
-                Div({
-                    classes(StoryStyles.contentGroups)
-                }) {
-                    part.groups.forEach { groupId ->
-                        var group by remember(groupId) {
-                            mutableStateOf<GroupExtended?>(null)
+                    is StoryContent.Comments -> {
+                        val me by application.me.collectAsState()
+                        var comments by remember(part.story) {
+                            mutableStateOf<List<CommentExtended>?>(null)
                         }
 
-                        LaunchedEffect(groupId) {
-                            api.group(groupId) {
-                                group = it
+                        suspend fun reloadComments() {
+                            api.storyComments(part.story) {
+                                comments = it
                             }
                         }
 
-                        LoadingText(group != null, appString { loadingGroup }) {
-                            group?.let { group ->
-                                GroupItem(
-                                    group,
-                                    selectable = true,
-                                    selected = false,
-                                    shadow = true,
-                                    onSelected = {
-                                        onGroupClick(group)
+                        LaunchedEffect(part.story) {
+                            reloadComments()
+                        }
+
+                        Div({
+                            style {
+                                width(100.percent)
+                            }
+                        }) {
+                            key(part.story) {
+                                var comment by remember {
+                                    mutableStateOf("")
+                                }
+                                FlexInput(
+                                    value = comment,
+                                    onChange = {
+                                        comment = it
                                     },
-                                    info = GroupInfo.Members,
-                                    coverPhoto = part.coverPhotos
+                                    placeholder = appString { if (me == null) signInToComment else shareAComment },
+                                    styles = {
+                                        width(100.percent)
+                                    },
+                                    buttonText = appString { post },
+                                    enabled = me != null,
+                                    onSubmit = {
+                                        var success = false
+                                        api.commentOnStory(
+                                            id = part.story,
+                                            comment = Comment(comment = comment)
+                                        ) {
+                                            success = true
+                                        }
+                                        reloadComments()
+                                        success
+                                    }
+                                )
+
+                                LoadingText(
+                                    comments != null,
+                                    appString { loadingComments }
+                                ) {
+                                    StoryComments(comments ?: return@LoadingText, max = 2) {
+                                        reloadComments()
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    is StoryContent.Section -> {
+                        if (editable) {
+                            var value by remember(content) { mutableStateOf(part.section) }
+                            FlexInput(
+                                value = value,
+                                onChange = {
+                                    value = it
+                                    onEdited?.invoke(index, part.copy(section = it))
+                                },
+                                singleLine = true,
+                                placeholder = appString { section },
+                                styles = {
+                                    width(100.percent)
+                                    fontSize(24.px)
+                                    fontWeight("bold")
+                                },
+                                onSubmit = {
+                                    onSave?.invoke(content)
+                                    true
+                                }
+                            )
+                        } else {
+                            Div({
+                                classes(StoryStyles.contentSection)
+                            }) {
+                                Text(part.section)
+                            }
+                        }
+                    }
+
+                    is StoryContent.Text -> {
+                        if (editable) {
+                            var value by remember(content) { mutableStateOf(part.text) }
+                            FlexInput(
+                                value = value,
+                                onChange = {
+                                    value = it
+                                    onEdited?.invoke(index, part.copy(text = it))
+                                },
+                                singleLine = true,
+                                placeholder = appString { write },
+                                styles = {
+                                    width(100.percent)
+                                    fontSize(16.px)
+                                },
+                                onSubmit = {
+                                    onSave?.invoke(content)
+                                    true
+                                }
+                            )
+                        } else {
+                            Div({
+                                classes(StoryStyles.contentText)
+                            }) {
+                                LinkifyText(part.text)
+                            }
+                        }
+                    }
+
+                    is StoryContent.Groups -> {
+                        Div({
+                            classes(StoryStyles.contentGroups)
+                        }) {
+                            part.groups.forEach { groupId ->
+                                var group by remember(groupId) {
+                                    mutableStateOf<GroupExtended?>(null)
+                                }
+
+                                LaunchedEffect(groupId) {
+                                    api.group(groupId) {
+                                        group = it
+                                    }
+                                }
+
+                                LoadingText(group != null, appString { loadingGroup }) {
+                                    group?.let { group ->
+                                        GroupItem(
+                                            group,
+                                            selectable = true,
+                                            selected = false,
+                                            shadow = true,
+                                            onSelected = {
+                                                onGroupClick(group)
+                                            },
+                                            info = GroupInfo.Members,
+                                            coverPhoto = part.coverPhotos
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    is StoryContent.Cards -> {
+                        Div({
+                            classes(StoryStyles.contentCards)
+                        }) {
+                            part.cards.forEach { card ->
+                                CardItem(
+                                    cardId = card,
+                                    onClick = onCardClick?.let { onCardClick ->
+                                        { openInNewWindow ->
+                                            onCardClick(card, openInNewWindow)
+                                        }
+                                    },
                                 )
                             }
                         }
                     }
-                }
-            }
 
-            is StoryContent.Cards -> {
-                Div({
-                    classes(StoryStyles.contentCards)
-                }) {
-                    part.cards.forEach { card ->
-                        CardItem(
-                            cardId = card,
-                            onClick = onCardClick?.let { onCardClick ->
-                                { openInNewWindow ->
-                                    onCardClick(card, openInNewWindow)
-                                }
-                            },
-                        )
-                    }
-                }
-            }
+                    is StoryContent.Photos -> {
+                        Div({
+                            classes(StoryStyles.contentPhotos)
 
-            is StoryContent.Photos -> {
-                Div({
-                    classes(StoryStyles.contentPhotos)
-
-                    if (part.photos.size > 1) {
-                        classes(StoryStyles.contentPhotosMulti)
-                    }
-                }) {
-                    part.photos.forEach { photo ->
-                        val url = "$baseUrl$photo"
-                        if (part.aspect == null) {
-                            Img(url) {
-                                classes(StoryStyles.contentPhotosPhotoNoAspect)
-
-                                onClick {
-                                    scope.launch {
-                                        photoDialog(url)
-                                    }
-                                }
+                            if (part.photos.size > 1) {
+                                classes(StoryStyles.contentPhotosMulti)
                             }
-                        } else {
-                            Div({
-                                classes(StoryStyles.contentPhotosPhoto)
+                        }) {
+                            part.photos.forEach { photo ->
+                                val url = "$baseUrl$photo"
+                                if (part.aspect == null) {
+                                    Img(url) {
+                                        classes(StoryStyles.contentPhotosPhotoNoAspect)
 
-                                style {
-                                    backgroundImage("url($url)")
-                                    property("aspect-ratio", "${part.aspect}")
-                                }
-
-                                onClick {
-                                    scope.launch {
-                                        photoDialog(url)
-                                    }
-                                }
-                            })
-                        }
-                    }
-                }
-            }
-
-            is StoryContent.Audio -> {
-                key(part.audio) {
-                    Audio({
-                        classes(StoryStyles.contentAudio)
-                        attr("controls", "")
-                        style {
-                            width(100.percent)
-                        }
-                    }) {
-                        Source({
-                            attr("src", "$baseUrl${part.audio}")
-                            attr("type", "audio/mp4")
-                        })
-                    }
-                }
-            }
-
-            is StoryContent.Video -> {
-                Div({
-                    style {
-                        width(100.percent)
-                        margin(1.r, 0.r)
-                    }
-                }) {
-                    Video({
-                        classes(Styles.video)
-
-                        attr("controls", "")
-                        attr("preload", "metadata")
-                        attr("loop", "")
-                        attr("playsinline", "")
-                    }) {
-                        Source({
-                            attr("src", "$baseUrl${part.video}")
-                            attr("type", "video/mp4")
-                        })
-                    }
-                }
-            }
-
-            is StoryContent.Divider -> {
-                Div({
-                    classes(StoryStyles.divider)
-                }) {
-                    Icon("flare")
-                }
-            }
-
-            is StoryContent.Widget -> {
-                when (part.widget) {
-                    Widgets.ImpactEffortTable -> {
-                        ImpactEffortTable(part.id)
-                    }
-
-                    Widgets.PageTree -> {
-                        PageTreeWidget(part.id)
-                    }
-
-                    Widgets.Script -> {
-                        ScriptWidget(part.id)
-                    }
-
-                    Widgets.Web -> {
-                        WebWidget(part.id)
-                    }
-
-                    Widgets.Form -> {
-                        FormWidget(part.id, formReloadKey)
-                    }
-
-                    Widgets.Space -> {
-                        SpaceWidget(part.id)
-                    }
-                }
-            }
-
-            is StoryContent.Button -> {
-                var isDisabled by remember(part) { mutableStateOf(false) }
-                val buttonEnabled = part.enabled != false // null or true means enabled
-
-                Button({
-                    classes(
-                        if (part.style == ButtonStyle.Secondary) {
-                            Styles.outlineButton
-                        } else {
-                            Styles.button
-                        }
-                    )
-
-                    if (isDisabled || !buttonEnabled) {
-                        disabled()
-                    }
-
-                    part.color?.let {
-                        style {
-                            if (part.style == ButtonStyle.Secondary) {
-                                border(1.px, LineStyle.Solid, Color(it))
-                                color(Color(it))
-                            } else {
-                                backgroundColor(Color(it))
-                            }
-                        }
-                    }
-
-                    onClick {
-                        if (!isDisabled && buttonEnabled) {
-                            isDisabled = true
-                            scope.launch {
-                                onButtonClick?.invoke(part.script, part.data, input)
-                                isDisabled = false
-                            }
-                        }
-                    }
-                }) {
-                    Text(part.text)
-                }
-            }
-
-            is StoryContent.Input -> {
-                var value by remember(key, part) {
-                    mutableStateOf(part.value.orEmpty())
-                }
-
-                when (part.inputType) {
-                    InputType.Text -> {
-                        FlexInput(
-                            value = value,
-                            onChange = {
-                                input = input + (part.key to it)
-                                value = it
-                            },
-                            styles = {
-                                width(100.percent)
-                            },
-                            placeholder = part.hint.orEmpty()
-                        )
-                    }
-
-                    InputType.Photo -> {
-                        val choosePhoto = rememberChoosePhotoDialog(showUpload = true)
-                        val isGenerating = choosePhoto.isGenerating.collectAsState().value
-
-                        if (value.isBlank()) {
-                            Button({
-                                classes(Styles.outlineButton)
-                                if (isGenerating) {
-                                    disabled()
-                                }
-                                onClick {
-                                    scope.launch {
-                                        choosePhoto.launch { photoUrl, _, _ ->
-                                            input = input + (part.key to photoUrl)
-                                            value = photoUrl
+                                        onClick {
+                                            scope.launch {
+                                                photoDialog(url)
+                                            }
                                         }
                                     }
+                                } else {
+                                    Div({
+                                        classes(StoryStyles.contentPhotosPhoto)
+
+                                        style {
+                                            backgroundImage("url($url)")
+                                            property("aspect-ratio", "${part.aspect}")
+                                        }
+
+                                        onClick {
+                                            scope.launch {
+                                                photoDialog(url)
+                                            }
+                                        }
+                                    })
                                 }
-                            }) {
-                                // todo: translate
-                                Text(part.hint?.notBlank ?: "Choose photo")
                             }
-                        } else {
-                            Div({
+                        }
+                    }
+
+                    is StoryContent.Audio -> {
+                        key(part.audio) {
+                            Audio({
+                                classes(StoryStyles.contentAudio)
+                                attr("controls", "")
                                 style {
-                                    position(Position.Relative)
                                     width(100.percent)
                                 }
                             }) {
-                                val src = "$baseUrl$value"
-                                Img(src = src) {
-                                    style {
-                                        width(100.percent)
-                                        borderRadius(1.r)
-                                        overflow("hidden")
+                                Source({
+                                    attr("src", "$baseUrl${part.audio}")
+                                    attr("type", "audio/mp4")
+                                })
+                            }
+                        }
+                    }
+
+                    is StoryContent.Video -> {
+                        Div({
+                            style {
+                                width(100.percent)
+                                margin(1.r, 0.r)
+                            }
+                        }) {
+                            Video({
+                                classes(Styles.video)
+
+                                attr("controls", "")
+                                attr("preload", "metadata")
+                                attr("loop", "")
+                                attr("playsinline", "")
+                            }) {
+                                Source({
+                                    attr("src", "$baseUrl${part.video}")
+                                    attr("type", "video/mp4")
+                                })
+                            }
+                        }
+                    }
+
+                    is StoryContent.Divider -> {
+                        Div({
+                            classes(StoryStyles.divider)
+                        }) {
+                            Icon("flare")
+                        }
+                    }
+
+                    is StoryContent.Widget -> {
+                        when (part.widget) {
+                            Widgets.ImpactEffortTable -> {
+                                ImpactEffortTable(part.id)
+                            }
+
+                            Widgets.PageTree -> {
+                                PageTreeWidget(part.id)
+                            }
+
+                            Widgets.Script -> {
+                                ScriptWidget(part.id)
+                            }
+
+                            Widgets.Web -> {
+                                WebWidget(part.id)
+                            }
+
+                            Widgets.Form -> {
+                                FormWidget(part.id, formReloadKey)
+                            }
+
+                            Widgets.Space -> {
+                                SpaceWidget(part.id)
+                            }
+                        }
+                    }
+
+                    is StoryContent.Button -> {
+                        var isDisabled by remember(part) { mutableStateOf(false) }
+                        val buttonEnabled = part.enabled != false // null or true means enabled
+
+                        Button({
+                            classes(
+                                if (part.style == ButtonStyle.Secondary) {
+                                    Styles.outlineButton
+                                } else {
+                                    Styles.button
+                                }
+                            )
+
+                            if (isDisabled || !buttonEnabled) {
+                                disabled()
+                            }
+
+                            part.color?.let {
+                                style {
+                                    if (part.style == ButtonStyle.Secondary) {
+                                        border(1.px, LineStyle.Solid, Color(it))
+                                        color(Color(it))
+                                    } else {
+                                        backgroundColor(Color(it))
                                     }
-                                    onClick {
-                                        scope.launch {
-                                            photoDialog(src)
+                                }
+                            }
+
+                            onClick {
+                                if (!isDisabled && buttonEnabled) {
+                                    isDisabled = true
+                                    scope.launch {
+                                        onButtonClick?.invoke(part.script, part.data, input)
+                                        isDisabled = false
+                                    }
+                                }
+                            }
+                        }) {
+                            Text(part.text)
+                        }
+                    }
+
+                    is StoryContent.Input -> {
+                        var value by remember(key, part) {
+                            mutableStateOf(part.value.orEmpty())
+                        }
+
+                        when (part.inputType) {
+                            InputType.Text -> {
+                                FlexInput(
+                                    value = value,
+                                    onChange = {
+                                        input = input + (part.key to it)
+                                        value = it
+                                    },
+                                    styles = {
+                                        width(100.percent)
+                                    },
+                                    placeholder = part.hint.orEmpty()
+                                )
+                            }
+
+                            InputType.Photo -> {
+                                val choosePhoto = rememberChoosePhotoDialog(showUpload = true)
+                                val isGenerating = choosePhoto.isGenerating.collectAsState().value
+
+                                if (value.isBlank()) {
+                                    Button({
+                                        classes(Styles.outlineButton)
+                                        if (isGenerating) {
+                                            disabled()
+                                        }
+                                        onClick {
+                                            scope.launch {
+                                                choosePhoto.launch { photoUrl, _, _ ->
+                                                    input = input + (part.key to photoUrl)
+                                                    value = photoUrl
+                                                }
+                                            }
+                                        }
+                                    }) {
+                                        // todo: translate
+                                        Text(part.hint?.notBlank ?: "Choose photo")
+                                    }
+                                } else {
+                                    Div({
+                                        style {
+                                            position(Position.Relative)
+                                            width(100.percent)
+                                        }
+                                    }) {
+                                        val src = "$baseUrl$value"
+                                        Img(src = src) {
+                                            style {
+                                                width(100.percent)
+                                                borderRadius(1.r)
+                                                overflow("hidden")
+                                            }
+                                            onClick {
+                                                scope.launch {
+                                                    photoDialog(src)
+                                                }
+                                            }
+                                        }
+
+                                        // Delete button
+                                        IconButton(
+                                            name = "delete",
+                                            title = appString { remove },
+                                            background = true,
+                                            styles = {
+                                                position(Position.Absolute)
+                                                top(1.r)
+                                                right(1.r)
+                                                color(Styles.colors.red)
+                                            }
+                                        ) {
+                                            input = input + (part.key to "")
+                                            value = ""
                                         }
                                     }
                                 }
+                            }
+                        }
+                    }
 
-                                // Delete button
-                                IconButton(
-                                    name = "delete",
-                                    title = appString { remove },
-                                    background = true,
-                                    styles = {
-                                        position(Position.Absolute)
-                                        top(1.r)
-                                        right(1.r)
-                                        color(Styles.colors.red)
-                                    }
-                                ) {
-                                    input = input + (part.key to "")
-                                    value = ""
+                    is StoryContent.Profiles -> {
+                        Div({
+                            classes(StoryStyles.contentProfiles)
+                        }) {
+                            part.profiles.forEach { personId ->
+                                ProfileCard(personId) {
+                                    window.open("/profile/$personId", "_blank")
                                 }
                             }
                         }
                     }
                 }
-            }
-
-            is StoryContent.Profiles -> {
-                Div({
-                    classes(StoryStyles.contentProfiles)
-                }) {
-                    part.profiles.forEach { personId ->
-                        ProfileCard(personId) {
-                            window.open("/profile/$personId", "_blank")
-         }
-                    }
-                }
+                actions(index, part)
             }
         }
-        actions(index, part)
+    }
+
+    if (editable) {
+        ContentAdder(
+            onContentAdded = { newContent ->
+                val currentContent = content.toMutableList()
+                currentContent.add(newContent)
+                // Just call onSave, don't call onEdited for new content
+                onSave?.invoke(currentContent)
+            },
+            cardId = cardId,
+            buttonText = "Add",
+            buttonIcon = "add"
+        )
     }
 }
