@@ -51,19 +51,15 @@ fun locationSelector(
         wasRequested = true
     }
 
-    val isGranted = @Composable {
-        locationPermissionState.status.isGranted || coarseLocationPermissionState.status.isGranted
-    }
-
-    val granted = isGranted()
+    val granted = locationPermissionState.status.isGranted || coarseLocationPermissionState.status.isGranted
 
     if (granted) {
         DisposableEffect(Unit) {
             val disposable = locationClient
                 .observeLocation(LocationRequest.createDefault())
                 .filter { it is Outcome.Success && it.value.lastLocation != null }
-                .takeWhile { scope.isActive }
                 .take(1)
+                .takeWhile { scope.isActive }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
                     geoManual = false
@@ -111,7 +107,7 @@ fun locationSelector(
     return LocationSelector(
         isManualCallback = { geoManual },
         setLocationManuallyCallback = { showSetMyLocation = true },
-        permissionGrantedCallback = { isGranted() },
+        permissionGrantedCallback = { granted },
         wasRequested = { wasRequested },
         shouldShowPermissionRationaleCallback = { locationPermissionState.status.shouldShowRationale || coarseLocationPermissionState.status.shouldShowRationale },
         launchPermissionRequestCallback = { locationPermissionState.launchPermissionRequest() },

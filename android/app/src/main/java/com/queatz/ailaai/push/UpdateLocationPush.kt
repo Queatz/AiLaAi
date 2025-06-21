@@ -20,10 +20,12 @@ import com.queatz.ailaai.extensions.toLatLng
 import com.queatz.ailaai.services.Push
 import com.queatz.push.UpdateLocationPushData
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.minutes
 
 fun Push.receive(data: UpdateLocationPushData) {
@@ -43,10 +45,20 @@ fun Push.receive(data: UpdateLocationPushData) {
     // 2. Get the current location in a worker with foreground service and notification
     val workRequest = OneTimeWorkRequestBuilder<LocationUpdateWorker>()
         .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+        .setConstraints(
+            Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .setRequiresBatteryNotLow(true)
+                .build()
+        )
         .build()
 
     WorkManager.getInstance(context)
-        .enqueue(workRequest)
+        .enqueueUniqueWork(
+            uniqueWorkName = "location_update_work",
+            existingWorkPolicy = ExistingWorkPolicy.KEEP,
+            request = workRequest
+        )
 }
 
 class LocationUpdateWorker(
@@ -70,12 +82,17 @@ class LocationUpdateWorker(
 
         // Get current location
         val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(context)
+        val done = CompletableDeferred<Unit>()
 
         try {
             val disposable = locationClient
-                .observeLocation(LocationRequest.createDefault())
-                .filter { it is Outcome.Success && it.value.lastLocation != null }
-                .take(1)
+                .observeLocation(
+                    LocationRequest.Builder()
+                        .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
+                        .setInterval(10000) // 10 seconds
+                        .setMaxWaitTime(60000) // 1 minute
+                        .build()
+                )
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { outcome ->
                     if (outcome is Outcome.Success) {
@@ -85,16 +102,18 @@ class LocationUpdateWorker(
                         // 3. Send location to server via API call
                         CoroutineScope(Dispatchers.IO).launch {
                             api.myGeo(
-                                geo = latLng.toGeo(),
-                                onError = { /* Handle error */ },
-                                onSuccess = { /* Handle success */ }
-                            )
+                                geo = latLng.toGeo()
+                            ) {
+                                done.complete(Unit)
+                            }
                         }
                     }
                 }
 
             // Wait for location to be fetched
-            delay(1.minutes)
+            withTimeoutOrNull(1.minutes) {
+                done.await()
+            }
 
             disposable.dispose()
 

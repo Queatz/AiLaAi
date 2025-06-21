@@ -191,6 +191,8 @@ class MainStyleSheet : StyleSheet() {
     )
 
     val fullscreenContainer by style {
+        borderRadius(1.5.r)
+
         backgroundColor(colors.white)
 
         dark(self) {

@@ -32,6 +32,7 @@ fun JsonObject.toStoryContent(): StoryContent? = get("content")?.jsonObject?.let
         "button" -> json.decodeFromJsonElement<StoryContent.Button>(content)
         "input" -> json.decodeFromJsonElement<StoryContent.Input>(content)
         "profile" -> json.decodeFromJsonElement<StoryContent.Profiles>(content)
+        "scene" -> json.decodeFromJsonElement<StoryContent.Scene>(content)
         else -> null
     }
 }

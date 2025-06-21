@@ -26,6 +26,7 @@ import app.widget.ScriptWidget
 import app.widget.SpaceWidget
 import app.widget.WebWidget
 import app.widget.WidgetStyleSheet
+import app.game.SceneComponent
 import appString
 import application
 import baseUrl
@@ -599,6 +600,24 @@ fun StoryContents(
                                     window.open("/profile/$personId", "_blank")
                                 }
                             }
+                        }
+                    }
+
+                    is StoryContent.Scene -> {
+                        Div({
+                            style {
+                                width(100.percent)
+                            }
+                        }) {
+                            SceneComponent(
+                                sceneId = part.sceneId,
+                                showSidePanel = false,
+                                showScreenshot = false,
+                                editable = false,
+                                styles = {
+                                    width(100.percent)
+                                }
+                            )
                         }
                     }
                 }

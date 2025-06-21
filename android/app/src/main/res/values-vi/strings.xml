@@ -294,6 +294,7 @@
     <string name="write_a_story">Viết bài viết</string>
     <string name="title">Tiêu đề</string>
     <string name="section">Phân</string>
+        <string name="scene">Cảnh</string>
     <string name="write">Viết</string>
     <string name="choose_location">Chọn vị trí</string>
     <string name="reorder">Đổi thứ tự</string>

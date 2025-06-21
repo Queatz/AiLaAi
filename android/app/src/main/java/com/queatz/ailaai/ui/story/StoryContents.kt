@@ -53,6 +53,7 @@ import com.queatz.ailaai.ui.story.contents.inputItem
 import com.queatz.ailaai.ui.story.contents.photosItem
 import com.queatz.ailaai.ui.story.contents.profilesItem
 import com.queatz.ailaai.ui.story.contents.reactionsItem
+import com.queatz.ailaai.ui.story.contents.sceneItem
 import com.queatz.ailaai.ui.story.contents.sectionItem
 import com.queatz.ailaai.ui.story.contents.textItem
 import com.queatz.ailaai.ui.story.contents.titleItem
@@ -241,6 +242,11 @@ fun StoryContents(
                     )
 
                     is StoryContent.Profiles -> profilesItem(content)
+
+                    is StoryContent.Scene -> sceneItem(
+                        content = content,
+                        fullscreenWebView = { fullscreenWebView = it }
+                    )
                 }
             }
         }

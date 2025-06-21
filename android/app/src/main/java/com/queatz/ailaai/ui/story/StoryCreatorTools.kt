@@ -9,6 +9,7 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.FormatShapes
 import androidx.compose.material.icons.outlined.HistoryEdu
 import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.Landscape
 import androidx.compose.material.icons.outlined.ListAlt
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.MoreHoriz
@@ -77,6 +78,7 @@ fun StoryCreatorTools(
     var showCreateGroupDialog by rememberStateOf(false)
     var showWidgetsMenu by rememberStateOf(false)
     var showPhotoDialog by rememberStateOf(false)
+    var showSceneDialog by rememberStateOf(false)
     var isGeneratingPhoto by rememberStateOf(false)
     var isUploadingPhotoOrVideo by rememberStateOf(false)
     var isUploadingAudio by remember { mutableStateOf(false) }

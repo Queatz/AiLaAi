@@ -307,6 +307,7 @@
     <string name="write_a_story">Write a post</string>
     <string name="title">Title</string>
     <string name="section">Section</string>
+        <string name="scene">Scene</string>
     <string name="write">Write</string>
     <string name="choose_location">Choose location</string>
     <string name="reorder">Reorder</string>

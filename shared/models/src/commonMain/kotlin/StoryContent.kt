@@ -87,6 +87,10 @@ sealed class StoryContent {
     data class Video(
         val video: String
     ) : StoryContent()
+    @Serializable
+    data class Scene(
+        val sceneId: String
+    ) : StoryContent()
 }
 
 enum class InputType {
@@ -124,6 +128,7 @@ fun StoryContent.partType() = when (this) {
     is StoryContent.Button -> "button"
     is StoryContent.Input -> "input"
     is StoryContent.Profiles -> "profile"
+    is StoryContent.Scene -> "scene"
     else -> throw NotImplementedError("$this is not a valid story part")
 }
 
@@ -139,5 +144,6 @@ fun StoryContent.isPart() = when (this) {
     is StoryContent.Button -> true
     is StoryContent.Input -> true
     is StoryContent.Profiles -> true
+    is StoryContent.Scene -> true
     else -> false
 }

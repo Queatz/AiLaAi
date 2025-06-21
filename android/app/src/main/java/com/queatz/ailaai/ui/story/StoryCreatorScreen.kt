@@ -538,6 +538,8 @@ fun StoryCreatorScreen(
 
                     is StoryContent.Profiles -> profilesCreatorItem(creatorScope(part, partIndex))
 
+                    // todo StoryContent.Scene
+
                     else -> {
                         // Not supported in the editor
                     }

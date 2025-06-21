@@ -19,6 +19,7 @@ import com.queatz.db.Card
 import com.queatz.db.StoryContent
 import com.queatz.widgets.Widgets
 import app.dialog.selectScriptDialog
+import app.dialog.selectSceneDialog
 import com.queatz.widgets.widgets.FormData
 import com.queatz.widgets.widgets.FormOptions
 import com.queatz.widgets.widgets.PageTreeData
@@ -36,7 +37,8 @@ import org.w3c.dom.DOMRect
 enum class ContentType {
     Section,
     Text,
-    Widget
+    Widget,
+    Scene
 }
 
 @Composable
@@ -108,6 +110,16 @@ fun ContentAdder(
 
                         if (textContent != null) {
                             onContentAdded(StoryContent.Text(textContent))
+                        }
+                    }
+                }
+            }
+
+            if (ContentType.Scene in availableTypes) {
+                item("Scene", icon = "landscape") {
+                    scope.launch {
+                        selectSceneDialog(scope) { sceneId ->
+                            onContentAdded(StoryContent.Scene(sceneId))
                         }
                     }
                 }
