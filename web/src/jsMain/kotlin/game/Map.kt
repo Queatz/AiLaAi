@@ -7,12 +7,23 @@ import lib.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import app.game.editor.assetManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import kotlin.js.asDynamic
 
 class Map(private val scene: Scene) {
+    // Object selection flow
+    private val _objectSelected = MutableSharedFlow<Pair<String, GameObject>>()
+    val objectSelectedFlow: SharedFlow<Pair<String, GameObject>> = _objectSelected.asSharedFlow()
+
+    // Coroutine scope for emitting events
+    private val coroutineScope = CoroutineScope(Dispatchers.Default)
+
     val tilemapEditor: TilemapEditor
     val post: Post
     val camera: Camera
@@ -171,7 +182,7 @@ class Map(private val scene: Scene) {
                         event.event.preventDefault()
                     }
 
-                    " " -> {
+                    " ", "Space" -> {
                         // Only handle spacebar for editor functions if we're in edit mode
                         // and have a tile or object selected, or if sketch tool is active
                         // (otherwise let it be used for play/pause)
@@ -229,6 +240,7 @@ class Map(private val scene: Scene) {
                 return
             }
 
+
             when (event.type) {
                 PointerEventTypes.POINTERWHEEL -> {
                     // Auto recenter camera target on mousewheel zoom
@@ -282,7 +294,57 @@ class Map(private val scene: Scene) {
                              tilemapEditor.drawMode != DrawMode.Clone && 
                              toolState.selectedToolType != ToolType.LINE)
                         ) {
-                            tilemapEditor.draw(event.event.altKey)
+                            // If SELECT tool is active, handle object selection
+                            if (toolState.selectedToolType == ToolType.SELECT && event.type == PointerEventTypes.POINTERDOWN) {
+                                // First try to pick an object directly using ray casting
+                                val pickedObject = tilemap.pickObject(event.event.offsetX.toInt(), event.event.offsetY.toInt())
+
+                                if (pickedObject != null) {
+                                    // We found an object using ray casting
+                                    val (key, _) = pickedObject
+                                    val objectId = tilemap.getObjectTypes()[key]
+
+                                    if (objectId != null) {
+                                        // Find the GameObject in the asset manager
+                                        val gameObject = assetManager.objects.value.find { it.id == objectId }
+                                        if (gameObject != null) {
+                                            // Store the selected object key for the CurrentSelectionSection
+                                            tilemapEditor.selectedObjectKey = key
+
+                                            // Notify that an object has been selected using a coroutine
+                                            coroutineScope.launch {
+                                                _objectSelected.emit(Pair(key, gameObject))
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    // Fallback to the tile-based selection if ray casting didn't find anything
+                                    val position = tilemapEditor.tilePos
+                                    val side = tilemapEditor.side
+
+                                    // Create a key from the position and side
+                                    val key = tilemap.key(position, side)
+
+                                    // Check if there's an object at this position
+                                    val objectId = tilemap.getObjectTypes()[key]
+                                    if (objectId != null) {
+                                        // Find the GameObject in the asset manager
+                                        val gameObject = assetManager.objects.value.find { it.id == objectId }
+                                        if (gameObject != null) {
+                                            // Store the selected object key for the CurrentSelectionSection
+                                            tilemapEditor.selectedObjectKey = key
+
+                                            // Notify that an object has been selected using a coroutine
+                                            coroutineScope.launch {
+                                                _objectSelected.emit(Pair(key, gameObject))
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                // For other tools, call the regular draw method
+                                tilemapEditor.draw(event.event.altKey)
+                            }
                         }
                     }
                 }

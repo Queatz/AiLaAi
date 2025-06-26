@@ -363,7 +363,7 @@ fun GroupsNavPage(
 //                NavMenuItem("group", "Friends", selected = selected is GroupNav.Friends) {
 //                    onSelected(GroupNav.Friends)
 //                }
-                NavMenuItem("location_on", appString { local }, selected = selected is GroupNav.Local) {
+                NavMenuItem("location_on", appString { explore }, selected = selected is GroupNav.Local) {
                     onSelected(GroupNav.Local)
                 }
 

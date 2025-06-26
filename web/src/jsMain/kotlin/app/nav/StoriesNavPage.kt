@@ -213,7 +213,7 @@ fun StoriesNavPage(
                 NavMenuItem("group", appString { friends }, selected = selected is StoryNav.Friends) {
                     onSelected(StoryNav.Friends)
                 }
-                NavMenuItem("location_on", appString { local }, selected = selected is StoryNav.Local) {
+                NavMenuItem("location_on", appString { explore }, selected = selected is StoryNav.Local) {
                     onSelected(StoryNav.Local)
                 }
 //                NavMenuItem("favorite", "Saved", selected = false) {

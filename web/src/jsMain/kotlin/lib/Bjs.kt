@@ -169,8 +169,11 @@ abstract external class Material {
     var needDepthPrePass: Boolean
     var wireframe: Boolean
     var zOffset: Float
+    var zOffsetUnits: Float
     var cullBackFaces: Boolean
     var transparencyMode: Int
+    var disableColorWrite: Boolean
+    var disableDepthWrite: Boolean
     var alpha: Float
     var id: String
     var name: String
@@ -191,9 +194,6 @@ external class StandardMaterial(name: String, scene: Scene) : Material {
     var diffuseColor: Color3
     var specularColor: Color3
     var emissiveColor: Color3
-    var disableColorWrite: Boolean
-    var disableDepthWrite: Boolean
-    var zOffsetUnits: Int
     var roughness: Float
     var disableLighting: Boolean
     var useAlphaFromDiffuseTexture: Boolean
@@ -386,6 +386,8 @@ external class PointerEvent {
     val shiftKey: Boolean
     val ctrlKey: Boolean
     val altKey: Boolean
+    val offsetX: Float
+    val offsetY: Float
 }
 
 external class ActionManager(scene: Scene) {

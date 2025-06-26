@@ -47,6 +47,7 @@ import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.minHeight
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
@@ -223,6 +224,7 @@ fun StoriesPage(
                                 autoFocus = true,
                                 showButtons = true,
                                 buttonText = appString { post },
+                                useMinHeight = 8.r,
                                 onSubmit = {
                                     if (newPostText.isNotBlank()) {
                                         isSaving = true

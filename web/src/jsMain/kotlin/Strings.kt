@@ -1535,11 +1535,6 @@ object Strings {
         vn = "Tạo nhóm mở",
         ru = "Создать открытую группу"
     )
-    val local = Translation(
-        en = "Local",
-        vn = "Gần đây",
-        ru = "Местные"
-    )
     val saved = Translation(
         en = "Saved",
         vn = "Đã lưu",

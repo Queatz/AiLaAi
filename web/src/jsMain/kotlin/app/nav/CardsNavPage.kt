@@ -238,7 +238,7 @@ fun CardsNavPage(
                 NavMenuItem("map", appString { map }, selected = nav == CardNav.Map) {
                     onSelected(CardNav.Map)
                 }
-                NavMenuItem("location_on", appString { local }, selected = nav == CardNav.Local) {
+                NavMenuItem("location_on", appString { explore }, selected = nav == CardNav.Local) {
                     onSelected(CardNav.Local)
                 }
                 NavMenuItem("group", appString { friends }, selected = nav == CardNav.Friends) {

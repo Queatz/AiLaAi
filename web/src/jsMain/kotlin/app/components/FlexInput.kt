@@ -98,6 +98,7 @@ fun FlexInput(
     styles: StyleScope.() -> Unit = {},
     defaultMargins: Boolean = false,
     useDefaultWidth: Boolean = true,
+    useMinHeight: CSSSizeValue<CSSUnit.rem>? = null,
     // Feature toggles
     enableVoiceInput: Boolean = true,
     enablePhotoPasting: Boolean = false,
@@ -356,7 +357,7 @@ fun FlexInput(
                         width(0.r)
                     }
                     if (autoSize) {
-                        minHeight(3.5.r)
+                        minHeight(useMinHeight ?: 3.5.r)
                         maxHeight(18.r)
                     }
                     flex(1)

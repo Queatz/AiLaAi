@@ -1866,6 +1866,27 @@ class SpaceWidgetInputControl {
         }
     }
 
+    // Function to duplicate the selected item
+    fun duplicateSelectedItem() {
+        if (canEdit && selectedItem != null) {
+            // Create a copy of the selected item with a slight offset
+            val offset = 20.0 to 20.0
+            val duplicatedItem = selectedItem!!.copy()
+                .move(selectedItem!!.position.first + offset.first to selectedItem!!.position.second + offset.second)
+
+            // Add the duplicated item to the data
+            data = data!!.copy(
+                items = data!!.items!! + duplicatedItem
+            )
+
+            // Update the selected item to the new duplicated item
+            selectedItem = duplicatedItem
+
+            dirty = nextInt()
+            drawFunc()
+        }
+    }
+
     // Function to navigate to a card
     fun navigateToCard(newCardId: String, pathItem: SpacePathItem) {
         // Store current state in path item

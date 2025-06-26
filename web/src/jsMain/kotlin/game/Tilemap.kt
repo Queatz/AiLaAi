@@ -16,11 +16,12 @@ import lib.MeshBuilder
 import lib.VertexBuffer
 import lib.StandardMaterial
 import lib.Texture
-import lib.Color3
 import lib.Vector3
 import lib.Quaternion
+import lib.Color3
 import lib.Color4
 import lib.Math
+import lib.Matrix
 import lib.CreatePlaneOptions
 import kotlin.js.Date
 import lib.TextureOptions
@@ -84,6 +85,9 @@ class Tilemap(
 
     // Store base meshes by GameObject id
     private val objectBaseMeshes = mutableMapOf<String, Mesh>()
+
+    // Store shadow base meshes by GameObject id
+    private val shadowBaseMeshes = mutableMapOf<String, Mesh>()
 
     // Store textures by GameTile id
     private val tileTextures = mutableMapOf<String, Texture>()
@@ -156,10 +160,8 @@ class Tilemap(
 
         // Configure the shadow material
         val shadowMaterial = StandardMaterial("Shadow Material", scene)
-        shadowMaterial.disableColorWrite = true
-        shadowMaterial.disableDepthWrite = true
+        shadowMaterial.alpha = 0f  // Make it completely transparent
         shadowMesh.material = shadowMaterial
-        shadowMesh.isVisible = false
 
         // Initialize the shadow base mesh
         this.shadowBaseMesh = shadowMesh
@@ -265,6 +267,53 @@ class Tilemap(
      */
     fun getObjectOptions(key: String): String? {
         return objectOptions[key]
+    }
+
+    /**
+     * Find an object key by mesh
+     * @param mesh The mesh to find the key for
+     * @return The key in the format "x,y,z,side" or null if not found
+     */
+    fun findObjectKeyByMesh(mesh: AbstractMesh): String? {
+        for ((key, meshes) in objects) {
+            if (meshes.contains(mesh)) {
+                return key
+            }
+        }
+        return null
+    }
+
+    /**
+     * Pick an object at the given screen position
+     * @param x Screen X coordinate
+     * @param y Screen Y coordinate
+     * @return Pair of object key and mesh, or null if no object was picked
+     */
+    fun pickObject(x: Int, y: Int): Pair<String, AbstractMesh>? {
+        val ray = scene.createPickingRay(x, y, Matrix.Identity(), scene.activeCamera)
+
+        // Check each object mesh for intersection
+        for ((key, meshes) in objects) {
+            for (mesh in meshes) {
+                val pickResult = ray.intersectsMesh(mesh)
+                if (pickResult.pickedPoint != null) {
+                    return Pair(key, mesh)
+                }
+            }
+        }
+
+        return null
+    }
+
+    /**
+     * Update object options
+     * @param key The object key in the format "x,y,z,side"
+     * @param options The new options JSON string
+     */
+    fun updateObjectOptions(key: String, options: String) {
+        if (key in objectOptions) {
+            objectOptions[key] = options
+        }
     }
 
     /**
@@ -530,7 +579,12 @@ class Tilemap(
         objectTypes.remove(key)
     }
 
-    fun addObject(position: Vector3, side: Side, gameObject: GameObject) {
+    fun addObject(
+        position: Vector3,
+        side: Side,
+        gameObject: GameObject,
+        castShadow: Boolean = true
+    ) {
         val key = key(position, side)
         if (objects[key] != null) {
             return
@@ -588,6 +642,8 @@ class Tilemap(
             material.diffuseColor = Color3.White()
             material.specularColor = Color3.Black()
             material.backFaceCulling = false
+            material.zOffsetUnits = -0.25f  // Draw on top of tiles
+            material.zOffset = -0.05f // Draw on top of tiles
 
             objectMesh.material = material
             objectMesh.receiveShadows = true
@@ -654,6 +710,39 @@ class Tilemap(
             newObject.instancedBuffers["color"] = Color3.White().toColor4()
         }
 
+        // Determine which side to use based on the axis property and the side
+        val effectiveSide = if (options?.axis == null) {
+            // null means Auto, use the provided side
+            side
+        } else {
+            // Rotate based on the side
+            when (options.axis) {
+                com.queatz.db.Axis.X -> {
+                    when (side) {
+                        Side.X -> Side.Z
+                        Side.Y -> Side.X
+                        Side.Z -> Side.Y
+                        Side.NEGATIVE_X -> Side.NEGATIVE_Z
+                        Side.NEGATIVE_Y -> Side.NEGATIVE_X
+                        Side.NEGATIVE_Z -> Side.NEGATIVE_Y
+                    }
+                }
+                com.queatz.db.Axis.Y -> side
+                com.queatz.db.Axis.Z -> {
+                    when (side) {
+                        Side.X -> Side.Y
+                        Side.Y -> Side.Z
+                        Side.Z -> Side.X
+                        Side.NEGATIVE_X -> Side.NEGATIVE_Y
+                        Side.NEGATIVE_Y -> Side.NEGATIVE_Z
+                        Side.NEGATIVE_Z -> Side.NEGATIVE_X
+                    }
+                }
+                else -> side // This should never happen, but needed for exhaustive when
+            }
+        }
+
+        // Function for setting up camera-facing objects (Auto mode)
         fun setupObjectRotation(
             newObject: AbstractMesh,
             position: Vector3,
@@ -709,75 +798,239 @@ class Tilemap(
             }
         }
 
-        when (side) {
-            Side.Y -> {
-                setupObjectRotation(
-                    newObject,
-                    position,
-                    Vector3(0.5f, 0f, 0.5f),
-                    { _ -> },
-                    Vector3.Up(),
-                    { v -> v.y = 0f }
-                )
-            }
+        // Function for setting up axis-aligned objects (when axis is specified)
+        fun setupAxisAlignedObjectRotation(
+            newObject: AbstractMesh,
+            position: Vector3,
+            offset: Vector3,
+            initialRotation: (AbstractMesh) -> Unit
+        ) {
+            newObject.position.copyFrom(position.add(offset))
 
-            Side.X -> {
-                setupObjectRotation(
-                    newObject,
-                    position,
-                    Vector3(0f, 0.5f, 0.5f),
-                    { obj -> obj.rotation.z = -Math.PI / 2 },
-                    Vector3.Right(),
-                    { v -> v.x = 0f }
-                )
-            }
+            // Apply the initial rotation directly to the object
+            // This will set the Euler angles (rotation property)
+            initialRotation(newObject)
 
-            Side.Z -> {
-                setupObjectRotation(
-                    newObject,
-                    position,
-                    Vector3(0.5f, 0.5f, 0f),
-                    { obj -> obj.rotation.x = Math.PI / 2 },
-                    Vector3.Forward(),
-                    { v -> v.z = 0f }
-                )
-            }
+            // Don't set rotationQuaternion, let the Euler angles (rotation property) control the rotation
+            // This ensures the object stays aligned to the specified axis
+        }
 
-            Side.NEGATIVE_Y -> {
-                setupObjectRotation(
-                    newObject,
-                    position,
-                    Vector3(0.5f, 0f, 0.5f),
-                    { obj -> obj.rotation.z = -Math.PI },
-                    Vector3.Down(),
-                    { v -> v.y = 0f }
-                )
-            }
+        // Function for setting up shadow objects that face the sun
+        fun setupShadowObjectRotation(
+            shadowObject: AbstractMesh,
+            position: Vector3,
+            offset: Vector3,
+            initialRotation: (AbstractMesh) -> Unit,
+            upVector: Vector3
+        ) {
+            shadowObject.position.copyFrom(position.add(offset))
+            initialRotation(shadowObject)
+            shadowObject.rotationQuaternion = Quaternion.Identity()
 
-            Side.NEGATIVE_X -> {
-                setupObjectRotation(
-                    newObject,
-                    position,
-                    Vector3(0f, 0.5f, 0.5f),
-                    { obj -> obj.rotation.z = Math.PI / 2 },
-                    Vector3.Left(),
-                    { v -> v.x = 0f }
-                )
-            }
+            // Make the shadow object face the sun
+            shadowObject.onAfterWorldMatrixUpdateObservable.add { node ->
+                // Get the sun direction (invert it to face toward the sun)
+                val sunDirection = sun.direction.scale(-1f)
 
-            Side.NEGATIVE_Z -> {
+                // Create a quaternion to rotate the object to face the sun
+                val targetQ = Quaternion()
+                Quaternion.FromLookDirectionRHToRef(
+                    direction = sunDirection,
+                    up = upVector,
+                    result = targetQ
+                )
+
+                // Apply the rotation
+                node.rotationQuaternion = targetQ
+            }
+        }
+
+        // Check if we should use axis-aligned rotation
+        val useAxisAlignedRotation = options?.axis != null
+
+        // Helper function for setting up object rotation based on side
+        fun setupSideRotation(
+            offset: Vector3,
+            initialRotation: (AbstractMesh) -> Unit,
+            upVector: Vector3,
+            zeroAxis: (Vector3) -> Unit
+        ) {
+            if (useAxisAlignedRotation) {
+                setupAxisAlignedObjectRotation(
+                    newObject = newObject,
+                    position = position,
+                    offset = Vector3.Zero(),
+                    initialRotation = initialRotation
+                )
+            } else {
                 setupObjectRotation(
-                    newObject,
-                    position,
-                    Vector3(0.5f, 0.5f, 0f),
-                    { obj -> obj.rotation.x = -Math.PI / 2 },
-                    Vector3.Backward(),
-                    { v -> v.z = 0f }
+                    newObject = newObject,
+                    position = position,
+                    offset = offset,
+                    initialRotation = initialRotation,
+                    upVector = upVector,
+                    zeroAxis = zeroAxis
                 )
             }
         }
 
-        // Store the object without shadow for now
-        objects[key] = listOf(newObject)
+        when (effectiveSide) {
+            Side.Y -> setupSideRotation(
+                offset = Vector3(0.5f, 0f, 0.5f),
+                initialRotation = { _ -> },
+                upVector = Vector3.Up(),
+                zeroAxis = { v -> v.y = 0f }
+            )
+
+            Side.X -> setupSideRotation(
+                offset = Vector3(0f, 0.5f, 0.5f),
+                initialRotation = { obj -> obj.rotation.z = -Math.PI / 2 },
+                upVector = Vector3.Right(),
+                zeroAxis = { v -> v.x = 0f }
+            )
+
+            Side.Z -> setupSideRotation(
+                offset = Vector3(0.5f, 0.5f, 0f),
+                initialRotation = { obj -> obj.rotation.x = Math.PI / 2 },
+                upVector = Vector3.Forward(),
+                zeroAxis = { v -> v.z = 0f }
+            )
+
+            Side.NEGATIVE_Y -> setupSideRotation(
+                offset = Vector3(0.5f, 0f, 0.5f),
+                initialRotation = { obj -> obj.rotation.z = -Math.PI },
+                upVector = Vector3.Down(),
+                zeroAxis = { v -> v.y = 0f }
+            )
+
+            Side.NEGATIVE_X -> setupSideRotation(
+                offset = Vector3(0f, 0.5f, 0.5f),
+                initialRotation = { obj -> obj.rotation.z = Math.PI / 2 },
+                upVector = Vector3.Left(),
+                zeroAxis = { v -> v.x = 0f }
+            )
+
+            Side.NEGATIVE_Z -> setupSideRotation(
+                offset = Vector3(0.5f, 0.5f, 0f),
+                initialRotation = { obj -> obj.rotation.x = -Math.PI / 2 },
+                upVector = Vector3.Backward(),
+                zeroAxis = { v -> v.z = 0f }
+            )
+        }
+
+        // Handle shadow casting based on options and castShadow parameter
+        if (castShadow) {
+            if (options?.axis == null) {
+                // When axis is null (Auto mode), create an additional shadow-only object that faces the sun
+                // Get or create the shadow base mesh for this object type
+                val shadowBaseMesh = if (gameObject.id != null && shadowBaseMeshes.containsKey(gameObject.id)) {
+                    // Reuse existing shadow base mesh
+                    shadowBaseMeshes[gameObject.id]!!
+                } else {
+                    // Create a new shadow base mesh for this object type
+                    val shadowMesh = baseMesh.clone("ShadowBase") as Mesh
+
+                    // Create a special material that doesn't render but still casts shadows
+                    val shadowMaterial = (newObject.material.clone("Shadow Material") as StandardMaterial) // todo reuse
+                    shadowMaterial.disableColorWrite = true
+                    shadowMaterial.disableDepthWrite = true
+                    shadowMesh.isVisible = true
+                    shadowMesh.material = shadowMaterial
+
+                    // Register the color instanced buffer for the shadow base mesh
+                    try {
+                        shadowMesh.registerInstancedBuffer("color", 4)
+                        // Initialize base mesh color buffer to avoid null value during instancing
+                        shadowMesh.instancedBuffers["color"] = Color3.White().toColor4()
+                    } catch (e: Exception) {
+                        console.error("Failed to register instanced buffer for shadow base mesh", e)
+                    }
+
+                    // Store the shadow base mesh for future reuse
+                    if (gameObject.id != null) {
+                        shadowBaseMeshes[gameObject.id!!] = shadowMesh
+                    }
+
+                    shadowMesh
+                }
+
+                // Create an instance of the shadow base mesh
+                val shadowObject = shadowBaseMesh.createInstance("ShadowObject")
+
+                // Copy the same scaling from the regular object
+                shadowObject.scaling = newObject.scaling.clone()
+
+                // Copy the color from the regular object to the shadow object
+                try {
+                    shadowObject.instancedBuffers["color"] = newObject.instancedBuffers["color"]
+                } catch (e: Exception) {
+                    console.error("Failed to set instanced buffer for shadow object", e)
+                }
+
+                // Set up the shadow object to face the sun
+                when (effectiveSide) {
+                    Side.Y -> setupShadowObjectRotation(
+                        shadowObject = shadowObject,
+                        position = position,
+                        offset = Vector3(0.5f, 0f, 0.5f),
+                        initialRotation = { _ -> },
+                        upVector = Vector3.Up()
+                    )
+
+                    Side.X -> setupShadowObjectRotation(
+                        shadowObject = shadowObject,
+                        position = position,
+                        offset = Vector3(0f, 0.5f, 0.5f),
+                        initialRotation = { obj -> obj.rotation.z = -Math.PI / 2 },
+                        upVector = Vector3.Right()
+                    )
+
+                    Side.Z -> setupShadowObjectRotation(
+                        shadowObject = shadowObject,
+                        position = position,
+                        offset = Vector3(0.5f, 0.5f, 0f),
+                        initialRotation = { obj -> obj.rotation.x = Math.PI / 2 },
+                        upVector = Vector3.Forward()
+                    )
+
+                    Side.NEGATIVE_Y -> setupShadowObjectRotation(
+                        shadowObject = shadowObject,
+                        position = position,
+                        offset = Vector3(0.5f, 0f, 0.5f),
+                        initialRotation = { obj -> obj.rotation.z = -Math.PI },
+                        upVector = Vector3.Down()
+                    )
+
+                    Side.NEGATIVE_X -> setupShadowObjectRotation(
+                        shadowObject = shadowObject,
+                        position = position,
+                        offset = Vector3(0f, 0.5f, 0.5f),
+                        initialRotation = { obj -> obj.rotation.z = Math.PI / 2 },
+                        upVector = Vector3.Left()
+                    )
+
+                    Side.NEGATIVE_Z -> setupShadowObjectRotation(
+                        shadowObject = shadowObject,
+                        position = position,
+                        offset = Vector3(0.5f, 0.5f, 0f),
+                        initialRotation = { obj -> obj.rotation.x = -Math.PI / 2 },
+                        upVector = Vector3.Backward()
+                    )
+                }
+
+                // Add the shadow object to the shadow casters
+                addShadowCaster(shadowObject)
+
+                // Store both objects
+                objects[key] = listOf(newObject, shadowObject)
+            } else {
+                // When axis is specified, make the object itself cast a shadow
+                addShadowCaster(newObject)
+                objects[key] = listOf(newObject)
+            }
+        } else {
+            // No shadow casting, just store the regular object
+            objects[key] = listOf(newObject)
+        }
     }
 }

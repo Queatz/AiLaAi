@@ -10,7 +10,6 @@ external class GridMaterial(name: String, scene: Scene) : Material {
     var opacity: Float
     var gridRatio: Float
     var majorUnitFrequency: Int
-    var zOffsetUnits: Float
     var fogEnabled: Boolean
     var gridOffset: Vector3
     var antialias: Boolean

@@ -60,6 +60,7 @@ import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.left
+import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
@@ -852,6 +853,8 @@ fun GamePage(
                     top(1.r)
                     property("z-index", "10")
                     display(DisplayStyle.Flex)
+                    overflow("auto")
+                    maxWidth("calc(${100.percent} - ${2.r})")
                 }
             }) {
                 // Fullscreen button

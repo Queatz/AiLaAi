@@ -21,6 +21,7 @@ import app.ailaai.api.updateGameTile
 import app.dialog.dialog
 import application
 import baseUrl
+import com.queatz.db.Axis
 import com.queatz.db.GameObjectOptions
 import com.queatz.db.PersonProfile
 import components.GroupPhoto
@@ -53,8 +54,11 @@ import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.dom.TextInput
+import org.jetbrains.compose.web.dom.RadioInput
 import org.w3c.dom.HTMLAnchorElement
 import r
+import lib.Vector3
+import game.Side
 
 @Composable
 fun CurrentSelectionSection(map: Map) {
@@ -75,6 +79,7 @@ fun CurrentSelectionSection(map: Map) {
     // Track object options
     var scaleVariation by remember { mutableStateOf(0f) }
     var colorVariation by remember { mutableStateOf(0f) }
+    var axis by remember { mutableStateOf<Axis?>(null) }
 
     // Track creator profile
     var creatorProfile by remember { mutableStateOf<PersonProfile?>(null) }
@@ -132,16 +137,19 @@ fun CurrentSelectionSection(map: Map) {
                     val options = Json.decodeFromString<GameObjectOptions>(optionsJson)
                     scaleVariation = options.scaleVariation
                     colorVariation = options.colorVariation
+                    axis = options.axis
                 } ?: run {
                     // Reset to defaults if no options
                     scaleVariation = 0f
                     colorVariation = 0f
+                    axis = null
                 }
             } catch (e: Exception) {
                 console.error("Failed to parse object options", e)
                 // Reset to defaults on error
                 scaleVariation = 0f
                 colorVariation = 0f
+                axis = null
             }
 
             // Fetch creator profile for object
@@ -811,6 +819,80 @@ fun CurrentSelectionSection(map: Map) {
                                     }
                                     Text("${(colorVariation * 100).toInt()}%")
                                 }
+
+                                // Axis selection
+                                Div({
+                                    style {
+                                        display(DisplayStyle.Flex)
+                                        flexDirection(FlexDirection.Column)
+                                        gap(0.25.r)
+                                        marginBottom(0.5.r)
+                                    }
+                                }) {
+                                    Div({
+                                        style { fontWeight("bold") }
+                                    }) { Text("Axis") }
+
+                                    // Auto option
+                                    Div({
+                                        style {
+                                            display(DisplayStyle.Flex)
+                                            alignItems(AlignItems.Center)
+                                            gap(0.5.r)
+                                        }
+                                    }) {
+                                        RadioInput {
+                                            checked(axis == null)
+                                            onChange { axis = null }
+                                        }
+                                        Text("Auto")
+                                    }
+
+                                    // X axis option
+                                    Div({
+                                        style {
+                                            display(DisplayStyle.Flex)
+                                            alignItems(AlignItems.Center)
+                                            gap(0.5.r)
+                                        }
+                                    }) {
+                                        RadioInput {
+                                            checked(axis == Axis.X)
+                                            onChange { axis = Axis.X }
+                                        }
+                                        Text("X Axis")
+                                    }
+
+                                    // Y axis option
+                                    Div({
+                                        style {
+                                            display(DisplayStyle.Flex)
+                                            alignItems(AlignItems.Center)
+                                            gap(0.5.r)
+                                        }
+                                    }) {
+                                        RadioInput {
+                                            checked(axis == Axis.Y)
+                                            onChange { axis = Axis.Y }
+                                        }
+                                        Text("Y Axis")
+                                    }
+
+                                    // Z axis option
+                                    Div({
+                                        style {
+                                            display(DisplayStyle.Flex)
+                                            alignItems(AlignItems.Center)
+                                            gap(0.5.r)
+                                        }
+                                    }) {
+                                        RadioInput {
+                                            checked(axis == Axis.Z)
+                                            onChange { axis = Axis.Z }
+                                        }
+                                        Text("Z Axis")
+                                    }
+                                }
                             }
 
                             // Save/Cancel buttons
@@ -843,10 +925,11 @@ fun CurrentSelectionSection(map: Map) {
                                                 }
 
                                                 currentObject != null -> {
-                                                    // Create GameObjectOptions with current scale and color variations
+                                                    // Create GameObjectOptions with current scale, color variations, and axis
                                                     val options = GameObjectOptions(
                                                         scaleVariation = scaleVariation,
-                                                        colorVariation = colorVariation
+                                                        colorVariation = colorVariation,
+                                                        axis = axis
                                                     )
 
                                                     // Encode options to JSON
@@ -864,6 +947,48 @@ fun CurrentSelectionSection(map: Map) {
                                                         map.setCurrentGameObject(it)
                                                         // Update the AssetManager
                                                         assetManager.updateObject(it)
+
+                                                        // Find and update all instances of this object in the tilemap
+                                                        val objectId = it.id
+                                                        if (objectId != null) {
+                                                            // Get all object positions by type
+                                                            val objectKeys = mutableListOf<String>()
+                                                            val objectTypes = map.tilemapEditor.tilemap.getObjectTypes()
+
+                                                            // Find all keys where this object type is used
+                                                            for ((key, id) in objectTypes) {
+                                                                if (id == objectId) {
+                                                                    objectKeys.add(key)
+                                                                }
+                                                            }
+
+                                                            // Remove and re-add all objects of this type
+                                                            for (key in objectKeys) {
+                                                                // Parse the key manually
+                                                                val parts = key.split(",")
+                                                                if (parts.size == 4) {
+                                                                    try {
+                                                                        val x = parts[0].toFloat()
+                                                                        val y = parts[1].toFloat()
+                                                                        val z = parts[2].toFloat()
+                                                                        val side = Side.fromString(parts[3])
+
+                                                                        val position = Vector3(x, y, z)
+
+                                                                        // Remove the object
+                                                                        map.tilemapEditor.tilemap.removeObject(position, side)
+                                                                        // Re-add the object with updated properties
+                                                                        map.tilemapEditor.tilemap.addObject(position, side, it)
+                                                                    } catch (e: Exception) {
+                                                                        console.error("Error parsing key: $key", e)
+                                                                    }
+                                                                }
+                                                            }
+
+                                                            // Notify that the tilemap has changed
+                                                            map.notifyTilemapChanged()
+                                                        }
+
                                                         // Force reload of objects in the AssetManager
                                                         scope.launch {
                                                             api.gameObjects(
@@ -986,6 +1111,48 @@ fun CurrentSelectionSection(map: Map) {
                                                         map.setCurrentGameObject(it)
                                                         // Update the AssetManager
                                                         assetManager.updateObject(it)
+
+                                                        // Find and update all instances of this object in the tilemap
+                                                        val objectId = it.id
+                                                        if (objectId != null) {
+                                                            // Get all object positions by type
+                                                            val objectKeys = mutableListOf<String>()
+                                                            val objectTypes = map.tilemapEditor.tilemap.getObjectTypes()
+
+                                                            // Find all keys where this object type is used
+                                                            for ((key, id) in objectTypes) {
+                                                                if (id == objectId) {
+                                                                    objectKeys.add(key)
+                                                                }
+                                                            }
+
+                                                            // Remove and re-add all objects of this type
+                                                            for (key in objectKeys) {
+                                                                // Parse the key manually
+                                                                val parts = key.split(",")
+                                                                if (parts.size == 4) {
+                                                                    try {
+                                                                        val x = parts[0].toFloat()
+                                                                        val y = parts[1].toFloat()
+                                                                        val z = parts[2].toFloat()
+                                                                        val side = Side.fromString(parts[3])
+
+                                                                        val position = Vector3(x, y, z)
+
+                                                                        // Remove the object
+                                                                        map.tilemapEditor.tilemap.removeObject(position, side)
+                                                                        // Re-add the object with updated properties
+                                                                        map.tilemapEditor.tilemap.addObject(position, side, it)
+                                                                    } catch (e: Exception) {
+                                                                        console.error("Error parsing key: $key", e)
+                                                                    }
+                                                                }
+                                                            }
+
+                                                            // Notify that the tilemap has changed
+                                                            map.notifyTilemapChanged()
+                                                        }
+
                                                         // Force reload of objects in the AssetManager
                                                         scope.launch {
                                                             api.gameObjects(

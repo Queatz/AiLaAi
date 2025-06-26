@@ -36,6 +36,14 @@ class TilemapEditor(
     val toolState: ToolState,
     private val map: Map? = null
 ) {
+    // Selected object key state
+    private val _selectedObjectKey = mutableStateOf<String?>(null)
+    val selectedObjectKeyState = _selectedObjectKey
+    var selectedObjectKey: String?
+        get() = _selectedObjectKey.value
+        set(value) {
+            _selectedObjectKey.value = value
+        }
     val cursor: Mesh
     var grid: Mesh
 
@@ -208,7 +216,7 @@ class TilemapEditor(
         material.alpha = 0.3f
         material.backFaceCulling = false  // Show both sides
         material.zOffset = -0.01f  // Draw on top
-        material.zOffsetUnits = -1
+        material.zOffsetUnits = -1f
         cursor.rotation = Vector3(Math.PI / 2, 0f, 0f)
         cursor.material = material
         this.cursor = cursor
@@ -1219,7 +1227,7 @@ class TilemapEditor(
         material.alpha = 0.5f
         material.backFaceCulling = false
         material.zOffset = -0.01f // Draw on top
-        material.zOffsetUnits = -1
+        material.zOffsetUnits = -1f
 
         // Create a mesh for each point on the line
         for ((x, y) in points) {

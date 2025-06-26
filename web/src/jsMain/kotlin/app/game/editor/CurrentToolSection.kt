@@ -189,6 +189,23 @@ fun CurrentToolSection(
                                 }
                                 keyEvent.preventDefault()
                             }
+                            "6" -> {
+                                // Toggle Select tool
+                                if (selectedToolType == ToolType.SELECT) {
+                                    // Deselect current tool
+                                    selectedToolType = null
+                                    map.toolState.selectTool(null as ToolType?)
+                                    currentDrawMode = map.toolState.drawMode
+                                    map.camera.camera.attachControl()
+                                    onToolDeselected()
+                                } else {
+                                    // Select Select tool
+                                    selectedToolType = ToolType.SELECT
+                                    map.toolState.selectTool(ToolType.SELECT)
+                                    currentDrawMode = map.toolState.drawMode
+                                }
+                                keyEvent.preventDefault()
+                            }
                             "Escape", "Esc" -> {
                                 if (selectedToolType == ToolType.LINE) {
                                     // Cancel line drawing if active
@@ -252,6 +269,13 @@ fun CurrentToolSection(
                     photoUrl = "/assets/icons/timeline.svg",
                     description = "Draw lines of tiles",
                     number = 5
+                ),
+                Tool(
+                    id = ToolType.SELECT,
+                    name = "Select",
+                    photoUrl = "/assets/icons/select.svg",
+                    description = "Select objects to edit their properties",
+                    number = 6
                 )
             )
 

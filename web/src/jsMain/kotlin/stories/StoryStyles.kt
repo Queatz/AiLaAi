@@ -1,8 +1,55 @@
 package stories
+import StyleManager
 import Styles
 import app.AppStyles
 import app.dark
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.AlignSelf
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.FlexWrap
+import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.LineStyle
+import org.jetbrains.compose.web.css.Position
+import org.jetbrains.compose.web.css.StyleSheet
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.alignSelf
+import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.backgroundPosition
+import org.jetbrains.compose.web.css.backgroundSize
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.boxSizing
+import org.jetbrains.compose.web.css.color
+import org.jetbrains.compose.web.css.cursor
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flex
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.flexWrap
+import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.fontWeight
+import org.jetbrains.compose.web.css.gap
+import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.lineHeight
+import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.marginTop
+import org.jetbrains.compose.web.css.maxHeight
+import org.jetbrains.compose.web.css.maxWidth
+import org.jetbrains.compose.web.css.media
+import org.jetbrains.compose.web.css.mediaMaxWidth
+import org.jetbrains.compose.web.css.minWidth
+import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.outline
+import org.jetbrains.compose.web.css.overflow
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.position
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.textAlign
+import org.jetbrains.compose.web.css.vh
+import org.jetbrains.compose.web.css.whiteSpace
+import org.jetbrains.compose.web.css.width
 import r
 
 val StoryStyles get() = StyleManager.style(StoryStyleSheet::class)
@@ -15,6 +62,7 @@ class StoryStyleSheet : StyleSheet() {
         justifyContent(JustifyContent.Stretch)
         fontSize(36.px)
         whiteSpace("pre-wrap")
+        property("word-break", "break-word")
     }
 
     val contentAuthors by style {
@@ -41,6 +89,7 @@ class StoryStyleSheet : StyleSheet() {
 
     val contentText by style {
         boxSizing("border-box")
+        whiteSpace("pre-wrap")
         whiteSpace("pre-wrap")
         fontSize(16.px)
         textAlign("justify")

@@ -28,6 +28,7 @@ fun SpaceWidgetSidePanel(
     onBringToFront: () -> Unit,
     onToggleSlideshow: () -> Unit,
     isSlideshowActive: Boolean,
+    onDuplicate: () -> Unit,
     onDelete: () -> Unit,
 ) {
     Div(
@@ -100,6 +101,20 @@ fun SpaceWidgetSidePanel(
                 },
                 onClick = {
                     onBringToFront()
+                }
+            )
+
+            IconButton(
+                name = "content_copy",
+                // todo: translate
+                title = "Duplicate",
+                styles = {
+                    borderRadius(1.r)
+                    backgroundColor(Styles.colors.primary)
+                    property("pointer-events", "initial")
+                },
+                onClick = {
+                    onDuplicate()
                 }
             )
 

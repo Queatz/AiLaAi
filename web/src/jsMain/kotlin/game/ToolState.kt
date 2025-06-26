@@ -102,6 +102,11 @@ data class ToolState(
                 // If a game object is selected, keep DrawMode.Object
                 isSketching = false
             }
+            ToolType.SELECT -> {
+                // Select tool doesn't change draw mode
+                // It just enables selection mode
+                isSketching = false
+            }
             null -> {
                 // Deselect current tool
                 currentGameTile = null

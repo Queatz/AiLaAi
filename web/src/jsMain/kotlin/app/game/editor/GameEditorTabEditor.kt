@@ -413,6 +413,7 @@ fun GameEditorTabEditor(
             clearObjectSelection = true
             clearMusicSelection = true
         }
+        CurrentSelectionSection(map)
         BrushSection(map)
         // Sketch layers management panel
         SketchLayersSection(map)

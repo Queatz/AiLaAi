@@ -463,7 +463,6 @@
     <string name="edit_reminders">Edit reminders</string>
     <string name="yes_delete">Yes, delete</string>
     <string name="delete_this_occurrence">Delete this occurrence?</string>
-    <string name="local">Local</string>
     <string name="join_group">Join group</string>
     <string name="cancel_join_request">Cancel join request</string>
     <string name="send_request">Send request</string>

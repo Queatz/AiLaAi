@@ -8,7 +8,8 @@ enum class ToolType {
     CLONE,
     SKETCH,
     BUCKET,
-    LINE;
+    LINE,
+    SELECT;
 
     companion object {
         /**
@@ -21,6 +22,7 @@ enum class ToolType {
                 "sketch" -> SKETCH
                 "bucket" -> BUCKET
                 "line" -> LINE
+                "select" -> SELECT
                 else -> null
             }
         }
@@ -35,6 +37,7 @@ enum class ToolType {
                 SKETCH -> "sketch"
                 BUCKET -> "bucket"
                 LINE -> "line"
+                SELECT -> "select"
                 null -> null
             }
         }

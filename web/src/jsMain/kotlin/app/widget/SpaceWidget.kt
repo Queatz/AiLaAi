@@ -662,6 +662,9 @@ fun SpaceWidget(widgetId: String) {
                     }
                 },
                 isSlideshowActive = slideshowMode,
+                onDuplicate = {
+                    control.duplicateSelectedItem()
+                },
                 onDelete = {
                     control.deleteSelectedItem()
                 }

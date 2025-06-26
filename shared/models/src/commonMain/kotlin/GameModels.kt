@@ -211,5 +211,6 @@ data class CameraKeyframeData(
 @Serializable
 data class GameObjectOptions(
     val scaleVariation: Float = 0f,
-    val colorVariation: Float = 0f
+    val colorVariation: Float = 0f,
+    val axis: Axis? = null  // null means Auto
 )
