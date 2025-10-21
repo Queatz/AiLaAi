@@ -72,7 +72,6 @@ class ToolbarScope internal constructor() {
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Toolbar(
     modifier: Modifier = Modifier,

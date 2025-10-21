@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-val joins = Joins()
+val joins by lazy { Joins() }
 
 class Joins {
 

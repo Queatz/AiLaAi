@@ -2,7 +2,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.mapLatest
 
-val indicator = Indicator()
+val indicator by lazy { Indicator() }
 
 enum class IndicatorSource {
     Group

@@ -44,6 +44,15 @@ fun AppFooter(
         Span({
             classes(Styles.menuButton)
             onClick {
+                window.open("https://www.youtube.com/@hitownchat", target = "_blank")
+            }
+        }) {
+            Text("YouTube")
+        }
+        Bullet()
+        Span({
+            classes(Styles.menuButton)
+            onClick {
                 router.navigate("/info/use-cases")
             }
         }) {

@@ -102,12 +102,9 @@ fun EventsScreen(
         ) { occurrences ->
             val newEvents = occurrences.toEvents()
                 .filter { it.event != ReminderEventType.End }
-                .sortedBy { it.date }
-
             events = if (loadMore) {
                 (events + newEvents)
                     .distinctBy { it.reminder.id to it.date }
-                    .sortedBy { it.date }
             } else {
                 newEvents
             }

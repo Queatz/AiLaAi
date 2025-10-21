@@ -54,11 +54,11 @@ import org.w3c.dom.get
 import org.w3c.dom.set
 import stories.StoryStyles
 
-const val baseUrl = "http://0.0.0.0:8080"
-//const val baseUrl = "https://api.ailaai.app"
+//const val baseUrl = "http://0.0.0.0:8080"
+const val baseUrl = "https://api.ailaai.app"
 
-const val webBaseUrl = "http://0.0.0.0:4040"
-//const val webBaseUrl = "https://hitown.chat"
+//const val webBaseUrl = "http://0.0.0.0:4040"
+const val webBaseUrl = "https://hitown.chat"
 
 val json = Json {
     encodeDefaults = true
@@ -77,7 +77,7 @@ val http = HttpClient(Js) {
 
 fun main() {
     // Mapbox
-    js("require(\"mapbox-gl/dist/mapbox-gl.css\")")
+    // js("require(\"mapbox-gl/dist/mapbox-gl.css\")")
 
     mapboxgl.accessToken =
         "pk.eyJ1IjoiamFjb2JmZXJyZXJvIiwiYSI6ImNraXdyY211eTBlMmcycW02eDNubWNpZzcifQ.1KtSoMzrPCM0A8UVtI_gdg"

@@ -2,7 +2,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-val notifications = Notifications()
+val notifications by lazy { Notifications() }
 
 class Notification(
     val icon: String?,

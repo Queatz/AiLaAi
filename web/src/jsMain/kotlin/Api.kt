@@ -5,7 +5,7 @@ import org.w3c.dom.get
 import org.w3c.dom.set
 import baseUrl as apiBaseUrl
 
-val api = Api()
+val api by lazy { Api() }
 
 class Api : app.ailaai.api.Api() {
     val device: String

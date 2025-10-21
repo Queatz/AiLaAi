@@ -755,6 +755,8 @@ fun PageTreeWidget(widgetId: String) {
                 onChange = { search = it },
                 defaultMargins = false,
                 autoFocus = false,
+                // todo: translate
+                placeholder = "Search",
                 styles = {
                     width(100.percent)
                     marginBottom(1.r)

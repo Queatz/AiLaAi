@@ -55,11 +55,6 @@ import r
 import toBytes
 import web.blob.Blob
 import web.events.EventHandler
-import web.media.recorder.BlobEvent
-import web.media.recorder.MediaRecorder
-import web.media.streams.MediaStream
-import web.media.streams.MediaStreamConstraints
-import web.media.streams.MediaTrackConstraints
 import web.navigator.navigator
 import Styles
 import format
@@ -72,6 +67,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.jetbrains.compose.web.css.alignItems
 import pad
+import web.blob.bytes
+import web.mediadevices.getUserMedia
+import web.mediarecorder.BlobEvent
+import web.mediarecorder.MediaRecorder
+import web.mediastreams.MediaStream
+import web.mediastreams.MediaStreamConstraints
+import web.mediastreams.MediaTrackConstraints
 import kotlin.js.Date
 
 @Composable

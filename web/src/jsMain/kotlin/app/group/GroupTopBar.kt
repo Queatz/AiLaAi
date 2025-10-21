@@ -860,7 +860,7 @@ fun GroupTopBar(
             renameGroup()
         },
         actions = {
-            if (isSnoozed && myMember != null) {
+            if (isSnoozed) {
                 IconButton(
                     name = "notifications_paused",
                     title = "Snoozed",

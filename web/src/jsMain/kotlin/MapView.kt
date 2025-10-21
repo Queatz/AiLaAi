@@ -401,8 +401,11 @@ fun MapView(
         }
 
         ref { ref ->
-            val locateMeControl = mapboxgl.GeolocateControl()
+            val locateMeControl = mapboxgl.GeolocateControl(
+                js("{showAccuracyCircle: false}")
+            )
 
+            // Saigon
             val (initialZoom, initialLat, initialLng, initialBearing, initialPitch) = "13.27/10.77564/106.72394/-39.9/50".split("/")
             val options: mapboxgl.MapOptions = js("{}")
             val initialLngLat: mapboxgl.LngLat = js("{}")

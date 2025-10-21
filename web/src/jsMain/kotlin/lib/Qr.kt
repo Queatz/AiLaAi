@@ -2,7 +2,7 @@ package lib
 
 import org.khronos.webgl.Uint8Array
 
-@JsModule("@paulmillr/qr")
+@JsModule("qr")
 @JsNonModule
 external object Qr {
     @JsName("default")

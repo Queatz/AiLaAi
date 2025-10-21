@@ -59,8 +59,6 @@ server {
         listen [::]:80 ;
     server_name api.ailaai.app;
     return 404; # managed by Certbot
-
-
 }
 
 ```

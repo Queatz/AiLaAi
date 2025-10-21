@@ -173,6 +173,12 @@ You can depend on packages from Maven Repositories.
 @file:DependsOn("<package>")
 ```
 
+Example
+```kotlin
+@file:Repository("https://repo.maven.apache.org/maven2/")
+@file:DependsOn("com.auth0:java-jwt:4.5.0")
+```
+
 You can also depend on other scripts.
 
 ```kotlin

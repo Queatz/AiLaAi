@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.AlarmOff
 import androidx.compose.material.icons.outlined.CameraAlt
@@ -27,7 +25,6 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.Share
@@ -52,7 +49,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -71,14 +67,12 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import coil3.compose.AsyncImage
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.eventUrl
 import com.queatz.ailaai.extensions.format
-import com.queatz.ailaai.extensions.formatTime
-import com.queatz.ailaai.extensions.groupUrl
 import com.queatz.ailaai.extensions.inList
-import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -499,14 +493,19 @@ fun ReminderScreen(reminderId: String) {
             onPhotos = { photos ->
                 isPhotoLoading = true
                 scope.launch {
-                    api.updateReminder(
-                        id = reminderId,
-                        reminder = Reminder(photo = photos.firstOrNull()?.toString())
-                    ) {
-                        reload()
-                        showPhotoDialog = false
+                    api.uploadPhotosFromUris(
+                        context = context,
+                        photos = photos,
+                    ) { response ->
+                        api.updateReminder(
+                            id = reminderId,
+                            reminder = Reminder(photo = response.urls.firstOrNull())
+                        ) {
+                            reload()
+                            showPhotoDialog = false
+                        }
+                        isPhotoLoading = false
                     }
-                    isPhotoLoading = false
                 }
             },
             onIsGeneratingPhoto = {

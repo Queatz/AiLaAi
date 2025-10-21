@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if ! grep -q '//const val baseUrl = "http://0.0.0.0:8080"$' src/jsMain/kotlin/Main.kt; then
-    echo "Error: Main.kt is missing comment on local URL"
+if ! grep -q '//const val baseUrl = "http://0.0.0.0:8080"$' src/jsMain/kotlin/Main.kt || ! grep -q '//const val webBaseUrl = "http://0.0.0.0:4040"$' src/jsMain/kotlin/Main.kt; then
+    echo "Error: Main.kt is missing one or more required commented URLs (baseUrl or webBaseUrl)"
     exit 1
 fi
 

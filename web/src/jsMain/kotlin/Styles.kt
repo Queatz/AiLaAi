@@ -608,7 +608,7 @@ class MainStyleSheet : StyleSheet() {
         boxSizing("border-box")
         display(DisplayStyle.Flex)
         alignItems(AlignItems.Center)
-        justifyContent(JustifyContent.Center)
+        justifyContent(JustifyContent.FlexStart)
         padding(1.r)
         backgroundColor(colors.lightgray)
         property("z-index", "1")

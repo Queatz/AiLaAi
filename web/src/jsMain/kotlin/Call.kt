@@ -18,7 +18,7 @@ import kotlinx.serialization.json.encodeToDynamic
 import lib.VideoSDK
 import org.w3c.dom.mediacapture.MediaStream
 
-val call = Call()
+val call by lazy { Call() }
 
 data class GroupCallParticipant(
     val participant: dynamic,

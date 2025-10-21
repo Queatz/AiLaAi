@@ -7,8 +7,8 @@ import org.jetbrains.kotlin.konan.properties.Properties
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    kotlin("plugin.serialization") version "2.1.21"
-    kotlin("plugin.compose") version "2.1.21"
+    kotlin("plugin.serialization") version "2.2.20"
+    kotlin("plugin.compose") version "2.2.20"
     id("com.huawei.agconnect")
     id("com.google.gms.google-services")
     id("com.google.devtools.ksp")
@@ -136,9 +136,9 @@ dependencies {
 
     // Compose
     implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.navigation:navigation-compose:2.8.9")
+    implementation("androidx.navigation:navigation-compose:2.9.0")
     implementation("androidx.compose.ui:ui:${versions.compose}")
-    implementation("androidx.compose.material:material-icons-extended:${versions.compose}")
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
     implementation("androidx.compose.ui:ui-tooling-preview:${versions.compose}")
     runtimeOnly("androidx.compose.runtime:runtime-rxjava3:${versions.compose}")
     implementation("androidx.compose.ui:ui-viewbinding:${versions.compose}")
@@ -153,19 +153,19 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.serialization}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutines}")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.1")
     implementation("androidx.activity:activity-compose:1.10.1")
-    implementation("androidx.datastore:datastore-preferences:1.1.4")
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("androidx.core:core-ktx:1.16.0")
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("androidx.appcompat:appcompat-resources:1.7.0")
+    implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("androidx.appcompat:appcompat-resources:1.7.1")
     implementation("androidx.biometric:biometric-ktx:1.4.0-alpha02")
     implementation("dev.shreyaspatil:capturable:3.0.1")
     implementation("com.github.skydoves:colorpicker-compose:1.1.2")
     implementation("io.github.ehsannarmani:compose-charts:0.1.0")
     implementation("com.halilibo.compose-richtext:richtext-commonmark:${versions.richtext}")
-    implementation("androidx.work:work-runtime-ktx:2.10.0")
+    implementation("androidx.work:work-runtime-ktx:2.10.2")
 
     // HMS Support
     implementation("at.bluesource.choicesdk:choicesdk-location:${versions.choiceSdk}")
@@ -179,12 +179,12 @@ dependencies {
     implementation("com.huawei.hms:location:6.12.0.300")
 
     // Media
-    implementation("androidx.exifinterface:exifinterface:1.4.0")
+    implementation("androidx.exifinterface:exifinterface:1.4.1")
     implementation("io.coil-kt.coil3:coil-compose:3.0.4")
     implementation("io.coil-kt.coil3:coil-network-ktor3:3.0.4")
     implementation("me.saket.telephoto:zoomable-image-coil3:0.14.0")
-    implementation("androidx.media3:media3-exoplayer:1.6.1")
-    implementation("androidx.media3:media3-ui:1.6.1")
+    implementation("androidx.media3:media3-exoplayer:1.7.1")
+    implementation("androidx.media3:media3-ui:1.7.1")
     implementation("com.otaliastudios:transcoder:0.11.2")
 
     // Logging & Crash Reporting

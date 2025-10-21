@@ -1,9 +1,9 @@
 import org.codehaus.groovy.ast.tools.GeneralUtils.args
 
 plugins {
-    kotlin("multiplatform") version "2.1.21"
-    kotlin("plugin.serialization") version "2.1.21"
-    kotlin("plugin.compose") version "2.1.21"
+    kotlin("multiplatform") version "2.2.20"
+    kotlin("plugin.serialization") version "2.2.20"
+    kotlin("plugin.compose") version "2.2.20"
     id("com.ailaai.shared.config")
 }
 
@@ -30,7 +30,7 @@ kotlin {
         browser {
             runTask {
                 args("-t")
-                devServer = devServer.copy(port = 4040)
+                devServerProperty.set(devServerProperty.get().copy(port = 4040))
             }
             commonWebpackConfig {
                 cssSupport {
@@ -39,7 +39,7 @@ kotlin {
             }
         }
         binaries.executable()
-//        useEsModules()
+        useEsModules()
     }
     sourceSets {
         val jsMain by getting {
@@ -54,17 +54,17 @@ kotlin {
                 implementation("io.ktor:ktor-client-content-negotiation:${versions.ktor}")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:${versions.ktor}")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
-                implementation("app.softwork:routing-compose:0.4.0")
-                implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2025.4.12")
-                implementation(npm("@paulmillr/qr", "0.2.0"))
+                implementation("app.softwork:routing-compose:0.5.0")
+                implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2025.10.10")
+                implementation(npm("qr", "0.5.2"))
                 implementation(npm("date-fns", "4.1.0"))
-                implementation(npm("@vvo/tzdb", "6.141.0"))
-                implementation(npm("@videosdk.live/js-sdk", "0.0.98"))
-                implementation(npm("mapbox-gl", "3.5.2"))
-                implementation(npm("marked", "15.0.7"))
-                implementation(npm("@babylonjs/core", "8.7.0"))
-                implementation(npm("@babylonjs/materials", "8.7.0"))
-                implementation(npm("monaco-editor", "0.52.2"))
+                implementation(npm("@vvo/tzdb", "6.187.0"))
+                implementation(npm("@videosdk.live/js-sdk", "0.3.8"))
+                implementation(npm("mapbox-gl", "3.15.0"))
+                implementation(npm("marked", "16.4.1"))
+                implementation(npm("@babylonjs/core", "8.32.2"))
+                implementation(npm("@babylonjs/materials", "8.32.2"))
+                implementation(npm("monaco-editor", "0.54.0"))
             }
         }
     }

@@ -64,11 +64,12 @@ import r
 import resize
 import toBytes
 import web.events.EventHandler
-import web.media.recorder.BlobEvent
-import web.media.recorder.MediaRecorder
-import web.media.streams.MediaStream
-import web.media.streams.MediaStreamConstraints
-import web.media.streams.MediaTrackConstraints
+import web.mediadevices.getUserMedia
+import web.mediarecorder.BlobEvent
+import web.mediarecorder.MediaRecorder
+import web.mediastreams.MediaStream
+import web.mediastreams.MediaStreamConstraints
+import web.mediastreams.MediaTrackConstraints
 import web.navigator.navigator
 
 class FlexInputControl {
@@ -362,6 +363,7 @@ fun FlexInput(
                     }
                     flex(1)
                     backgroundColor(Color.transparent)
+                    maxWidth(100.percent)
 
                     if (monospace) {
                         fontFamily("monospace")

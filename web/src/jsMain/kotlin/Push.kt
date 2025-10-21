@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.first
 import org.w3c.dom.EventSource
 import kotlin.time.Duration.Companion.seconds
 
-val push = Push()
+val push by lazy { Push() }
 
 class Push {
 

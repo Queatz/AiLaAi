@@ -15,7 +15,7 @@ import lib.vi
 import org.w3c.dom.get
 import org.w3c.dom.set
 
-val application = Application()
+val application by lazy { Application() }
 
 private class Background(val url: String)
 

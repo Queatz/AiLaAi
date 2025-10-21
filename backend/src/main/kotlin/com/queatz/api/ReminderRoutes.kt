@@ -27,18 +27,6 @@ fun Route.reminderRoutes() {
                 }
             }
         }
-    }
-
-    authenticate {
-        get("/reminders") {
-            respond {
-                db.reminders(
-                    me.id!!,
-                    offset = call.parameters["offset"]?.toInt() ?: 0,
-                    limit = call.parameters["limit"]?.toInt() ?: 100
-                )
-            }
-        }
 
         get("/occurrences") {
             respond {
@@ -50,11 +38,23 @@ fun Route.reminderRoutes() {
                 val open = call.parameters["open"]?.toBoolean()?.takeIf { it }
 
                 db.occurrences(
-                    person = me.id!!,
+                    person = meOrNull?.id,
                     start = start,
                     end = end,
                     geo = geo,
                     open = open
+                )
+            }
+        }
+    }
+
+    authenticate {
+        get("/reminders") {
+            respond {
+                db.reminders(
+                    person = me.id!!,
+                    offset = call.parameters["offset"]?.toInt() ?: 0,
+                    limit = call.parameters["limit"]?.toInt() ?: 100
                 )
             }
         }
