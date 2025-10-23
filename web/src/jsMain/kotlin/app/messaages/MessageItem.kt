@@ -26,7 +26,6 @@ import components.ProfilePhoto
 import format
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
-import kotlinx.datetime.toJSDate
 import notBlank
 import notEmpty
 import org.jetbrains.compose.web.css.AlignItems
@@ -51,6 +50,7 @@ import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
 import withPlus
+import kotlin.time.toJSDate
 
 @Composable
 fun MessageItem(

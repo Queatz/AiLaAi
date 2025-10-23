@@ -5,7 +5,7 @@ import com.queatz.db.Member
 import com.queatz.db.Person
 import com.queatz.db.asId
 import com.queatz.plugins.db
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 class App {
     fun createGroup(

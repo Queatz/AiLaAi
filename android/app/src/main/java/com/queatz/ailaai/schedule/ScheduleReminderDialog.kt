@@ -26,7 +26,7 @@ import com.queatz.db.Reminder
 import com.queatz.db.ReminderSchedule
 import com.queatz.db.ReminderStickiness
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 @Composable
 fun ScheduleReminderDialog(

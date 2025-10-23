@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.ui.theme.pad
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 @Composable
 fun PeriodDateTime(view: ScheduleView, date: Instant, done: Boolean = false) {

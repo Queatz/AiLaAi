@@ -38,7 +38,7 @@ import components.Loading
 import components.ProfilePhoto
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.percent

@@ -1,7 +1,7 @@
 import com.queatz.db.Reminder
 import com.queatz.db.ReminderOccurrence
 import com.queatz.db.ReminderOccurrences
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 enum class ReminderEventType {
     Start,

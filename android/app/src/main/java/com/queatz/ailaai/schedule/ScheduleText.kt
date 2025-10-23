@@ -6,7 +6,7 @@ import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.*
 import com.queatz.db.Reminder
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 val Reminder.scheduleText @Composable get(): String = buildString {
     val now = Clock.System.now()

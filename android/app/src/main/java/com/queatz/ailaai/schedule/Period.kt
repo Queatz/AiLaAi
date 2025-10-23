@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 fun LazyListScope.Period(
     view: ScheduleView,

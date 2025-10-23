@@ -41,6 +41,9 @@ kotlin {
         binaries.executable()
         useEsModules()
     }
+    compilerOptions {
+        optIn.add("kotlin.time.ExperimentalTime")
+    }
     sourceSets {
         val jsMain by getting {
             dependencies {

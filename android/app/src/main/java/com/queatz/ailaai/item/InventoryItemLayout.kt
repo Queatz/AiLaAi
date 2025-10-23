@@ -25,7 +25,7 @@ import com.queatz.ailaai.extensions.formatDistance
 import com.queatz.ailaai.extensions.isExpired
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.InventoryItemExtended
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 @Composable
 fun InventoryItemLayout(inventoryItem: InventoryItemExtended, quantity: Double? = null, onClick: () -> Unit) {

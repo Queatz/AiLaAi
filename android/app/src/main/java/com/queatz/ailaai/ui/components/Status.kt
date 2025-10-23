@@ -34,8 +34,8 @@ import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.ui.screens.OutlinedText
 import com.queatz.ailaai.ui.theme.pad
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlin.time.Duration.Companion.minutes
 
 @Composable

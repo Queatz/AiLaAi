@@ -11,7 +11,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.appLanguage
 import kotlinx.coroutines.delay
 import kotlinx.datetime.*
-import kotlinx.datetime.Clock.System.now
+import kotlin.time.Clock.System.now
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.TimeZone
 import java.time.Duration

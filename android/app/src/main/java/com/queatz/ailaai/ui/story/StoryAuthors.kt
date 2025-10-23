@@ -12,7 +12,7 @@ import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.nav
 import com.queatz.db.Person
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 @OptIn(ExperimentalTextApi::class)
 @Composable

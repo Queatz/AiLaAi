@@ -15,8 +15,8 @@ import com.queatz.ailaai.extensions.at
 import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.extensions.plus
 import com.queatz.ailaai.ui.theme.pad
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.days

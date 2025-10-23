@@ -31,7 +31,7 @@ import io.ktor.http.withCharset
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.serialization.Serializable
 import kotlin.text.Charsets.UTF_8
 import kotlin.time.Duration.Companion.minutes

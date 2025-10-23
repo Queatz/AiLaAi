@@ -1,7 +1,7 @@
 package com.queatz.db
 
 import com.queatz.plugins.defaultNearbyMaxDistanceInMeters
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 /**
  * @person The current user

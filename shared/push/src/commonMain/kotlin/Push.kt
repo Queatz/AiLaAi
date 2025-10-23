@@ -1,7 +1,7 @@
 package com.queatz.push
 
 import com.queatz.db.*
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.Serializable
 
 enum class PushAction {

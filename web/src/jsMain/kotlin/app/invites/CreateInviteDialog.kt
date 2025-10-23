@@ -12,7 +12,6 @@ import appString
 import application
 import com.queatz.db.Invite
 import components.LabeledCheckbox
-import kotlinx.datetime.toKotlinInstant
 import lib.addDays
 import notBlank
 import org.jetbrains.compose.web.attributes.InputType
@@ -27,6 +26,7 @@ import parseDateTime
 import r
 import time.format
 import kotlin.js.Date
+import kotlin.time.toKotlinInstant
 
 suspend fun createInviteDialog(
     group: String,

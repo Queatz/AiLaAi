@@ -5,7 +5,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.*
 import com.queatz.db.Reminder
 import com.queatz.db.ReminderOccurrence
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlin.time.Duration.Companion.days
 
 enum class ScheduleView {

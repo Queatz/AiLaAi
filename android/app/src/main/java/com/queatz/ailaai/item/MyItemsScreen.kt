@@ -29,7 +29,7 @@ import com.queatz.db.Item
 import com.queatz.db.ItemExtended
 import com.queatz.db.MintItemBody
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import mintItem
 import myItems
 import kotlin.time.Duration.Companion.seconds

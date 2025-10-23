@@ -2,7 +2,7 @@ plugins {
     application
     kotlin("jvm") version "2.2.20"
     kotlin("plugin.serialization") version "2.2.20"
-    id("io.ktor.plugin") version "3.2.0"
+    id("io.ktor.plugin") version "3.3.1"
     id("com.ailaai.shared.config")
 }
 
@@ -67,8 +67,8 @@ dependencies {
     implementation("io.ktor:ktor-client-cio-jvm:${versions.ktor}")
     implementation("io.ktor:ktor-client-java:${versions.ktor}")
     implementation("io.ktor:ktor-server-caching-headers-jvm:${versions.ktor}")
-    implementation("com.mohamedrejeb.ksoup:ksoup-html:0.3.1")
-    implementation("org.apache.commons:commons-text:1.12.0")
+    implementation("com.mohamedrejeb.ksoup:ksoup-html:0.6.0")
+    implementation("org.apache.commons:commons-text:1.14.0")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:${versions.kotlin}")
     testImplementation("io.ktor:ktor-server-test-host:${versions.ktor}")
 }

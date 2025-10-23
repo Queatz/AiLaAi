@@ -38,9 +38,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
-import kotlinx.datetime.toJSDate
-import kotlinx.datetime.toKotlinInstant
+import kotlin.time.Instant
+import kotlin.time.toJSDate
+import kotlin.time.toKotlinInstant
 import kotlinx.serialization.Serializable
 import lib.addDays
 import lib.addMilliseconds

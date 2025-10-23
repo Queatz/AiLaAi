@@ -42,8 +42,8 @@ import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Invite
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.util.Calendar

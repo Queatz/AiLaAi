@@ -20,7 +20,7 @@ import com.queatz.ailaai.extensions.minute
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.pad
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetIn
 import kotlinx.datetime.toLocalDateTime

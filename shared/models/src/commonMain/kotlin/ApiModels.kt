@@ -1,9 +1,12 @@
+@file:OptIn(ExperimentalTime::class)
+
 package com.queatz.db
 
 import com.queatz.widgets.Widgets
-import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 @Serializable
 data class Geo(val latitude: Double, val longitude: Double) {

@@ -12,7 +12,7 @@ import focusable
 import kotlinx.browser.window
 import kotlinx.coroutines.awaitAnimationFrame
 import kotlinx.coroutines.delay
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.CSSColorValue
 import org.jetbrains.compose.web.css.StyleScope

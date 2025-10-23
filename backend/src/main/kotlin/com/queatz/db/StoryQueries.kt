@@ -1,6 +1,6 @@
 package com.queatz.db
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 fun Db.storyExtended(person: String?, storyVal: String) = """
     merge(

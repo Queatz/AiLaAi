@@ -18,14 +18,13 @@ import com.fasterxml.jackson.databind.module.SimpleSerializers
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.queatz.plugins.json
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
-import kotlinx.datetime.toJavaInstant
-import kotlinx.serialization.encodeToString
+import kotlin.time.Clock
+import kotlin.time.Instant
 import java.io.IOException
 import java.time.format.DateTimeFormatterBuilder
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
+import kotlin.time.toJavaInstant
 
 val instantFormatter = DateTimeFormatterBuilder()
     .parseCaseInsensitive()

@@ -8,7 +8,7 @@ import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.toInstant
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration.Companion.days

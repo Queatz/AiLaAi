@@ -51,8 +51,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.toJSDate
+import kotlin.time.Clock
 import time.differenceInMinutes
 import time.formatDistanceToNowStrict
 import notBlank
@@ -96,6 +95,7 @@ import r
 import sortedDistinct
 import kotlin.js.Date
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.toJSDate
 
 @kotlinx.serialization.Serializable
 sealed class GroupNav {

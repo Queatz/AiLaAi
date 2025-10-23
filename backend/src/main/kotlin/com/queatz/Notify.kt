@@ -39,8 +39,8 @@ import com.queatz.push.StoryEvent
 import com.queatz.push.StoryPushData
 import com.queatz.push.TradeEvent
 import com.queatz.push.TradePushData
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 class Notify {
     fun trade(trade: Trade, person: Person, people: List<Person>? = null, event: TradeEvent) {

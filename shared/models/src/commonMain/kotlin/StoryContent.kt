@@ -1,7 +1,7 @@
 package com.queatz.db
 
 import com.queatz.widgets.Widgets
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject

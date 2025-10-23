@@ -49,7 +49,7 @@ import components.LinkifyText
 import components.LoadingText
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import lib.isThisYear
 import notBlank
 import org.jetbrains.compose.web.attributes.ATarget

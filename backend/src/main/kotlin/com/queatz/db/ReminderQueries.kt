@@ -1,7 +1,7 @@
 package com.queatz.db
 
 import com.queatz.plugins.defaultRemindersNearbyMaxDistanceInMeters
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 fun Db.reminders(person: String, offset: Int = 0, limit: Int = 20) = list(
     Reminder::class,

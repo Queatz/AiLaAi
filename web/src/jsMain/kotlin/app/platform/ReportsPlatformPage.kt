@@ -18,9 +18,7 @@ import components.LazyColumn
 import components.Loading
 import format
 import kotlinx.browser.window
-import kotlinx.datetime.toJSDate
 import org.jetbrains.compose.web.css.AlignItems
-import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.alignItems
@@ -41,6 +39,7 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import r
+import kotlin.time.toJSDate
 
 @Composable
 fun ReportsPlatformPage() {

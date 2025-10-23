@@ -3,7 +3,7 @@ package app.game.editor
 import com.queatz.db.GameTile
 import com.queatz.db.GameObject
 import com.queatz.db.GameMusic
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 /**
  * Generic interface for game assets that can be displayed in the AssetSection

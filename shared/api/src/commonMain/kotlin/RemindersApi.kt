@@ -5,7 +5,7 @@ import com.queatz.db.Reminder
 import com.queatz.db.ReminderOccurrence
 import com.queatz.db.ReminderOccurrences
 import io.ktor.http.HttpStatusCode
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 
 suspend fun Api.reminders(

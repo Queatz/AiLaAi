@@ -19,7 +19,7 @@ import components.Loading
 import format
 import json
 import kotlinx.browser.window
-import kotlinx.datetime.toJSDate
+import kotlin.time.toJSDate
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.web.css.AlignItems

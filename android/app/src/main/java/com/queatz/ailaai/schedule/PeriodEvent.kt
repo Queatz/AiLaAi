@@ -37,7 +37,7 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.ReminderOccurrence
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
+import kotlin.time.Instant.Companion.fromEpochMilliseconds
 import updateDate
 
 @Composable

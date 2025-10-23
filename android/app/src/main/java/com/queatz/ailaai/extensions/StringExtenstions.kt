@@ -31,7 +31,7 @@ import com.queatz.ailaai.R
 import io.ktor.http.ContentType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException

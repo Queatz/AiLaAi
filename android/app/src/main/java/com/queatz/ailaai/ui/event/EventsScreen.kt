@@ -56,7 +56,7 @@ import com.queatz.db.Geo
 import com.queatz.db.Reminder
 import com.queatz.db.toList
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt

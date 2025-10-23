@@ -93,7 +93,7 @@ import com.queatz.db.ImpromptuMode
 import com.queatz.db.ImpromptuNotificationStyle
 import com.queatz.db.ImpromptuSeek
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
@@ -925,7 +925,7 @@ enum class ExpirationOption(
 private fun ImpromptuItemDialog(
     isSeek: Boolean,
     onDismissRequest: () -> Unit,
-    onSave: (String, Double, kotlinx.datetime.Instant) -> Unit
+    onSave: (String, Double, kotlin.time.Instant) -> Unit
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     var distance by rememberSaveable { mutableStateOf("5") }

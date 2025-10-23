@@ -21,8 +21,8 @@ import com.queatz.db.TradeAttachment
 import com.queatz.db.TradeExtended
 import com.queatz.db.UrlAttachment
 import com.queatz.db.VideosAttachment
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import java.math.BigDecimal
 import java.text.ParseException
 

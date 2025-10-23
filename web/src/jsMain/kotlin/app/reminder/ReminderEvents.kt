@@ -9,7 +9,7 @@ import app.page.ScheduleView
 import appText
 import com.queatz.db.Reminder
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text

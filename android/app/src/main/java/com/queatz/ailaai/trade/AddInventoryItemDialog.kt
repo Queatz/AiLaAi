@@ -34,7 +34,7 @@ import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.InventoryItemExtended
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import myInventory
 
 @Composable

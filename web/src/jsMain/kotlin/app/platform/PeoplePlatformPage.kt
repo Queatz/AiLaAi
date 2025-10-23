@@ -21,7 +21,7 @@ import focusable
 import format
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
-import kotlinx.datetime.toJSDate
+import kotlin.time.toJSDate
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection

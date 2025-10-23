@@ -33,7 +33,7 @@ import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Reminder
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 

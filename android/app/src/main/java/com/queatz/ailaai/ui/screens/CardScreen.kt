@@ -180,7 +180,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
+import kotlin.time.Instant.Companion.fromEpochMilliseconds
 import kotlin.time.Duration.Companion.seconds
 
 private val showGeneratingMessage = booleanPreferencesKey("ui.showGeneratingMessage")

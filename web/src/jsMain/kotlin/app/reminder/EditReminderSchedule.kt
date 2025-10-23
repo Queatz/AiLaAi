@@ -12,7 +12,7 @@ import com.queatz.db.ReminderSchedule
 import com.queatz.db.ReminderStickiness
 import components.LabeledCheckbox
 import format
-import kotlinx.datetime.toKotlinInstant
+import kotlin.time.toKotlinInstant
 import lib.addHours
 import lib.getMinutes
 import lib.parse

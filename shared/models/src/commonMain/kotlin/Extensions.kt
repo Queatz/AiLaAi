@@ -1,6 +1,6 @@
 package com.queatz.db
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 fun List<GroupExtended>.people(): List<Person> = mapNotNull { it.members?.mapNotNull { it.person } }
     .flatten()
