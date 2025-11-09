@@ -2,15 +2,15 @@
 # yarn lockfile v1
 
 
-"@babylonjs/core@8.32.2":
-  version "8.32.2"
-  resolved "https://registry.yarnpkg.com/@babylonjs/core/-/core-8.32.2.tgz#76cb63ab7c03e0caff73abbe19b68366c0018fc4"
-  integrity sha512-3LyyhiWA85Z2B211WsX328OZdgHGucF0MDJrYTnFXcwFdjaTdjnhphdrPQdfLm2PMOEE3UE0wgLM1gb4hX/h0Q==
+"@babylonjs/core@8.36.0":
+  version "8.36.0"
+  resolved "https://registry.yarnpkg.com/@babylonjs/core/-/core-8.36.0.tgz#5167fe0f62e21980ed69674c8cd5e3181b0301bf"
+  integrity sha512-4hPQXdAT8yDFUQZzVbc0kD4BLrK0vlu4ikw3SNqY2cridJnVXTNE93LJDvTyl/0PVCf1pZTxUlFAOPrlcKqFpA==
 
-"@babylonjs/materials@8.32.2":
-  version "8.32.2"
-  resolved "https://registry.yarnpkg.com/@babylonjs/materials/-/materials-8.32.2.tgz#671e961bb09ba1cb70185adf30883fbeb937cea4"
-  integrity sha512-f46eDQv4BJMB3IBeWOgp0ozireFxtUVFGRAFCL6qLJrpFTeq7H/oEfPy+0/QLbUEoTW+i7jtFLdiPV0qGDGkwQ==
+"@babylonjs/materials@8.36.0":
+  version "8.36.0"
+  resolved "https://registry.yarnpkg.com/@babylonjs/materials/-/materials-8.36.0.tgz#7fce8e3a98d49388402277e4d670a6bba0236308"
+  integrity sha512-w2CpdfwrLOjMqIgSVJAwN8vFpKG3HpKWc/v2EWYELCo4AlC1a0MMm+4ANNYmrXGPZn/7T5rIZ8mk0ftvNnswww==
 
 "@colors/colors@1.5.0":
   version "1.5.0"

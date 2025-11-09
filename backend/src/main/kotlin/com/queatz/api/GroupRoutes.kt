@@ -156,7 +156,7 @@ fun Route.groupRoutes() {
                 } else {
                     val call = db.call(groupId)?.takeIf {
                         try {
-                            groupCall.validateRoom(it.room!!)
+                            groupCall.validateRoom(roomId = it.room!!)
                             true
                         } catch (e: Throwable) {
                             e.printStackTrace()
@@ -167,8 +167,8 @@ fun Route.groupRoutes() {
                         try {
                             db.insert(
                                 Call(
-                                    groupId,
-                                    groupCall.createRoom().roomId
+                                    group = groupId,
+                                    room = groupCall.createRoom().roomId
                                 )
                             )
                         } catch (e: Throwable) {
@@ -182,12 +182,15 @@ fun Route.groupRoutes() {
                     // send push when room call is initially started
                     if (session.data.firstOrNull()?.status != "ongoing") {
                         notify.call(
-                            db.document(Group::class, groupId)!!,
-                            me
+                            group = db.document(Group::class, groupId)!!,
+                            from = me
                         )
                     }
 
-                    CallAndToken(call, groupCall.jwt(7.days))
+                    CallAndToken(
+                        call = call,
+                        token = groupCall.jwt(7.days)
+                    )
                 }
             }
         }
