@@ -1,9 +1,9 @@
 import org.codehaus.groovy.ast.tools.GeneralUtils.args
 
 plugins {
-    kotlin("multiplatform") version "2.2.20"
-    kotlin("plugin.serialization") version "2.2.20"
-    kotlin("plugin.compose") version "2.2.20"
+    kotlin("multiplatform") version "2.2.21"
+    kotlin("plugin.serialization") version "2.2.21"
+    kotlin("plugin.compose") version "2.2.21"
     id("com.ailaai.shared.config")
 }
 
@@ -65,8 +65,8 @@ kotlin {
                 implementation(npm("@videosdk.live/js-sdk", "0.3.8"))
                 implementation(npm("mapbox-gl", "3.15.0"))
                 implementation(npm("marked", "16.4.1"))
-                implementation(npm("@babylonjs/core", "8.32.2"))
-                implementation(npm("@babylonjs/materials", "8.32.2"))
+                implementation(npm("@babylonjs/core", "8.36.0"))
+                implementation(npm("@babylonjs/materials", "8.36.0"))
                 implementation(npm("monaco-editor", "0.54.0"))
             }
         }

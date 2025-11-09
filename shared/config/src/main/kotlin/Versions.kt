@@ -1,7 +1,7 @@
 package com.ailaai.shared.config
 
 open class Versions {
-    val kotlin = "2.2.20"
+    val kotlin = "2.2.21"
     val coroutines = "1.10.2"
     val ktor = "3.3.1"
     val choiceSdk = "0.3.0"
