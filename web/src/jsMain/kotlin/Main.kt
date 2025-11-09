@@ -44,6 +44,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.serialization.json.Json
 import lib.mapboxgl
+import lib.mapboxCss
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Span
@@ -76,8 +77,8 @@ val http = HttpClient(Js) {
 }
 
 fun main() {
-    // Mapbox
-    // js("require(\"mapbox-gl/dist/mapbox-gl.css\")")
+    // Ensure Mapbox CSS is bundled (ESM build, no global require)
+    val __mapboxCss = mapboxCss
 
     mapboxgl.accessToken =
         "pk.eyJ1IjoiamFjb2JmZXJyZXJvIiwiYSI6ImNraXdyY211eTBlMmcycW02eDNubWNpZzcifQ.1KtSoMzrPCM0A8UVtI_gdg"

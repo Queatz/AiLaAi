@@ -1110,6 +1110,10 @@ class MainStyleSheet : StyleSheet() {
     }
 
     val mapMarker by style {
+        position(Absolute)
+        top(0.px)
+        left(0.px)
+        property("will-change", "transform")
     }
 
     val mapMarkerContent by style {

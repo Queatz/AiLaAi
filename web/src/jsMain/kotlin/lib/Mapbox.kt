@@ -76,17 +76,20 @@ external object mapboxgl {
     interface MarkerOptions {
         var element: HTMLElement?
         var anchor: String
+        var altitude: Double?
     }
 
     interface FlyToOptions {
         var center: LngLat
     }
 
-    class Marker(options: dynamic) {
+    class Marker(options: MarkerOptions?) {
         fun addTo(map: Map): Marker
         fun setLngLat(lngLat: LngLat): Marker
         fun getLngLat(): LngLat
         fun getElement(): HTMLElement
+        fun setAltitude(altitude: Double): Marker
+        fun getAltitude(): Double
         fun remove()
     }
 
@@ -98,11 +101,14 @@ external object mapboxgl {
         fun flyTo(options: FlyToOptions)
         fun getZoom(): Double
         fun getPitch(): Double
-        fun project(latLng: LngLat): Point
+        fun project(latLng: LngLat, altitude: Double? = definedExternally): Point
+        fun unproject(point: Point, altitude: Double? = definedExternally): LngLat
         fun getFreeCameraOptions(): dynamic
-        fun on(event: String, block: (event: mapboxgl.MapEvent) -> Unit)
+        fun on(event: String, block: (event: MapEvent) -> Unit)
         fun setStyle(style: String)
         fun resize()
+        fun getTerrain(): dynamic
+        fun queryTerrainElevation(lngLat: LngLat, options: dynamic = definedExternally): Double?
     }
 
     class GeolocateControl(options: dynamic = definedExternally) {

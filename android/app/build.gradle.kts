@@ -31,6 +31,12 @@ tasks.withType<KotlinCompile> {
     }
 }
 
+kotlin {
+    compilerOptions {
+        optIn.add("kotlin.time.ExperimentalTime")
+    }
+}
+
 android {
     compileSdk = 35
     namespace = "com.queatz.ailaai"
@@ -163,9 +169,9 @@ dependencies {
     implementation("androidx.biometric:biometric-ktx:1.4.0-alpha02")
     implementation("dev.shreyaspatil:capturable:3.0.1")
     implementation("com.github.skydoves:colorpicker-compose:1.1.2")
-    implementation("io.github.ehsannarmani:compose-charts:0.1.0")
+    implementation("io.github.ehsannarmani:compose-charts:0.2.0")
     implementation("com.halilibo.compose-richtext:richtext-commonmark:${versions.richtext}")
-    implementation("androidx.work:work-runtime-ktx:2.10.2")
+    implementation("androidx.work:work-runtime-ktx:2.11.0")
 
     // HMS Support
     implementation("at.bluesource.choicesdk:choicesdk-location:${versions.choiceSdk}")

@@ -335,53 +335,6 @@ suspend fun File.toGameTileBlob(): Blob {
     return blobResult.await()
 }
 
-/**
- * Picks a photo, processes it for use as a game tile (scales and center-crops),
- * uploads it, and returns the URL of the uploaded photo.
- */
-suspend fun pickGameTilePhoto(onSuccess: (String) -> Unit) {
-    val deferred = CompletableDeferred<Unit>()
-
-    pickPhotos(multiple = false) { files ->
-        if (files.isNotEmpty()) {
-            val file = files.first()
-
-            // Use kotlinx.coroutines.GlobalScope to launch a coroutine
-            kotlinx.coroutines.GlobalScope.launch {
-                try {
-                    // Process the image (scale and center-crop)
-                    val processedBlob = file.toGameTileBlob()
-                    val processedBytes = processedBlob.toBytes()
-
-                    // Upload the processed image
-                    api.uploadPhotos(
-                        photos = listOf(processedBytes),
-                        onSuccess = { response ->
-                            if (response.urls.isNotEmpty()) {
-                                onSuccess(response.urls.first())
-                            }
-                            deferred.complete(Unit)
-                        },
-                        onError = { error -> 
-                            console.error("Error uploading game tile photo", error)
-                            deferred.complete(Unit)
-                        }
-                    )
-                } catch (e: Throwable) {
-                    console.error("Error processing game tile photo", e)
-                    deferred.complete(Unit)
-                }
-            }
-        } else {
-            deferred.complete(Unit)
-        }
-    }
-
-    // Wait for the upload to complete
-    deferred.await()
-}
-
-
 suspend fun Blob.toBytes(): ByteArray {
     val reader = asDynamic().stream().getReader()
     var bytes = ByteArray(0)

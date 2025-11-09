@@ -31,6 +31,7 @@ import kotlinx.dom.addClass
 import lib.ResizeObserver
 import lib.getCameraLngLat
 import lib.mapboxgl
+import lib.mapboxgl.MarkerOptions
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.AlignSelf
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -261,7 +262,7 @@ fun MapView(
             val element = document.createElement("div") as HTMLDivElement
             element.addClass(Styles.mapMarker)
 
-            val options: mapboxgl.MarkerOptions = js("{}")
+            val options: MarkerOptions = js("{}")
             options.element = element
             options.anchor = "bottom"
 
@@ -298,12 +299,12 @@ fun MapView(
                                     textAlign("center")
                                     fontSize(128.px)
                                     color(Styles.colors.black)
-                                    padding(2.r)
+                                    padding(4.r)
                                     lineHeight(120.percent)
 
                                     if (isNpc) {
                                         property("box-shadow", "0 2px 16px rgba(0, 0, 0, 0.125)")
-                                        borderRadius(2.r)
+                                        borderRadius(6.r)
                                         backgroundColor(Styles.colors.white)
                                     }
                                 }
