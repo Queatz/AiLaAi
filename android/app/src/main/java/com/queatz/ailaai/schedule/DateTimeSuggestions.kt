@@ -18,6 +18,7 @@ import com.queatz.ailaai.ui.theme.pad
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
@@ -76,8 +77,8 @@ fun DateTimeSuggestions(
     )
 
     // Add "This weekend at 7am" suggestion if it's not already the weekend
-    if (localDateTime.dayOfWeek.value < 6) { // If today is not Saturday or Sunday
-        val daysUntilWeekend = 6 - localDateTime.dayOfWeek.value // Days until Saturday
+    if (localDateTime.dayOfWeek.isoDayNumber < 6) { // If today is not Saturday or Sunday
+        val daysUntilWeekend = 6 - localDateTime.dayOfWeek.isoDayNumber // Days until Saturday
         val weekendMorningAt7am = now.plus(days = daysUntilWeekend).at(hour = 7)
         suggestionsList.add(
             DateTimeSuggestion(stringResource(R.string.weekend_at_7am), weekendMorningAt7am)

@@ -3,15 +3,18 @@ package com.queatz
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlHandler
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import kotlinx.coroutines.delay
-import kotlinx.datetime.*
 import org.apache.commons.text.StringEscapeUtils.unescapeHtml4
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.time.temporal.ChronoUnit
 import javax.imageio.ImageIO
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
+import kotlin.time.toJavaInstant
+import kotlin.time.toKotlinInstant
 
 val String.notBlank get() = takeIf { it.isNotBlank() }
 

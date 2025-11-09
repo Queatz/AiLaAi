@@ -23,7 +23,9 @@ import java.util.*
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.toJavaInstant
 import kotlin.time.toKotlinDuration
+import kotlin.time.toKotlinInstant
 
 fun formatCurrentLocalTime(offsetHours: Double): String = DateTimeFormatter.ofPattern("MMMM d, h:mm a").format(
     ZonedDateTime.now(

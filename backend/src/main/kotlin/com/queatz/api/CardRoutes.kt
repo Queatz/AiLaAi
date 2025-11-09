@@ -52,6 +52,7 @@ import kotlin.time.Clock
 import kotlinx.datetime.toInstant
 import kotlin.reflect.KMutableProperty1
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Instant
 
 fun Route.cardRoutes() {
     authenticate(optional = true) {
@@ -774,7 +775,7 @@ fun Route.cardRoutes() {
                 } else {
                     db.cardVisits(
                         card.id!!,
-                        call.parameters["since"]?.toInstant() ?: (Clock.System.now() - 1.days)
+                        call.parameters["since"]?.let { Instant.parse(it) } ?: (Clock.System.now() - 1.days)
                     )
                 }
             }

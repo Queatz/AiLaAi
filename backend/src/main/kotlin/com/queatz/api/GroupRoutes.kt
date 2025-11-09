@@ -12,6 +12,7 @@ import kotlin.time.Clock
 import kotlinx.datetime.toInstant
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Instant
 
 @Serializable
 data class CreateGroupBody(val people: List<String>, val reuse: Boolean = false)
@@ -47,7 +48,7 @@ fun Route.groupRoutes() {
                     db.messages(
                         personId = meOrNull?.id?.asId(Person::class),
                         group = group.group!!.id!!,
-                        before = call.parameters["before"]?.toInstant(),
+                        before = call.parameters["before"]?.let { Instant.parse(it) },
                         limit = call.parameters["limit"]?.toInt() ?: 20,
                         search = call.parameters["search"]?.notBlank,
                         reaction = call.parameters["reaction"]?.notBlank,
@@ -154,37 +155,89 @@ fun Route.groupRoutes() {
                 if (member == null) {
                     HttpStatusCode.NotFound
                 } else {
-                    val call = db.call(groupId)?.takeIf {
+                    // Try to reuse an active call; otherwise create a new one per session
+                    val active = db.activeCallOfGroup(groupId)?.takeIf { existing ->
                         try {
-                            groupCall.validateRoom(roomId = it.room!!)
+                            groupCall.validateRoom(roomId = existing.room!!)
                             true
                         } catch (e: Throwable) {
                             e.printStackTrace()
-                            db.delete(it)
+                            db.delete(existing)
                             false
                         }
-                    } ?: run {
+                    }
+
+                    var createdNewCall = false
+                    val call = active ?: run {
                         try {
-                            db.insert(
+                            val newCall = db.insert(
                                 Call(
                                     group = groupId,
-                                    room = groupCall.createRoom().roomId
+                                    room = groupCall.createRoom().roomId,
+                                    startedBy = me.id,
+                                    participantIds = listOf(me.id!!),
+                                    ongoing = true
                                 )
                             )
+
+                            // Insert a group message with a CallAttachment idempotently
+                            if (newCall.message == null) {
+                                val myMember = db.member(me.id!!, groupId)!!
+                                val attachment = json.encodeToString(CallAttachment(call = newCall.id))
+                                val msg = db.insert(
+                                    Message(
+                                        group = groupId,
+                                        member = myMember.id,
+                                        text = null,
+                                        attachment = attachment
+                                    )
+                                )
+                                newCall.message = msg.id
+                                db.update(newCall)
+
+                                // Call notification already exists; no need to notifyMessage
+                                notify.call(
+                                    group = db.document(Group::class, groupId)!!,
+                                    from = me
+                                )
+                            }
+
+                            createdNewCall = true
+                            newCall
                         } catch (e: Throwable) {
                             e.printStackTrace()
                             return@respond HttpStatusCode.InternalServerError.description("Create room failed")
                         }
                     }
 
-                    val session = groupCall.activeRoomSession(call.room!!)
+// Old code -------------------------------------------------------------------
+//                    val session = groupCall.activeRoomSession(call.room!!)
+//
+//                    // send push when room call is initially started
+//                    if (session.data.firstOrNull()?.status != "ongoing") {
+//                        notify.call(
+//                            group = db.document(Group::class, groupId)!!,
+//                            from = me
+//                        )
+//                    }
+// ----------------------------------------------------------------------------
 
-                    // send push when room call is initially started
-                    if (session.data.firstOrNull()?.status != "ongoing") {
-                        notify.call(
-                            group = db.document(Group::class, groupId)!!,
-                            from = me
-                        )
+                    // Track participant join (idempotent add)
+                    run {
+                        var updated = false
+                        if (call.startedBy == null) {
+                            call.startedBy = me.id
+                            updated = true
+                        }
+                        val ids = (call.participantIds ?: emptyList()).toMutableSet()
+                        if (me.id !in ids) {
+                            ids += me.id!!
+                            call.participantIds = ids.toList()
+                            updated = true
+                        }
+                        if (updated) {
+                            db.update(call)
+                        }
                     }
 
                     CallAndToken(

@@ -29,15 +29,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
-import kotlinx.datetime.toJavaInstant
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import java.net.http.HttpClient
 import java.util.logging.Logger
 import kotlin.text.Charsets.UTF_8
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.toJavaInstant
 
 val groupCall = Call()
 
@@ -124,7 +123,32 @@ class Call {
         db.callByRoom(
             roomId
         )?.let { call ->
-            call.participants = session.pageInfo?.total ?: 0
+            val count = session.pageInfo?.total ?: 0
+            call.participants = count
+            // Do not force ongoing=false when count == 0; rely on session lifecycle (session-started / session-ended)
+            if (count > 0) {
+                call.ongoing = true
+            }
+
+            db.update(call)
+
+            if (push) {
+                notify.callStatus(
+                    db.document(Group::class, call.group!!)!!,
+                    call
+                )
+            }
+        }
+    }
+
+    fun setOngoing(roomId: String, ongoing: Boolean, push: Boolean = true) {
+        db.callByRoom(
+            roomId
+        )?.let { call ->
+            call.ongoing = ongoing
+            if (!ongoing) {
+                call.participants = 0
+            }
 
             db.update(call)
 

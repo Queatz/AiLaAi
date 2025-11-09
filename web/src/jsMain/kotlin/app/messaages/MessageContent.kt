@@ -9,6 +9,8 @@ import app.StickerItem
 import app.ailaai.api.group
 import app.ailaai.api.message
 import app.ailaai.api.reactToMessage
+import app.ailaai.api.call
+import application
 import app.appNav
 import app.dialog.photoDialog
 import app.group.GroupInfo
@@ -34,6 +36,8 @@ import profile.ProfileCard
 import r
 import stories.StoryStyles
 import stories.textContent
+import call
+import components.Loading
 import kotlin.js.Date
 
 private val cachedReplies = mutableListOf<Message>()
@@ -368,6 +372,86 @@ fun MessageContent(
 
                 is UrlAttachment -> {
                     UrlPreview(attachment)
+                }
+
+                is CallAttachment -> {
+                    val callId = attachment.call
+                    var callDetails by remember(callId) { mutableStateOf<com.queatz.db.Call?>(null) }
+                    var callGroup by remember(callDetails) { mutableStateOf<GroupExtended?>(null) }
+
+                    LaunchedEffect(callId) {
+                        if (callId != null) {
+                            api.call(callId) {
+                                callDetails = it
+                            }
+                        }
+                    }
+
+                    LaunchedEffect(callDetails?.group) {
+                        val gid = callDetails?.group
+                        if (gid != null) {
+                            api.group(gid) {
+                                callGroup = it
+                            }
+                        }
+                    }
+
+                    if (callDetails != null) {
+                        val ongoing = callDetails!!.ongoing == true || (callDetails!!.participants ?: 0) > 0
+                        val names = callDetails!!.participantIds
+                            ?.mapNotNull { pid -> callGroup?.members?.firstOrNull { it.person?.id == pid }?.person?.name }
+                            ?.joinToString(", ")
+                            ?: ""
+
+                        Div({
+                            classes(
+                                listOf(AppStyles.messageItem) + if (isMe) listOf(AppStyles.myMessage) else emptyList()
+                            )
+                            style {
+                                if (ongoing) cursor("pointer")
+                                property("user-select", "none")
+                            }
+                            if (ongoing) {
+                                onClick {
+                                    val gid = callDetails!!.group ?: return@onClick
+                                    scope.launch {
+                                        api.group(gid) {
+                                            call.join(application.me.value ?: return@group, it)
+                                        }
+                                    }
+                                }
+                            }
+                        }) {
+                            Div({
+                                style {
+                                    display(DisplayStyle.Flex)
+                                    alignItems(AlignItems.Center)
+                                    marginBottom(.25.r)
+                                }
+                            }) {
+                                Icon("call", null) {
+                                    color(Styles.colors.green)
+                                    marginRight(.5.r)
+                                }
+                                Div({
+                                    style {
+                                        color(if (ongoing) Styles.colors.green else Styles.colors.gray)
+                                        fontWeight(700)
+                                    }
+                                }) {
+                                    // todo: translate
+                                    Text(if (ongoing) "Ongoing call" else "Call ended")
+                                }
+                            }
+                            if (names.isNotBlank()) {
+                                Div({
+                                    style { color(Styles.colors.secondary) }
+                                }) { Text(names) }
+                            }
+                        }
+                    } else {
+                        Loading()
+                    }
                 }
 
                 is TradeAttachment -> {

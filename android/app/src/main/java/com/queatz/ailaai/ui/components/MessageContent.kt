@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -24,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Reply
 import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -43,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
@@ -60,6 +63,7 @@ import app.ailaai.api.reactToMessage
 import app.ailaai.api.setMessageRating
 import app.ailaai.api.sticker
 import app.ailaai.api.updateMessage
+import app.ailaai.api.call
 import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.toBitmap
@@ -109,6 +113,9 @@ import com.queatz.db.GroupExtended
 import com.queatz.db.Message
 import com.queatz.db.Person
 import com.queatz.db.PersonProfile
+import com.queatz.db.Call
+import com.queatz.db.CallAttachment
+import com.queatz.ailaai.services.calls
 import com.queatz.db.PhotosAttachment
 import com.queatz.db.ProfilesAttachment
 import com.queatz.db.Rating
@@ -126,6 +133,7 @@ import com.queatz.db.UrlAttachment
 import com.queatz.db.VideosAttachment
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock.System.now
@@ -186,6 +194,9 @@ fun ColumnScope.MessageContent(
     var attachedUrls by remember(message) { mutableStateOf<List<UrlAttachment>>(emptyList()) }
     var selectedBitmap by remember { mutableStateOf<String?>(null) }
     var showReminderDialog by remember { mutableStateOf<String?>(null) }
+    var attachedCallId by remember { mutableStateOf<String?>(null) }
+    var attachedCall by remember { mutableStateOf<Call?>(null) }
+    var attachedCallGroup by remember { mutableStateOf<GroupExtended?>(null) }
     val nav = nav
     val writeExternalStoragePermissionRequester = permissionRequester(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     var showStoragePermissionDialog by rememberStateOf(false)
@@ -251,6 +262,10 @@ fun ColumnScope.MessageContent(
 
                 is UrlAttachment -> {
                     attachedUrls += attachment
+                }
+
+                is CallAttachment -> {
+                    attachedCallId = attachment.call
                 }
             }
         }
@@ -1050,6 +1065,104 @@ fun ColumnScope.MessageContent(
                 }
         ) {
             showTradeDialog = true
+        }
+    }
+
+    attachedCallId?.also { callId ->
+        LaunchedEffect(callId) {
+            api.call(callId) {
+                attachedCall = it
+            }
+        }
+
+        // Live refresh: update attachedCall when call status changes via push
+        LaunchedEffect(attachedCallId) {
+            calls.calls.collectLatest { list ->
+                list.firstOrNull { it.id == attachedCallId }?.let { updated ->
+                    attachedCall = updated
+                }
+            }
+        }
+
+        // Load group to resolve participant names
+        LaunchedEffect(attachedCall?.group) {
+            val gid = attachedCall?.group
+            if (gid != null) {
+                api.group(gid) {
+                    attachedCallGroup = it
+                }
+            }
+        }
+
+        attachedCall?.let { call ->
+            val ongoing = (call.ongoing == true) || ((call.participants ?: 0) > 0)
+            val participantNames = call.participantIds
+                ?.mapNotNull { pid ->
+                    attachedCallGroup?.members?.firstOrNull { it.person?.id == pid }?.person?.name
+                        ?: getPerson(pid)?.name
+                }
+                ?.distinct()
+                .orEmpty()
+            val fallbackName = call.startedBy?.let { sid ->
+                attachedCallGroup?.members?.firstOrNull { it.person?.id == sid }?.person?.name
+                    ?: getPerson(sid)?.name
+            }
+            val names = when {
+                participantNames.isNotEmpty() -> participantNames.joinToString(", ")
+                !fallbackName.isNullOrBlank() -> fallbackName
+                else -> null
+            }
+
+            Column(
+                modifier = Modifier
+                    .align(if (isMe) Alignment.End else Alignment.Start)
+                    .padding(1.pad)
+                    .let {
+                        if (isReply) it else if (isMe) it.padding(start = 8.pad) else it.padding(end = 8.pad)
+                    }
+                    .then(
+                        if (ongoing) Modifier.clickable {
+                            val gid = call.group ?: return@clickable
+                            calls.start(
+                                groupId = gid,
+                                micEnabled = true,
+                                cameraEnabled = true
+                            )
+                        } else Modifier
+                    )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp), MaterialTheme.shapes.large)
+                        .padding(1.5f.pad)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Call,
+                            contentDescription = stringResource(R.string.call),
+                            tint = Color(0xFF2E7D32),
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Text(
+                            // todo: translate
+                            text = if (ongoing) "Ongoing call" else "Call ended",
+                            color = if (ongoing) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                    if (!names.isNullOrBlank()) {
+                        Text(
+                            text = names,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            }
+        } ?: run {
+            Loading()
         }
     }
 

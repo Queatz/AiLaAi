@@ -689,6 +689,12 @@ object Strings {
         ru = "Отправил профиль"
     )
 
+    val startedACall = Translation(
+        en = "Started a call",
+        vn = "Đã bắt đầu cuộc gọi",
+        ru = "Начал звонок"
+    )
+
     val orGetItOn = Translation(
         en = "or get it on",
         vn = "hoặc tải xuống trên",

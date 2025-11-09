@@ -10,8 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
-import kotlin.time.Instant
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.asTimeZone
@@ -19,9 +18,11 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import toEvents
 import java.util.logging.Logger
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
 
 val remind = Remind()
 
@@ -153,29 +154,36 @@ fun updateStickyReminder(event: ReminderEvent): Instant? {
         }
         ReminderStickiness.Monthly -> {
             // Push to the next month
-            val newLocalDateTime = LocalDateTime(
-                localDateTime.year,
-                localDateTime.month.plus(1),
-                minOf(localDateTime.dayOfMonth, localDateTime.month.plus(1).length(localDateTime.year.isLeap())),
+            val currentYear = localDateTime.year
+            val currentMonth = localDateTime.monthNumber // 1..12
+            val nextMonth = if (currentMonth == 12) 1 else currentMonth + 1
+            val nextYear = if (currentMonth == 12) currentYear + 1 else currentYear
+            val maxDay = daysInMonth(nextYear, nextMonth)
+            val nextDay = minOf(localDateTime.dayOfMonth, maxDay)
+            LocalDateTime(
+                nextYear,
+                nextMonth,
+                nextDay,
                 localDateTime.hour,
                 localDateTime.minute,
                 localDateTime.second,
                 localDateTime.nanosecond
-            )
-            newLocalDateTime.toInstant(utcOffset)
+            ).toInstant(utcOffset)
         }
         ReminderStickiness.Yearly -> {
             // Push to the next year
-            val newLocalDateTime = LocalDateTime(
-                localDateTime.year + 1,
-                localDateTime.month,
-                minOf(localDateTime.dayOfMonth, localDateTime.month.length(localDateTime.year.plus(1).isLeap())),
+            val nextYear = localDateTime.year + 1
+            val maxDay = daysInMonth(nextYear, localDateTime.monthNumber)
+            val nextDay = minOf(localDateTime.dayOfMonth, maxDay)
+            LocalDateTime(
+                nextYear,
+                localDateTime.monthNumber,
+                nextDay,
                 localDateTime.hour,
                 localDateTime.minute,
                 localDateTime.second,
                 localDateTime.nanosecond
-            )
-            newLocalDateTime.toInstant(utcOffset)
+            ).toInstant(utcOffset)
         }
         else -> date
     }
@@ -188,4 +196,14 @@ fun updateStickyReminder(event: ReminderEvent): Instant? {
  */
 fun Int.isLeap(): Boolean {
     return this % 4 == 0 && (this % 100 != 0 || this % 400 == 0)
+}
+
+
+fun daysInMonth(year: Int, monthNumber: Int): Int {
+    return when (monthNumber) {
+        1, 3, 5, 7, 8, 10, 12 -> 31
+        4, 6, 9, 11 -> 30
+        2 -> if (year.isLeap()) 29 else 28
+        else -> throw IllegalArgumentException("Invalid monthNumber: $monthNumber")
+    }
 }

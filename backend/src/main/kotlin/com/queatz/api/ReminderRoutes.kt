@@ -12,6 +12,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import kotlinx.datetime.toInstant
+import kotlin.time.Instant
 
 fun Route.reminderRoutes() {
     authenticate(optional = true) {
@@ -30,9 +31,9 @@ fun Route.reminderRoutes() {
 
         get("/occurrences") {
             respond {
-                val start = call.parameters["start"]?.toInstant()
+                val start = call.parameters["start"]?.let { Instant.parse(it) }
                     ?: return@respond HttpStatusCode.BadRequest.description("Missing 'start' parameter")
-                val end = call.parameters["end"]?.toInstant()
+                val end = call.parameters["end"]?.let { Instant.parse(it) }
                     ?: return@respond HttpStatusCode.BadRequest.description("Missing 'end' parameter")
                 val geo = call.parameters["geo"]?.split(",")?.map { it.toDouble() }?.takeIf { it.size == 2 }
                 val open = call.parameters["open"]?.toBoolean()?.takeIf { it }
@@ -94,8 +95,8 @@ fun Route.reminderRoutes() {
 
         get("/reminders/{id}/occurrences") {
             respond {
-                val start = call.parameters["start"]?.toInstant() ?: return@respond HttpStatusCode.BadRequest.description("Missing 'start' parameter")
-                val end = call.parameters["end"]?.toInstant() ?: return@respond HttpStatusCode.BadRequest.description("Missing 'end' parameter")
+                val start = call.parameters["start"]?.let { Instant.parse(it) } ?: return@respond HttpStatusCode.BadRequest.description("Missing 'start' parameter")
+                val end = call.parameters["end"]?.let { Instant.parse(it) } ?: return@respond HttpStatusCode.BadRequest.description("Missing 'end' parameter")
 
                 db.occurrences(
                     person = me.id!!,
@@ -246,7 +247,7 @@ fun Route.reminderRoutes() {
                     return@respond HttpStatusCode.NotFound
                 }
 
-                val at = parameter("occurrence").toInstant().startOfSecond()
+                val at = parameter("occurrence").let { Instant.parse(it) }.startOfSecond()
                 val occurrence = db.occurrence(reminder.id!!, at) ?: ReminderOccurrence(
                     reminder = reminder.id!!,
                     occurrence = at,
@@ -300,7 +301,7 @@ fun Route.reminderRoutes() {
                     return@respond HttpStatusCode.NotFound
                 }
 
-                db.upsertReminderOccurrenceGone(reminder.id!!, parameter("date").toInstant().startOfSecond(), true)
+                db.upsertReminderOccurrenceGone(reminder.id!!, parameter("date").let { Instant.parse(it) }.startOfSecond(), true)
 
                 HttpStatusCode.NoContent
             }

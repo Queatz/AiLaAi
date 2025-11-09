@@ -5,6 +5,7 @@ import com.ibm.icu.text.DecimalFormat
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.getAttachment
 import com.queatz.db.AudioAttachment
+import com.queatz.db.CallAttachment
 import com.queatz.db.CardAttachment
 import com.queatz.db.GroupAttachment
 import com.queatz.db.GroupExtended
@@ -101,6 +102,9 @@ fun Message.attachmentText(context: Context): String? = when (val attachment = g
     }
     is ProfilesAttachment -> {
         context.resources.getString(R.string.sent_a_profile)
+    }
+    is CallAttachment -> {
+        context.resources.getString(R.string.started_a_call)
     }
     else -> null
 }

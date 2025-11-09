@@ -25,6 +25,7 @@ private fun String.asMessageAttachment(): MessageAttachment? {
             "sticker" -> json.decodeFromJsonElement<StickerAttachment>(jsonElement)
             "url" -> json.decodeFromJsonElement<UrlAttachment>(jsonElement)
             "trade" -> json.decodeFromJsonElement<TradeAttachment>(jsonElement)
+            "call" -> json.decodeFromJsonElement<CallAttachment>(jsonElement)
             else -> null
         }
     } catch (e: Exception) {

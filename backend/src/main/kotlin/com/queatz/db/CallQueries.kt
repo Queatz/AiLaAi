@@ -12,6 +12,20 @@ fun Db.call(group: String) = one(
     )
 )
 
+fun Db.activeCallOfGroup(group: String) = one(
+    Call::class,
+    """
+        for x in @@collection
+            filter x.${f(Call::group)} == @group
+                and (x.${f(Call::ongoing)} == true || x.${f(Call::participants)} > 0)
+            limit 1
+            return x
+    """.trimIndent(),
+    mapOf(
+        "group" to group
+    )
+)
+
 fun Db.callByRoom(room: String) = one(
     Call::class,
     """
@@ -33,7 +47,9 @@ fun Db.activeCallsOfPerson(person: String) = list(
             sort group.${f(Group::seen)} desc
             for x in @@collection
                 filter x.${f(Call::group)} == group._key
-                    and x.${f(Call::participants)} > 0
+                    and (
+                        x.${f(Call::ongoing)} == true || x.${f(Call::participants)} > 0
+                    )
                 return x
     """.trimIndent(),
     mapOf(

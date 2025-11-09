@@ -184,7 +184,7 @@ fun PageStatisticsDialog(
                             popupProperties = PopupProperties(
                                 enabled = true,
                                 contentBuilder = {
-                                    it.toInt().format()
+                                    it.value.toInt().format()
                                 },
                                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                                 textStyle = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),

@@ -239,7 +239,16 @@ enum class GroupEditsConfig {
 class Call(
     var group: String? = null,
     var room: String? = null,
+    // Number of currently active participants (live)
     var participants: Int? = null,
+    // IDs of people who have joined this call (historical)
+    var participantIds: List<String>? = null,
+    // The person who started the call
+    var startedBy: String? = null,
+    // Whether the call is ongoing (has active participants)
+    var ongoing: Boolean? = null,
+    // ID of the message created when this call started (for idempotency)
+    var message: String? = null,
 ) : Model()
 
 @Serializable

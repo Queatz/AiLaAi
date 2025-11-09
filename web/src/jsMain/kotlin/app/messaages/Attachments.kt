@@ -29,6 +29,7 @@ private fun String.asMessageAttachment(): MessageAttachment? {
             "sticker" -> json.decodeFromJsonElement<StickerAttachment>(jsonElement)
             "url" -> json.decodeFromJsonElement<UrlAttachment>(jsonElement)
             "trade" -> json.decodeFromJsonElement<TradeAttachment>(jsonElement)
+            "call" -> json.decodeFromJsonElement<CallAttachment>(jsonElement)
             else -> null
         }
     } catch (e: Throwable) {
@@ -74,6 +75,10 @@ fun Message.attachmentText(): String? = when (val attachment = getAttachment()) 
 
     is ProfilesAttachment -> {
         appString { sentAProfile }
+    }
+
+    is CallAttachment -> {
+        appString { startedACall }
     }
 
     else -> null

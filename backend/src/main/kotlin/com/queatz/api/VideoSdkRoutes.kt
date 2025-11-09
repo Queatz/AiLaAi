@@ -53,9 +53,11 @@ fun Route.videoSdkRoutes() {
             }
             is VideoSdkSessionWebhookEvent -> {
                 if (event.end != null) {
-                    groupCall.updateParticipantCount(event.meetingId, event.sessionId)
+                    // Explicitly mark call as ended on session end
+                    groupCall.setOngoing(event.meetingId, false)
                 } else {
-                    groupCall.updateParticipantCount(event.meetingId, VideoSdkSessionsResponse())
+                    // Mark call as ongoing as soon as the session starts (even if count is 0)
+                    groupCall.setOngoing(event.meetingId, true)
                 }
             }
         }

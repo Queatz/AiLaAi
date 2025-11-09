@@ -85,6 +85,13 @@ class UrlAttachment(
 }
 
 @Serializable
+class CallAttachment(
+    var call: String? = null
+) : MessageAttachment() {
+    override val type = "call"
+}
+
+@Serializable
 abstract class MessageAttachment  {
     abstract val type: String
 }
