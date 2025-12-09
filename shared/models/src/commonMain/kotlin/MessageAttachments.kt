@@ -86,7 +86,9 @@ class UrlAttachment(
 
 @Serializable
 class CallAttachment(
-    var call: String? = null
+    var call: String? = null,
+    // Final duration in milliseconds, when known
+    var duration: Long? = null
 ) : MessageAttachment() {
     override val type = "call"
 }

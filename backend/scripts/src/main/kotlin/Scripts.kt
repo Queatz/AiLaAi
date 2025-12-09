@@ -126,7 +126,7 @@ private fun configureScriptDepsOnAnnotations(
 }
 
 fun parseScript(script: Script): String = ensurePackageDeclaration(
-    source = "@file:Suppress(\"PROVIDED_RUNTIME_TOO_LOW\")\n${script.source!!}",
+    source = "@file:Suppress(\"PROVIDED_RUNTIME_TOO_LOW\")\n@file:OptIn(kotlin.time.ExperimentalTime::class)\n${script.source!!}",
     packageName = "script_${script.id!!}"
 )
 

@@ -39,6 +39,7 @@ import stories.textContent
 import call
 import components.Loading
 import kotlin.js.Date
+import app.reminder.formatDuration
 
 private val cachedReplies = mutableListOf<Message>()
 
@@ -402,6 +403,7 @@ fun MessageContent(
                             ?.mapNotNull { pid -> callGroup?.members?.firstOrNull { it.person?.id == pid }?.person?.name }
                             ?.joinToString(", ")
                             ?: ""
+                        val durationText = (callDetails!!.duration ?: attachment.duration)?.formatDuration()
 
                         Div({
                             classes(
@@ -447,6 +449,11 @@ fun MessageContent(
                                 Div({
                                     style { color(Styles.colors.secondary) }
                                 }) { Text(names) }
+                            }
+                            if (!ongoing && !durationText.isNullOrBlank()) {
+                                Div({
+                                    style { color(Styles.colors.secondary) }
+                                }) { Text(durationText) }
                             }
                         }
                     } else {

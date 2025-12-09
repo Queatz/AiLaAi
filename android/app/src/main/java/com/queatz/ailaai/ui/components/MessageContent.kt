@@ -50,6 +50,7 @@ import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.card
@@ -197,6 +198,7 @@ fun ColumnScope.MessageContent(
     var attachedCallId by remember { mutableStateOf<String?>(null) }
     var attachedCall by remember { mutableStateOf<Call?>(null) }
     var attachedCallGroup by remember { mutableStateOf<GroupExtended?>(null) }
+    var attachedCallDuration by remember { mutableStateOf<Long?>(null) }
     val nav = nav
     val writeExternalStoragePermissionRequester = permissionRequester(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     var showStoragePermissionDialog by rememberStateOf(false)
@@ -266,6 +268,7 @@ fun ColumnScope.MessageContent(
 
                 is CallAttachment -> {
                     attachedCallId = attachment.call
+                    attachedCallDuration = attachment.duration
                 }
             }
         }
@@ -739,12 +742,14 @@ fun ColumnScope.MessageContent(
                         }
 
                         isMe -> {
-                            Modifier.padding(start = 12.pad)
+                            Modifier
+                                .padding(start = 12.pad)
                                 .align(Alignment.End)
                         }
 
                         else -> {
-                            Modifier.padding(end = 12.pad)
+                            Modifier
+                                .padding(end = 12.pad)
                                 .align(Alignment.Start)
                         }
                     }
@@ -771,10 +776,12 @@ fun ColumnScope.MessageContent(
                         it
                     } else {
                         when (isMe) {
-                            true -> it.padding(start = 12.pad)
+                            true -> it
+                                .padding(start = 12.pad)
                                 .align(Alignment.End)
 
-                            false -> it.padding(end = 12.pad)
+                            false -> it
+                                .padding(end = 12.pad)
                                 .align(Alignment.Start)
                         }
                     }
@@ -806,10 +813,12 @@ fun ColumnScope.MessageContent(
                         it
                     } else {
                         when (isMe) {
-                            true -> it.padding(start = 12.pad)
+                            true -> it
+                                .padding(start = 12.pad)
                                 .align(Alignment.End)
 
-                            false -> it.padding(end = 12.pad)
+                            false -> it
+                                .padding(end = 12.pad)
                                 .align(Alignment.Start)
                         }
                     }
@@ -827,8 +836,8 @@ fun ColumnScope.MessageContent(
                         modifier = Modifier
                             .clip(MaterialTheme.shapes.large)
                             .clickable {
-                            isPlaying = !isPlaying
-                        }
+                                isPlaying = !isPlaying
+                            }
                     )
                     if (!isPlaying) {
                         Icon(
@@ -881,10 +890,12 @@ fun ColumnScope.MessageContent(
                     it
                 } else {
                     when (isMe) {
-                        true -> it.padding(start = 8.pad)
+                        true -> it
+                            .padding(start = 8.pad)
                             .align(Alignment.End)
 
-                        false -> it.padding(end = 8.pad)
+                        false -> it
+                            .padding(end = 8.pad)
                             .align(Alignment.Start)
                     }
                 }
@@ -913,19 +924,23 @@ fun ColumnScope.MessageContent(
 
     attachedGroupId?.let { groupId ->
         Box(
-            modifier = Modifier.padding(1.pad).then(
-                if (isReply) {
-                    Modifier
-                } else {
-                    when (isMe) {
-                        true -> Modifier.padding(start = 8.pad)
-                            .align(Alignment.End)
+            modifier = Modifier
+                .padding(1.pad)
+                .then(
+                    if (isReply) {
+                        Modifier
+                    } else {
+                        when (isMe) {
+                            true -> Modifier
+                                .padding(start = 8.pad)
+                                .align(Alignment.End)
 
-                        false -> Modifier.padding(end = 8.pad)
-                            .align(Alignment.Start)
+                            false -> Modifier
+                                .padding(end = 8.pad)
+                                .align(Alignment.Start)
+                        }
                     }
-                }
-            )
+                )
         ) {
             LoadingText(
                 attachedGroup != null,
@@ -952,19 +967,24 @@ fun ColumnScope.MessageContent(
 
             profile?.let {
                 Box(
-                    modifier = Modifier.padding(1.pad).widthIn(max = 240.dp).then(
-                        if (isReply) {
-                            Modifier
-                        } else {
-                            when (isMe) {
-                                true -> Modifier.padding(start = 8.pad)
-                                    .align(Alignment.End)
+                    modifier = Modifier
+                        .padding(1.pad)
+                        .widthIn(max = 240.dp)
+                        .then(
+                            if (isReply) {
+                                Modifier
+                            } else {
+                                when (isMe) {
+                                    true -> Modifier
+                                        .padding(start = 8.pad)
+                                        .align(Alignment.End)
 
-                                false -> Modifier.padding(end = 8.pad)
-                                    .align(Alignment.Start)
+                                    false -> Modifier
+                                        .padding(end = 8.pad)
+                                        .align(Alignment.Start)
+                                }
                             }
-                        }
-                    )
+                        )
                 ) {
                     ProfileCard(it) {
                         nav.appNavigate(AppNav.Profile(personId))
@@ -978,19 +998,23 @@ fun ColumnScope.MessageContent(
         StoryCard(
             story = attachedStory,
             isLoading = !attachedStoryNotFound,
-            modifier = Modifier.padding(1.pad).then(
-                if (isReply) {
-                    Modifier
-                } else {
-                    when (isMe) {
-                        true -> Modifier.padding(start = 8.pad)
-                            .align(Alignment.End)
+            modifier = Modifier
+                .padding(1.pad)
+                .then(
+                    if (isReply) {
+                        Modifier
+                    } else {
+                        when (isMe) {
+                            true -> Modifier
+                                .padding(start = 8.pad)
+                                .align(Alignment.End)
 
-                        false -> Modifier.padding(end = 8.pad)
-                            .align(Alignment.Start)
+                            false -> Modifier
+                                .padding(end = 8.pad)
+                                .align(Alignment.Start)
+                        }
                     }
-                }
-            )
+                )
         ) {
             if (!attachedStoryNotFound) {
                 nav.appNavigate(AppNav.Story(storyId))
@@ -1094,47 +1118,47 @@ fun ColumnScope.MessageContent(
             }
         }
 
-        attachedCall?.let { call ->
-            val ongoing = (call.ongoing == true) || ((call.participants ?: 0) > 0)
-            val participantNames = call.participantIds
-                ?.mapNotNull { pid ->
-                    attachedCallGroup?.members?.firstOrNull { it.person?.id == pid }?.person?.name
-                        ?: getPerson(pid)?.name
+        Column(
+            modifier = Modifier
+                .align(if (isMe) Alignment.End else Alignment.Start)
+                .padding(1.pad)
+                .let {
+                    if (isReply) it else if (isMe) it.padding(start = 8.pad) else it.padding(end = 8.pad)
                 }
-                ?.distinct()
-                .orEmpty()
-            val fallbackName = call.startedBy?.let { sid ->
-                attachedCallGroup?.members?.firstOrNull { it.person?.id == sid }?.person?.name
-                    ?: getPerson(sid)?.name
-            }
-            val names = when {
-                participantNames.isNotEmpty() -> participantNames.joinToString(", ")
-                !fallbackName.isNullOrBlank() -> fallbackName
-                else -> null
-            }
-
-            Column(
-                modifier = Modifier
-                    .align(if (isMe) Alignment.End else Alignment.Start)
-                    .padding(1.pad)
-                    .let {
-                        if (isReply) it else if (isMe) it.padding(start = 8.pad) else it.padding(end = 8.pad)
+        ) {
+            attachedCall?.let { call ->
+                val ongoing = (call.ongoing == true) || ((call.participants ?: 0) > 0)
+                val participantNames = call.participantIds
+                    ?.mapNotNull { pid ->
+                        attachedCallGroup?.members?.firstOrNull { it.person?.id == pid }?.person?.name
+                            ?: getPerson(pid)?.name
                     }
-                    .then(
-                        if (ongoing) Modifier.clickable {
-                            val gid = call.group ?: return@clickable
-                            calls.start(
-                                groupId = gid,
-                                micEnabled = true,
-                                cameraEnabled = true
-                            )
-                        } else Modifier
-                    )
-            ) {
+                    ?.distinct()
+                    .orEmpty()
+                val fallbackName = call.startedBy?.let { sid ->
+                    attachedCallGroup?.members?.firstOrNull { it.person?.id == sid }?.person?.name
+                        ?: getPerson(sid)?.name
+                }
+                val names = when {
+                    participantNames.isNotEmpty() -> participantNames.joinToString(", ")
+                    !fallbackName.isNullOrBlank() -> fallbackName
+                    else -> null
+                }
+
                 Column(
                     modifier = Modifier
                         .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp), MaterialTheme.shapes.large)
                         .padding(1.5f.pad)
+                        .then(
+                            if (ongoing) Modifier.clickable {
+                                val gid = call.group ?: return@clickable
+                                calls.start(
+                                    groupId = gid,
+                                    micEnabled = true,
+                                    cameraEnabled = true
+                                )
+                            } else Modifier
+                        )
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically
@@ -1159,10 +1183,36 @@ fun ColumnScope.MessageContent(
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
+                    // Show final call duration under participants when available
+                    if (!ongoing) {
+                        val durationMs = call.duration ?: attachedCallDuration
+                        val durationText = durationMs?.takeIf { it > 0 }?.let { dur ->
+                            val hours = (dur / 3_600_000L).toInt()
+                            val minutes = ((dur / 60_000L) - hours * 60).toInt()
+                            listOfNotNull(
+                                hours.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.inline_hour, it, it) },
+                                minutes.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.inline_minute, it, it) },
+                            ).joinToString(" ")
+                        }
+
+                        if (!durationText.isNullOrBlank()) {
+                            Text(
+                                text = durationText,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+            } ?: run {
+                Column(
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp), MaterialTheme.shapes.large)
+                        .padding(1.5f.pad)
+                ) {
+                    Loading()
                 }
             }
-        } ?: run {
-            Loading()
         }
     }
 

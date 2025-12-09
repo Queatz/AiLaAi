@@ -161,6 +161,25 @@ class Call {
         }
     }
 
+    fun endCall(roomId: String, durationMs: Long? = null, push: Boolean = true) {
+        db.callByRoom(roomId)?.let { call ->
+            call.ongoing = false
+            call.participants = 0
+            if (durationMs != null && durationMs >= 0) {
+                call.duration = durationMs
+            }
+
+            db.update(call)
+
+            if (push) {
+                notify.callStatus(
+                    db.document(Group::class, call.group!!)!!,
+                    call
+                )
+            }
+        }
+    }
+
     fun jwt(expiresIn: Duration) = JWT.create()
         .withAudience(videoSdkEndpoint)
         .withPayload(json.encodeToString(VideoSdkJwtPayload(secrets.videoSdk.apiKey)))

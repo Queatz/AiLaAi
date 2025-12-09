@@ -247,6 +247,8 @@ class Call(
     var startedBy: String? = null,
     // Whether the call is ongoing (has active participants)
     var ongoing: Boolean? = null,
+    // Final duration in milliseconds, when known
+    var duration: Long? = null,
     // ID of the message created when this call started (for idempotency)
     var message: String? = null,
 ) : Model()

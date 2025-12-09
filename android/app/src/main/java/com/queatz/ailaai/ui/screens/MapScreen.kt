@@ -1,7 +1,9 @@
 package com.queatz.ailaai.ui.screens
 
 import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.Point
+import androidx.core.content.ContextCompat
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -285,9 +287,13 @@ fun MapScreen(
                             isMyLocationButtonEnabled = true
                         }
 
-                        if (locationPermissionState.status == PermissionStatus.Granted || coarseLocationPermissionState.status == PermissionStatus.Granted) {
-                            runCatching {
+                        val hasFineLocation = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                        val hasCoarseLocation = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                        if (hasFineLocation || hasCoarseLocation) {
+                            try {
                                 isMyLocationEnabled = true
+                            } catch (e: SecurityException) {
+                                // Ignore; can happen on some map providers if permissions change mid-lifecycle
                             }
                         }
 

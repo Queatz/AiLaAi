@@ -1,0 +1,57 @@
+#! /bin/bash
+set -euo pipefail
+
+# Remote configuration
+REMOTE_HOST="root@hitown.chat"
+REMOTE_DIR="/root/ui"
+
+# Determine repo structure based on this script's location (expected: repo/android/push-apk)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Local file paths
+APK_PATH="$SCRIPT_DIR/app/default/release/app-default-release.apk"
+VERSION_INFO_PATH="$REPO_DIR/web/src/jsMain/resources/version-info"
+RELEASE_NOTES_PATH="$REPO_DIR/web/src/jsMain/resources/release-notes"
+
+# Sanity checks
+if [[ ! -f "$APK_PATH" ]]; then
+  echo "Error: APK not found at $APK_PATH" >&2
+  exit 1
+fi
+if [[ ! -f "$VERSION_INFO_PATH" ]]; then
+  echo "Error: version-info not found at $VERSION_INFO_PATH" >&2
+  exit 1
+fi
+if [[ ! -f "$RELEASE_NOTES_PATH" ]]; then
+  echo "Error: release-notes not found at $RELEASE_NOTES_PATH" >&2
+  exit 1
+fi
+
+# Read version-info formatted as: version_code,version_name
+IFS=, read -r VERSION_CODE VERSION_NAME < "$VERSION_INFO_PATH"
+VERSION_NAME="${VERSION_NAME//[$'\t\r\n ']}" # trim whitespace/newlines
+if [[ -z "${VERSION_NAME:-}" ]]; then
+  echo "Error: Could not parse version_name from $VERSION_INFO_PATH" >&2
+  exit 1
+fi
+
+echo "Uploading APK and metadata to $REMOTE_HOST:$REMOTE_DIR ..."
+
+# Upload files using sftp
+sftp "$REMOTE_HOST:$REMOTE_DIR" <<SFTP_CMDS
+put "$APK_PATH" ailaai.apk
+put "$VERSION_INFO_PATH" version-info
+put "$RELEASE_NOTES_PATH" release-notes
+SFTP_CMDS
+
+# Create a versioned copy on the remote host
+VERSIONED_REMOTE_APK="$REMOTE_DIR/ailaai-$VERSION_NAME.apk"
+echo "Creating versioned copy on remote: \"$VERSIONED_REMOTE_APK\""
+ssh "$REMOTE_HOST" "cp -f '$REMOTE_DIR/ailaai.apk' '$VERSIONED_REMOTE_APK'"
+
+echo "Done. Deployed:"
+echo " - $REMOTE_DIR/ailaai.apk"
+echo " - $VERSIONED_REMOTE_APK"
+echo " - $REMOTE_DIR/version-info"
+echo " - $REMOTE_DIR/release-notes"
