@@ -1,9 +1,12 @@
 package app.widget.space
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.web.events.SyntheticMouseEvent
+import app.dialog.dialog
 import app.widget.WidgetStyles
 import components.IconButton
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.margin
@@ -33,67 +36,93 @@ fun SlideshowControls(
     onDuration: (SyntheticMouseEvent) -> Unit,
     onDelete: (SyntheticMouseEvent) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+
     Div(
         attrs = { classes(WidgetStyles.slideshowControls) }
     ) {
-        // Create new slide always
-        IconButton(
-            name = "add",
-            title = "New Slide",
-            styles = { color(rgb(255, 255, 255)) },
-            onClick = { event -> onCreate(event) }
-        )
+        if (isPaused) {
+            // Create new slide always
+            IconButton(
+                name = "add",
+                title = "New slide",
+                styles = { color(rgb(255, 255, 255)) },
+                onClick = { event -> onCreate(event) }
+            )
+        }
         // Rename/Delete only when there is at least one slide
-        if (totalSlides > 0) {
+        if (totalSlides > 0 && isPaused) {
             IconButton(
                 name = "edit",
-                title = "Rename Slide",
+                // todo: translate
+                title = "Rename slide",
                 styles = { color(rgb(255, 255, 255)) },
                 onClick = { event -> onRename(event) }
             )
             IconButton(
                 name = "timer",
-                title = "Edit Duration",
+                // todo: translate
+                title = "Edit duration",
                 styles = { color(rgb(255, 255, 255)) },
                 onClick = { event -> onDuration(event) }
             )
             IconButton(
                 name = "delete",
-                title = "Delete Slide",
+                // todo: translate
+                title = "Delete slide",
                 styles = { color(rgb(255, 255, 255)) },
-                onClick = { event -> onDelete(event) }
+                onClick = { event ->
+                    scope.launch {
+                        val result = dialog(
+                            // todo: translate
+                            title = "Delete slide",
+                            // todo: translate
+                            confirmButton = "Delete",
+                            // todo: translate
+                            cancelButton = "Cancel"
+                        )
+
+                        if (result == true) {
+                            onDelete(event)
+                        }
+                    }
+                }
             )
         }
 
-        Div(
-            attrs = {
-                style {
-                    margin(.5.r)
-                    backgroundColor(rgb(255, 255, 255))
-                    width(1.px)
-                    opacity(.25f)
+        if (isPaused) {
+            Div(
+                attrs = {
+                    style {
+                        margin(.5.r)
+                        backgroundColor(rgb(255, 255, 255))
+                        width(1.px)
+                        opacity(.25f)
+                    }
                 }
-            }
-        )
+            )
+        }
 
         // Navigation and play/pause only when more than one slide
         if (totalSlides > 1) {
             IconButton(
                 name = "navigate_before",
-                title = "Previous Slide",
+                // todo: translate
+                title = "Previous slide",
                 styles = { color(rgb(255, 255, 255)) },
                 onClick = { event -> onPrevious(event) }
             )
         }
         // Slide counter
         Span(attrs = { classes(WidgetStyles.slideshowControlsCounter) }) {
-            Text("${currentSlide + 1} / $totalSlides")
+            Text("${(currentSlide + 1).coerceAtMost(totalSlides)} / $totalSlides")
         }
         // Next button only when more than one slide
         if (totalSlides > 1) {
             IconButton(
                 name = "navigate_next",
-                title = "Next Slide",
+                // todo: translate
+                title = "Next slide",
                 styles = { color(rgb(255, 255, 255)) },
                 onClick = { event -> onNext(event) }
             )
@@ -113,7 +142,8 @@ fun SlideshowControls(
         if (totalSlides > 1) {
             IconButton(
                 name = if (isPaused) "play_arrow" else "pause",
-                title = if (isPaused) "Resume Slideshow" else "Pause Slideshow",
+                // todo: translate
+                title = if (isPaused) "Resume slideshow" else "Pause slideshow",
                 styles = { color(rgb(255, 255, 255)) },
                 onClick = { event -> onPause(event) }
             )
@@ -122,7 +152,8 @@ fun SlideshowControls(
         // Exit slideshow
         IconButton(
             name = "close",
-            title = "Exit Slideshow",
+            // todo: translate
+            title = "Exit slideshow",
             styles = {
                 color(rgb(255, 255, 255))
             },

@@ -671,9 +671,19 @@ fun SpaceWidget(widgetId: String) {
             )
         }
 
+        val slides = control.collectSlides()
+
+        // Generate first slide automatically
+        LaunchedEffect(slideshowMode) {
+            if (slideshowMode && slides.isEmpty()) {
+                // todo: translate
+                val newTitle = "Slide ${slides.size + 1}"
+                control.createSlide(newTitle)
+            }
+        }
+
         // Show slideshow controls when in slideshow mode
         if (slideshowMode) {
-            val slides = control.collectSlides()
             SlideshowControls(
                 currentSlide = currentSlideIndex,
                 totalSlides = slides.size,
@@ -686,6 +696,7 @@ fun SpaceWidget(widgetId: String) {
                 onExit = { _ -> control.stopSlideshow() },
                 onCreate = { _ ->
                     // Auto-generate slide name
+                    // todo: translate
                     val newTitle = "Slide ${slides.size + 1}"
                     control.createSlide(newTitle)
                 },
@@ -694,7 +705,8 @@ fun SpaceWidget(widgetId: String) {
                         val current = slides.getOrNull(currentSlideIndex)
                         val currentTitle = (current?.content as? SpaceContent.Slide)?.title.orEmpty()
                         val newTitle = inputDialog(
-                            title = "Rename Slide",
+                            // todo: translate
+                            title = "Rename slide",
                             defaultValue = currentTitle,
                             singleLine = true
                         )
@@ -708,7 +720,7 @@ fun SpaceWidget(widgetId: String) {
                         // Prompt for duration in seconds
                         val currentDuration = control.getSlideDuration(currentSlideIndex) ?: 5000L
                         val input = inputDialog(
-                            title = "Slide Duration (seconds)",
+                            title = "Slide duration (seconds)",
                             defaultValue = (currentDuration / 1000).toString(),
                             singleLine = true,
                             type = InputType.Number

@@ -316,7 +316,24 @@ class SpaceWidgetInputControl {
      */
     fun deleteSlide(index: Int) {
         val slideItem = _slides.value.getOrNull(index) ?: return
-        val newItems = items.filter { it != slideItem }
+        val slideContent = slideItem.content as? SpaceContent.Slide ?: return
+
+        // Get the stable IDs of items that belong to this slide
+        val itemIdsToDelete = slideContent.items.toSet()
+
+        // Remove the slide and all items that belong to it
+        val newItems = items.filterIndexed { itemIndex, item ->
+            // Keep items that are not:
+            // 1. The slide itself
+            // 2. An item referenced by this slide's item IDs
+            if (item == slideItem) {
+                false
+            } else {
+                val itemId = _stableIds.value.getOrNull(itemIndex) ?: ""
+                !itemIdsToDelete.contains(itemId)
+            }
+        }
+
         updateData(data?.copy(items = newItems) ?: SpaceData(items = newItems))
         updateDirty(nextInt())
         val updatedSlides = collectAllSlides()
