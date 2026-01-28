@@ -26,6 +26,12 @@ kotlin {
     }
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
 val osName = System.getProperty("os.name").lowercase()
 val tcnative_classifier = when {
     osName.contains("win") -> "windows-x86_64"

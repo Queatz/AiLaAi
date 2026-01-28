@@ -95,7 +95,7 @@ data class OpenAiTool(
 
 @Serializable
 data class OpenAiImageGenerationBody(
-    val model: String = "gpt-4.1-mini",
+    val model: String = "gpt-5-mini",
     val input: List<OpenAiCompletionsMessage>,
     val tools: List<OpenAiTool>
 )
@@ -315,7 +315,6 @@ class OpenAi {
             background = if (transparentBackground) "transparent" else null
         )
         val body = OpenAiImageGenerationBody(
-            model = "gpt-4.1-mini",
             input = listOf(OpenAiCompletionsMessage(role = "user", content = prompt)),
             tools = listOf(tool)
         )

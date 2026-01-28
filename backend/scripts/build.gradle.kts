@@ -10,6 +10,12 @@ repositories {
     mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
 dependencies {
     implementation("app.ailaai.shared:models")
     implementation("org.apache.maven.resolver:maven-resolver-connector-basic:1.9.22")
