@@ -347,6 +347,11 @@ object Strings {
         vn = "Mô tả",
         ru = "Описание"
     )
+    val sidePanel = Translation(
+        en = "Side panel",
+        vn = "Bảng bên",
+        ru = "Боковая панель"
+    )
     val secret = Translation(
         en = "Secret",
         vn = "Bí mật",

@@ -1,12 +1,10 @@
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import app.ailaai.api.group
+import app.group.GroupSidePanel
 import app.group.GroupTopBar
 import com.queatz.db.GroupExtended
+import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.Div
 
 @Composable
 fun GroupLayout(
@@ -18,6 +16,7 @@ fun GroupLayout(
         mutableStateOf(false)
     }
     var showSearch by remember(group.group?.id) { mutableStateOf(false) }
+    var showSidePanel by remember { mutableStateOf(false) }
 
     application.background(group.group?.background?.let { "$baseUrl$it" })
     application.effects(group.group?.config?.effects?.let { json.decodeFromString(it) })
@@ -29,28 +28,56 @@ fun GroupLayout(
         }
     }
 
-    if (showCards) {
-        GroupCards(group = group)
-    } else {
-        GroupMessages(
-            group = group,
-            showSearch = showSearch,
-            onShowSearch = {
-                showSearch = it
-            }
-        )
-    }
-
-    GroupTopBar(
-        group = group,
-        onGroupUpdated = onGroupUpdated,
-        onGroupGone = onGroupGone,
-        showCards = showCards,
-        onShowCards = {
-            showCards = !showCards
-        },
-        onSearch = {
-            showSearch = !showSearch
+    Div({
+        style {
+            display(DisplayStyle.Flex)
+            flexDirection(FlexDirection.Row)
+            flex(1)
+            height(100.percent)
+            width(100.percent)
         }
-    )
+    }) {
+        Div({
+            style {
+                display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.ColumnReverse)
+                flex(1)
+                width(0.r)
+                height(100.percent)
+            }
+        }) {
+            if (showCards) {
+                GroupCards(group = group)
+            } else {
+                GroupMessages(
+                    group = group,
+                    showSearch = showSearch,
+                    onShowSearch = {
+                        showSearch = it
+                    }
+                )
+            }
+
+            GroupTopBar(
+                group = group,
+                onGroupUpdated = onGroupUpdated,
+                onGroupGone = onGroupGone,
+                showCards = showCards,
+                onShowCards = {
+                    showCards = !showCards
+                },
+                onSearch = {
+                    showSearch = !showSearch
+                },
+                showSidePanel = showSidePanel,
+                onShowSidePanel = {
+                    showSidePanel = !showSidePanel
+                }
+            )
+        }
+
+        if (showSidePanel) {
+            GroupSidePanel(group)
+        }
+    }
 }

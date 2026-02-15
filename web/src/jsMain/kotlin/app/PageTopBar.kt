@@ -18,6 +18,7 @@ fun PageTopBar(
     description: String? = null,
     useMinHeight: Boolean = false,
     actions: @Composable ElementScope<HTMLDivElement>.() -> Unit = {},
+    actionsAfterMenu: @Composable ElementScope<HTMLDivElement>.() -> Unit = {},
     navActions: @Composable ElementScope<HTMLDivElement>.() -> Unit = {},
     onTitleClick: (() -> Unit)? = null,
     onDescriptionClick: (() -> Unit)? = null,
@@ -93,5 +94,6 @@ fun PageTopBar(
                 onMenu(it)
             }
         }
+        actionsAfterMenu()
     }
 }

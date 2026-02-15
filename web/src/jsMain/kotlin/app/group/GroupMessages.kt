@@ -225,6 +225,7 @@ fun GroupMessages(
                         width(100.percent)
                         height(3.5.r)
                     },
+                    autoFocus = true,
                     defaultMargins = false
                 )
             }

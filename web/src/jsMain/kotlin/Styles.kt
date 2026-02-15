@@ -42,6 +42,7 @@ import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.div
+import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexGrow
 import org.jetbrains.compose.web.css.flexShrink
@@ -127,6 +128,24 @@ val Styles get() = StyleManager.style(MainStyleSheet::class)
 
 @OptIn(ExperimentalComposeWebApi::class)
 class MainStyleSheet : StyleSheet() {
+    val pane by style {
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        overflowX("hidden")
+        overflowY("auto")
+        height(100.percent)
+    }
+
+    val flexGrow by style {
+        flex(1)
+        width(0.r)
+    }
+
+    val sidePane by style {
+        flexShrink(0)
+        width(24.r)
+    }
+
     // Data class for dark theme colors
     data class DarkColors(
         // Dark theme colors with cascading fallback:

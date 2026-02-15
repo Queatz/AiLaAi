@@ -76,6 +76,7 @@ import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.maxHeight
@@ -108,7 +109,9 @@ fun GroupTopBar(
     onGroupGone: () -> Unit,
     showCards: Boolean,
     onShowCards: () -> Unit,
-    onSearch: () -> Unit
+    onSearch: () -> Unit,
+    showSidePanel: Boolean,
+    onShowSidePanel: () -> Unit
 ) {
     val me by application.me.collectAsState()
     val myMember = group.members?.find { it.person?.id == me?.id }
@@ -935,6 +938,18 @@ fun GroupTopBar(
                         showBots()
                     }
                 }
+            }
+        },
+        actionsAfterMenu = {
+            IconButton(
+                name = "dock_to_left",
+                title = appString { sidePanel },
+                background = showSidePanel,
+                styles = {
+                    marginLeft(.5.r)
+                }
+            ) {
+                onShowSidePanel()
             }
         }
     ) {

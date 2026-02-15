@@ -127,19 +127,11 @@ fun ResultPanel(
     isOnLeft: Boolean
 ) {
     Div({
-        style {
-            if (isOnLeft) {
-                flex(1)
-                width(0.r)
-            } else {
-                flexShrink(0)
-                width(24.r)
-            }
-            display(DisplayStyle.Flex)
-            flexDirection(FlexDirection.Column)
-            overflowX("hidden")
-            overflowY("auto")
-            height(100.percent)
+        classes(Styles.pane)
+        if (isOnLeft) {
+            classes(Styles.flexGrow)
+        } else {
+            classes(Styles.sidePane)
         }
     }) {
         if (isRunningScript) {
@@ -751,19 +743,14 @@ fun ScriptsPage(
 
                     // Editor (left by default, right when isEditorOnRight is true)
                     Div({
-                        style {
-                            if (isEditorOnRight && showResultPanel) {
+                        classes(Styles.pane)
+                        if (isEditorOnRight && showResultPanel) {
+                            style {
                                 flexShrink(0)
                                 width(32.r)
-                            } else {
-                                flex(1)
-                                width(0.r)
                             }
-                            height(100.percent)
-                            display(DisplayStyle.Flex)
-                            flexDirection(FlexDirection.Column)
-                            overflowX("hidden")
-                            overflowY("auto")
+                        } else {
+                            classes(Styles.flexGrow)
                         }
                     }) {
                         MonacoEditor(

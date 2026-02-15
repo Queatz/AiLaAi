@@ -15,10 +15,13 @@ import kotlinx.coroutines.delay
 import kotlin.time.Clock
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.CSSColorValue
+import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.paddingRight
 import org.jetbrains.compose.web.css.px
@@ -46,6 +49,7 @@ fun IconButton(
     enabled: Boolean = true,
     styles: (StyleScope.() -> Unit)? = null,
     iconStyles: (StyleScope.() -> Unit)? = null,
+    isReversed: Boolean = false,
     onClick: (SyntheticMouseEvent) -> Unit
 ) {
     val start = remember { Clock.System.now().toEpochMilliseconds() }
@@ -83,6 +87,10 @@ fun IconButton(
             if (text != null) {
                 paddingLeft(1.r)
                 paddingRight(1.r)
+            }
+
+            if (isReversed) {
+                flexDirection(FlexDirection.RowReverse)
             }
 
             if (circular) {
@@ -123,7 +131,11 @@ fun IconButton(
         if (text != null) {
             Span({
                 style {
-                    marginLeft(.5.r)
+                    if (isReversed) {
+                        marginRight(.5.r)
+                    } else {
+                        marginLeft(.5.r)
+                    }
                 }
             }) {
                 Text(text)
