@@ -168,7 +168,9 @@ class Card(
 
 @Serializable
 class Task(
+    var status: String? = null,
     var fields: Map<String, String>? = null,
+    var done: Boolean? = null,
 )
 
 @Serializable

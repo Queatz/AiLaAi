@@ -17,12 +17,13 @@ suspend fun inputSelectDialog(
     confirmButton: String,
     defaultValue: String = "",
     items: List<String>? = null,
+    placeholder: String = application.appString { search },
     itemStyle: StyleScope.(String) -> Unit = {}
 ) = inputDialog(
     title = null,
     defaultValue = defaultValue,
     confirmButton = confirmButton,
-    placeholder = application.appString { search },
+    placeholder = placeholder,
     inputStyles = {
         width(100.percent)
     }

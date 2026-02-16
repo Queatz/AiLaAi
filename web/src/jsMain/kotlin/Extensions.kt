@@ -12,6 +12,8 @@ import lib.Qr
 import lib.intlFormat
 import lib.parse
 import org.jetbrains.compose.web.attributes.AttrsScope
+import org.jetbrains.compose.web.css.CSSColorValue
+import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.cssRem
 import org.khronos.webgl.Uint8Array
 import org.khronos.webgl.get
@@ -546,4 +548,9 @@ suspend fun cropTransparentEdges(blob: Blob, alphaThreshold: Int = 1): Blob? {
     }, "image/png")
 
     return blobResult.await()
+}
+
+fun tagColor(tag: String): CSSColorValue {
+    val hue = Random(tag.hashCode()).nextInt(360)
+    return Color("hsl($hue, 60%, 40%)")
 }

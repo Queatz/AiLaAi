@@ -49,7 +49,7 @@ import json
 
 suspend fun selectScriptDialog(
     scope: CoroutineScope,
-    onScriptSelected: (scriptId: String, scriptData: String) -> Unit
+    onScriptSelected: (scriptId: String, scriptData: String?) -> Unit
 ) {
     dialog(
         title = application.appString { scripts },
@@ -135,9 +135,7 @@ suspend fun selectScriptDialog(
 
                                 onClick {
                                     scope.launch {
-                                        // todo: do we really want this
-                                        val scriptData = json.encodeToString(ScriptData(script = script.id))
-                                        onScriptSelected(script.id!!, scriptData)
+                                        onScriptSelected(script.id!!, null)
                                         resolve(false)
                                     }
                                 }

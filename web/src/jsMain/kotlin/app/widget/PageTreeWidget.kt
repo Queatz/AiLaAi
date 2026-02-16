@@ -26,6 +26,7 @@ import app.components.FlexInput
 import app.softwork.routingcompose.Router
 import appString
 import application
+import tagColor
 import com.queatz.db.Card
 import com.queatz.db.Widget
 import com.queatz.widgets.widgets.PageTreeData
@@ -93,10 +94,6 @@ sealed class TagFilter {
     data object Untagged : TagFilter()
 }
 
-internal fun tagColor(tag: String): CSSColorValue {
-    val hue = Random(tag.hashCode()).nextInt(360)
-    return Color("hsl($hue, 60%, 40%)")
-}
 
 @Composable
 fun PageTreeWidget(widgetId: String) {

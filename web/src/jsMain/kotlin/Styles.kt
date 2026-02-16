@@ -144,6 +144,7 @@ class MainStyleSheet : StyleSheet() {
     val sidePane by style {
         flexShrink(0)
         width(24.r)
+        maxWidth(100.vw)
     }
 
     // Data class for dark theme colors
@@ -821,6 +822,8 @@ class MainStyleSheet : StyleSheet() {
         }
     }
 
+    val buttonSmall by style {}
+
     val button by style {
         borderRadius(2.r)
         border(0.px)
@@ -843,6 +846,11 @@ class MainStyleSheet : StyleSheet() {
 
         self + disabled style {
             opacity(.5)
+        }
+
+        self + className(buttonSmall) style {
+            padding(0.r, 1.r)
+            minHeight(2.r)
         }
     }
 

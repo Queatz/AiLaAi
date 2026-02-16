@@ -21,6 +21,12 @@ data class Translation(
  * for different languages (English, Vietnamese, and optionally Russian).
  */
 object Strings {
+
+    val upload = Translation(
+        en = "Upload",
+        vn = "Tải lên",
+        ru = "Загрузить"
+    )
     val people = Translation(
         en = "People",
         vn = "Con người",
@@ -123,6 +129,36 @@ object Strings {
         en = "New script",
         vn = "Tập lệnh mới",
         ru = "Новый скрипт"
+    )
+    val newTask = Translation(
+        en = "New task",
+        vn = "Nhiệm vụ mới",
+        ru = "Новая задача"
+    )
+    val collaborators = Translation(
+        en = "Collaborators",
+        vn = "Hợp tác viên",
+        ru = "Сотрудники"
+    )
+    val status = Translation(
+        en = "Status",
+        vn = "Trạng thái",
+        ru = "Статус"
+    )
+    val selectStatus = Translation(
+        en = "Select status",
+        vn = "Chọn trạng thái",
+        ru = "Выбрать статус"
+    )
+    val addCategory = Translation(
+        en = "Add category",
+        vn = "Thêm danh mục",
+        ru = "Добавить категорию"
+    )
+    val categories = Translation(
+        en = "Categories",
+        vn = "Danh mục",
+        ru = "Категории"
     )
 
     val viewSource = Translation(

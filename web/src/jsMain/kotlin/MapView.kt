@@ -620,7 +620,12 @@ fun MapView(
                         if (shownCards.isEmpty()) {
                             Empty { appText { noCardsNearby } }
                         } else {
-                            MapList(shownCards) { card ->
+                            MapList(
+                                shownCards,
+                                styles = {
+                                    padding(1.r)
+                                }
+                            ) { card ->
                                 cardNavHistory = emptyList()
                                 selectedCard = if (selectedCard?.id == card.id) null else card
                                 centerMapOnCard(selectedCard)
@@ -665,7 +670,7 @@ fun MapView(
                     }
                 }) {
                     if (searchResults.any { it.pay != null }) {
-                        var paidFilterSelected = selectedFilters.any { it is SearchFilter.Paid }
+                        val paidFilterSelected = selectedFilters.any { it is SearchFilter.Paid }
                         Div({
                             classes(Styles.floatingButton)
 
@@ -679,7 +684,7 @@ fun MapView(
 
                             onClick {
                                 selectedFilters = if (paidFilterSelected) {
-                                    emptyList<SearchFilter>()
+                                    emptyList()
                                 } else {
                                     SearchFilter.Paid.inList()
                                 }

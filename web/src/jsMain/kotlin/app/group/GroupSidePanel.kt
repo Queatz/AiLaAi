@@ -1,8 +1,7 @@
 package app.group
 
 import Styles
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import api
 import app.ailaai.api.updateGroup
 import json
@@ -22,6 +21,7 @@ import r
 @Composable
 fun GroupSidePanel(group: GroupExtended, onUpdated: (GroupExtended) -> Unit) {
     val scope = rememberCoroutineScope()
+    var dynamicTitle by remember(group) { mutableStateOf<String?>(null) }
     Div({
         classes(Styles.pane, Styles.sidePane)
         style {
@@ -38,15 +38,22 @@ fun GroupSidePanel(group: GroupExtended, onUpdated: (GroupExtended) -> Unit) {
                 null
             }
         }
+
+        LaunchedEffect(content) {
+            dynamicTitle = null
+        }
+
         if (content != null && content !is GroupContentModel.None) {
-            val (icon, title) = when (content) {
-                is GroupContentModel.Text -> "text_fields" to "Text"
+            val (icon, defaultTitle) = when (content) {
+                is GroupContentModel.Text -> "text_fields" to "Notes"
                 is GroupContentModel.Tasks -> "check_box" to "Tasks"
-                is GroupContentModel.Card -> "description" to "Card"
+                is GroupContentModel.Card -> "description" to "Page"
                 is GroupContentModel.Script -> "code" to "Script"
                 is GroupContentModel.Website -> "public" to "Website"
                 else -> "" to ""
             }
+
+            val title = dynamicTitle ?: defaultTitle
 
             IconButton(
                 name = "close",
@@ -66,6 +73,8 @@ fun GroupSidePanel(group: GroupExtended, onUpdated: (GroupExtended) -> Unit) {
             }
         }
 
-        GroupContent(group, onUpdated)
+        GroupContent(group, onUpdated) {
+            dynamicTitle = it
+        }
     }
 }

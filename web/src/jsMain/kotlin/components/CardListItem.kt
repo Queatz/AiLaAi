@@ -1,9 +1,13 @@
 package components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import app.AppStyles
 import appString
 import com.queatz.db.Card
+import com.queatz.db.Person
+import components.GroupPhoto
+import components.GroupPhotoItem
 import focusable
 import hint
 import notBlank
@@ -29,6 +33,7 @@ import r
 fun CardListItem(
     card: Card,
     showPhoto: Boolean = true,
+    people: List<Person>? = null,
     onClick: () -> Unit,
 ) {
     Div({
@@ -37,7 +42,7 @@ fun CardListItem(
             flexDirection(FlexDirection.Column)
         }
     }) {
-        if (card.photo != null) {
+        if (showPhoto && card.photo != null) {
             Div({
                 style {
                     backgroundImage("url($baseUrl${card.photo!!})")
@@ -51,7 +56,7 @@ fun CardListItem(
                 onClick {
                     onClick()
                 }
-            }) {}
+            })
         }
         Div({
             classes(AppStyles.groupItem)
@@ -66,7 +71,23 @@ fun CardListItem(
                 onClick()
             }
         }) {
-            ProfilePhoto(card.photo, card.name ?: appString { newCard }, size = 54.px)
+            val collaborators = card.collaborators.orEmpty()
+
+            if (collaborators.isNotEmpty()) {
+                val items = buildList {
+                    val ownerPerson = people?.find { it.id == card.person }
+                    add(GroupPhotoItem(ownerPerson?.photo ?: card.photo, ownerPerson?.name ?: card.name))
+
+                    collaborators.forEach { id ->
+                        val p = people?.find { it.id == id }
+                        add(GroupPhotoItem(p?.photo, p?.name))
+                    }
+                }
+                GroupPhoto(items = items, size = 54.px)
+            } else {
+                ProfilePhoto(card.photo, card.name ?: appString { newCard }, size = 54.px)
+            }
+
             Div({
                 style {
                     marginLeft(1.r)

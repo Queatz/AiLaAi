@@ -2,6 +2,7 @@ package components
 
 import Styles
 import androidx.compose.runtime.Composable
+import application
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.autoFocus
 import org.jetbrains.compose.web.attributes.placeholder
@@ -13,9 +14,10 @@ import org.jetbrains.compose.web.dom.Text
 import r
 
 @Composable
+@Deprecated("Use FlexInput")
 fun SearchField(
     value: String,
-    placeholder: String,
+    placeholder: String = application.appString { search },
     focus: Boolean = true,
     shadow: Boolean = true,
     styles: StyleScope.() -> Unit = {},

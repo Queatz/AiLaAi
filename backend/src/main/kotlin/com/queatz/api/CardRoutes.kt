@@ -165,7 +165,8 @@ fun Route.cardRoutes() {
                             content = card.content,
                             active = card.active ?: false,
                             npc = card.npc,
-                            size = card.size
+                            size = card.size,
+                            task = card.task,
                         )
                     )
                 }
@@ -469,6 +470,10 @@ fun Route.cardRoutes() {
                         card.offline = update.offline
                         card.geo = update.geo
                         card.equipped = update.equipped
+                    }
+
+                    if (update.task != null) {
+                        card.task = update.task
                     }
 
                     if (card.parent == null && previousParent != null && card.active == true) {

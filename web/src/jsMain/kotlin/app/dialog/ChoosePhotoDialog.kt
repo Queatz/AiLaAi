@@ -284,7 +284,11 @@ private suspend fun choosePhotoDialog(
         },
         extraButtons = { resolve ->
             if (showUpload) {
-                IconButton("photo", application.appString { choosePhoto }) {
+                IconButton(
+                    name = "photo",
+                    title = application.appString { upload },
+                    text = application.appString { upload }
+                ) {
                     pickPhotos(multiple = multiple) { files ->
                         files.forEach(onFile)
                     }
