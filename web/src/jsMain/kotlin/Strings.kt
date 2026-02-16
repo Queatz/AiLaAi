@@ -135,6 +135,16 @@ object Strings {
         vn = "Nhiệm vụ mới",
         ru = "Новая задача"
     )
+    val addField = Translation(
+        en = "Add field",
+        vn = "Thêm trường",
+        ru = "Добавить поле"
+    )
+    val field = Translation(
+        en = "Field",
+        vn = "Trường",
+        ru = "Поле"
+    )
     val collaborators = Translation(
         en = "Collaborators",
         vn = "Hợp tác viên",

@@ -1,5 +1,6 @@
 package app.dialog
 
+import androidx.compose.runtime.Composable
 import app.AppStyles
 import application
 import focusable
@@ -18,12 +19,14 @@ suspend fun inputSelectDialog(
     defaultValue: String = "",
     items: List<String>? = null,
     placeholder: String = application.appString { search },
+    extraButtons: (@Composable (resolve: (Boolean?) -> Unit) -> Unit)? = null,
     itemStyle: StyleScope.(String) -> Unit = {}
 ) = inputDialog(
     title = null,
     defaultValue = defaultValue,
     confirmButton = confirmButton,
     placeholder = placeholder,
+    extraButtons = extraButtons,
     inputStyles = {
         width(100.percent)
     }

@@ -31,6 +31,7 @@ suspend fun editTaskDialog(groupId: String, card: Card? = null, allCards: List<C
     var doneValue = card?.task?.done ?: false
     var categoriesValue = card?.categories ?: emptyList<String>()
     var collaboratorsValue = card?.collaborators ?: emptyList<String>()
+    var fieldsValue = card?.task?.fields ?: emptyMap<String, String>()
 
     val isNew = card == null
 
@@ -56,6 +57,7 @@ suspend fun editTaskDialog(groupId: String, card: Card? = null, allCards: List<C
         var done by remember { mutableStateOf(doneValue) }
         var categories by remember { mutableStateOf(categoriesValue) }
         var collaborators by remember { mutableStateOf(collaboratorsValue) }
+        var fields by remember { mutableStateOf(fieldsValue) }
         var people by remember { mutableStateOf(emptyList<Person>()) }
 
         val scope = rememberCoroutineScope()
@@ -267,6 +269,135 @@ suspend fun editTaskDialog(groupId: String, card: Card? = null, allCards: List<C
                 placeholder = application.appString { Strings.description },
                 singleLine = false
             )
+
+            // Custom fields
+            Div({
+                style {
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Column)
+                    gap(.5.r)
+                }
+            }) {
+                fields.forEach { (fieldName, fieldValue) ->
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            alignItems(AlignItems.Center)
+                            gap(1.r)
+                            cursor("pointer")
+                        }
+                        onClick {
+                            scope.launch {
+                                val select: suspend (List<String>) -> Unit = { items ->
+                                    val newValue = inputSelectDialog(
+                                        confirmButton = application.appString { okay },
+                                        placeholder = fieldName,
+                                        defaultValue = fieldValue,
+                                        items = items,
+                                        extraButtons = { resolve ->
+                                            IconButton("delete", application.appString { delete }) {
+                                                fields = fields - fieldName
+                                                fieldsValue = fields
+                                                resolve(false)
+                                            }
+                                        }
+                                    )
+                                    if (newValue != null) {
+                                        fields = fields + (fieldName to newValue)
+                                        fieldsValue = fields
+                                    }
+                                }
+
+                                if (allCards != null) {
+                                    select(allCards.mapNotNull { it.task?.fields?.get(fieldName) }.filter { it.isNotBlank() }.distinct().sorted())
+                                } else {
+                                    api.groupCards(groupId) { cards ->
+                                        val items = cards.mapNotNull { it.task?.fields?.get(fieldName) }.filter { it.isNotBlank() }.distinct().sorted()
+                                        scope.launch {
+                                            select(items)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }) {
+                        Div({
+                            style {
+                                flex(1)
+                                opacity(.7)
+                                fontSize(.9.r)
+                            }
+                        }) {
+                            Text(fieldName)
+                        }
+                        Div({
+                            style {
+                                flex(1)
+                                fontWeight("bold")
+                            }
+                        }) {
+                            Text(fieldValue)
+                        }
+                    }
+                }
+
+                Div({
+                    classes(Styles.outlineButton, Styles.outlineButtonSmall)
+                    style {
+                        alignSelf(AlignSelf.FlexStart)
+                    }
+                    onClick {
+                        scope.launch {
+                            val select: suspend (List<String>) -> Unit = { items ->
+                                val fieldName = inputSelectDialog(
+                                    confirmButton = application.appString { okay },
+                                    placeholder = application.appString { Strings.field },
+                                    items = items
+                                )
+                                if (!fieldName.isNullOrBlank()) {
+                                    scope.launch {
+                                        val selectValue: suspend (List<String>) -> Unit = { valueItems ->
+                                            val fieldValue = inputSelectDialog(
+                                                confirmButton = application.appString { okay },
+                                                placeholder = fieldName,
+                                                items = valueItems
+                                            )
+                                            if (fieldValue != null) {
+                                                fields = fields + (fieldName to fieldValue)
+                                                fieldsValue = fields
+                                            }
+                                        }
+
+                                        if (allCards != null) {
+                                            selectValue(allCards.mapNotNull { it.task?.fields?.get(fieldName) }.filter { it.isNotBlank() }.distinct().sorted())
+                                        } else {
+                                            api.groupCards(groupId) { cards ->
+                                                val valueItems = cards.mapNotNull { it.task?.fields?.get(fieldName) }.filter { it.isNotBlank() }.distinct().sorted()
+                                                scope.launch {
+                                                    selectValue(valueItems)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (allCards != null) {
+                                select(allCards.flatMap { it.task?.fields?.keys.orEmpty() }.filter { it.isNotBlank() }.distinct().sorted())
+                            } else {
+                                api.groupCards(groupId) { cards ->
+                                    val items = cards.flatMap { it.task?.fields?.keys.orEmpty() }.filter { it.isNotBlank() }.distinct().sorted()
+                                    scope.launch {
+                                        select(items)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }) {
+                    Text("+ ${application.appString { Strings.addField }}")
+                }
+            }
         }
     }
 
@@ -277,6 +408,7 @@ suspend fun editTaskDialog(groupId: String, card: Card? = null, allCards: List<C
         val updatedTask = (card?.task ?: Task()).apply {
             this.status = statusValue
             this.done = doneValue
+            this.fields = fieldsValue
         }
         val updatedCard = (card ?: Card()).apply {
             this.name = nameValue
