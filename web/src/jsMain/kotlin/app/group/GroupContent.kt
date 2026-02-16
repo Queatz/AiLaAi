@@ -47,6 +47,7 @@ import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.padding
@@ -90,7 +91,7 @@ fun GroupContent(
             }
         }) {
             FeatureButton(
-                icon = "text_fields",
+                icon = "edit",
                 title = "Notes",
                 description = "Add simple notes"
             ) {
@@ -239,7 +240,7 @@ fun GroupContent(
                                 }
                             }
                         }
-                        LaunchedEffect(group.group!!.id) {
+                        LaunchedEffect(group) {
                             reload()
                         }
 
@@ -287,7 +288,9 @@ fun GroupContent(
                                         }
                                     )
                                 }
-                                IconButton("add", appString { newTask }) {
+                                IconButton("add", appString { newTask }, styles = {
+                                    marginRight(.5.r)
+                                }) {
                                     scope.launch {
                                         editTaskDialog(group.group!!.id!!, allCards = cards) {
                                             reload()

@@ -1,32 +1,75 @@
 package app.dialog
 
-import Strings.newCard
+import Strings
 import Styles
-import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import api
 import app.AppNavigation
-import app.group.friendsDialog
-import app.ailaai.api.*
+import app.ailaai.api.cardPeople
+import app.ailaai.api.groupCards
+import app.ailaai.api.newCard
+import app.ailaai.api.updateCard
 import app.appNav
 import app.components.FlexInput
-import appString
+import app.group.friendsDialog
 import application
-import com.queatz.db.*
+import com.queatz.db.Card
+import com.queatz.db.ConversationItem
+import com.queatz.db.Person
+import com.queatz.db.Task
 import components.GroupPhoto
 import components.GroupPhotoItem
-import components.Icon
 import components.IconButton
 import components.getConversation
+import ellipsize
 import json
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.*
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.AlignSelf
+import org.jetbrains.compose.web.css.Color
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.FlexWrap
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.alignSelf
+import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.color
+import org.jetbrains.compose.web.css.cursor
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flex
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.flexWrap
+import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.fontWeight
+import org.jetbrains.compose.web.css.gap
+import org.jetbrains.compose.web.css.maxWidth
+import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.dom.CheckboxInput
+import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Label
+import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.Text
 import r
 import tagColor
 
-suspend fun editTaskDialog(groupId: String, card: Card? = null, allCards: List<Card>? = null, onUpdated: () -> Unit) {
-    var nameValue = card?.name ?: ""
-    var descriptionValue = card?.getConversation()?.message ?: ""
+suspend fun editTaskDialog(
+    groupId: String,
+    card: Card? = null,
+    allCards: List<Card>? = null,
+    initialName: String? = null,
+    initialDescription: String? = null,
+    onUpdated: () -> Unit,
+) {
+    var nameValue = initialName ?: card?.name ?: ""
+    var descriptionValue = initialDescription ?: card?.getConversation()?.message ?: ""
     var statusValue = card?.task?.status ?: ""
     var doneValue = card?.task?.done ?: false
     var categoriesValue = card?.categories ?: emptyList<String>()
@@ -326,6 +369,8 @@ suspend fun editTaskDialog(groupId: String, card: Card? = null, allCards: List<C
                                 flex(1)
                                 opacity(.7)
                                 fontSize(.9.r)
+                                width(0.r)
+                                ellipsize()
                             }
                         }) {
                             Text(fieldName)
@@ -334,6 +379,8 @@ suspend fun editTaskDialog(groupId: String, card: Card? = null, allCards: List<C
                             style {
                                 flex(1)
                                 fontWeight("bold")
+                                width(0.r)
+                                ellipsize()
                             }
                         }) {
                             Text(fieldValue)

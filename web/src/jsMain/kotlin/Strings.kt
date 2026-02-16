@@ -135,6 +135,11 @@ object Strings {
         vn = "Nhiệm vụ mới",
         ru = "Новая задача"
     )
+    val addAsTask = Translation(
+        en = "Add as task",
+        vn = "Thêm làm nhiệm vụ",
+        ru = "Добавить как задачу"
+    )
     val addField = Translation(
         en = "Add field",
         vn = "Thêm trường",

@@ -54,7 +54,8 @@ fun GroupLayout(
                     showSearch = showSearch,
                     onShowSearch = {
                         showSearch = it
-                    }
+                    },
+                    onGroupUpdated = onGroupUpdated
                 )
             }
 

@@ -12,12 +12,14 @@ import app.ailaai.api.groupTopReactions
 import app.ailaai.api.messages
 import app.ailaai.api.messagesBefore
 import app.ailaai.api.myTopReactions
+import app.ailaai.api.updateGroup
 import app.ailaai.api.reactToMessage
 import app.ailaai.api.setMessageRating
 import app.appNav
 import app.components.FlexInput
 import app.components.LoadMore
 import app.components.LoadMoreState
+import app.dialog.editTaskDialog
 import app.dialog.replyInNewGroupDialog
 import app.group.GroupMessageBar
 import app.group.JoinGroupLayout
@@ -26,6 +28,8 @@ import app.messaages.MessageItem
 import app.messaages.preview
 import app.rating.setRatingDialog
 import app.reaction.addReactionDialog
+import com.queatz.db.Group
+import com.queatz.db.GroupContent as GroupContentModel
 import com.queatz.db.GroupExtended
 import com.queatz.db.GroupMessagesConfig
 import com.queatz.db.MemberAndPerson
@@ -36,8 +40,10 @@ import com.queatz.db.Reaction
 import components.IconButton
 import components.Loading
 import components.ProfilePhoto
+import json
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
 import kotlin.time.Instant
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.marginLeft
@@ -53,6 +59,7 @@ fun GroupMessages(
     group: GroupExtended,
     showSearch: Boolean,
     onShowSearch: (Boolean) -> Unit,
+    onGroupUpdated: () -> Unit,
     inCoverPage: Boolean = false,
 ) {
     val nav = appNav
@@ -331,6 +338,31 @@ fun GroupMessages(
                         scope.launch {
                             replyInNewGroupDialog(title, scope, group, message) {
                                 nav.navigate(AppNavigation.Group(it.id!!))
+                            }
+                        }
+                    },
+                    onAddTask = {
+                        scope.launch {
+                            val lines = message.text.orEmpty().lines()
+                            val initialName = lines.firstOrNull()?.notBlank
+                            val initialDescription = message.text.takeIf { lines.size > 1 }?.notBlank
+                            editTaskDialog(
+                                groupId = group.group!!.id!!,
+                                initialName = initialName,
+                                initialDescription = initialDescription
+                            ) {
+                                if (group.group?.content == null) {
+                                    scope.launch {
+                                        api.updateGroup(
+                                            group.group!!.id!!,
+                                            Group(content = json.encodeToString<GroupContentModel>(GroupContentModel.Tasks()))
+                                        ) {
+                                            onGroupUpdated()
+                                        }
+                                    }
+                                } else {
+                                    onGroupUpdated()
+                                }
                             }
                         }
                     }

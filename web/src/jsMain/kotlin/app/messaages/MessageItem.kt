@@ -66,6 +66,7 @@ fun MessageItem(
     onReact: () -> Unit,
     onRate: (Int?) -> Unit,
     onReplyInNewGroup: () -> Unit,
+    onAddTask: () -> Unit,
     onUpdated: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -166,6 +167,10 @@ fun MessageItem(
 
                 item(appString { replyInNewGroup }) {
                     onReplyInNewGroup()
+                }
+
+                item(appString { addAsTask }) {
+                    onAddTask()
                 }
 
                 if (message.member == myMember?.member?.id) {

@@ -2,13 +2,7 @@ package app.group
 
 import GroupMessages
 import StyleManager
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import api
 import app.AppStyleSheet
 import app.FullPageLayout
@@ -48,10 +42,11 @@ fun GroupCoverPage(groupId: String, onGroupLoaded: (GroupExtended) -> Unit) {
     var showSearch by remember {
         mutableStateOf(false)
     }
+    var refresh by remember { mutableIntStateOf(0) }
 
     application.background(group?.group?.background?.let { "$baseUrl$it" })
 
-    LaunchedEffect(groupId) {
+    LaunchedEffect(groupId, refresh) {
         api.group(
             groupId,
             onError = {
@@ -88,6 +83,9 @@ fun GroupCoverPage(groupId: String, onGroupLoaded: (GroupExtended) -> Unit) {
                         showSearch = showSearch,
                         onShowSearch = { newShowSearch ->
                             showSearch = newShowSearch
+                        },
+                        onGroupUpdated = {
+                            refresh++
                         },
                         inCoverPage = true
                     )

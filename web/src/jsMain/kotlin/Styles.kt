@@ -144,7 +144,7 @@ class MainStyleSheet : StyleSheet() {
     val sidePane by style {
         flexShrink(0)
         width(24.r)
-        maxWidth(100.vw)
+        maxWidth(50.vw)
     }
 
     // Data class for dark theme colors
