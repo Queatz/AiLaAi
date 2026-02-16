@@ -158,6 +158,7 @@ fun ScriptsNavPage(
             value = searchQuery,
             onChange = { searchQuery = it },
             defaultMargins = true,
+            autoFocus = true,
             onDismissRequest = {
                 searchQuery = ""
                 showSearch = false

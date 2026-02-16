@@ -453,7 +453,7 @@ fun GroupMessageBar(
                     ) {
                         audioIconRef?.getBoundingClientRect()?.let { rect ->
                             audioMenuTarget = rect
-                            showAudioMenu = true
+                            showAudioMenu = !showAudioMenu
                         }
                     }
                     if (showAudioMenu && audioMenuTarget != null) {

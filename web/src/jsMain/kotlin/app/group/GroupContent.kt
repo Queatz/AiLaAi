@@ -312,7 +312,11 @@ fun GroupContent(
                                     marginRight(.5.r)
                                 }) {
                                     scope.launch {
-                                        editTaskDialog(group.group!!.id!!, allCards = cards) {
+                                        editTaskDialog(
+                                            groupId = group.group!!.id!!,
+                                            allCards = cards,
+                                            initialName = search
+                                        ) {
                                             reload()
                                         }
                                     }
