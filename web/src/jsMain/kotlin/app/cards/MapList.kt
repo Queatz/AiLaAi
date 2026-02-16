@@ -29,6 +29,7 @@ fun MapList(
     showPhoto: Boolean = true,
     people: List<Person>? = null,
     groupId: String? = null,
+    isOnSurface: Boolean = false,
     onUpdated: (() -> Unit)? = null,
     styles: (StyleScope.() -> Unit)? = null,
     onSelected: (Card) -> Unit
@@ -61,7 +62,12 @@ fun MapList(
                         width(0.px)
                     }
                 }) {
-                    CardListItem(card, showPhoto = showPhoto, people = people) {
+                    CardListItem(
+                        card = card,
+                        showPhoto = showPhoto,
+                        people = people,
+                        isOnSurface = isOnSurface,
+                    ) {
                         onSelected(card)
                     }
                 }

@@ -35,6 +35,7 @@ fun CardListItem(
     card: Card,
     showPhoto: Boolean = true,
     people: List<Person>? = null,
+    isOnSurface: Boolean = false,
     onClick: () -> Unit,
 ) {
     var loadedPeople by remember { mutableStateOf(emptyList<Person>()) }
@@ -72,6 +73,10 @@ fun CardListItem(
         }
         Div({
             classes(AppStyles.groupItem)
+
+            if (isOnSurface) {
+                classes(AppStyles.groupItemOnSurface)
+            }
 
             focusable()
 

@@ -26,6 +26,8 @@ import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.maxHeight
+import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.Div
@@ -95,6 +97,8 @@ suspend fun friendsDialog(
             style {
                 display(DisplayStyle.Flex)
                 flexDirection(FlexDirection.Column)
+                overflowY("auto")
+                maxHeight(16.r)
             }
         }) {
             if (isLoading) {

@@ -144,6 +144,7 @@ suspend fun editTaskDialog(
                         friendsDialog(
                             title = application.appString { Strings.collaborators },
                             preselect = collaborators.toSet(),
+                            confirmButton = application.appString { confirm },
                             multiple = true
                         ) { selected ->
                             val ownerId = card?.person ?: application.me.value?.id

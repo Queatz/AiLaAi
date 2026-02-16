@@ -377,11 +377,9 @@ class AppStyleSheet : StyleSheet() {
     }
 
     val groupItemOnBackground by style {
-
     }
 
     val groupItemDefault by style {
-
     }
 
     val groupItemCard by style {
