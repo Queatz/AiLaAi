@@ -24,7 +24,7 @@ import org.jetbrains.compose.web.dom.*
 import r
 import tagColor
 
-suspend fun editTaskDialog(groupId: String, card: Card? = null, onUpdated: () -> Unit) {
+suspend fun editTaskDialog(groupId: String, card: Card? = null, allCards: List<Card>? = null, onUpdated: () -> Unit) {
     var nameValue = card?.name ?: ""
     var descriptionValue = card?.getConversation()?.message ?: ""
     var statusValue = card?.task?.status ?: ""
@@ -63,7 +63,8 @@ suspend fun editTaskDialog(groupId: String, card: Card? = null, onUpdated: () ->
         LaunchedEffect(card?.id) {
             card?.id?.let { id ->
                 api.cardPeople(id) {
-                    people = it
+                    // We need to exclude the card owner here
+                    people = it.filter { it.id!! in (card.collaborators ?: emptyList()) }
                 }
             }
         }
@@ -103,13 +104,7 @@ suspend fun editTaskDialog(groupId: String, card: Card? = null, onUpdated: () ->
                             val ownerId = card?.person ?: application.me.value?.id
                             collaborators = selected.mapNotNull { it.id }.filter { it != ownerId }
                             collaboratorsValue = collaborators
-
-                            val owner = people.find { it.id == ownerId } ?: application.me.value
-                            people = if (owner != null && selected.none { it.id == ownerId }) {
-                                listOf(owner) + selected.toList()
-                            } else {
-                                selected.toList()
-                            }
+                            people = selected.toList()
                         }
                     }
                 }
@@ -162,18 +157,25 @@ suspend fun editTaskDialog(groupId: String, card: Card? = null, onUpdated: () ->
                     }
                     onClick {
                         scope.launch {
-                            api.groupCards(groupId) { cards ->
-                                val items = cards.mapNotNull { it.task?.status }.distinct().sorted()
-                                scope.launch {
-                                    val newStatus = inputSelectDialog(
-                                        confirmButton = application.appString { okay },
-                                        placeholder = application.appString { Strings.status },
-                                        items = items,
-                                        defaultValue = status
-                                    )
-                                    if (newStatus != null) {
-                                        status = newStatus
-                                        statusValue = newStatus
+                            val select: suspend (List<String>) -> Unit = { items ->
+                                val newStatus = inputSelectDialog(
+                                    confirmButton = application.appString { okay },
+                                    placeholder = application.appString { Strings.status },
+                                    items = items
+                                )
+                                if (newStatus != null) {
+                                    status = newStatus
+                                    statusValue = newStatus
+                                }
+                            }
+
+                            if (allCards != null) {
+                                select(allCards.mapNotNull { it.task?.status }.filter { it.isNotBlank() }.distinct().sorted())
+                            } else {
+                                api.groupCards(groupId) { cards ->
+                                    val items = cards.mapNotNull { it.task?.status }.filter { it.isNotBlank() }.distinct().sorted()
+                                    scope.launch {
+                                        select(items)
                                     }
                                 }
                             }
@@ -229,17 +231,25 @@ suspend fun editTaskDialog(groupId: String, card: Card? = null, onUpdated: () ->
                     classes(Styles.outlineButton, Styles.outlineButtonSmall)
                     onClick {
                         scope.launch {
-                            api.groupCards(groupId) { cards ->
-                                val items = cards.flatMap { it.categories.orEmpty() }.distinct().sorted()
-                                scope.launch {
-                                    val newCategory = inputSelectDialog(
-                                        confirmButton = application.appString { okay },
-                                        placeholder = application.appString { Strings.category },
-                                        items = items
-                                    )
-                                    if (newCategory != null && newCategory !in categories) {
-                                        categories = categories + newCategory
-                                        categoriesValue = categories
+                            val select: suspend (List<String>) -> Unit = { items ->
+                                val newCategory = inputSelectDialog(
+                                    confirmButton = application.appString { okay },
+                                    placeholder = application.appString { Strings.category },
+                                    items = items
+                                )
+                                if (newCategory != null && newCategory !in categories) {
+                                    categories = categories + newCategory
+                                    categoriesValue = categories
+                                }
+                            }
+
+                            if (allCards != null) {
+                                select(allCards.flatMap { it.categories.orEmpty() }.filter { it.isNotBlank() }.distinct().sorted())
+                            } else {
+                                api.groupCards(groupId) { cards ->
+                                    val items = cards.flatMap { it.categories.orEmpty() }.filter { it.isNotBlank() }.distinct().sorted()
+                                    scope.launch {
+                                        select(items)
                                     }
                                 }
                             }

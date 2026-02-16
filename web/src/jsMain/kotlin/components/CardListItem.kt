@@ -1,8 +1,9 @@
 package components
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import api
 import app.AppStyles
+import app.ailaai.api.cardPeople
 import appString
 import com.queatz.db.Card
 import com.queatz.db.Person
@@ -36,6 +37,17 @@ fun CardListItem(
     people: List<Person>? = null,
     onClick: () -> Unit,
 ) {
+    var loadedPeople by remember { mutableStateOf(emptyList<Person>()) }
+
+    LaunchedEffect(card.id, people) {
+        val id = card.id ?: return@LaunchedEffect
+        if (card.collaborators.orEmpty().any { cid -> people?.none { it.id == cid } != false }) {
+            api.cardPeople(id) {
+                loadedPeople = it
+            }
+        }
+    }
+
     Div({
         style {
             display(DisplayStyle.Flex)
@@ -75,11 +87,8 @@ fun CardListItem(
 
             if (collaborators.isNotEmpty()) {
                 val items = buildList {
-                    val ownerPerson = people?.find { it.id == card.person }
-                    add(GroupPhotoItem(ownerPerson?.photo ?: card.photo, ownerPerson?.name ?: card.name))
-
                     collaborators.forEach { id ->
-                        val p = people?.find { it.id == id }
+                        val p = people?.find { it.id == id } ?: loadedPeople.find { it.id == id }
                         add(GroupPhotoItem(p?.photo, p?.name))
                     }
                 }

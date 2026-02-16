@@ -289,7 +289,7 @@ fun GroupContent(
                                 }
                                 IconButton("add", appString { newTask }) {
                                     scope.launch {
-                                        editTaskDialog(group.group!!.id!!) {
+                                        editTaskDialog(group.group!!.id!!, allCards = cards) {
                                             reload()
                                         }
                                     }
@@ -301,6 +301,7 @@ fun GroupContent(
                             } else {
                                 MapList(
                                     cards = filteredCards,
+                                    allCards = cards,
                                     showPhoto = false,
                                     people = group.members?.mapNotNull { it.person },
                                     groupId = group.group!!.id!!,
@@ -310,7 +311,7 @@ fun GroupContent(
                                     }
                                 ) { card ->
                                     scope.launch {
-                                        editTaskDialog(group.group!!.id!!, card) {
+                                        editTaskDialog(group.group!!.id!!, card, cards) {
                                             reload()
                                         }
                                     }

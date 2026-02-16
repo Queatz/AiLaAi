@@ -25,6 +25,7 @@ import web.cssom.TextDecoration
 @Composable
 fun MapList(
     cards: List<Card>,
+    allCards: List<Card>? = null,
     showPhoto: Boolean = true,
     people: List<Person>? = null,
     groupId: String? = null,
@@ -77,27 +78,22 @@ fun MapList(
                         }
                         onClick {
                             it.stopPropagation()
-                            if (groupId != null && onUpdated != null) {
+                            if (onUpdated != null) {
+                                val items = (allCards ?: cards).mapNotNull { it.task?.status }.filter { it.isNotBlank() }.distinct().sorted()
                                 scope.launch {
-                                    api.groupCards(groupId) { cards ->
-                                        val items = cards.mapNotNull { it.task?.status }.distinct().sorted()
-                                        scope.launch {
-                                            val newStatus = inputSelectDialog(
-                                                confirmButton = application.appString { okay },
-                                                placeholder = application.appString { Strings.status },
-                                                items = items,
-                                                defaultValue = status
-                                            )
-                                            if (newStatus != null && newStatus != status) {
-                                                val updatedCard = card.apply {
-                                                    task = (task ?: Task()).apply {
-                                                        this.status = newStatus
-                                                    }
-                                                }
-                                                api.updateCard(card.id!!, updatedCard) {
-                                                    onUpdated()
-                                                }
+                                    val newStatus = inputSelectDialog(
+                                        confirmButton = application.appString { okay },
+                                        placeholder = application.appString { Strings.status },
+                                        items = items
+                                    )
+                                    if (newStatus != null && newStatus != status) {
+                                        val updatedCard = card.apply {
+                                            task = (task ?: Task()).apply {
+                                                this.status = newStatus
                                             }
+                                        }
+                                        api.updateCard(card.id!!, updatedCard) {
+                                            onUpdated()
                                         }
                                     }
                                 }
