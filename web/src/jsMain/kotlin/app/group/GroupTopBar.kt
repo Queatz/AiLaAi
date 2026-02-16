@@ -386,6 +386,43 @@ fun GroupTopBar(
         }
     }
 
+    fun showBackgroundOpacity() {
+        scope.launch {
+            val groupConfig = group.group?.config ?: GroupConfig()
+
+            val result = dialog(
+                application.appString { backgroundOpacity },
+                application.appString { update },
+                closeStr
+            ) {
+                var backgroundOpacity by remember {
+                    mutableStateOf(group.group?.config?.backgroundOpacity ?: 1f)
+                }
+
+                LaunchedEffect(backgroundOpacity) {
+                    groupConfig.backgroundOpacity = backgroundOpacity
+                }
+
+                RangeInput(
+                    backgroundOpacity * 100f,
+                    min = 0,
+                    max = 100,
+                    step = .1f
+                ) {
+                    onInput {
+                        backgroundOpacity = it.value!!.toFloat() / 100f
+                    }
+                }
+            }
+
+            if (result == true) {
+                api.updateGroup(group.group!!.id!!, Group(config = groupConfig)) {
+                    onGroupUpdated()
+                }
+            }
+        }
+    }
+
     fun showSettings() {
         scope.launch {
             val groupConfig = group.group?.config ?: GroupConfig()
@@ -698,9 +735,9 @@ fun GroupTopBar(
                     item(appString { manage }) {
                         scope.launch {
                             dialog(
-                                null,
-                                closeStr,
-                                null
+                                title = null,
+                                confirmButton = closeStr,
+                                cancelButton = null
                             ) {
                                 InlineMenu({
                                     it(true)
@@ -719,6 +756,11 @@ fun GroupTopBar(
                                     }
                                     item(appString { settings }) {
                                         showSettings()
+                                    }
+                                    if (group.group?.background.isNullOrBlank().not()) {
+                                        item(appString { backgroundOpacity }) {
+                                            showBackgroundOpacity()
+                                        }
                                     }
                                 }
                             }

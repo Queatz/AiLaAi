@@ -44,7 +44,10 @@ fun GroupCoverPage(groupId: String, onGroupLoaded: (GroupExtended) -> Unit) {
     }
     var refresh by remember { mutableIntStateOf(0) }
 
-    application.background(group?.group?.background?.let { "$baseUrl$it" })
+    application.background(
+        group?.group?.background?.let { "$baseUrl$it" },
+        group?.group?.config?.backgroundOpacity ?: 1f
+    )
 
     LaunchedEffect(groupId, refresh) {
         api.group(

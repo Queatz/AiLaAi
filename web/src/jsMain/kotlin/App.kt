@@ -17,8 +17,6 @@ import org.w3c.dom.set
 
 val application by lazy { Application() }
 
-private class Background(val url: String)
-
 enum class AppLayout {
     Default,
     Kiosk
@@ -26,12 +24,12 @@ enum class AppLayout {
 
 class Application {
     private val _effects = MutableStateFlow<List<List<Effect>>>(emptyList())
-    private val _background = MutableStateFlow<List<Background>>(emptyList())
+    private val _background = MutableStateFlow<List<Pair<String, Float>>>(emptyList())
 
     val me = MutableStateFlow<Person?>(null)
     val layout = MutableStateFlow(localStorage["layout"]?.let { AppLayout.valueOf(it) } ?: AppLayout.Default)
     val effects = _effects.map { it.lastOrNull() }
-    val background = _background.map { it.lastOrNull()?.url }
+    val background = _background.map { it.lastOrNull() }
     val bearerToken = MutableStateFlow<String?>(null)
 
     var navPage: NavPage = NavPage.Groups
@@ -120,10 +118,10 @@ class Application {
     }
 
     @Composable
-    fun background(url: String?) {
+    fun background(url: String?, alpha: Float = 1f) {
         if (url != null) {
-            val value = Background(url)
-            DisposableEffect(url) {
+            val value = url to alpha
+            DisposableEffect(url, alpha) {
                 _background.update {
                     it + value
                 }

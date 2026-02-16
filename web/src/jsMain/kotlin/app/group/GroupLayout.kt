@@ -18,7 +18,10 @@ fun GroupLayout(
     var showSearch by remember(group.group?.id) { mutableStateOf(false) }
     var showSidePanel by remember(group.group?.id) { mutableStateOf(!group.group?.content.isNullOrBlank()) }
 
-    application.background(group.group?.background?.let { "$baseUrl$it" })
+    application.background(
+        group.group?.background?.let { "$baseUrl$it" },
+        group.group?.config?.backgroundOpacity ?: 1f
+    )
     application.effects(group.group?.config?.effects?.let { json.decodeFromString(it) })
 
     LaunchedEffect(group.group?.id) {

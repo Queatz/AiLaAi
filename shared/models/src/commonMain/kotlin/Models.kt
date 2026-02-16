@@ -204,6 +204,7 @@ data class GroupConfig(
     var messages: GroupMessagesConfig? = null,
     var edits: GroupEditsConfig? = null,
     var effects: String? = null,
+    var backgroundOpacity: Float? = null,
 )
 
 @Serializable

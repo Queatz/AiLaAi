@@ -57,6 +57,8 @@ import web.blob.Blob
 import web.events.EventHandler
 import web.navigator.navigator
 import Styles
+import baseUrl
+import com.queatz.db.StoryContent
 import format
 import format1Decimal
 import org.jetbrains.compose.web.css.AlignItems
@@ -65,9 +67,17 @@ import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.px
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.dom.Audio
+import org.jetbrains.compose.web.dom.Source
 import pad
+import stories.StoryStyles
+import toGameTileBlob
 import web.blob.bytes
+import web.cssom.HtmlAttributes.Companion.part
 import web.mediadevices.getUserMedia
 import web.mediarecorder.BlobEvent
 import web.mediarecorder.MediaRecorder
@@ -267,45 +277,74 @@ fun GroupMessageBar(
                 // Recording controls
                 Div({ style {
                     display(DisplayStyle.Flex)
-                    alignItems(AlignItems.Center)
+                    alignItems(AlignItems.FlexStart)
+                    flexDirection(FlexDirection.Column)
                     gap(1.r)
                 } }) {
                     // Record/stop button
-                    IconButton(
-                        name = if (!isRecording) "mic" else "stop",
-                        title = if (!isRecording) "Start recording" else "Stop recording",
-                        background = isRecording,
-                        backgroundColor = Styles.colors.red,
-                        styles = { fontSize(32.px) },
-                        onClick = {
-                            if (!isRecording) {
-                                scope.launch {
-                                    val constraints = MediaStreamConstraints(
-                                        audio = MediaTrackConstraints(),
-                                        video = null
-                                    )
-                                    val stream: MediaStream = navigator.mediaDevices.getUserMedia(constraints)
-                                    val rec = MediaRecorder(stream)
-                                    recorder = rec
-                                    rec.ondataavailable = EventHandler { event: BlobEvent ->
-                                        recordedFile.value = File(arrayOf(event.data), "recording.webm")
-                                    }
-                                    rec.start()
-                                    isRecording = true
-                                    // Start timer
-                                    startTime = Date.now()
-                                }
-                            } else {
-                                recorder?.stop()
-                                isRecording = false
+                    Div(
+                        attrs = {
+                            style {
+                                display(DisplayStyle.Flex)
+                                alignItems(AlignItems.Center)
+                                gap(1.r)
                             }
                         }
-                    )
-                    // Timer display
-                    if (isRecording) {
-                        Text("${(elapsedSecs / 60)}:${(elapsedSecs % 60).pad()}")
-                    } else {
-                        Text("Click to record")
+                    ) {
+                        IconButton(
+                            name = if (!isRecording) "mic" else "stop",
+                            // todo: translate
+                            title = if (!isRecording) "Start recording" else "Stop recording",
+                            background = isRecording,
+                            backgroundColor = Styles.colors.red,
+                            styles = { fontSize(32.px) },
+                            onClick = {
+                                if (!isRecording) {
+                                    recordedFile.value = null
+                                    scope.launch {
+                                        val constraints = MediaStreamConstraints(
+                                            audio = MediaTrackConstraints(),
+                                            video = null
+                                        )
+                                        val stream: MediaStream = navigator.mediaDevices.getUserMedia(constraints)
+                                        val rec = MediaRecorder(stream)
+                                        recorder = rec
+                                        rec.ondataavailable = EventHandler { event: BlobEvent ->
+                                            recordedFile.value = File(arrayOf(event.data), "recording.webm")
+                                        }
+                                        rec.start()
+                                        isRecording = true
+                                        // Start timer
+                                        startTime = Date.now()
+                                    }
+                                } else {
+                                    recorder?.stop()
+                                    recorder = null
+                                    isRecording = false
+                                }
+                            }
+                        )
+                        // Timer display
+                        if (isRecording) {
+                            Text("${(elapsedSecs / 60)}:${(elapsedSecs % 60).pad()}")
+                        } else {
+                            // todo: translate
+                            Text("Click to record")
+                        }
+                    }
+                    if (recordedFile.value != null) {
+                        Audio({
+                            classes(StoryStyles.contentAudio)
+                            attr("controls", "")
+                            style {
+                                width(100.percent)
+                            }
+                        }) {
+                            Source({
+                                attr("src", org.w3c.dom.url.URL.createObjectURL(recordedFile.value!!))
+                                attr("type", "audio/mp4")
+                            })
+                        }
                     }
                 }
             }

@@ -15,6 +15,7 @@ import com.queatz.db.RainEffect
 import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.backgroundImage
 import org.jetbrains.compose.web.css.left
+import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.s
 import org.jetbrains.compose.web.css.vw
 import org.jetbrains.compose.web.dom.Div
@@ -29,15 +30,15 @@ fun Background(attrs: AttrsScope<HTMLDivElement>.() -> Unit = {}, content: @Comp
     var loaded by remember { mutableStateOf(false) }
     var preload by remember { mutableStateOf<Image?>(null) }
 
-    LaunchedEffect(background) {
+    LaunchedEffect(background?.first) {
         loaded = false
-        background?.let { background ->
+        background?.first?.let { backgroundUrl ->
             preload = Image().apply {
                 addEventListener("load", {
                     loaded = true
                     preload = null
                 })
-                src = background
+                src = backgroundUrl
             }
         }
     }
@@ -80,7 +81,8 @@ fun Background(attrs: AttrsScope<HTMLDivElement>.() -> Unit = {}, content: @Comp
 
             style {
                 if (background != null && loaded) {
-                    backgroundImage("url($background)")
+                    backgroundImage("url(${background!!.first})")
+                    opacity(background!!.second)
                 }
             }
         }) {

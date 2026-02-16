@@ -2218,6 +2218,11 @@ object Strings {
         vn = "Nhiều",
         ru = "Множество"
     )
+    val backgroundOpacity = Translation(
+        en = "Background opacity",
+        vn = "Độ mờ của nền",
+        ru = "Прозрачность фона"
+    )
 }
 
 /**

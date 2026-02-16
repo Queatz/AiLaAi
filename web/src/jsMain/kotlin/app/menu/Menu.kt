@@ -78,8 +78,9 @@ class MenuScope(val onDismissRequest: () -> Unit) {
                             opacity(0.5)
                             fontWeight("bold")
                             display(DisplayStyle.Flex)
-                            width(24.px)
+                            minWidth(24.px)
                             height(24.px)
+                            marginLeft(1.r)
                             alignItems(AlignItems.Center)
                             justifyContent(JustifyContent.Center)
                         }

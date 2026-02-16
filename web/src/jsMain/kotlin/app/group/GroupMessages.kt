@@ -175,7 +175,10 @@ fun GroupMessages(
 
             if (menuTarget != null) {
                 Menu({ menuTarget = null }, menuTarget!!) {
-                    item(appString { reaction }) {
+                    item(
+                        appString { reaction },
+                        textIcon = searchByReaction.notBlank
+                    ) {
                         scope.launch {
                             val reaction = addReactionDialog(
                                 quickReactions = topGroupReactions + myTopReactions,
@@ -187,7 +190,10 @@ fun GroupMessages(
                             }
                         }
                     }
-                    item(appString { rating }) {
+                    item(
+                        appString { rating },
+                        textIcon = searchByRating.notBlank?.let { if (it.startsWith("-")) it else "+$it" }
+                    ) {
                         scope.launch {
                             val rating = setRatingDialog(
                                 confirmButton = application.appString { this.search },
