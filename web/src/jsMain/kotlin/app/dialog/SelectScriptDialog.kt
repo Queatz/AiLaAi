@@ -135,6 +135,7 @@ suspend fun selectScriptDialog(
 
                                 onClick {
                                     scope.launch {
+                                        // todo: do we really want this
                                         val scriptData = json.encodeToString(ScriptData(script = script.id))
                                         onScriptSelected(script.id!!, scriptData)
                                         resolve(false)

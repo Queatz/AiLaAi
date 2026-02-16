@@ -1186,6 +1186,11 @@ object Strings {
         vn = "Trang",
         ru = "Страницы"
     )
+    val card = Translation(
+        en = "Page",
+        vn = "Trang",
+        ru = "Страница"
+    )
     val friends = Translation(
         en = "Friends",
         vn = "Bạn bè",

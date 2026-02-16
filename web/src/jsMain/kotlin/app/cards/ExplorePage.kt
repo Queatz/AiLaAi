@@ -1,6 +1,7 @@
 package app.cards
 
 import LocalConfiguration
+import Strings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,6 +29,7 @@ import app.dialog.dialog
 import app.dialog.editFormDialog
 import app.dialog.inputDialog
 import app.dialog.searchDialog
+import app.dialog.selectCardDialog
 import app.group.GroupInfo
 import app.group.GroupItem
 import app.menu.InlineMenu
@@ -287,35 +289,8 @@ fun ExplorePage(
 
     fun moveToPage() {
         scope.launch {
-            val result = searchDialog(
-                configuration = configuration,
-                title = inAPage,
-                confirmButton = cancel,
-                load = {
-                    var cards = emptyList<Card>()
-                    api.myCollaborations {
-                        cards = it
-                    }
-                    cards.sortedByDescending {
-                        saves.cards.value.any { save -> it.id == save.id }
-                    }
-                },
-                filter = { it, value ->
-                    (it.name?.contains(value, true) ?: false)
-                }
-            ) { card, resolve ->
-                app.nav.CardItem(
-                    card = card,
-                    scroll = false,
-                    selected = false,
-                    saved = saves.cards.value.any { save -> save.id == card.id },
-                    published = card.active == true
-                ) {
-                    if (!it) {
-                        moveToPage(card.id!!)
-                        resolve(false)
-                    }
-                }
+            selectCardDialog(configuration, title = inAPage) {
+                moveToPage(it.id!!)
             }
         }
     }

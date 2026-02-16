@@ -218,7 +218,7 @@ class AppStyleSheet : StyleSheet() {
     val menu by style {
         padding(.5.r)
         backgroundColor(Styles.colors.white)
-        borderRadius(1.r)
+        borderRadius(1.5.r)
         property("box-shadow", "2px 2px 16px rgba(0, 0, 0, 0.125)")
         position(Position.Fixed)
         property("z-index", "102")

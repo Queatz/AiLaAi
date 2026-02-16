@@ -16,7 +16,7 @@ fun GroupLayout(
         mutableStateOf(false)
     }
     var showSearch by remember(group.group?.id) { mutableStateOf(false) }
-    var showSidePanel by remember { mutableStateOf(false) }
+    var showSidePanel by remember(group.group?.id) { mutableStateOf(!group.group?.content.isNullOrBlank()) }
 
     application.background(group.group?.background?.let { "$baseUrl$it" })
     application.effects(group.group?.config?.effects?.let { json.decodeFromString(it) })
@@ -77,7 +77,9 @@ fun GroupLayout(
         }
 
         if (showSidePanel) {
-            GroupSidePanel(group)
+            GroupSidePanel(group) {
+                onGroupUpdated()
+            }
         }
     }
 }

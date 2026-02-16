@@ -160,10 +160,16 @@ class Card(
     var active: Boolean? = null,
     var level: Int? = null,
     var size: Double? = null,
+    var task: Task? = null,
 
     // Transient from db
     var cardCount: Int? = null
 ) : Model()
+
+@Serializable
+class Task(
+    var fields: Map<String, String>? = null,
+)
 
 @Serializable
 class Reaction(
@@ -187,7 +193,8 @@ class Group(
     var categories: List<String>? = null,
     var geo: List<Double>? = null,
     var open: Boolean? = null,
-    var config: GroupConfig? = null
+    var config: GroupConfig? = null,
+    var content: String? = null,
 ) : Model()
 
 @Serializable
@@ -196,6 +203,34 @@ data class GroupConfig(
     var edits: GroupEditsConfig? = null,
     var effects: String? = null,
 )
+
+@Serializable
+sealed class GroupContent {
+    @Serializable
+    data object None : GroupContent()
+
+    @Serializable
+    data class Text(val text: String? = null) : GroupContent()
+
+    @Serializable
+    data class Tasks(
+        val fields: Map<String, String>? = null,
+    ) : GroupContent()
+
+    @Serializable
+    data class Card(
+        val cardId: String? = null,
+    ) : GroupContent()
+
+    @Serializable
+    data class Script(
+        val scriptId: String? = null,
+        val data: String? = null,
+    ) : GroupContent()
+
+    @Serializable
+    data class Website(val url: String? = null) : GroupContent()
+}
 
 enum class PromptContext {
     Scripts,

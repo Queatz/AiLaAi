@@ -300,6 +300,10 @@ fun Route.groupRoutes() {
                         }
                     }
 
+                    if (groupUpdated.content != null) {
+                        group.content = if (groupUpdated.content == "{\"type\":\"com.queatz.db.GroupContent.None\"}") null else groupUpdated.content
+                    }
+
                     db.update(group)
                 }
             }
