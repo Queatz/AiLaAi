@@ -182,7 +182,9 @@ fun GroupContent(
                 style {
                     display(DisplayStyle.Flex)
                     flexDirection(FlexDirection.Column)
-                    height(100.percent)
+                    height(0.r)
+                    flex(1)
+                    overflow("auto")
                 }
             }) {
                 when (content) {

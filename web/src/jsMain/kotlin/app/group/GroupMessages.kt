@@ -60,6 +60,7 @@ fun GroupMessages(
     showSearch: Boolean,
     onShowSearch: (Boolean) -> Unit,
     onGroupUpdated: () -> Unit,
+    onShowSidePanel: () -> Unit = {},
     inCoverPage: Boolean = false,
 ) {
     val nav = appNav
@@ -186,7 +187,7 @@ fun GroupMessages(
                             }
                         }
                     }
-                    item(appString { reaction }) {
+                    item(appString { rating }) {
                         scope.launch {
                             val rating = setRatingDialog(
                                 confirmButton = application.appString { this.search },
@@ -358,6 +359,7 @@ fun GroupMessages(
                                             Group(content = json.encodeToString<GroupContentModel>(GroupContentModel.Tasks()))
                                         ) {
                                             onGroupUpdated()
+                                            onShowSidePanel()
                                         }
                                     }
                                 } else {

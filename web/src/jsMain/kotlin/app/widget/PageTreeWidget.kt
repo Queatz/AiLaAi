@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
+import LocalConfiguration
 import app.ailaai.api.card
 import app.ailaai.api.cardsCards
 import app.ailaai.api.newCard
@@ -20,6 +21,8 @@ import app.components.Empty
 import app.dialog.dialog
 import app.dialog.inputDialog
 import app.dialog.inputSelectDialog
+import app.dialog.selectGroupDialog
+import appText
 import app.menu.Menu
 import app.messaages.inList
 import app.components.FlexInput
@@ -28,6 +31,8 @@ import appString
 import application
 import tagColor
 import com.queatz.db.Card
+import com.queatz.db.GroupExtended
+import com.queatz.db.Task
 import com.queatz.db.Widget
 import com.queatz.widgets.widgets.PageTreeData
 import components.Icon
@@ -85,6 +90,7 @@ import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
+import Translation
 import updateWidget
 import widget
 import kotlin.random.Random
@@ -1033,45 +1039,104 @@ fun PageTreeWidget(widgetId: String) {
             }
         }
 
+        val configuration = LocalConfiguration.current
+        val selectAGroupString = appString { selectAGroup }
+
         PageTreeHeader(
             // todo: translate
             title = "Pages (${shownCards.size})"
         ) {
-            IconButton(
-                name = "download",
-                // todo: translate
-                title = "Export",
-                small = true,
-                styles = {
-                    padding(0.r)
+            Div({
+                style {
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Row)
+                    alignItems(AlignItems.Center)
                 }
-            ) {
-                scope.launch {
-                    dialog(
-                        // todo: json
-                        title = "Export",
-                        cancelButton = null,
-                        confirmButton = application.appString { close },
-                        content = {
-                            Div({
-                                style {
-                                    display(DisplayStyle.Flex)
-                                    flexDirection(FlexDirection.Column)
-                                    whiteSpace("pre-wrap")
-                                }
-                            }) {
-                                Text(
-                                    shownCardsSorted.joinToString("\n\n") {
-                                        // todo: translate
-                                        "[${data?.votes?.get(it.id!!) ?: 0}, ${data?.stages?.get(it.id!!) ?: "New"}] ${it.name}\n${
-                                            data?.tags?.get(
-                                                it.id!!
-                                            )?.joinToString(" ") { "($it)" } ?: ""}"
-                                    }
-                                )
-                            }
+            }) {
+                IconButton(
+                    name = "move_item",
+                    // todo: translate
+                    title = "Move to tasks",
+                    small = true,
+                    styles = {
+                        padding(0.r)
+                        marginRight(.5.r)
+                    }
+                ) {
+                    scope.launch {
+                        val cardsToProcess = shownCards.filter { it.task == null }
+                        if (cardsToProcess.isEmpty()) return@launch
+
+                        val group = selectGroupDialog(configuration, title = selectAGroupString) ?: return@launch
+                        val confirmed = dialog(
+                            title = "Move to tasks",
+                            confirmButton = "Confirm"
+                        ) {
+                            val pagesString = if (cardsToProcess.size == 1) "page" else "pages"
+                            appText { Translation(en = "Move ${cardsToProcess.size} $pagesString to tasks in ${group.group?.name}?") }
                         }
-                    )
+
+                        if (confirmed == true) {
+                            cardsToProcess.forEach { card ->
+                                val cardData = data ?: return@forEach
+                                val status = cardData.stages[card.id!!] ?: "New"
+                                val tags = cardData.tags[card.id!!] ?: emptyList()
+                                val votes = cardData.votes[card.id!!] ?: 0
+
+                                val updatedCard = Card().apply {
+                                    this.parent = null
+                                    this.group = group.group?.id
+                                    this.offline = false
+                                    this.equipped = false
+                                    this.geo = null
+                                    this.categories = tags
+                                    this.task = Task(
+                                        status = status,
+                                        fields = if (votes > 0) mapOf("Votes" to votes.toString()) else null
+                                    )
+                                }
+                                api.updateCard(card.id!!, updatedCard)
+                            }
+                            reload()
+                        }
+                    }
+                }
+                IconButton(
+                    name = "download",
+                    // todo: translate
+                    title = "Export",
+                    small = true,
+                    styles = {
+                        padding(0.r)
+                    }
+                ) {
+                    scope.launch {
+                        dialog(
+                            // todo: json
+                            title = "Export",
+                            cancelButton = null,
+                            confirmButton = application.appString { close },
+                            content = {
+                                Div({
+                                    style {
+                                        display(DisplayStyle.Flex)
+                                        flexDirection(FlexDirection.Column)
+                                        whiteSpace("pre-wrap")
+                                    }
+                                }) {
+                                    Text(
+                                        shownCardsSorted.joinToString("\n\n") {
+                                            // todo: translate
+                                            "[${data?.votes?.get(it.id!!) ?: 0}, ${data?.stages?.get(it.id!!) ?: "New"}] ${it.name}\n${
+                                                data?.tags?.get(
+                                                    it.id!!
+                                                )?.joinToString(" ") { "($it)" } ?: ""}"
+                                        }
+                                    )
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }

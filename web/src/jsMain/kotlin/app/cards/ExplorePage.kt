@@ -30,6 +30,7 @@ import app.dialog.editFormDialog
 import app.dialog.inputDialog
 import app.dialog.searchDialog
 import app.dialog.selectCardDialog
+import app.dialog.selectGroupDialog
 import app.group.GroupInfo
 import app.group.GroupItem
 import app.menu.InlineMenu
@@ -258,31 +259,9 @@ fun ExplorePage(
 
     fun moveToGroup() {
         scope.launch {
-            val result = searchDialog(
-                configuration = configuration,
-                title = application.appString { inAGroup },
-                confirmButton = cancel,
-                load = {
-                    var groups = emptyList<GroupExtended>()
-                    api.groups {
-                        groups = it
-                    }
-                    groups
-                },
-                filter = { it, value ->
-                    (it.group?.name?.contains(value, true)
-                        ?: false) || (it.members?.any { it.person?.name?.contains(value, true) ?: false } ?: false)
-                }
-            ) { it, resolve ->
-                GroupItem(
-                    it,
-                    selectable = true,
-                    onSelected = {
-                        moveToGroup(it.group!!.id!!)
-                        resolve(false)
-                    },
-                    info = GroupInfo.LatestMessage
-                )
+            val group = selectGroupDialog(configuration)
+            if (group != null) {
+                moveToGroup(group.group!!.id!!)
             }
         }
     }

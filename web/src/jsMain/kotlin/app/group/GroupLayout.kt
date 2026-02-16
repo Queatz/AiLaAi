@@ -55,7 +55,10 @@ fun GroupLayout(
                     onShowSearch = {
                         showSearch = it
                     },
-                    onGroupUpdated = onGroupUpdated
+                    onGroupUpdated = onGroupUpdated,
+                    onShowSidePanel = {
+                        showSidePanel = true
+                    }
                 )
             }
 
