@@ -33,17 +33,22 @@ import components.Markdown
 import components.SearchField
 import json
 import kotlinx.browser.window
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.w3c.dom.HTMLIFrameElement
 import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.flexShrink
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
@@ -54,10 +59,12 @@ import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Iframe
+import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import r
 import saves
 import stories.StoryContents
+import tagColor
 import web.cssom.HtmlAttributes.Companion.list
 import com.queatz.db.GroupContent as GroupContentModel
 
@@ -225,7 +232,8 @@ fun GroupContent(
                                 onClick { editing = true }
                             }) {
                                 if (content.text.isNullOrBlank()) {
-                                    Empty { Text("No text.") }
+                                    // todo: translate
+                                    Empty { Text("No notes.") }
                                 } else {
                                     Markdown(content.text!!)
                                 }
@@ -250,6 +258,7 @@ fun GroupContent(
                             Loading()
                         } else {
                             var search by remember { mutableStateOf("") }
+                            var isSearchFocused by remember { mutableStateOf(false) }
                             val filteredCards = remember(cards, search) {
                                 val list = if (search.isBlank()) cards!! else cards!!.filter {
                                     it.name?.contains(search, ignoreCase = true) == true ||
@@ -287,6 +296,15 @@ fun GroupContent(
                                         placeholder = appString { this.search },
                                         onDismissRequest = {
                                             search = ""
+                                        },
+                                        onFocus = {
+                                            isSearchFocused = true
+                                        },
+                                        onBlur = {
+                                            scope.launch {
+                                                delay(200)
+                                                isSearchFocused = false
+                                            }
                                         }
                                     )
                                 }
@@ -296,6 +314,62 @@ fun GroupContent(
                                     scope.launch {
                                         editTaskDialog(group.group!!.id!!, allCards = cards) {
                                             reload()
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (isSearchFocused) {
+                                val statuses = remember(cards) {
+                                    cards!!.mapNotNull { it.task?.status }.filter { it.isNotBlank() }.distinct().sorted()
+                                }
+                                val categories = remember(cards) {
+                                    cards!!.flatMap { it.categories.orEmpty() }.filter { it.isNotBlank() }.distinct().sorted()
+                                }
+
+                                if (statuses.isNotEmpty() || categories.isNotEmpty()) {
+                                    Div({
+                                        style {
+                                            display(DisplayStyle.Flex)
+                                            flexDirection(FlexDirection.Row)
+                                            overflow("auto")
+                                            gap(.5.r)
+                                            marginTop(.5.r)
+                                            flexShrink(0)
+                                            padding(0.5.r, 0.r)
+                                        }
+                                    }) {
+                                        statuses.forEach { status ->
+                                            Span({
+                                                classes(Styles.button, Styles.buttonSmall)
+                                                style {
+                                                    backgroundColor(tagColor(status))
+                                                    color(Color.white)
+                                                    flexShrink(0)
+                                                }
+                                                onMouseDown { it.preventDefault() }
+                                                onClick {
+                                                    search = status
+                                                }
+                                            }) {
+                                                Text(status)
+                                            }
+                                        }
+                                        categories.forEach { category ->
+                                            Span({
+                                                classes(Styles.button, Styles.buttonSmall)
+                                                style {
+                                                    backgroundColor(tagColor(category))
+                                                    color(Color.white)
+                                                    flexShrink(0)
+                                                }
+                                                onMouseDown { it.preventDefault() }
+                                                onClick {
+                                                    search = category
+                                                }
+                                            }) {
+                                                Text(category)
+                                            }
                                         }
                                     }
                                 }

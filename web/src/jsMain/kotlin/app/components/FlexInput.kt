@@ -107,6 +107,8 @@ fun FlexInput(
     // Action handlers
     onSubmit: suspend () -> Boolean = { false },
     onDismissRequest: () -> Unit = {},
+    onFocus: () -> Unit = {},
+    onBlur: () -> Unit = {},
     onPhotoFiles: (suspend (List<File>) -> Unit)? = null,
     onPhotos: (suspend (List<Triple<String, Int?, Int?>>) -> Unit)? = null,
     // Button configuration
@@ -323,6 +325,14 @@ fun FlexInput(
                     onChange(it.value)
                 }
 
+                onFocus {
+                    onFocus()
+                }
+
+                onBlur {
+                    onBlur()
+                }
+
                 onChange {
                     onChange(it.value)
                 }
@@ -435,6 +445,14 @@ fun FlexInput(
                     if (autoSize) {
                         it.target.resize()
                     }
+                }
+
+                onFocus {
+                    onFocus()
+                }
+
+                onBlur {
+                    onBlur()
                 }
 
                 onChange {
