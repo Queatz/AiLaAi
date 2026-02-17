@@ -13,6 +13,7 @@ import app.ailaai.api.groupCards
 import app.cards.MapList
 import app.components.Empty
 import app.components.FlexInput
+import app.dialog.batchTasksDialog
 import app.dialog.editTaskDialog
 import app.nav.CardItem
 import appString
@@ -203,6 +204,27 @@ fun GroupContentTasks(
             ) { card ->
                 scope.launch {
                     editTaskDialog(group.group!!.id!!, card, cards) {
+                        reload()
+                    }
+                }
+            }
+        }
+
+        Div({
+            style {
+                display(DisplayStyle.Flex)
+                alignItems(AlignItems.Center)
+                marginTop(1.r)
+            }
+        }) {
+            IconButton("fact_check", appString { batch }, appString { batch }) {
+                scope.launch {
+                    batchTasksDialog(
+                        groupId = group.group!!.id!!,
+                        initialCards = filteredCards,
+                        allCards = cards,
+                        people = group.members?.mapNotNull { it.person }
+                    ) {
                         reload()
                     }
                 }

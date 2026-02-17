@@ -2223,6 +2223,26 @@ object Strings {
         vn = "Độ mờ của nền",
         ru = "Прозрачность фона"
     )
+    val batch = Translation(
+        en = "Batch",
+        vn = "Hàng loạt",
+        ru = "Пакет"
+    )
+    val tapToRemoveFromBatch = Translation(
+        en = "Tap to remove from batch",
+        vn = "Nhấn để xóa khỏi hàng loạt",
+        ru = "Нажмите, чтобы удалить из пакета"
+    )
+    val setCollaborators = Translation(
+        en = "Set collaborator(s)",
+        vn = "Đặt cộng tác viên",
+        ru = "Назначить соавтора(ов)"
+    )
+    val markAsNotDone = Translation(
+        en = "Mark as not done",
+        vn = "Đánh dấu là chưa xong",
+        ru = "Отметить как невыполненное"
+    )
 }
 
 /**
