@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import api
 import app.ailaai.api.groupCards
 import app.cards.MapList
@@ -22,6 +23,7 @@ import com.queatz.db.GroupExtended
 import components.IconButton
 import components.Loading
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.Color
@@ -51,11 +53,12 @@ fun GroupContentTasks(
     group: GroupExtended
 ) {
     val scope = rememberCoroutineScope()
-    var cards by remember { mutableStateOf<List<Card>?>(null) }
+    val allCards = remember { MutableStateFlow<List<Card>?>(null) }
+    val cards by allCards.collectAsState()
     fun reload() {
         scope.launch {
             api.groupCards(group.group!!.id!!) {
-                cards = it
+                allCards.value = it
             }
         }
     }
@@ -222,7 +225,7 @@ fun GroupContentTasks(
                     batchTasksDialog(
                         groupId = group.group!!.id!!,
                         initialCards = filteredCards,
-                        allCards = cards,
+                        allCards = allCards,
                         people = group.members?.mapNotNull { it.person }
                     ) {
                         reload()

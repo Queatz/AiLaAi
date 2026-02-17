@@ -12,6 +12,7 @@ import com.queatz.db.Person
 import components.Loading
 import components.TaskListItem
 import app.compose.rememberDarkMode
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
@@ -22,7 +23,7 @@ import app.group.friendsDialog
 suspend fun batchTasksDialog(
     groupId: String,
     initialCards: List<Card>,
-    allCards: List<Card>? = null,
+    allCards: StateFlow<List<Card>?>,
     people: List<Person>? = null,
     onUpdated: () -> Unit
 ) {
@@ -32,6 +33,15 @@ suspend fun batchTasksDialog(
         cancelButton = application.appString { close }
     ) { resolve ->
         var cards by remember { mutableStateOf(initialCards) }
+        val allCardsState by allCards.collectAsState()
+
+        LaunchedEffect(allCardsState) {
+            val updatedAllCards = allCardsState ?: return@LaunchedEffect
+            cards = cards.map { card ->
+                updatedAllCards.find { it.id == card.id } ?: card
+            }
+        }
+
         var isLoading by remember { mutableStateOf(false) }
         val isDarkMode = rememberDarkMode()
         val scope = rememberCoroutineScope()
@@ -89,7 +99,7 @@ suspend fun batchTasksDialog(
                         onClick {
                             if (isLoading) return@onClick
                             scope.launch {
-                                val items = allCards?.mapNotNull { it.task?.status }?.filter { it.isNotBlank() }?.distinct()?.sorted() ?: emptyList()
+                                val items = allCards.value?.mapNotNull { it.task?.status }?.filter { it.isNotBlank() }?.distinct()?.sorted() ?: emptyList()
                                 val newStatus = inputSelectDialog(
                                     confirmButton = application.appString { okay },
                                     placeholder = application.appString { Strings.status },
@@ -125,7 +135,7 @@ suspend fun batchTasksDialog(
                         onClick {
                             if (isLoading) return@onClick
                             scope.launch {
-                                val items = allCards?.flatMap { it.categories.orEmpty() }?.filter { it.isNotBlank() }?.distinct()?.sorted() ?: emptyList()
+                                val items = allCards.value?.flatMap { it.categories.orEmpty() }?.filter { it.isNotBlank() }?.distinct()?.sorted() ?: emptyList()
                                 val newCategory = inputSelectDialog(
                                     confirmButton = application.appString { okay },
                                     placeholder = application.appString { Strings.category },
