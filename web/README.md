@@ -16,13 +16,21 @@ Here's a quick primer:
 - Anything inside a `remember { }` block will not be re-executed (i.e. it will be remembered) on re-composition.
 - Only changes to `MutableState` (i.e. `mutableStateOf`) are able to trigger a re-composition.
 
+## Configure
+
+Update values in `src/jsMain/kotlin/Main.kt`:
+
+ - `mapboxgl.accessToken` // Mapbox access token
+ - `baseUrl` // Base URL of the API
+ - `webBaseUrl` // Domain of the website
+
 ## Run (development)
 
-`./gradlew jsBrowserRun --continuous`
+`./gradlew jsBrowserDevelopmentRun -t`
 
 ## Run
 
-`./gradlew jsBrowserRun`
+`./gradlew jsBrowserProductionRun`
 
 ## Build
 
