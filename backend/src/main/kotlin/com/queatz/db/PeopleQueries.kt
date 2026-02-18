@@ -289,7 +289,9 @@ fun Db.groupExtended(personKey: String? = null, groupVar: String = "group") = ""
     ${f(GroupExtended::bots)}: (
         for groupBot in `${GroupBot::class.collection()}`
             filter groupBot.${f(GroupBot::group)} == $groupVar._key
-            return keep(document('${Bot::class.collection()}', groupBot.${f(GroupBot::bot)}), "_key", "${f(Bot::name)}", "${f(Bot::photo)}")
+            let groupBotBot = document('${Bot::class.collection()}', groupBot.${f(GroupBot::bot)})
+            filter groupBotBot != null
+            return keep(groupBotBot, "_key", "${f(Bot::name)}", "${f(Bot::photo)}")
     ),
     ${f(GroupExtended::latestMessage)}: first(
         for message in `${Message::class.collection()}`
