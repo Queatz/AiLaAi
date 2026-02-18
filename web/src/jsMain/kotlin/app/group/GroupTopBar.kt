@@ -1,5 +1,9 @@
 package app.group
 
+import Strings.createCard
+import Strings.group
+import Strings.newGroup
+import Strings.someone
 import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -879,10 +883,28 @@ fun GroupTopBar(
         Div({
             classes(AppStyles.groupAppsBar)
         }) {
-            Button({
-                classes(Styles.button)
-            }) {
-                Text("\uD83C\uDF75 Free Matcha 7am - 8am")
+            if (!showCards) {
+                Div({
+                    classes(AppStyles.groupAppsBar)
+                }) {
+                    val buttons = listOf(
+                        "\uD83C\uDF75 Free Matcha 7am - 8am",
+                        "☕ Coffee Break 9am - 10am",
+                        "\uD83E\uDD64 Lunch Special 12pm - 1pm",
+                        "\uD83C\uDF6A Afternoon Snack 2pm - 3pm",
+                        "\uD83C\uDF7A Happy Hour 5pm - 6pm",
+                        "\uD83C\uDF5C Dinner Time 7pm - 8pm",
+                        "\uD83C\uDF68 Late Night Treats 9pm - 10pm"
+                    )
+
+                    buttons.forEach { buttonText ->
+                        Button({
+                            classes(Styles.button)
+                        }) {
+                            Text(buttonText)
+                        }
+                    }
+                }
             }
         }
     }

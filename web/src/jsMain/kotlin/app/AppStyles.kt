@@ -174,7 +174,15 @@ class AppStyleSheet : StyleSheet() {
     }
 
     val groupAppsBar by style {
-        margin(0.r, 1.r, 1.r, 1.r)
+        margin(0.r, .5.r, .5.r)
+        gap(.5.r)
+        display(DisplayStyle.Flex)
+        overflow("auto")
+        flexShrink(0)
+
+        desc(self, className(Styles.button)) style {
+            flexShrink(0)
+        }
     }
 
     val groupDescription by style {
