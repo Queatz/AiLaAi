@@ -635,7 +635,7 @@ fun GamePage(
                         }
                     }
 
-                    tabIndex(1)
+                    tabIndex(0)
 
                     // Add keyboard event listener for animation control and tool-aware play/pause
                     onKeyDown { event ->

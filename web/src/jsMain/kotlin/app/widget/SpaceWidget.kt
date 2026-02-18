@@ -292,7 +292,7 @@ fun SpaceWidget(widgetId: String) {
             attrs = {
                 classes(WidgetStyles.space)
 
-                tabIndex(1)
+                tabIndex(0)
 
                 onPaste { clipboardEvent: SyntheticClipboardEvent ->
                     if (!canEdit) return@onPaste

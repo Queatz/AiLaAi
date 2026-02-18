@@ -159,7 +159,7 @@ val Element.parents get() = let { element ->
 fun IntRange.token() = joinToString("") { Random.nextInt(35).toString(36) }
 
 fun AttrsScope<HTMLElement>.focusable() {
-    tabIndex(1)
+    tabIndex(0)
 
     onKeyDown {
         if (it.key == "Enter") {
