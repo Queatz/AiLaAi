@@ -18,6 +18,7 @@ import app.dialog.batchTasksDialog
 import app.dialog.editTaskDialog
 import app.nav.CardItem
 import appString
+import application
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
 import components.IconButton
@@ -163,6 +164,7 @@ fun GroupContentTasks(
                                 color(Color.white)
                                 flexShrink(0)
                             }
+                            title(application.appString { this.status })
                             onMouseDown { it.preventDefault() }
                             onClick {
                                 search = status
@@ -179,6 +181,7 @@ fun GroupContentTasks(
                                 color(Color.white)
                                 flexShrink(0)
                             }
+                            title(application.appString { this.category })
                             onMouseDown { it.preventDefault() }
                             onClick {
                                 search = category

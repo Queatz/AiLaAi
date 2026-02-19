@@ -72,9 +72,9 @@ suspend fun editTaskDialog(
     var descriptionValue = initialDescription ?: card?.getConversation()?.message ?: ""
     var statusValue = card?.task?.status ?: ""
     var doneValue = card?.task?.done ?: false
-    var categoriesValue = card?.categories ?: emptyList<String>()
-    var collaboratorsValue = card?.collaborators ?: emptyList<String>()
-    var fieldsValue = card?.task?.fields ?: emptyMap<String, String>()
+    var categoriesValue = card?.categories ?: emptyList()
+    var collaboratorsValue = card?.collaborators ?: emptyList()
+    var fieldsValue = card?.task?.fields ?: emptyMap()
 
     val isNew = card == null
 
@@ -147,8 +147,7 @@ suspend fun editTaskDialog(
                             confirmButton = application.appString { confirm },
                             multiple = true
                         ) { selected ->
-                            val ownerId = card?.person ?: application.me.value?.id
-                            collaborators = selected.mapNotNull { it.id }.filter { it != ownerId }
+                            collaborators = selected.mapNotNull { it.id }
                             collaboratorsValue = collaborators
                             people = selected.toList()
                         }
@@ -450,8 +449,7 @@ suspend fun editTaskDialog(
     }
 
     if (result == true) {
-        val ownerId = card?.person ?: application.me.value?.id
-        val finalCollaborators = collaboratorsValue.filter { it != ownerId }
+        val finalCollaborators = collaboratorsValue
 
         val updatedTask = (card?.task ?: Task()).apply {
             this.status = statusValue
