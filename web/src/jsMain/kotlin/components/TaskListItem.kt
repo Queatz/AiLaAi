@@ -61,6 +61,9 @@ fun TaskListItem(
                 }
             }
         }) {
+            val subtaskCount = remember(allCards, card.id, card.task?.owner) {
+                allCards?.count { it.task?.owner == card.id } ?: 0
+            }
             Div({
                 style {
                     flex(1)
@@ -78,10 +81,7 @@ fun TaskListItem(
                                     }?.name?.notBlank?.let { "⤷ $it" }
                                 }
                             },
-                            allCards
-                                ?.count { it.task?.owner == card.id }
-                                ?.takeIf { it > 0 }
-                                ?.toString()
+                            subtaskCount.takeIf { it > 0 }?.toString()
                         ).notBlank
                     },
                     showPhoto = showPhoto,
@@ -135,7 +135,9 @@ fun TaskListItem(
                     name = if (expanded) "expand_less" else "expand_more",
                     title = application.appString { if (expanded) collapse else expand },
                     styles = {
-                        opacity(.5f)
+                        if (subtaskCount == 0) {
+                            opacity(.5f)
+                        }
                     }
                 ) {
                     onExpanded(!expanded)

@@ -15,6 +15,16 @@ import app.ailaai.api.updateMessage
 import app.dialog.dialog
 import app.dialog.inputDialog
 import app.menu.Menu
+import app.ailaai.api.newReminder
+import app.reminder.EditReminderSchedule
+import app.reminder.EditSchedule
+import app.reminder.start
+import app.reminder.end
+import app.reminder.reminderSchedule
+import app.components.FlexInput
+import lib.systemTimezone
+import lib.rawTimeZones
+import com.queatz.db.Reminder
 import app.reaction.allReactionsDialog
 import appString
 import application
@@ -39,6 +49,7 @@ import org.jetbrains.compose.web.css.flexShrink
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.percent
@@ -49,6 +60,7 @@ import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
+import web.cssom.PropertyName.Companion.margin
 import withPlus
 import kotlin.time.toJSDate
 
@@ -167,6 +179,56 @@ fun MessageItem(
 
                 item(appString { replyInNewGroup }) {
                     onReplyInNewGroup()
+                }
+
+                if (message.text?.isNotBlank() == true) {
+                    item(appString { createReminder }) {
+                        scope.launch {
+                            val timezone = systemTimezone
+                            var titleState = message.text?.trim().orEmpty()
+                            val schedule = EditSchedule()
+
+                            val result = dialog(
+                                title = application.appString { createReminder },
+                                confirmButton = application.appString { createReminder }
+                            ) { _ ->
+                                var title by remember { mutableStateOf(titleState) }
+
+                                FlexInput(
+                                    value = title,
+                                    onChange = {
+                                        title = it
+                                        titleState = it
+                                    },
+                                    placeholder = appString { createReminder },
+                                    autoFocus = true,
+                                    autoSize = true,
+                                    defaultMargins = true,
+                                    useDefaultWidth = false,
+                                    styles = {
+                                        margin(.5.r)
+                                    }
+                                )
+
+                                EditReminderSchedule(schedule = schedule)
+                            }
+
+                            if (result == true && titleState.isNotBlank()) {
+                                api.newReminder(
+                                    Reminder(
+                                        title = titleState,
+                                        start = schedule.start,
+                                        end = schedule.end,
+                                        timezone = timezone,
+                                        utcOffset = rawTimeZones.toList().firstOrNull { it.name == timezone }?.rawOffsetInMinutes?.toDouble()?.div(60.0) ?: 0.0,
+                                        schedule = schedule.reminderSchedule
+                                    )
+                                ) {
+                                    // Reminder created
+                                }
+                            }
+                        }
+                    }
                 }
 
                 item(appString { addAsTask }) {
