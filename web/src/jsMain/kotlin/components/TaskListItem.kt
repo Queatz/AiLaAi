@@ -1,16 +1,19 @@
 package components
 
 import Styles
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import api
+import app.ailaai.api.newCard
 import app.ailaai.api.updateCard
+import app.components.FlexInput
 import app.dialog.inputSelectDialog
 import application
+import bulletedString
 import com.queatz.db.Card
 import com.queatz.db.Person
 import com.queatz.db.Task
 import kotlinx.coroutines.launch
+import notBlank
 import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
@@ -28,6 +31,10 @@ fun TaskListItem(
     showPhoto: Boolean = false,
     people: List<Person>? = null,
     isOnSurface: Boolean = false,
+    onBackground: Boolean = false,
+    isSubtask: Boolean = false,
+    expanded: Boolean = false,
+    onExpanded: ((Boolean) -> Unit)? = null,
     onUpdated: (() -> Unit)? = null,
     attrs: (AttrsScope<HTMLDivElement>.() -> Unit)? = null,
     onClick: (Card) -> Unit
@@ -36,68 +43,175 @@ fun TaskListItem(
     Div({
         style {
             display(DisplayStyle.Flex)
-            alignItems(AlignItems.Center)
-            gap(.5.r)
-            card.task?.done?.let { done ->
-                if (done) {
-                    opacity(.5)
-                    textDecoration(TextDecoration.lineThrough.toString())
-                }
-            }
+            flexDirection(FlexDirection.Column)
+            alignItems(AlignItems.Stretch)
         }
         attrs?.invoke(this)
     }) {
         Div({
             style {
-                flex(1)
-                width(0.px)
+                display(DisplayStyle.Flex)
+                alignItems(AlignItems.Center)
+                gap(.5.r)
+                card.task?.done?.let { done ->
+                    if (done) {
+                        opacity(.5)
+                        textDecoration(TextDecoration.lineThrough.toString())
+                    }
+                }
             }
         }) {
-            CardListItem(
-                card = card,
-                showPhoto = showPhoto,
-                people = people,
-                isOnSurface = isOnSurface,
-            ) {
-                onClick(card)
-            }
-        }
-
-        card.task?.status?.takeIf { it.isNotBlank() }?.let { status ->
-            Span({
-                classes(Styles.button, Styles.buttonSmall)
+            Div({
                 style {
-                    backgroundColor(tagColor(status))
-                    color(Color.white)
-                    whiteSpace("nowrap")
-                    marginRight(.5.r)
-                    flexShrink(0)
+                    flex(1)
+                    width(0.px)
                 }
-                onClick {
-                    it.stopPropagation()
-                    if (onUpdated != null) {
-                        val items = (allCards ?: listOf(card)).mapNotNull { it.task?.status }.filter { it.isNotBlank() }.distinct().sorted()
-                        scope.launch {
-                            val newStatus = inputSelectDialog(
-                                confirmButton = application.appString { okay },
-                                placeholder = application.appString { Strings.status },
-                                items = items
-                            )
-                            if (newStatus != null && newStatus != status) {
-                                val updatedCard = card.apply {
-                                    task = (task ?: Task()).apply {
-                                        this.status = newStatus
-                                    }
+            }) {
+                CardListItem(
+                    card = card,
+                    description = remember(allCards, card.id, card.task?.owner) {
+                        bulletedString(
+                            if (isSubtask) { null } else {
+                                card.task?.owner?.let { owner ->
+                                    allCards?.find {
+                                        it.id == owner
+                                    }?.name?.notBlank?.let { "⤷ $it" }
                                 }
-                                api.updateCard(card.id!!, updatedCard) {
-                                    onUpdated()
+                            },
+                            allCards
+                                ?.count { it.task?.owner == card.id }
+                                ?.takeIf { it > 0 }
+                                ?.toString()
+                        ).notBlank
+                    },
+                    showPhoto = showPhoto,
+                    people = people,
+                    isOnSurface = isOnSurface,
+                    onBackground = onBackground,
+                ) {
+                    onClick(card)
+                }
+            }
+
+            card.task?.status?.takeIf { it.isNotBlank() }?.let { status ->
+                Span({
+                    classes(Styles.button, Styles.buttonSmall)
+                    style {
+                        backgroundColor(tagColor(status))
+                        color(Color.white)
+                        whiteSpace("nowrap")
+                        flexShrink(0)
+                    }
+                    onClick {
+                        it.stopPropagation()
+                        if (onUpdated != null) {
+                            val items = (allCards ?: listOf(card)).mapNotNull { it.task?.status }.filter { it.isNotBlank() }.distinct().sorted()
+                            scope.launch {
+                                val newStatus = inputSelectDialog(
+                                    confirmButton = application.appString { okay },
+                                    placeholder = application.appString { Strings.status },
+                                    items = items
+                                )
+                                if (newStatus != null && newStatus != status) {
+                                    val updatedCard = card.apply {
+                                        task = (task ?: Task()).apply {
+                                            this.status = newStatus
+                                        }
+                                    }
+                                    api.updateCard(card.id!!, updatedCard) {
+                                        onUpdated()
+                                    }
                                 }
                             }
                         }
                     }
+                }) {
+                    Text(status)
+                }
+            }
+
+            if (onExpanded != null) {
+                IconButton(
+                    name = if (expanded) "expand_less" else "expand_more",
+                    title = application.appString { if (expanded) collapse else expand },
+                    styles = {
+                        opacity(.5f)
+                    }
+                ) {
+                    onExpanded(!expanded)
+                }
+            }
+        }
+
+        if (expanded) {
+            val subtasks = remember(allCards, card.id) {
+                allCards?.filter { it.task?.owner == card.id } ?: emptyList()
+            }
+
+            Div({
+                style {
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Column)
+                    paddingLeft(1.r)
+                    gap(.5.r)
+                    marginTop(.5.r)
                 }
             }) {
-                Text(status)
+                subtasks.forEach { subtask ->
+                    TaskListItem(
+                        card = subtask,
+                        allCards = allCards,
+                        showPhoto = showPhoto,
+                        people = people,
+                        isOnSurface = isOnSurface,
+                        onBackground = onBackground,
+                        onUpdated = onUpdated,
+                        onClick = onClick,
+                        isSubtask = true
+                    )
+                }
+
+                var newSubtaskName by remember { mutableStateOf("") }
+                Div({
+                    style {
+                        display(DisplayStyle.Flex)
+                        alignItems(AlignItems.Center)
+                        gap(.5.r)
+                    }
+                }) {
+                    val onSubmit: () -> Boolean = {
+                        scope.launch {
+                            api.newCard(
+                                Card(
+                                    group = card.group,
+                                    name = newSubtaskName,
+                                    task = Task(owner = card.id)
+                                )
+                            ) {
+                                newSubtaskName = ""
+                                onUpdated?.invoke()
+                            }
+                        }
+
+                        true
+                    }
+
+                    Div({ style { flex(1) } }) {
+                        FlexInput(
+                            value = newSubtaskName,
+                            onChange = { newSubtaskName = it },
+                            placeholder = application.appString { newTask },
+                            onDismissRequest = { newSubtaskName = "" },
+                            onSubmit = onSubmit,
+                            autoFocus = true,
+                        )
+                    }
+                    if (newSubtaskName.isNotBlank()) {
+                        IconButton("send", application.appString { create }) {
+                            onSubmit()
+                        }
+                    }
+                }
             }
         }
     }

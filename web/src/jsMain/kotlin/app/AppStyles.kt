@@ -507,6 +507,11 @@ class AppStyleSheet : StyleSheet() {
         }
     }
 
+    val groupItemNone by style {
+        opacity(.5)
+        property("font-style", "italic")
+    }
+
     val groupItemName by style {
 
     }

@@ -95,12 +95,14 @@ fun GroupContent(
             ) {
                 scope.launch {
                     selectCardDialog(configuration) { card ->
-                        scope.launch {
-                            api.updateGroup(
-                                group.group!!.id!!,
-                                Group(content = json.encodeToString<GroupContentModel>(GroupContentModel.Card(card.id)))
-                            ) {
-                                onUpdated(group.apply { this.group!!.content = it.content })
+                        if (card != null) {
+                            scope.launch {
+                                api.updateGroup(
+                                    group.group!!.id!!,
+                                    Group(content = json.encodeToString<GroupContentModel>(GroupContentModel.Card(card.id)))
+                                ) {
+                                    onUpdated(group.apply { this.group!!.content = it.content })
+                                }
                             }
                         }
                     }

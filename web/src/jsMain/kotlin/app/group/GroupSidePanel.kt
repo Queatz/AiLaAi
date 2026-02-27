@@ -66,7 +66,12 @@ fun GroupSidePanel(group: GroupExtended, onUpdated: (GroupExtended) -> Unit) {
                 }
             ) {
                 scope.launch {
-                    api.updateGroup(group.group!!.id!!, com.queatz.db.Group(content = json.encodeToString<GroupContentModel>(GroupContentModel.None))) {
+                    api.updateGroup(
+                        id = group.group!!.id!!,
+                        groupUpdate = com.queatz.db.Group(
+                            content = json.encodeToString<GroupContentModel>(GroupContentModel.None)
+                        )
+                    ) {
                         onUpdated(group.apply { this.group!!.content = it.content })
                     }
                 }

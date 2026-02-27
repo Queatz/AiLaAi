@@ -1,5 +1,6 @@
 package app.dialog
 
+import LocalConfiguration
 import Strings
 import Styles
 import androidx.compose.runtime.LaunchedEffect
@@ -47,6 +48,7 @@ import org.jetbrains.compose.web.css.flexWrap
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.gap
+import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.percent
@@ -75,8 +77,10 @@ suspend fun editTaskDialog(
     var categoriesValue = card?.categories ?: emptyList()
     var collaboratorsValue = card?.collaborators ?: emptyList()
     var fieldsValue = card?.task?.fields ?: emptyMap()
+    var ownerValue = card?.task?.owner
 
     val isNew = card == null
+    val ownerState = mutableStateOf(ownerValue)
 
     val result = dialog(
         title = if (isNew) application.appString { newTask } else null,
@@ -84,6 +88,7 @@ suspend fun editTaskDialog(
         cancelButton = application.appString { cancel },
         extraButtons = {
             val scope = rememberCoroutineScope()
+            val configuration = LocalConfiguration.current
 
             if (card != null) {
                 IconButton("edit", application.appString { edit }, application.appString { edit }) {
@@ -92,8 +97,22 @@ suspend fun editTaskDialog(
                     }
                 }
             }
+
+            IconButton("move_item", application.appString { move }, application.appString { move }) {
+                scope.launch {
+                    selectCardDialog(
+                        configuration = configuration,
+                        title = application.appString { move },
+                        allCards = allCards?.filter { it.id != card?.id },
+                        showNone = true
+                    ) { selected ->
+                        ownerState.value = selected?.id
+                    }
+                }
+            }
         }
     ) { resolve ->
+        var owner by ownerState
         var name by remember { mutableStateOf(nameValue) }
         var description by remember { mutableStateOf(descriptionValue) }
         var status by remember { mutableStateOf(statusValue) }
@@ -130,6 +149,29 @@ suspend fun editTaskDialog(
                 placeholder = application.appString { Strings.name },
                 singleLine = true
             )
+
+            // Parent task (Owner)
+            owner?.let { ownerId ->
+                val ownerCard = allCards?.find { it.id == ownerId }
+                if (ownerCard != null) {
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            alignItems(AlignItems.Center)
+                            gap(.5.r)
+                            opacity(.5)
+                            fontSize(.8.r)
+                            marginLeft(.5.r)
+                        }
+                    }) {
+                        Span({
+                            classes("material-symbols-outlined")
+                            style { fontSize(1.r) }
+                        }) { Text("subdirectory_arrow_right") }
+                        Text(ownerCard.name ?: application.appString { Strings.card })
+                    }
+                }
+            }
 
             // Card owner + collaborators
             Div({
@@ -455,6 +497,7 @@ suspend fun editTaskDialog(
             this.status = statusValue
             this.done = doneValue
             this.fields = fieldsValue
+            this.owner = ownerState.value
         }
         val updatedCard = (card ?: Card()).apply {
             this.name = nameValue

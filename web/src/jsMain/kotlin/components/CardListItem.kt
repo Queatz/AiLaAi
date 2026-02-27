@@ -34,8 +34,10 @@ import r
 fun CardListItem(
     card: Card,
     showPhoto: Boolean = true,
+    description: String? = null,
     people: List<Person>? = null,
     isOnSurface: Boolean = false,
+    onBackground: Boolean = false,
     onClick: () -> Unit,
 ) {
     var loadedPeople by remember { mutableStateOf(emptyList<Person>()) }
@@ -99,7 +101,12 @@ fun CardListItem(
                 }
                 GroupPhoto(items = items, size = 54.px)
             } else {
-                ProfilePhoto(card.photo, card.name ?: appString { newCard }, size = 54.px)
+                ProfilePhoto(
+                    photo = card.photo,
+                    name = card.name ?: appString { newCard },
+                    size = 54.px,
+                    onBackground = onBackground,
+                )
             }
 
             Div({
@@ -122,6 +129,7 @@ fun CardListItem(
                 }) {
                     Text(
                         bulletedString(
+                            description,
                             card.hint.notBlank,
                             card.getConversation().message.notBlank
                         )

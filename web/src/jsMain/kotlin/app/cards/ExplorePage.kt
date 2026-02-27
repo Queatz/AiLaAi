@@ -22,12 +22,12 @@ import app.ailaai.api.groups
 import app.ailaai.api.myCollaborations
 import app.ailaai.api.newCard
 import app.ailaai.api.updateCard
-import app.ailaai.api.uploadCardPhoto
 import app.components.FlexInput
 import app.dialog.categoryDialog
 import app.dialog.dialog
 import app.dialog.editFormDialog
 import app.dialog.inputDialog
+import app.dialog.rememberChoosePhotoDialog
 import app.dialog.searchDialog
 import app.dialog.selectCardDialog
 import app.dialog.selectGroupDialog
@@ -89,12 +89,10 @@ import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
-import pickPhotos
 import qr
 import r
 import saves
 import stories.asStoryContents
-import toScaledBytes
 import updateWidget
 import webBaseUrl
 import widget
@@ -117,6 +115,7 @@ fun ExplorePage(
 ) {
     val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()
+    val choosePhotoDialog = rememberChoosePhotoDialog(showUpload = true)
     var cards by remember(card.id) {
         mutableStateOf(listOf<Card>())
     }
@@ -269,7 +268,7 @@ fun ExplorePage(
     fun moveToPage() {
         scope.launch {
             selectCardDialog(configuration, title = inAPage) {
-                moveToPage(it.id!!)
+                it?.id?.let { id -> moveToPage(id) }
             }
         }
     }
@@ -470,17 +469,9 @@ fun ExplorePage(
             }
 
             item(appString { choosePhoto }) {
-                pickPhotos(multiple = false) {
-                    it.singleOrNull()?.let {
-                        scope.launch {
-                            val photo = it.toScaledBytes()
-                            api.uploadCardPhoto(
-                                card.id!!,
-                                photo
-                            ) {
-                                onCardUpdated(card)
-                            }
-                        }
+                choosePhotoDialog.launch { photo, _, _ ->
+                    api.updateCard(card.id!!, Card(photo = photo)) {
+                        onCardUpdated(it)
                     }
                 }
             }
@@ -579,6 +570,7 @@ fun ExplorePage(
                 }
             }
         },
+        isMenuLoading = choosePhotoDialog.isGenerating.collectAsState().value,
         actions = {
             Switch(
                 value = published,

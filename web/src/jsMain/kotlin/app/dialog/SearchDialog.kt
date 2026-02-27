@@ -25,7 +25,7 @@ import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import r
 
-suspend fun <T : Any> searchDialog(
+suspend fun <T> searchDialog(
     configuration: Configuration,
     title: String,
     placeholder: String = application.appString { search },
@@ -96,7 +96,7 @@ suspend fun <T : Any> searchDialog(
             }) {
                 key(items) {
                     LazyColumn {
-                        items(items) {
+                        this@LazyColumn.items<T>(items) {
                             item(it, resolve)
                         }
                     }

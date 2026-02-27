@@ -1290,7 +1290,7 @@ fun CardScreen(
                     }
 
                     Crossfade(
-                        targetState = userIsActive || showScanMe,
+                        targetState = userIsInactive || showScanMe,
                         modifier = Modifier
                             .align(if (isLandscape) Alignment.BottomEnd else Alignment.BottomStart)
                             .padding(1.pad)

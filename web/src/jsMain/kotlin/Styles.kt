@@ -1022,6 +1022,8 @@ class MainStyleSheet : StyleSheet() {
         }
     }
 
+    val profilePhotoOnBackground by style {}
+
     val profilePhotoText by style {
         borderRadius(100.percent)
         backgroundColor(colors.background)
@@ -1030,8 +1032,16 @@ class MainStyleSheet : StyleSheet() {
         justifyContent(JustifyContent.Center)
         flexShrink(0)
 
+        self + className(profilePhotoOnBackground) style {
+            backgroundColor(colors.surface)
+        }
+
         dark(self) {
             backgroundColor(colors.black)
+
+            self + className(profilePhotoOnBackground) style {
+                backgroundColor(colors.dark.surface)
+            }
         }
     }
 

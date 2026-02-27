@@ -109,7 +109,15 @@ fun GroupPhoto(
             marginRight(.5.r)
         }
     } else {
-        ProfilePhoto(null, null, size, fontSize = size / 2, onClick = onClick, fallback = fallback, fallbackTitle = fallbackTitle) {
+        ProfilePhoto(
+            photo = null,
+            name = null,
+            size = size,
+            fontSize = size / 2,
+            onClick = onClick,
+            fallback = fallback,
+            fallbackTitle = fallbackTitle
+        ) {
             marginRight(.5.r)
         }
     }

@@ -135,6 +135,11 @@ object Strings {
         vn = "Nhiệm vụ mới",
         ru = "Новая задача"
     )
+    val move = Translation(
+        en = "Move",
+        vn = "Di chuyển",
+        ru = "Переместить"
+    )
     val addAsTask = Translation(
         en = "Add as task",
         vn = "Thêm làm nhiệm vụ",
@@ -1887,6 +1892,11 @@ object Strings {
         en = "Category",
         vn = "Danh mục",
         ru = "Категория"
+    )
+    val subtasks = Translation(
+        en = "Subtasks",
+        vn = "Nhiệm vụ phụ",
+        ru = "Подзадачи"
     )
     val reschedule = Translation(
         en = "Reschedule",

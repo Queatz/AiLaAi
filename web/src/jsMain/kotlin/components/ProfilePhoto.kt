@@ -52,6 +52,7 @@ fun ProfilePhoto(
     fallbackTitle: String = application.appString { someone },
     showTitle: Boolean = true,
     border: Boolean = false,
+    onBackground: Boolean = false,
     onClick: (() -> Unit)? = null,
     styles: (StyleScope.() -> Unit)? = null
 ) {
@@ -62,6 +63,10 @@ fun ProfilePhoto(
             } else {
                 emptyList()
             })
+
+            if (onBackground) {
+                classes(Styles.profilePhotoOnBackground)
+            }
 
             if (onClick != null) {
                 focusable()

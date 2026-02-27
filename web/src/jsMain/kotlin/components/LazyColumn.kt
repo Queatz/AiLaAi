@@ -24,7 +24,7 @@ class LazyDsl internal constructor() {
         }
     }
 
-    fun <T : Any> items(items: List<T>, block: @Composable (item: T) -> Unit) {
+    fun <T> items(items: List<T>, block: @Composable (item: T) -> Unit) {
         all = all + items.map {
             @Composable {
                 block(it)

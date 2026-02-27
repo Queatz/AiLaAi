@@ -47,7 +47,6 @@ import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import r
 import tagColor
-import com.queatz.db.GroupContent as GroupContentModel
 
 @Composable
 fun GroupContentTasks(
@@ -72,7 +71,10 @@ fun GroupContentTasks(
     } else {
         var search by remember { mutableStateOf("") }
         var isSearchFocused by remember { mutableStateOf(false) }
-        val filteredCards = remember(cards, search) {
+        var showSubtasks by remember { mutableStateOf(false) }
+        var expandedCardId by remember { mutableStateOf<String?>(null) }
+        val filteredCards = remember(cards, search, showSubtasks) {
+            val search = search.trim()
             val list = if (search.isBlank()) cards!! else cards!!.filter {
                 it.name?.contains(search, ignoreCase = true) == true ||
                         it.content?.contains(search, ignoreCase = true) == true ||
@@ -87,7 +89,8 @@ fun GroupContentTasks(
                                     } == true
                         } == true
             }
-            list.sortedWith(
+            val filteredBySubtasks = if (showSubtasks) list else list.filter { it.task?.owner == null }
+            filteredBySubtasks.sortedWith(
                 compareBy<Card> { it.task?.done ?: false }
                     .thenByDescending { it.createdAt }
             )
@@ -107,6 +110,7 @@ fun GroupContentTasks(
                     value = search,
                     onChange = { search = it },
                     placeholder = appString { this.search },
+                    useDefaultWidth = false,
                     onDismissRequest = {
                         search = ""
                     },
@@ -121,9 +125,7 @@ fun GroupContentTasks(
                     }
                 )
             }
-            IconButton("add", appString { newTask }, styles = {
-                marginRight(.5.r)
-            }) {
+            IconButton("add", appString { newTask }) {
                 scope.launch {
                     editTaskDialog(
                         groupId = group.group!!.id!!,
@@ -133,6 +135,16 @@ fun GroupContentTasks(
                         reload()
                     }
                 }
+            }
+            IconButton(
+                "account_tree",
+                appString { subtasks },
+                background = showSubtasks,
+                styles = {
+                    marginRight(.5.r)
+                }
+            ) {
+                showSubtasks = !showSubtasks
             }
         }
 
@@ -203,10 +215,15 @@ fun GroupContentTasks(
                 showPhoto = false,
                 people = group.members?.mapNotNull { it.person },
                 groupId = group.group!!.id!!,
+                expandedCardId = expandedCardId,
+                onExpanded = { card, expanded ->
+                    expandedCardId = if (expanded) card.id else null
+                },
                 onUpdated = { reload() },
                 styles = {
                     marginTop(1.r)
-                }
+                },
+                onBackground = true,
             ) { card ->
                 scope.launch {
                     editTaskDialog(group.group!!.id!!, card, cards) {
