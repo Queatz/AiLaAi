@@ -136,7 +136,7 @@ fun TaskListItem(
                     title = application.appString { if (expanded) collapse else expand },
                     styles = {
                         if (subtaskCount == 0) {
-                            opacity(.5f)
+                            opacity(.25f)
                         }
                     }
                 ) {
