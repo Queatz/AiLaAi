@@ -3,7 +3,6 @@ package com.queatz.ailaai.ui.profile
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,7 +32,6 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Person
 import com.queatz.db.ProfileStats
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Stats(stats: ProfileStats, person: Person?) {
     var showJoined by rememberStateOf(false)

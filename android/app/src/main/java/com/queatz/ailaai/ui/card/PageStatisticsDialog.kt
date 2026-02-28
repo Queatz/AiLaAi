@@ -2,7 +2,6 @@ package com.queatz.ailaai.ui.card
 
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -53,7 +52,6 @@ import ir.ehsannarmani.compose_charts.models.PopupProperties
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PageStatisticsDialog(
     card: Card,

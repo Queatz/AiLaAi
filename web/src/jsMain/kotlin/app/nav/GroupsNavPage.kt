@@ -256,8 +256,7 @@ fun GroupsNavPage(
                     }
                 }
             }
-        } else if (status == null || sendMessage) {
-            // todo: send message instead
+        } else if (sendMessage) {
             window.open("/profile/${person.id}", "_blank")
         } else  {
             scope.launch {

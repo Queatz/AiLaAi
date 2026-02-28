@@ -500,14 +500,17 @@ fun GroupScreen(groupId: String) {
 
             val pinShortcutInfo = ShortcutInfoCompat.Builder(context, "group/$groupId")
                 .setIcon(
-                    groupExtended.group?.photo?.let { api.url(it) }?.asOvalBitmap(context)?.let { IconCompat.createWithBitmap(it) }
+                    groupExtended.group?.photo?.let { api.url(it) }?.asOvalBitmap(context)
+                        ?.let { IconCompat.createWithBitmap(it) }
                         ?: IconCompat.createWithResource(context, R.mipmap.ic_app)
                 )
-                .setShortLabel(groupExtended.name(
-                    someone = context.getString(R.string.someone),
-                    emptyGroup = context.getString(R.string.app_name),
-                    omit =  me?.id?.inList() ?: emptyList()
-                ))
+                .setShortLabel(
+                    groupExtended.name(
+                        someone = context.getString(R.string.someone),
+                        emptyGroup = context.getString(R.string.app_name),
+                        omit = me?.id?.inList() ?: emptyList()
+                    )
+                )
                 .setIntent(Intent(context, MainActivity::class.java).apply {
                     action = Intent.ACTION_VIEW
                     data = groupUrl(groupExtended.group!!.id!!).toUri()
@@ -601,7 +604,8 @@ fun GroupScreen(groupId: String) {
             val myMember = groupExtended!!.members?.find { it.person?.id == me?.id }
             val otherMembers = groupExtended!!.members?.filter { it.person?.id != me?.id } ?: emptyList()
             val state = rememberLazyListState()
-            val canManage = myMember?.member?.host == true || groupExtended?.group?.config?.edits != GroupEditsConfig.Hosts
+            val canManage =
+                myMember?.member?.host == true || groupExtended?.group?.config?.edits != GroupEditsConfig.Hosts
 
             var latestMessage by remember { mutableStateOf<Instant?>(null) }
 
@@ -802,178 +806,181 @@ fun GroupScreen(groupId: String) {
                         } else {
                             Icon(Icons.Outlined.MoreVert, stringResource(R.string.more))
                         }
-                    }
 
-                    Dropdown(showMenu, { showMenu = false }) {
-                        Toolbar {
-                            item(
-                                icon = Icons.Outlined.Group,
-                                name = stringResource(R.string.members)
-                            ) {
-                                showMenu = false
-                                showGroupMembers = true
-                            }
-                            item(
-                                icon = Icons.Outlined.Map,
-                                name = stringResource(R.string.cards)
-                            ) {
-                                showMenu = false
-                                showCards = !showCards
-                            }
-                            if (myMember != null) {
-                                if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
-                                    item(
-                                        icon = Icons.Outlined.CalendarMonth,
-                                        name = stringResource(R.string.create_reminder)
-                                    ) {
-                                        showMenu = false
-                                        showNewReminderWithDialog = true
-                                    }
-                                }
-                                if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
-                                    item(
-                                        icon = Icons.Outlined.Rocket,
-                                        name = stringResource(R.string.trade)
-                                    ) {
-                                        showMenu = false
-                                        showTradeWithDialog = true
-                                    }
-                                }
-                            }
-                            item(
-                                icon = Icons.AutoMirrored.Default.Send,
-                                name = stringResource(R.string.send)
-                            ) {
-                                showMenu = false
-                                showSendDialog = true
-                            }
-                            if (myMember != null) {
-                                if (canManage) {
-                                    item(
-                                        icon = Icons.Outlined.ManageAccounts,
-                                        name = stringResource(R.string.manage)
-                                    ) {
-                                        showMenu = false
-                                        showManageDialog = true
-                                    }
-
-                                    item(
-                                        icon = Icons.Default.AddLink,
-                                        name = stringResource(R.string.invites)
-                                    ) {
-                                        showMenu = false
-                                        showActiveInvitesDialog = true
-                                    }
-                                }
-                            }
-                            if (groupExtended?.group?.open == true) {
+                        Dropdown(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false },
+                        ) {
+                            Toolbar {
                                 item(
-                                    icon = Icons.Outlined.Share,
-                                    name = stringResource(R.string.share)
+                                    icon = Icons.Outlined.Group,
+                                    name = stringResource(R.string.members)
                                 ) {
                                     showMenu = false
-                                    groupUrl(groupId).shareAsUrl(
-                                        context = context,
-                                        name = groupExtended?.name(
-                                            context.getString(R.string.someone),
-                                            context.getString(R.string.empty_group_name),
-                                            me?.id?.inList().orEmpty()
-                                        )
-                                    )
+                                    showGroupMembers = true
                                 }
-                            }
-                            item(
-                                icon = Icons.Outlined.Link,
-                                name = stringResource(R.string.copy_link)
-                            ) {
-                                showMenu = false
-                                groupUrl(groupId).copyToClipboard(context)
-                                context.toast(R.string.copied)
-                            }
-                            item(
-                                icon = Icons.Outlined.QrCode2,
-                                name = stringResource(R.string.qr_code)
-                            ) {
-                                showMenu = false
-                                showQrCodeDialog = true
-                            }
-                            if (myMember != null) {
-                                val hidden = myMember.member?.hide == true
                                 item(
-                                    icon = Icons.Outlined.Visibility,
-                                    name = if (hidden) stringResource(R.string.show) else stringResource(
-                                        R.string.hide
-                                    )
+                                    icon = Icons.Outlined.Map,
+                                    name = stringResource(R.string.cards)
                                 ) {
-                                    scope.launch {
-                                        api.updateMember(
-                                            id = myMember.member!!.id!!,
-                                            member = Member(hide = !hidden)
+                                    showMenu = false
+                                    showCards = !showCards
+                                }
+                                if (myMember != null) {
+                                    if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
+                                        item(
+                                            icon = Icons.Outlined.CalendarMonth,
+                                            name = stringResource(R.string.create_reminder)
                                         ) {
-                                            if (!hidden) {
-                                                context.toast(R.string.group_hidden)
-                                                nav.popBackStack()
-                                            } else {
-                                                reload()
-                                            }
+                                            showMenu = false
+                                            showNewReminderWithDialog = true
                                         }
                                     }
-                                    showMenu = false
+                                    if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
+                                        item(
+                                            icon = Icons.Outlined.Rocket,
+                                            name = stringResource(R.string.trade)
+                                        ) {
+                                            showMenu = false
+                                            showTradeWithDialog = true
+                                        }
+                                    }
                                 }
-                                if (isSnoozed) {
+                                item(
+                                    icon = Icons.AutoMirrored.Default.Send,
+                                    name = stringResource(R.string.send)
+                                ) {
+                                    showMenu = false
+                                    showSendDialog = true
+                                }
+                                if (myMember != null) {
+                                    if (canManage) {
+                                        item(
+                                            icon = Icons.Outlined.ManageAccounts,
+                                            name = stringResource(R.string.manage)
+                                        ) {
+                                            showMenu = false
+                                            showManageDialog = true
+                                        }
+
+                                        item(
+                                            icon = Icons.Default.AddLink,
+                                            name = stringResource(R.string.invites)
+                                        ) {
+                                            showMenu = false
+                                            showActiveInvitesDialog = true
+                                        }
+                                    }
+                                }
+                                if (groupExtended?.group?.open == true) {
                                     item(
-                                        icon = Icons.Outlined.NotificationsPaused,
-                                        name = if (myMember.member?.snoozed == true) {
-                                            stringResource(R.string.indefinitely)
-                                        } else {
-                                            stringResource(
-                                                R.string.until_x,
-                                                myMember.member?.snoozedUntil?.formatFuture() ?: ""
+                                        icon = Icons.Outlined.Share,
+                                        name = stringResource(R.string.share)
+                                    ) {
+                                        showMenu = false
+                                        groupUrl(groupId).shareAsUrl(
+                                            context = context,
+                                            name = groupExtended?.name(
+                                                context.getString(R.string.someone),
+                                                context.getString(R.string.empty_group_name),
+                                                me?.id?.inList().orEmpty()
                                             )
-                                        },
-                                        selected = true
-                                    ) {
-                                        showMenu = false
-                                        snooze(false)
+                                        )
                                     }
-                                } else {
+                                }
+                                item(
+                                    icon = Icons.Outlined.Link,
+                                    name = stringResource(R.string.copy_link)
+                                ) {
+                                    showMenu = false
+                                    groupUrl(groupId).copyToClipboard(context)
+                                    context.toast(R.string.copied)
+                                }
+                                item(
+                                    icon = Icons.Outlined.QrCode2,
+                                    name = stringResource(R.string.qr_code)
+                                ) {
+                                    showMenu = false
+                                    showQrCodeDialog = true
+                                }
+                                if (myMember != null) {
+                                    val hidden = myMember.member?.hide == true
                                     item(
-                                        icon = Icons.Outlined.NotificationsActive,
-                                        name = stringResource(R.string.snooze)
+                                        icon = Icons.Outlined.Visibility,
+                                        name = if (hidden) stringResource(R.string.show) else stringResource(
+                                            R.string.hide
+                                        )
                                     ) {
+                                        scope.launch {
+                                            api.updateMember(
+                                                id = myMember.member!!.id!!,
+                                                member = Member(hide = !hidden)
+                                            ) {
+                                                if (!hidden) {
+                                                    context.toast(R.string.group_hidden)
+                                                    nav.popBackStack()
+                                                } else {
+                                                    reload()
+                                                }
+                                            }
+                                        }
                                         showMenu = false
-                                        showSnoozeDialog = true
                                     }
-                                }
-                                item(
-                                    icon = Icons.Outlined.Search,
-                                    name = stringResource(R.string.search)
-                                ) {
-                                    showMenu = false
-                                    searchMessages = ""
-                                }
-                                item(
-                                    icon = Icons.AutoMirrored.Outlined.Logout,
-                                    name = stringResource(R.string.leave)
-                                ) {
-                                    showMenu = false
-                                    showLeaveGroup = true
-                                }
-                                if (ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
+                                    if (isSnoozed) {
+                                        item(
+                                            icon = Icons.Outlined.NotificationsPaused,
+                                            name = if (myMember.member?.snoozed == true) {
+                                                stringResource(R.string.indefinitely)
+                                            } else {
+                                                stringResource(
+                                                    R.string.until_x,
+                                                    myMember.member?.snoozedUntil?.formatFuture() ?: ""
+                                                )
+                                            },
+                                            selected = true
+                                        ) {
+                                            showMenu = false
+                                            snooze(false)
+                                        }
+                                    } else {
+                                        item(
+                                            icon = Icons.Outlined.NotificationsActive,
+                                            name = stringResource(R.string.snooze)
+                                        ) {
+                                            showMenu = false
+                                            showSnoozeDialog = true
+                                        }
+                                    }
                                     item(
-                                        icon = Icons.AutoMirrored.Outlined.AddToHomeScreen,
-                                        name = stringResource(R.string.add_to_homescreen)
+                                        icon = Icons.Outlined.Search,
+                                        name = stringResource(R.string.search)
                                     ) {
                                         showMenu = false
-                                        addToHomescreen()
+                                        searchMessages = ""
                                     }
-                                }
-                                item(
-                                    icon = Icons.Outlined.Report,
-                                    name = stringResource(R.string.report)
-                                ) {
-                                    showMenu = false
-                                    showReportDialog = true
+                                    item(
+                                        icon = Icons.AutoMirrored.Outlined.Logout,
+                                        name = stringResource(R.string.leave)
+                                    ) {
+                                        showMenu = false
+                                        showLeaveGroup = true
+                                    }
+                                    if (ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
+                                        item(
+                                            icon = Icons.AutoMirrored.Outlined.AddToHomeScreen,
+                                            name = stringResource(R.string.add_to_homescreen)
+                                        ) {
+                                            showMenu = false
+                                            addToHomescreen()
+                                        }
+                                    }
+                                    item(
+                                        icon = Icons.Outlined.Report,
+                                        name = stringResource(R.string.report)
+                                    ) {
+                                        showMenu = false
+                                        showReportDialog = true
+                                    }
                                 }
                             }
                         }
@@ -1072,7 +1079,8 @@ fun GroupScreen(groupId: String) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(.5f.pad, Alignment.End),
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier
+                                    .fillMaxWidth()
                                     .padding(horizontal = 1.pad)
                             ) {
                                 members.forEach { member ->
@@ -1360,7 +1368,10 @@ fun GroupScreen(groupId: String) {
                                                         Row(
                                                             verticalAlignment = Alignment.CenterVertically
                                                         ) {
-                                                            val activeFilters = listOf(searchByReaction, searchByRating).count { it != null }
+                                                            val activeFilters = listOf(
+                                                                searchByReaction,
+                                                                searchByRating
+                                                            ).count { it != null }
 
                                                             IconAndCount(
                                                                 icon = {
@@ -1604,7 +1615,8 @@ fun GroupScreen(groupId: String) {
                     }
                     AnimatedVisibility(showMore) {
                         Box(
-                            modifier = Modifier.height(240.dp)
+                            modifier = Modifier
+                                .height(240.dp)
                                 .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
                                 .shadow(0.25.dp)
                         ) {
@@ -1829,9 +1841,9 @@ fun GroupScreen(groupId: String) {
                 var topGroupReactions by rememberStateOf(emptyList<String>())
 
                 LaunchedEffect(groupId) {
-                        api.groupTopReactions(groupId) {
-                            topGroupReactions = it.take(5).map { it.reaction }
-                        }
+                    api.groupTopReactions(groupId) {
+                        topGroupReactions = it.take(5).map { it.reaction }
+                    }
                 }
                 AddReactionDialog(
                     onDismissRequest = {

@@ -133,7 +133,7 @@ fun TaskListItem(
             if (onExpanded != null) {
                 IconButton(
                     name = if (expanded) "expand_less" else "expand_more",
-                    title = application.appString { if (expanded) collapse else expand },
+                    title = application.appString { subtasks },
                     styles = {
                         if (subtaskCount == 0) {
                             opacity(.25f)
@@ -203,7 +203,10 @@ fun TaskListItem(
                             value = newSubtaskName,
                             onChange = { newSubtaskName = it },
                             placeholder = application.appString { newTask },
-                            onDismissRequest = { newSubtaskName = "" },
+                            onDismissRequest = {
+                                newSubtaskName = ""
+                                onExpanded?.invoke(false)
+                            },
                             onSubmit = onSubmit,
                             autoFocus = true,
                         )

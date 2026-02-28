@@ -1,7 +1,6 @@
 package com.queatz.ailaai.reaction
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -36,7 +35,6 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.ReactionSummary
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Reactions(
     reactions: ReactionSummary?,

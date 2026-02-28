@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,7 +28,6 @@ import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.story.SheetContent
 import com.queatz.ailaai.ui.theme.pad
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SheetHeader(
     title: String?,

@@ -33,7 +33,7 @@ import org.jetbrains.compose.web.dom.Text
 import r
 import kotlin.js.Date
 
-suspend fun personStatusDialog(person: Person, status: PersonStatus, scope: CoroutineScope) = dialog(
+suspend fun personStatusDialog(person: Person, status: PersonStatus?, scope: CoroutineScope) = dialog(
     title = null,
     confirmButton = application.appString { profile },
     cancelButton = application.appString { close },
@@ -54,50 +54,52 @@ suspend fun personStatusDialog(person: Person, status: PersonStatus, scope: Coro
         }) {
             Text(person.name ?: application.appString { someone })
         }
-        status.statusInfo?.let { status ->
-            StatusName(status)
-        }
-        status.photo?.let { photo ->
-            Div({
-                style {
-                    marginTop(1.r)
-                    backgroundImage("url($baseUrl$photo)")
-                    backgroundPosition("center")
-                    backgroundSize("cover")
-                    borderRadius(1.r)
-                    height(4.r)
-                    width(4.r)
-                    cursor("pointer")
-                }
-
-                onClick {
-                    scope.launch {
-                        photoDialog("$baseUrl$photo")
+        status?.let { status ->
+            status.statusInfo?.let { status ->
+                StatusName(status)
+            }
+            status.photo?.let { photo ->
+                Div({
+                    style {
+                        marginTop(1.r)
+                        backgroundImage("url($baseUrl$photo)")
+                        backgroundPosition("center")
+                        backgroundSize("cover")
+                        borderRadius(1.r)
+                        height(4.r)
+                        width(4.r)
+                        cursor("pointer")
                     }
+
+                    onClick {
+                        scope.launch {
+                            photoDialog("$baseUrl$photo")
+                        }
+                    }
+                }) {}
+            }
+            status.note?.let { note ->
+                Div({
+                    style {
+                        paddingTop(1.r)
+                        fontSize(20.px)
+                    }
+                }) {
+                    Text(note)
                 }
-            }) {}
-        }
-        status.note?.let { note ->
+            }
             Div({
                 style {
-                    paddingTop(1.r)
-                    fontSize(20.px)
+                    opacity(.5f)
+                    paddingBottom(1.r)
                 }
             }) {
-                Text(note)
-            }
-        }
-        Div({
-            style {
-                opacity(.5f)
-                paddingBottom(1.r)
-            }
-        }) {
-            Text(
-                formatDistanceToNow(
-                    Date(status.createdAt!!.toEpochMilliseconds())
+                Text(
+                    formatDistanceToNow(
+                        Date(status.createdAt!!.toEpochMilliseconds())
+                    )
                 )
-            )
+            }
         }
     }
 }

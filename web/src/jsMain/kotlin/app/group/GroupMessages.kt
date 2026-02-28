@@ -21,6 +21,7 @@ import app.components.FlexInput
 import app.components.LoadMore
 import app.components.LoadMoreState
 import app.dialog.editTaskDialog
+import app.dialog.personStatusDialog
 import app.dialog.replyInNewGroupDialog
 import app.group.GroupMessageBar
 import app.group.JoinGroupLayout
@@ -44,6 +45,7 @@ import components.ProfilePhoto
 import json
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.browser.window
 import kotlinx.serialization.encodeToString
 import kotlin.time.Instant
 import org.jetbrains.compose.web.css.height
@@ -297,7 +299,18 @@ fun GroupMessages(
                                 classes(AppStyles.seenUntilLayout)
                             }) {
                                 members.forEach {
-                                    ProfilePhoto(it.person!!, size = 18.px, fontSize = 12.px)
+                                    ProfilePhoto(
+                                        person = it.person!!,
+                                        size = 18.px,
+                                        fontSize = 12.px,
+                                        onClick = {
+                                            scope.launch {
+                                                if (personStatusDialog(it.person!!, null, scope) == true) {
+                                                    window.open("/profile/${it.person!!.id!!}", "_blank")
+                                                }
+                                            }
+                                        }
+                                    )
                                 }
                             }
                         }
