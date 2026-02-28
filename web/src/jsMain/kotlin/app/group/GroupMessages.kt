@@ -2,6 +2,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -259,8 +260,8 @@ fun GroupMessages(
             JoinGroupLayout(group)
         }
         LoadMore(
-            state,
-            !inCoverPage && hasMore && messages.isNotEmpty(),
+            state = state,
+            hasMore = !inCoverPage && hasMore && messages.isNotEmpty(),
             attrs = {
                 classes(AppStyles.messages)
             },
@@ -274,109 +275,120 @@ fun GroupMessages(
             val displayMessages = if (inCoverPage) messages.asReversed() else messages
 
             displayMessages.forEachIndexed { index, message ->
-                val title = (message.text?.notBlank ?: message.preview())?.let { "\"$it\"" } ?: appString { reply }
+                key(message.id!!) {
+                    val title = (message.text?.notBlank ?: message.preview())?.let { "\"$it\"" } ?: appString { reply }
 
-                val members = group.members ?: emptyList()
-                val nextMessage = if (index > 0) displayMessages[index - 1] else null
-
-                val seenUntilHere = members.filter {
-                    it.member?.id != myMember?.member?.id && it.hasSeen(message) && (nextMessage == null || !it.hasSeen(
-                        nextMessage
-                    ))
-                }
-
-                seenUntilHere.notEmpty?.let { members ->
-                    Div({
-                        classes(AppStyles.seenUntilLayout)
-                    }) {
-                        members.forEach {
-                            ProfilePhoto(it.person!!, size = 18.px, fontSize = 12.px)
+                    if (!inCoverPage) {
+                        val members = group.members ?: emptyList()
+                        val nextMessage = if (inCoverPage) {
+                            if (index < displayMessages.lastIndex) displayMessages[index + 1] else null
+                        } else {
+                            if (index > 0) displayMessages[index - 1] else null
                         }
-                    }
-                }
 
-                MessageItem(
-                    message = message,
-                    previousMessage = if (index < displayMessages.lastIndex) displayMessages[index + 1] else null,
-                    member = group.members?.find { member -> member.member?.id == message.member },
-                    bot = group.bots?.find { bot -> bot.id == message.bot },
-                    myMember = myMember,
-                    bots = group.bots ?: emptyList(),
-                    canReply = group.group?.config?.messages != GroupMessagesConfig.Hosts,
-                    canReact = myMember != null,
-                    onReply = {
-                        replyMessage = message
-                    },
-                    onReact = {
-                        scope.launch {
-                            val reaction = addReactionDialog(topGroupReactions + myTopReactions)?.notBlank
+                        val seenUntilHere = members.filter {
+                            it.member?.id != myMember?.member?.id && it.hasSeen(message) && (nextMessage == null || !it.hasSeen(
+                                nextMessage
+                            ))
+                        }
 
-                            if (reaction != null) {
-                                api.reactToMessage(message.id!!, ReactBody(reaction = Reaction(reaction = reaction))) {
-                                    reloadMessages()
+                        seenUntilHere.notEmpty?.let { members ->
+                            Div({
+                                classes(AppStyles.seenUntilLayout)
+                            }) {
+                                members.forEach {
+                                    ProfilePhoto(it.person!!, size = 18.px, fontSize = 12.px)
                                 }
                             }
                         }
-                    },
-                    onRate = { rating ->
-                        scope.launch {
-                            val result = setRatingDialog(rating) {
-                                scope.launch {
-                                    api.setMessageRating(
-                                        id = message.id!!,
-                                        rating = Rating(rating = null)
+                    }
+
+                    MessageItem(
+                        message = message,
+                        previousMessage = if (index < displayMessages.lastIndex) displayMessages[index + 1] else null,
+                        member = group.members?.find { member -> member.member?.id == message.member },
+                        bot = group.bots?.find { bot -> bot.id == message.bot },
+                        myMember = myMember,
+                        bots = group.bots ?: emptyList(),
+                        canReply = group.group?.config?.messages != GroupMessagesConfig.Hosts,
+                        canReact = myMember != null,
+                        onReply = {
+                            replyMessage = message
+                        },
+                        onReact = {
+                            scope.launch {
+                                val reaction = addReactionDialog(topGroupReactions + myTopReactions)?.notBlank
+
+                                if (reaction != null) {
+                                    api.reactToMessage(
+                                        message.id!!,
+                                        ReactBody(reaction = Reaction(reaction = reaction))
                                     ) {
                                         reloadMessages()
                                     }
                                 }
-                            }?.trimStart('+')?.toIntOrNull()
-
-                            if (result != null) {
-                                api.setMessageRating(
-                                    id = message.id!!,
-                                    rating = Rating(rating = result)
-                                ) {
-                                    reloadMessages()
-                                }
                             }
-                        }
-                    },
-                    onReplyInNewGroup = {
-                        scope.launch {
-                            replyInNewGroupDialog(title, scope, group, message) {
-                                nav.navigate(AppNavigation.Group(it.id!!))
-                            }
-                        }
-                    },
-                    onAddTask = {
-                        scope.launch {
-                            val lines = message.text.orEmpty().lines()
-                            val initialName = lines.firstOrNull()?.notBlank
-                            val initialDescription = message.text.takeIf { lines.size > 1 }?.notBlank
-                            editTaskDialog(
-                                groupId = group.group!!.id!!,
-                                initialName = initialName,
-                                initialDescription = initialDescription
-                            ) {
-                                if (group.group?.content == null) {
+                        },
+                        onRate = { rating ->
+                            scope.launch {
+                                val result = setRatingDialog(rating) {
                                     scope.launch {
-                                        api.updateGroup(
-                                            group.group!!.id!!,
-                                            Group(content = json.encodeToString<GroupContentModel>(GroupContentModel.Tasks()))
+                                        api.setMessageRating(
+                                            id = message.id!!,
+                                            rating = Rating(rating = null)
                                         ) {
-                                            onGroupUpdated()
-                                            onShowSidePanel()
+                                            reloadMessages()
                                         }
                                     }
-                                } else {
-                                    onGroupUpdated()
+                                }?.trimStart('+')?.toIntOrNull()
+
+                                if (result != null) {
+                                    api.setMessageRating(
+                                        id = message.id!!,
+                                        rating = Rating(rating = result)
+                                    ) {
+                                        reloadMessages()
+                                    }
+                                }
+                            }
+                        },
+                        onReplyInNewGroup = {
+                            scope.launch {
+                                replyInNewGroupDialog(title, scope, group, message) {
+                                    nav.navigate(AppNavigation.Group(it.id!!))
+                                }
+                            }
+                        },
+                        onAddTask = {
+                            scope.launch {
+                                val lines = message.text.orEmpty().lines()
+                                val initialName = lines.firstOrNull()?.notBlank
+                                val initialDescription = message.text.takeIf { lines.size > 1 }?.notBlank
+                                editTaskDialog(
+                                    groupId = group.group!!.id!!,
+                                    initialName = initialName,
+                                    initialDescription = initialDescription
+                                ) {
+                                    if (group.group?.content == null) {
+                                        scope.launch {
+                                            api.updateGroup(
+                                                group.group!!.id!!,
+                                                Group(content = json.encodeToString<GroupContentModel>(GroupContentModel.Tasks()))
+                                            ) {
+                                                onGroupUpdated()
+                                                onShowSidePanel()
+                                            }
+                                        }
+                                    } else {
+                                        onGroupUpdated()
+                                    }
                                 }
                             }
                         }
-                    }
-                ) {
-                    scope.launch {
-                        reloadMessages()
+                    ) {
+                        scope.launch {
+                            reloadMessages()
+                        }
                     }
                 }
             }
@@ -384,4 +396,5 @@ fun GroupMessages(
     }
 }
 
-private fun MemberAndPerson.hasSeen(message: Message) = (member?.seen ?: Instant.DISTANT_PAST) >= message.createdAt!!
+private fun MemberAndPerson.hasSeen(message: Message) =
+    (member?.seen ?: Instant.DISTANT_PAST) >= message.createdAt!!
