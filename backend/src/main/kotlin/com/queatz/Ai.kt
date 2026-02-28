@@ -27,8 +27,10 @@ class Ai {
     companion object {
         val styles = listOf(
             // OpenAI image generation via Responses API
-            "OpenAI" to "openai",
+            "Nano Banana (HD)" to "gemini-3.1-flash-image-preview",
+            "Nano Banana Pro (HD)" to "gemini-3-pro-image-preview",
             "Flux (Text Rendering, HD)" to ":flux",
+            "OpenAI (HD)" to "openai",
             "Dreaming (HD)" to "dreamshaperxl_lightning_1024px",
             "Starlight (HD)" to "envy_starlight_xl_01_lightning_1024px",
             "Juggernaut 9 (HD)" to "juggernautxl_9_lightning_1024px",
@@ -88,7 +90,8 @@ class Ai {
 
     val String.isFlux get() = this == ":flux"
     val String.isXlLightning get() = endsWith("_lightning_1024px")
-    val String.isXl get() = endsWith("_1024px") || isFlux
+    val String.isGoogle get() = startsWith("imagen-") || startsWith("gemini-")
+    val String.isXl get() = endsWith("_1024px") || isFlux || isGoogle
 
     suspend fun photo(
         prefix: String,
@@ -117,6 +120,42 @@ class Ai {
             }
             val path = save("$prefix-$model", finalBytes, "png")
             return Pair(path, dimensions)
+        }
+
+        // Handle Google image generation
+        if (model.isGoogle) {
+            val googleGenAi = GoogleGenAi()
+            val promptText = prompts.joinToString { it.text }
+            val (imageBytesRaw, mimeType) = googleGenAi.image(promptText, model, transparentBackground)
+                ?: throw IllegalStateException("Google image generation failed")
+            val contentType = ContentType.parse(mimeType)
+            val ext = contentType.contentSubtype
+            val processedBytes = processBytes(imageBytesRaw, contentType)
+            val path = save("$prefix-$model", processedBytes, ext)
+
+            if (transparentBackground) {
+                val transparentPath = runCatching {
+                    removeBackground(File(".$path"))
+                }.onFailure {
+                    it.printStackTrace()
+                    (it as? ServerResponseException)?.let {
+                        println("Remove background error:")
+                        println(it.response.bodyAsText())
+                    }
+                }.getOrDefault(path)
+
+                if (crop) {
+                    val (croppedBytes, dimensions) = withContext(Dispatchers.IO) {
+                        File(".$transparentPath").readBytes().cropTransparentBackground()
+                    }
+                    val finalPath = save("$prefix-$model", croppedBytes, "png")
+                    return Pair(finalPath, dimensions)
+                }
+
+                return Pair(transparentPath, null)
+            }
+
+            return Pair(path, null)
         }
 
         val isFlux = model.isFlux
@@ -229,8 +268,8 @@ class Ai {
                             key = "image",
                             value = photo.readBytes(),
                             headers = Headers.build {
-                                append(HttpHeaders.ContentType, "image/jpeg")
-                                append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
+                                append(HttpHeaders.ContentType, if (photo.extension == "png") "image/png" else "image/jpeg")
+                                append(HttpHeaders.ContentDisposition, "filename=photo.${photo.extension}")
                             }
                         )
                     }
