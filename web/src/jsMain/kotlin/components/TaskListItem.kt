@@ -61,8 +61,13 @@ fun TaskListItem(
                 }
             }
         }) {
+            // Done/Total
             val subtaskCount = remember(allCards, card.id, card.task?.owner) {
-                allCards?.count { it.task?.owner == card.id } ?: 0
+                allCards?.filter { it.task?.owner == card.id }
+                    ?.takeIf { it.isNotEmpty() }
+                    ?.let {
+                        it.count { it.task?.done == true } to it.size
+                    }
             }
             Div({
                 style {
@@ -81,7 +86,7 @@ fun TaskListItem(
                                     }?.name?.notBlank?.let { "⤷ $it" }
                                 }
                             },
-                            subtaskCount.takeIf { it > 0 }?.toString()
+                            subtaskCount?.let { subtaskCount -> "${subtaskCount.first}/${subtaskCount.second}" }
                         ).notBlank
                     },
                     showPhoto = showPhoto,
@@ -135,7 +140,7 @@ fun TaskListItem(
                     name = if (expanded) "expand_less" else "expand_more",
                     title = application.appString { subtasks },
                     styles = {
-                        if (subtaskCount == 0) {
+                        if (subtaskCount == null) {
                             opacity(.25f)
                         }
                     }

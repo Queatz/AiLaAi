@@ -2228,6 +2228,11 @@ object Strings {
         vn = "Nhiều",
         ru = "Множество"
     )
+    val background = Translation(
+        en = "Background",
+        vn = "Nền",
+        ru = "Фон"
+    )
     val backgroundOpacity = Translation(
         en = "Background opacity",
         vn = "Độ mờ của nền",

@@ -755,6 +755,17 @@ fun GroupTopBar(
                                             makeOpen(true)
                                         }
                                     }
+                                    item(appString { background }) {
+                                        scope.launch {
+                                            choosePhotoDialog.launch { photoUrl, _, _ ->
+                                                scope.launch {
+                                                    api.updateGroup(group.group!!.id!!, Group(background = photoUrl)) {
+                                                        onGroupUpdated()
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                     item(appString { effects }) {
                                         showEffects()
                                     }

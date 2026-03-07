@@ -233,22 +233,24 @@ fun GroupContentTasks(
             }
         }
 
-        Div({
-            style {
-                display(DisplayStyle.Flex)
-                alignItems(AlignItems.Center)
-                marginTop(1.r)
-            }
-        }) {
-            IconButton("fact_check", appString { batch }, appString { batch }) {
-                scope.launch {
-                    batchTasksDialog(
-                        groupId = group.group!!.id!!,
-                        initialCards = filteredCards,
-                        allCards = allCards,
-                        people = group.members?.mapNotNull { it.person }
-                    ) {
-                        reload()
+        if (filteredCards.isNotEmpty()) {
+            Div({
+                style {
+                    display(DisplayStyle.Flex)
+                    alignItems(AlignItems.Center)
+                    marginTop(1.r)
+                }
+            }) {
+                IconButton("fact_check", appString { batch }, appString { batch }) {
+                    scope.launch {
+                        batchTasksDialog(
+                            groupId = group.group!!.id!!,
+                            initialCards = filteredCards,
+                            allCards = allCards,
+                            people = group.members?.mapNotNull { it.person }
+                        ) {
+                            reload()
+                        }
                     }
                 }
             }

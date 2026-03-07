@@ -102,9 +102,7 @@ class Ai {
         transparentBackground: Boolean = false,
         crop: Boolean = false
     ): Pair<String, Pair<Int, Int>?> {
-        val model = style?.takeIf { it in defaultStylePresets } ?: defaultStylePresets.filter {
-            it.isXlLightning || it.isXl
-        }.random()
+        val model = style?.takeIf { it in defaultStylePresets } ?: defaultStylePresets.first()
 
         // Handle OpenAI image generation
         if (model == "openai") {

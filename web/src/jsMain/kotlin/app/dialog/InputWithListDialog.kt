@@ -32,9 +32,11 @@ suspend fun <T> inputWithListDialog(
     defaultValue = defaultValue,
     singleLine = singleLine,
     inputStyles = { width(32.r) },
-    extraButtons = extraButtons
+    extraButtons = extraButtons,
+    topContent = { resolve, _, _ ->
+        topContent?.invoke(resolve)
+    }
 ) { resolve, _, _ ->
-    topContent?.invoke(resolve)
     Div({
         style {
             overflowY("auto")

@@ -55,6 +55,7 @@ fun GroupPhoto(
     mergeTitles: Boolean = false,
     fallback: String = "account_circle",
     fallbackTitle: String = application.appString { someone },
+    styles: (StyleScope.() -> Unit)? = null,
     onClick: (() -> Unit)? = null
 ) {
     if (items.size > 1) {
@@ -64,6 +65,7 @@ fun GroupPhoto(
                 height(size)
                 position(Position.Relative)
                 marginRight(.5.r)
+                styles?.invoke(this)
             }
 
             if (mergeTitles) {
@@ -107,6 +109,7 @@ fun GroupPhoto(
 
         ) {
             marginRight(.5.r)
+            styles?.invoke(this)
         }
     } else {
         ProfilePhoto(
@@ -119,6 +122,7 @@ fun GroupPhoto(
             fallbackTitle = fallbackTitle
         ) {
             marginRight(.5.r)
+            styles?.invoke(this)
         }
     }
 }
