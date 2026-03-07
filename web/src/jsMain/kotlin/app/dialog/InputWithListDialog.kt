@@ -14,7 +14,7 @@ import org.jetbrains.compose.web.dom.Div
 import r
 
 suspend fun <T> inputWithListDialog(
-    items: List<T>,
+    items: StateFlow<List<T>>,
     selected: StateFlow<T?>,
     defaultValue: String = "",
     placeholder: String = "",
@@ -43,8 +43,9 @@ suspend fun <T> inputWithListDialog(
             height(8.r)
         }
     }) {
-        key(selected.collectAsState().value) {
-            items.forEach { item ->
+        val currentItems = items.collectAsState().value
+        key(currentItems, selected.collectAsState().value) {
+            currentItems.forEach { item ->
                 Div({
                     classes(
                         listOf(AppStyles.groupItem, AppStyles.groupItemOnSurface)

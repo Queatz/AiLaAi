@@ -10,6 +10,7 @@ import com.queatz.db.Status
 import components.GroupPhoto
 import components.GroupPhotoItem
 import components.IconButton
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import notBlank
@@ -21,12 +22,13 @@ suspend fun editStatusDialog(
     statuses: List<Status>,
     initialStatus: PersonStatus? = null,
     onUpdate: (PersonStatus) -> Unit
-) {
+) = coroutineScope {
     val selected = MutableStateFlow(initialStatus?.statusInfo)
     val photo = MutableStateFlow(initialStatus?.photo)
+    val allStatuses = MutableStateFlow<List<Status?>>(statuses + null)
 
-    val note = inputWithListDialog(
-        items = statuses,
+    val note = inputWithListDialog<Status?>(
+        items = allStatuses,
         selected = selected,
         defaultValue = initialStatus?.note.orEmpty(),
         placeholder = application.appString { note },
@@ -105,10 +107,18 @@ suspend fun editStatusDialog(
             }
         },
         isSelected = {
-            selected.value?.id == it.id
+            it?.id != null && selected.value?.id == it.id
         },
         onSelect = {
-            if (selected.value?.id == it.id) {
+            if (it == null) {
+                launch {
+                    val created = createStatusDialog()
+                    if (created != null) {
+                        allStatuses.value = listOf(created) + allStatuses.value
+                        selected.value = created
+                    }
+                }
+            } else if (selected.value?.id == it.id) {
                 selected.value = null
             } else {
                 selected.value = it
