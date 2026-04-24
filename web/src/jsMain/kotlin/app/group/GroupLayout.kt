@@ -5,6 +5,7 @@ import app.group.GroupTopBar
 import com.queatz.db.GroupExtended
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
+import androidx.compose.runtime.movableContentOf
 
 @Composable
 fun GroupLayout(
@@ -16,8 +17,27 @@ fun GroupLayout(
         mutableStateOf(false)
     }
     var showSearch by remember(group.group?.id) { mutableStateOf(false) }
-    var showSidePanel by remember(group.group?.id) { mutableStateOf(!group.group?.content.isNullOrBlank()) }
     var sidePanelOnLeft by remember(group.group?.id) { mutableStateOf(false) }
+    var showSidePanel by remember(group.group?.id) { mutableStateOf(!group.group?.content.isNullOrBlank()) }
+
+    LaunchedEffect(showSidePanel) {
+        if (!showSidePanel) {
+            sidePanelOnLeft = false
+        }
+    }
+
+    val sidePanel = remember(onGroupUpdated) {
+        movableContentOf { group: GroupExtended, isSwapped: Boolean ->
+            GroupSidePanel(
+                group,
+                isSwapped = isSwapped,
+                onSwap = { sidePanelOnLeft = !sidePanelOnLeft },
+                onClose = { showSidePanel = false }
+            ) {
+                onGroupUpdated()
+            }
+        }
+    }
 
     application.background(
         group.group?.background?.let { "$baseUrl$it" },
@@ -42,9 +62,7 @@ fun GroupLayout(
         }
     }) {
         if (showSidePanel && sidePanelOnLeft) {
-            GroupSidePanel(group, isSwapped = true, onSwap = { sidePanelOnLeft = !sidePanelOnLeft }) {
-                onGroupUpdated()
-            }
+            sidePanel(group, true)
         }
 
         Div({
@@ -96,9 +114,7 @@ fun GroupLayout(
         }
 
         if (showSidePanel && !sidePanelOnLeft) {
-            GroupSidePanel(group, isSwapped = false, onSwap = { sidePanelOnLeft = !sidePanelOnLeft }) {
-                onGroupUpdated()
-            }
+            sidePanel(group, false)
         }
     }
 }

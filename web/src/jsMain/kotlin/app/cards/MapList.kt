@@ -20,6 +20,7 @@ fun MapList(
     groupId: String? = null,
     isOnSurface: Boolean = false,
     onBackground: Boolean = false,
+    showStatus: Boolean = true,
     expandedCardId: String? = null,
     onExpanded: ((Card, Boolean) -> Unit)? = null,
     onUpdated: (() -> Unit)? = null,
@@ -41,6 +42,7 @@ fun MapList(
                 people = people,
                 isOnSurface = isOnSurface,
                 onBackground = onBackground,
+                showStatus = showStatus,
                 expanded = card.id == expandedCardId,
                 onExpanded = if (onExpanded != null) { { onExpanded(card, it) } } else null,
                 onUpdated = onUpdated

@@ -33,6 +33,7 @@ fun TaskListItem(
     isOnSurface: Boolean = false,
     onBackground: Boolean = false,
     isSubtask: Boolean = false,
+    showStatus: Boolean = true,
     expanded: Boolean = false,
     onExpanded: ((Boolean) -> Unit)? = null,
     onUpdated: (() -> Unit)? = null,
@@ -98,40 +99,42 @@ fun TaskListItem(
                 }
             }
 
-            card.task?.status?.takeIf { it.isNotBlank() }?.let { status ->
-                Span({
-                    classes(Styles.button, Styles.buttonSmall)
-                    style {
-                        backgroundColor(tagColor(status))
-                        color(Color.white)
-                        whiteSpace("nowrap")
-                        flexShrink(0)
-                    }
-                    onClick {
-                        it.stopPropagation()
-                        if (onUpdated != null) {
-                            val items = (allCards ?: listOf(card)).mapNotNull { it.task?.status }.filter { it.isNotBlank() }.distinct().sorted()
-                            scope.launch {
-                                val newStatus = inputSelectDialog(
-                                    confirmButton = application.appString { okay },
-                                    placeholder = application.appString { Strings.status },
-                                    items = items
-                                )
-                                if (newStatus != null && newStatus != status) {
-                                    val updatedCard = card.apply {
-                                        task = (task ?: Task()).apply {
-                                            this.status = newStatus
+            if (showStatus) {
+                card.task?.status?.takeIf { it.isNotBlank() }?.let { status ->
+                    Span({
+                        classes(Styles.button, Styles.buttonSmall)
+                        style {
+                            backgroundColor(tagColor(status))
+                            color(Color.white)
+                            whiteSpace("nowrap")
+                            flexShrink(0)
+                        }
+                        onClick {
+                            it.stopPropagation()
+                            if (onUpdated != null) {
+                                val items = (allCards ?: listOf(card)).mapNotNull { it.task?.status }.filter { it.isNotBlank() }.distinct().sorted()
+                                scope.launch {
+                                    val newStatus = inputSelectDialog(
+                                        confirmButton = application.appString { okay },
+                                        placeholder = application.appString { Strings.status },
+                                        items = items
+                                    )
+                                    if (newStatus != null && newStatus != status) {
+                                        val updatedCard = card.apply {
+                                            task = (task ?: Task()).apply {
+                                                this.status = newStatus
+                                            }
                                         }
-                                    }
-                                    api.updateCard(card.id!!, updatedCard) {
-                                        onUpdated()
+                                        api.updateCard(card.id!!, updatedCard) {
+                                            onUpdated()
+                                        }
                                     }
                                 }
                             }
                         }
+                    }) {
+                        Text(status)
                     }
-                }) {
-                    Text(status)
                 }
             }
 

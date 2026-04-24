@@ -151,9 +151,14 @@ object Strings {
         ru = "Выполнено %1\$s задач"
     )
     val percentComplete = Translation(
-        en = "%1\$s%% complete",
-        vn = "%1\$s%% hoàn thành",
-        ru = "%1\$s%% выполнено"
+        en = "%1\$s% complete",
+        vn = "%1\$s% hoàn thành",
+        ru = "%1\$s% выполнено"
+    )
+    val noStatus = Translation(
+        en = "No status",
+        vn = "Không có trạng thái",
+        ru = "Нет статуса"
     )
     val move = Translation(
         en = "Move",
@@ -623,6 +628,12 @@ object Strings {
         en = "Delete this page?",
         vn = "Xóa trang này?",
         ru = "Удалить эту страницу?"
+    )
+
+    val deleteThisCard = Translation(
+        en = "Delete this card?",
+        vn = "Xóa thẻ này?",
+        ru = "Удалить эту карточку?"
     )
 
     val youCannotUndoThis = Translation(
@@ -1923,6 +1934,21 @@ object Strings {
         vn = "Nhiệm vụ phụ",
         ru = "Подзадачи"
     )
+    val showDoneTasks = Translation(
+        en = "Show done tasks",
+        vn = "Hiển thị nhiệm vụ đã hoàn thành",
+        ru = "Показать выполненные задачи"
+    )
+    val sortBy = Translation(
+        en = "Sort by",
+        vn = "Sắp xếp theo",
+        ru = "Сортировать по"
+    )
+    val filterBy = Translation(
+        en = "Filter by",
+        vn = "Lọc theo",
+        ru = "Фильтровать по"
+    )
     val reschedule = Translation(
         en = "Reschedule",
         vn = "Lên lịch lại",
@@ -2267,6 +2293,16 @@ object Strings {
         en = "Batch",
         vn = "Hàng loạt",
         ru = "Пакет"
+    )
+    val list = Translation(
+        en = "List",
+        vn = "Danh sách",
+        ru = "Список"
+    )
+    val columns = Translation(
+        en = "Columns",
+        vn = "Cột",
+        ru = "Колонки"
     )
     val tapToRemoveFromBatch = Translation(
         en = "Tap to remove from batch",

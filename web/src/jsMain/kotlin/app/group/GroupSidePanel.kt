@@ -23,10 +23,11 @@ fun GroupSidePanel(
     group: GroupExtended,
     isSwapped: Boolean = false,
     onSwap: () -> Unit = {},
+    onClose: (() -> Unit)? = null,
     onUpdated: (GroupExtended) -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    var dynamicTitle by remember(group) { mutableStateOf<String?>(null) }
+    var dynamicTitle by remember(group.group?.id) { mutableStateOf<String?>(null) }
     Div({
         classes(Styles.pane)
         if (isSwapped) {
@@ -88,6 +89,7 @@ fun GroupSidePanel(
                             )
                         ) {
                             onUpdated(group.apply { this.group!!.content = it.content })
+                            onClose?.invoke()
                         }
                     }
                 }

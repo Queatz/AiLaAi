@@ -12,12 +12,15 @@ import androidx.compose.runtime.setValue
 import api
 import app.AppNavigation
 import app.ailaai.api.cardPeople
+import app.ailaai.api.deleteCard
 import app.ailaai.api.groupCards
 import app.ailaai.api.newCard
 import app.ailaai.api.updateCard
 import app.appNav
 import app.components.FlexInput
 import app.group.friendsDialog
+import appString
+import appText
 import application
 import com.queatz.db.Card
 import com.queatz.db.ConversationItem
@@ -86,7 +89,7 @@ suspend fun editTaskDialog(
         title = if (isNew) application.appString { newTask } else null,
         confirmButton = application.appString { save },
         cancelButton = application.appString { cancel },
-        extraButtons = {
+        extraButtons = { resolve ->
             val scope = rememberCoroutineScope()
             val configuration = LocalConfiguration.current
 
@@ -94,6 +97,24 @@ suspend fun editTaskDialog(
                 IconButton("edit", application.appString { edit }, application.appString { edit }) {
                     scope.launch {
                         appNav.navigate(AppNavigation.Page(card.id!!, card))
+                    }
+                }
+
+                IconButton("delete", application.appString { delete }, application.appString { delete }) {
+                    scope.launch {
+                        val result = dialog(
+                            title = application.appString { deleteThisCard },
+                            confirmButton = application.appString { yesDelete }
+                        ) {
+                            appText { youCannotUndoThis }
+                        }
+
+                        if (result == true) {
+                            api.deleteCard(card.id!!) {
+                                onUpdated()
+                                resolve(false)
+                            }
+                        }
                     }
                 }
             }
