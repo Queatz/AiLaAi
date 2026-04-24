@@ -135,6 +135,26 @@ object Strings {
         vn = "Nhiệm vụ mới",
         ru = "Новая задача"
     )
+    val showingNTasks = Translation(
+        en = "Showing %1\$s tasks",
+        vn = "Đang hiển thị %1\$s nhiệm vụ",
+        ru = "Показано %1\$s задач"
+    )
+    val nTasksToGo = Translation(
+        en = "%1\$s tasks to go",
+        vn = "Còn %1\$s nhiệm vụ",
+        ru = "Осталось %1\$s задач"
+    )
+    val nTasksDone = Translation(
+        en = "%1\$s tasks done",
+        vn = "Đã hoàn thành %1\$s nhiệm vụ",
+        ru = "Выполнено %1\$s задач"
+    )
+    val percentComplete = Translation(
+        en = "%1\$s%% complete",
+        vn = "%1\$s%% hoàn thành",
+        ru = "%1\$s%% выполнено"
+    )
     val move = Translation(
         en = "Move",
         vn = "Di chuyển",
@@ -300,6 +320,11 @@ object Strings {
         en = "Set status",
         vn = "Đặt trạng thái",
         ru = "Установить статус"
+    )
+    val setField = Translation(
+        en = "Set field",
+        vn = "Đặt trường",
+        ru = "Установить поле"
     )
     val isInvitingYouTo = Translation(
         en = "is inviting you to",

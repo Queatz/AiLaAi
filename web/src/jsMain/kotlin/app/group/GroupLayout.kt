@@ -17,6 +17,7 @@ fun GroupLayout(
     }
     var showSearch by remember(group.group?.id) { mutableStateOf(false) }
     var showSidePanel by remember(group.group?.id) { mutableStateOf(!group.group?.content.isNullOrBlank()) }
+    var sidePanelOnLeft by remember(group.group?.id) { mutableStateOf(false) }
 
     application.background(
         group.group?.background?.let { "$baseUrl$it" },
@@ -40,12 +41,23 @@ fun GroupLayout(
             width(100.percent)
         }
     }) {
+        if (showSidePanel && sidePanelOnLeft) {
+            GroupSidePanel(group, isSwapped = true, onSwap = { sidePanelOnLeft = !sidePanelOnLeft }) {
+                onGroupUpdated()
+            }
+        }
+
         Div({
+            if (sidePanelOnLeft) {
+                classes(Styles.sidePane)
+            }
             style {
                 display(DisplayStyle.Flex)
                 flexDirection(FlexDirection.ColumnReverse)
-                flex(1)
-                width(0.r)
+                if (!sidePanelOnLeft) {
+                    flex(1)
+                    width(0.r)
+                }
                 height(100.percent)
             }
         }) {
@@ -83,8 +95,8 @@ fun GroupLayout(
             )
         }
 
-        if (showSidePanel) {
-            GroupSidePanel(group) {
+        if (showSidePanel && !sidePanelOnLeft) {
+            GroupSidePanel(group, isSwapped = false, onSwap = { sidePanelOnLeft = !sidePanelOnLeft }) {
                 onGroupUpdated()
             }
         }

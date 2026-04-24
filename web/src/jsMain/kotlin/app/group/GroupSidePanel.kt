@@ -19,16 +19,24 @@ import r
 
 @OptIn(ExperimentalComposeWebApi::class)
 @Composable
-fun GroupSidePanel(group: GroupExtended, onUpdated: (GroupExtended) -> Unit) {
+fun GroupSidePanel(
+    group: GroupExtended,
+    isSwapped: Boolean = false,
+    onSwap: () -> Unit = {},
+    onUpdated: (GroupExtended) -> Unit
+) {
     val scope = rememberCoroutineScope()
     var dynamicTitle by remember(group) { mutableStateOf<String?>(null) }
     Div({
-        classes(Styles.pane, Styles.sidePane)
+        classes(Styles.pane)
+        if (isSwapped) {
+            classes(Styles.flexGrow)
+        } else {
+            classes(Styles.sidePane)
+        }
         style {
             padding(1.r)
             boxSizing("border-box")
-            display(DisplayStyle.Flex)
-            flexDirection(FlexDirection.Column)
         }
     }) {
         val content = group.group?.content?.let {
@@ -55,25 +63,43 @@ fun GroupSidePanel(group: GroupExtended, onUpdated: (GroupExtended) -> Unit) {
 
             val title = dynamicTitle ?: defaultTitle
 
-            IconButton(
-                name = "close",
-                title = title,
-                text = title,
-                isReversed = true,
-                styles = {
-                    margin(.5.r, 0.r)
-                    justifyContent(JustifyContent.SpaceBetween)
+            Div({
+                style {
+                    display(DisplayStyle.Flex)
+                    alignItems(AlignItems.Center)
                 }
-            ) {
-                scope.launch {
-                    api.updateGroup(
-                        id = group.group!!.id!!,
-                        groupUpdate = com.queatz.db.Group(
-                            content = json.encodeToString<GroupContentModel>(GroupContentModel.None)
-                        )
-                    ) {
-                        onUpdated(group.apply { this.group!!.content = it.content })
+            }) {
+                IconButton(
+                    name = "close",
+                    title = title,
+                    text = title,
+                    isReversed = true,
+                    styles = {
+                        flex(1)
+                        margin(.5.r, 0.r)
+                        justifyContent(JustifyContent.SpaceBetween)
                     }
+                ) {
+                    scope.launch {
+                        api.updateGroup(
+                            id = group.group!!.id!!,
+                            groupUpdate = com.queatz.db.Group(
+                                content = json.encodeToString<GroupContentModel>(GroupContentModel.None)
+                            )
+                        ) {
+                            onUpdated(group.apply { this.group!!.content = it.content })
+                        }
+                    }
+                }
+
+                IconButton(
+                    name = "swap_horiz",
+                    title = "Swap positions",
+                    styles = {
+                        margin(.5.r, 0.r, .5.r, .5.r)
+                    }
+                ) {
+                    onSwap()
                 }
             }
         }

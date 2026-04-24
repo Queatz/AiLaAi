@@ -7,7 +7,7 @@ val Card.hint get() = bulletedString(
             "$it/${frequency.appStringShort}"
         } ?: it
     },
-    categories?.firstOrNull(),
+    categories?.joinToString(),
     location?.notBlank
 )
 

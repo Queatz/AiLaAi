@@ -197,6 +197,52 @@ suspend fun batchTasksDialog(
                         Text(application.appString { setCollaborators })
                     }
 
+                    // Set field
+                    Div({
+                        classes(Styles.outlineButton, Styles.outlineButtonSmall)
+                        if (isLoading) {
+                            style {
+                                opacity(0.5)
+                            }
+                        }
+                        onClick {
+                            if (isLoading) return@onClick
+                            scope.launch {
+                                val fieldNameItems = allCards.value?.flatMap { it.task?.fields?.keys.orEmpty() }?.filter { it.isNotBlank() }?.distinct()?.sorted() ?: emptyList()
+                                val fieldName = inputSelectDialog(
+                                    confirmButton = application.appString { okay },
+                                    placeholder = application.appString { Strings.field },
+                                    items = fieldNameItems
+                                )
+
+                                if (!fieldName.isNullOrBlank()) {
+                                    val fieldValueItems = allCards.value?.mapNotNull { it.task?.fields?.get(fieldName) }?.filter { it.isNotBlank() }?.distinct()?.sorted() ?: emptyList()
+                                    val fieldValue = inputSelectDialog(
+                                        confirmButton = application.appString { okay },
+                                        placeholder = fieldName,
+                                        items = fieldValueItems
+                                    )
+
+                                    if (fieldValue != null) {
+                                        isLoading = true
+                                        cards.forEach { card ->
+                                            val updatedCard = card.apply {
+                                                task = (task ?: Task()).apply {
+                                                    fields = (fields ?: emptyMap()) + (fieldName to fieldValue)
+                                                }
+                                            }
+                                            api.updateCard(card.id!!, updatedCard)
+                                        }
+                                        isLoading = false
+                                        onUpdated()
+                                    }
+                                }
+                            }
+                        }
+                    }) {
+                        Text(application.appString { setField })
+                    }
+
                     // Mark as done
                     Div({
                         classes(Styles.outlineButton, Styles.outlineButtonSmall)

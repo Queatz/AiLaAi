@@ -12,12 +12,14 @@ import androidx.compose.runtime.collectAsState
 import api
 import app.ailaai.api.groupCards
 import app.cards.MapList
+import app.compose.rememberDarkMode
 import app.components.Empty
 import app.components.FlexInput
 import app.dialog.batchTasksDialog
 import app.dialog.editTaskDialog
 import app.nav.CardItem
 import appString
+import format
 import application
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
@@ -30,19 +32,27 @@ import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.FlexWrap
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexShrink
+import org.jetbrains.compose.web.css.flexWrap
+import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Progress
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import r
@@ -73,6 +83,7 @@ fun GroupContentTasks(
         var isSearchFocused by remember { mutableStateOf(false) }
         var showSubtasks by remember { mutableStateOf(false) }
         var expandedCardId by remember { mutableStateOf<String?>(null) }
+        val isDarkMode = rememberDarkMode()
         val filteredCards = remember(cards, search, showSubtasks) {
             val search = search.trim()
             val list = if (search.isBlank()) cards!! else cards!!.filter {
@@ -209,6 +220,63 @@ fun GroupContentTasks(
         if (filteredCards.isEmpty()) {
             Empty { Text(if (search.isBlank()) "No tasks." else "No results.") }
         } else {
+            if (filteredCards.size > 10) {
+                val total = filteredCards.size
+                val done = filteredCards.count { it.task?.done == true }
+                val remaining = total - done
+                val percent = if (total > 0) (done.toFloat() / total.toFloat() * 100).toInt() else 0
+
+                Div({
+                    style {
+                        display(DisplayStyle.Flex)
+                        flexDirection(FlexDirection.Column)
+                        gap(.5.r)
+                        padding(1.r)
+                        marginTop(1.r)
+                        backgroundColor(if (isDarkMode) Styles.colors.dark.surface else Styles.colors.surface)
+                        borderRadius(1.r)
+                        if (isDarkMode) {
+                            color(Color.white)
+                        }
+                    }
+                }) {
+                    Span({
+                        style {
+                            fontWeight("bold")
+                            fontSize(1.2.r)
+                        }
+                    }) {
+                        Text(appString { showingNTasks }.format(total.toString()))
+                    }
+
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            gap(1.r)
+                            flexWrap(FlexWrap.Wrap)
+                        }
+                    }) {
+                        Span {
+                            Text(appString { nTasksDone }.format(done.toString()))
+                        }
+                        Span {
+                            Text(appString { nTasksToGo }.format(remaining.toString()))
+                        }
+                        Span {
+                            Text(appString { percentComplete }.format(percent.toString()))
+                        }
+                    }
+
+                    Progress({
+                        attr("value", done.toString())
+                        attr("max", total.toString())
+                        style {
+                            width(100.percent)
+                        }
+                    })
+                }
+            }
+
             MapList(
                 cards = filteredCards,
                 allCards = cards,
