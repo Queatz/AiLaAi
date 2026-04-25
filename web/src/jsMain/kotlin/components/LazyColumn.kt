@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -75,36 +76,41 @@ fun LazyList(
     var shownCount by remember { mutableStateOf(pageSize) }
     var element by remember { mutableStateOf<HTMLDivElement?>(null) }
 
-    var isBottomReached by remember { mutableStateOf(false) }
-
     fun calc() {
-        isBottomReached = if (dsl.all.isEmpty()) {
-            false
-        } else {
-            element?.let { ref ->
-                val parent = ref.parentElement ?: return@let false
+        if (dsl.all.isEmpty()) return
+        if (shownCount >= dsl.all.size) return
 
-                val elementRect = ref.getBoundingClientRect()
-                val parentRect = parent.getBoundingClientRect()
-
-                if (horizontal) {
-                    false//
-                } else {
-                    elementRect.bottom <= parentRect.bottom
+        element?.let { ref ->
+            var scrollableParent = ref.parentElement
+            while (scrollableParent != null) {
+                val style = window.getComputedStyle(scrollableParent)
+                val overflowY = style.getPropertyValue("overflow-y")
+                val overflow = style.getPropertyValue("overflow")
+                if (overflowY == "auto" || overflowY == "scroll" || overflow == "auto" || overflow == "scroll") {
+                    break
                 }
-            } == true
+                scrollableParent = scrollableParent.parentElement
+            }
+
+            val parent = scrollableParent ?: ref.parentElement ?: return@let
+
+            val elementRect = ref.getBoundingClientRect()
+            val parentRect = parent.getBoundingClientRect()
+
+            val reached = if (horizontal) {
+                elementRect.right <= parentRect.right + 100
+            } else {
+                elementRect.bottom <= parentRect.bottom + 100
+            }
+
+            if (reached) {
+                shownCount += pageSize
+            }
         }
     }
 
-    LaunchedEffect(isBottomReached) {
-        if (isBottomReached) {
-            shownCount += pageSize
-        }
-    }
-
-    // todo
-    LaunchedEffect(element) {
-        while (true) {
+    LaunchedEffect(element, dsl.all.size) {
+        while (shownCount < dsl.all.size) {
             delay(50)
             calc()
         }

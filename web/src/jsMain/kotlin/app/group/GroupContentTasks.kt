@@ -499,7 +499,7 @@ fun GroupContentTasks(
                         }
                     }
 
-                    if (percent in 1..<100) {
+                    if (total > 0) {
                         Div({
                             style {
                                 display(DisplayStyle.Flex)

@@ -17,24 +17,22 @@ fun GroupLayout(
         mutableStateOf(false)
     }
     var showSearch by remember(group.group?.id) { mutableStateOf(false) }
-    var sidePanelOnLeft by remember(group.group?.id) { mutableStateOf(false) }
+    var sidePanelOnLeft by remember { mutableStateOf(false) }
     var showSidePanel by remember(group.group?.id) { mutableStateOf(!group.group?.content.isNullOrBlank()) }
 
-    LaunchedEffect(showSidePanel) {
-        if (!showSidePanel) {
-            sidePanelOnLeft = false
-        }
-    }
+    val currentOnSwap by rememberUpdatedState { sidePanelOnLeft = !sidePanelOnLeft }
+    val currentOnClose by rememberUpdatedState { showSidePanel = false }
+    val currentOnGroupUpdated by rememberUpdatedState(onGroupUpdated)
 
-    val sidePanel = remember(onGroupUpdated) {
+    val sidePanel = remember {
         movableContentOf { group: GroupExtended, isSwapped: Boolean ->
             GroupSidePanel(
                 group,
                 isSwapped = isSwapped,
-                onSwap = { sidePanelOnLeft = !sidePanelOnLeft },
-                onClose = { showSidePanel = false }
+                onSwap = { currentOnSwap() },
+                onClose = { currentOnClose() }
             ) {
-                onGroupUpdated()
+                currentOnGroupUpdated()
             }
         }
     }
@@ -66,13 +64,13 @@ fun GroupLayout(
         }
 
         Div({
-            if (sidePanelOnLeft) {
+            if (showSidePanel && sidePanelOnLeft) {
                 classes(Styles.sidePane)
             }
             style {
                 display(DisplayStyle.Flex)
                 flexDirection(FlexDirection.ColumnReverse)
-                if (!sidePanelOnLeft) {
+                if (!showSidePanel || !sidePanelOnLeft) {
                     flex(1)
                     width(0.r)
                 }
