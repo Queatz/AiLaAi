@@ -24,7 +24,6 @@ tasks.withType<KotlinCompile> {
 
 kotlin {
     jvm {
-        withJava()
     }
     js {
         browser {
