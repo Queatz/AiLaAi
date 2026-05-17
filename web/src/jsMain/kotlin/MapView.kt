@@ -31,6 +31,7 @@ import kotlinx.dom.addClass
 import lib.ResizeObserver
 import lib.getCameraLngLat
 import lib.mapboxgl
+import lib.mapboxCss
 import lib.mapboxgl.MarkerOptions
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.AlignSelf
@@ -402,6 +403,12 @@ fun MapView(
         }
 
         ref { ref ->
+            // Ensure Mapbox CSS is bundled (ESM build, no global require)
+            val __mapboxCss = mapboxCss
+
+            mapboxgl.accessToken =
+                "pk.eyJ1IjoiamFjb2JmZXJyZXJvIiwiYSI6ImNraXdyY211eTBlMmcycW02eDNubWNpZzcifQ.1KtSoMzrPCM0A8UVtI_gdg"
+
             val locateMeControl = mapboxgl.GeolocateControl(
                 js("{showAccuracyCircle: false}")
             )

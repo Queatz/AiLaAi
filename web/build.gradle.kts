@@ -65,6 +65,7 @@ kotlin {
                 implementation(npm("@videosdk.live/js-sdk", "0.3.12"))
                 implementation(npm("mapbox-gl", "3.15.0"))
                 implementation(npm("marked", "16.4.1"))
+                implementation(npm("html-webpack-plugin", "5.6.3"))
                 implementation(npm("@babylonjs/core", "8.36.0"))
                 implementation(npm("@babylonjs/materials", "8.36.0"))
                 implementation(npm("monaco-editor", "0.54.0"))

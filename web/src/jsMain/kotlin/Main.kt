@@ -5,9 +5,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import app.AppStyleSheet
 import app.AppStyles
 import app.appNav
 import app.call.CallLayout
+import app.call.CallStyleSheet
 import app.call.CallStyles
 import app.components.Background
 import app.compose.rememberMobileMode
@@ -22,6 +24,7 @@ import app.softwork.routingcompose.BrowserRouter
 import app.softwork.routingcompose.Router
 import app.theme.ThemeManager
 import app.theme.ThemeSettingsPage
+import app.widget.WidgetStyleSheet
 import app.widget.WidgetStyles
 import components.AppFooter
 import components.AppHeader
@@ -43,8 +46,6 @@ import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.serialization.json.Json
-import lib.mapboxgl
-import lib.mapboxCss
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Span
@@ -53,6 +54,7 @@ import org.jetbrains.compose.web.renderComposableInBody
 import org.w3c.dom.HTMLLinkElement
 import org.w3c.dom.get
 import org.w3c.dom.set
+import stories.StoryStyleSheet
 import stories.StoryStyles
 
 //const val baseUrl = "http://0.0.0.0:8080"
@@ -77,12 +79,6 @@ val http = HttpClient(Js) {
 }
 
 fun main() {
-    // Ensure Mapbox CSS is bundled (ESM build, no global require)
-    val __mapboxCss = mapboxCss
-
-    mapboxgl.accessToken =
-        "pk.eyJ1IjoiamFjb2JmZXJyZXJvIiwiYSI6ImNraXdyY211eTBlMmcycW02eDNubWNpZzcifQ.1KtSoMzrPCM0A8UVtI_gdg"
-
     val savedTheme = ThemeManager.getCurrentTheme()
     if (savedTheme != null) {
         StyleManager.setTheme(savedTheme)
@@ -91,11 +87,11 @@ fun main() {
     renderComposableInBody {
         StyleManager.use(
             MainStyleSheet::class,
-            AppStyles::class,
-            EffectStyles::class,
-            WidgetStyles::class,
-            CallStyles::class,
-            StoryStyles::class
+            AppStyleSheet::class,
+            EffectStyleSheet::class,
+            WidgetStyleSheet::class,
+            CallStyleSheet::class,
+            StoryStyleSheet::class
         )
 
         var language by remember {
