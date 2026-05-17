@@ -1,8 +1,8 @@
 plugins {
     application
-    kotlin("jvm") version "2.2.21"
-    kotlin("plugin.serialization") version "2.2.21"
-    id("io.ktor.plugin") version "3.3.1"
+    kotlin("jvm") version "2.3.21"
+    kotlin("plugin.serialization") version "2.3.21"
+    id("io.ktor.plugin") version "3.5.0"
     id("com.ailaai.shared.config")
 }
 

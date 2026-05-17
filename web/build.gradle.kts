@@ -1,9 +1,9 @@
 import org.codehaus.groovy.ast.tools.GeneralUtils.args
 
 plugins {
-    kotlin("multiplatform") version "2.2.21"
-    kotlin("plugin.serialization") version "2.2.21"
-    kotlin("plugin.compose") version "2.2.21"
+    kotlin("multiplatform") version "2.3.21"
+    kotlin("plugin.serialization") version "2.3.21"
+    kotlin("plugin.compose") version "2.3.21"
     id("com.ailaai.shared.config")
 }
 
@@ -58,17 +58,17 @@ kotlin {
                 implementation("io.ktor:ktor-serialization-kotlinx-json:${versions.ktor}")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
                 implementation("app.softwork:routing-compose:0.5.0")
-                implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2025.11.5")
-                implementation(npm("qr", "0.5.2"))
+                implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.5.4")
+                implementation(npm("qr", "0.6.0"))
                 implementation(npm("date-fns", "4.1.0"))
-                implementation(npm("@vvo/tzdb", "6.187.0"))
-                implementation(npm("@videosdk.live/js-sdk", "0.3.12"))
-                implementation(npm("mapbox-gl", "3.15.0"))
-                implementation(npm("marked", "16.4.1"))
-                implementation(npm("html-webpack-plugin", "5.6.3"))
-                implementation(npm("@babylonjs/core", "8.36.0"))
-                implementation(npm("@babylonjs/materials", "8.36.0"))
-                implementation(npm("monaco-editor", "0.54.0"))
+                implementation(npm("@vvo/tzdb", "6.198.0"))
+                implementation(npm("@videosdk.live/js-sdk", "0.8.1"))
+                implementation(npm("mapbox-gl", "3.23.1"))
+                implementation(npm("marked", "18.0.3"))
+                implementation(npm("html-webpack-plugin", "5.6.7"))
+                implementation(npm("@babylonjs/core", "9.7.0"))
+                implementation(npm("@babylonjs/materials", "9.7.0"))
+                implementation(npm("monaco-editor", "0.55.1"))
             }
         }
     }

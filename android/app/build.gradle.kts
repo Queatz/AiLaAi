@@ -7,8 +7,8 @@ import org.jetbrains.kotlin.konan.properties.Properties
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    kotlin("plugin.serialization") version "2.2.21"
-    kotlin("plugin.compose") version "2.2.21"
+    kotlin("plugin.serialization") version "2.3.21"
+    kotlin("plugin.compose") version "2.3.21"
     id("com.huawei.agconnect")
     id("com.google.gms.google-services")
     id("com.google.devtools.ksp")
@@ -111,9 +111,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
-    }
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_21.toString()
     }
     packaging {
         resources {
