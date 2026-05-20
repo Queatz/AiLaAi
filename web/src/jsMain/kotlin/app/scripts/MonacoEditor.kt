@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import app.compose.rememberDarkMode
+import kotlinx.coroutines.await
 import kotlinx.coroutines.flow.MutableSharedFlow
 import lib.Monaco
 import lib.jsObject
@@ -15,6 +16,7 @@ import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.dom.Div
+import org.w3c.dom.HTMLElement
 import r
 
 /**
@@ -71,11 +73,16 @@ fun MonacoEditor(
     onIsEdited: (Boolean) -> Unit = {},
     styles: StyleScope.() -> Unit = {},
 ) {
-    var editor: Monaco.IEditor? by remember { mutableStateOf(null) }
+    var monacoModule by remember { mutableStateOf<Monaco?>(null) }
+    var editor by remember { mutableStateOf<Monaco.IEditor?>(null) }
     val darkMode = rememberDarkMode()
     var currentValue by remember(initialValue) { mutableStateOf(initialValue) }
     var originalLines by remember(initialValue) { mutableStateOf(initialValue.lines()) }
     var decorationIds by remember { mutableStateOf(emptyArray<String>()) }
+
+    LaunchedEffect(Unit) {
+        monacoModule = js("import('monaco-editor')").unsafeCast<kotlin.js.Promise<Monaco>>().await()
+    }
 
     LaunchedEffect(currentValue) {
         onValueChange(currentValue)
@@ -164,7 +171,7 @@ fun MonacoEditor(
         }
 
         // Create decorations for each type of line change
-        val decorations = mutableListOf<Monaco.LineDecoration>()
+        val decorations = mutableListOf<dynamic>()
 
         // Add decorations for added lines
         addedLineNumbers.distinct().forEach { lineNumber ->
@@ -246,6 +253,24 @@ fun MonacoEditor(
         }
     }
 
+    val container = remember { mutableStateOf<HTMLElement?>(null) }
+
+    LaunchedEffect(container.value, monacoModule, darkMode) {
+        val c = container.value
+        val m = monacoModule
+        if (c != null && m != null && editor == null) {
+            editor = m.editor.create(
+                c,
+                jsObject {
+                    value = initialValue
+                    language = "kotlin"
+                    theme = if (darkMode) "vs-dark" else "vs-light"
+                    automaticLayout = true
+                }
+            )
+        }
+    }
+
     Div({
         style {
             borderRadius(1.r)
@@ -253,18 +278,11 @@ fun MonacoEditor(
             styles()
         }
 
-        ref { container ->
-            editor = Monaco.editor.create(
-                container = container,
-                options = jsObject {
-                    value = initialValue
-                    language = "kotlin"
-                    theme = if (darkMode) "vs-dark" else "vs-light"
-                    automaticLayout = true
-                }
-            )
+        ref {
+            container.value = it
 
             onDispose {
+                container.value = null
                 editor?.dispose()
                 editor = null
             }

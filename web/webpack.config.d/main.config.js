@@ -5,7 +5,7 @@ config.optimization = {
     splitChunks: {
         chunks: 'all',
         minSize: 50000,
-        maxSize: 1000000,
+        maxSize: 2000000,
         cacheGroups: {
             babylon: {
                 test: /[\\/]node_modules[\\/]@babylonjs[\\/]/,
@@ -37,6 +37,8 @@ config.optimization = {
                 chunks: 'all',
                 priority: 30,
                 enforce: true,
+                maxSize: Infinity,
+                minSize: 0,
             },
             vendor: {
                 test: /[\\/]node_modules[\\/]/,
@@ -52,7 +54,8 @@ config.optimization = {
 config.plugins.push(new HtmlWebpackPlugin({
     template: path.resolve(__dirname, 'kotlin/index.html'),
     inject: 'body',
-    publicPath: '/'
+    publicPath: '/',
+    excludeChunks: ['babylon', 'monaco']
 }));
 
 config.target = ['web'];

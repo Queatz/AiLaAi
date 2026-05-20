@@ -8,6 +8,40 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
 <link rel="icon" type="image/x-png" href="/icon.png">
 <head>
+<script>
+    (function() {
+        const handler = {
+            get(target, prop) {
+                if (prop === 'prototype') return {};
+                if (prop === 'then') return undefined;
+                return new Proxy(function() {}, {
+                    get(t, p) {
+                        if (p === 'prototype') return {};
+                        if (p === Symbol.hasInstance) {
+                            return function(instance) {
+                                const real = window.BABYLON_REAL && window.BABYLON_REAL[prop];
+                                return real && (instance instanceof real);
+                            };
+                        }
+                        const real = window.BABYLON_REAL && window.BABYLON_REAL[prop];
+                        return real ? real[p] : undefined;
+                    },
+                    apply(t, thisArg, args) {
+                        const real = window.BABYLON_REAL && window.BABYLON_REAL[prop];
+                        if (real) return real.apply(thisArg, args);
+                        throw new Error("BABYLON." + prop + " called before it was loaded. Ensure you are in GamePage.");
+                    },
+                    construct(t, args) {
+                        const real = window.BABYLON_REAL && window.BABYLON_REAL[prop];
+                        if (real) return new real(...args);
+                        throw new Error("BABYLON." + prop + " instantiated before it was loaded.");
+                    }
+                });
+            }
+        };
+        window.BABYLON = new Proxy({}, handler);
+    })();
+</script>
 <style>
 html, body {
     width: 100vw;

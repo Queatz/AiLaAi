@@ -1,5 +1,4 @@
-@file:JsModule("@babylonjs/materials")
-@file:JsNonModule
+@file:JsQualifier("BABYLON")
 
 package lib
 

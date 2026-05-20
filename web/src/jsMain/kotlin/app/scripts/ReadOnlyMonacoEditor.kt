@@ -7,12 +7,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import app.compose.rememberDarkMode
+import kotlinx.coroutines.await
 import lib.Monaco
 import lib.jsObject
 import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.dom.Div
+import org.w3c.dom.HTMLElement
 import r
 
 /**
@@ -23,8 +25,13 @@ fun ReadOnlyMonacoEditor(
     initialValue: String = "",
     styles: StyleScope.() -> Unit = {},
 ) {
-    var editor: Monaco.IEditor? by remember { mutableStateOf(null) }
+    var monacoModule by remember { mutableStateOf<Monaco?>(null) }
+    var editor by remember { mutableStateOf<Monaco.IEditor?>(null) }
     val darkMode = rememberDarkMode()
+
+    LaunchedEffect(Unit) {
+        monacoModule = js("import('monaco-editor')").unsafeCast<kotlin.js.Promise<Monaco>>().await()
+    }
 
     LaunchedEffect(editor, darkMode) {
         editor?.updateOptions(
@@ -41,17 +48,15 @@ fun ReadOnlyMonacoEditor(
         }
     }
 
-    Div({
-        style {
-            borderRadius(1.r)
-            overflow("hidden")
-            styles()
-        }
+    val container = remember { mutableStateOf<HTMLElement?>(null) }
 
-        ref { container ->
-            editor = Monaco.editor.create(
-                container = container,
-                options = jsObject {
+    LaunchedEffect(container.value, monacoModule, darkMode) {
+        val c = container.value
+        val m = monacoModule
+        if (c != null && m != null && editor == null) {
+            editor = m.editor.create(
+                c,
+                jsObject {
                     this.value = initialValue
                     this.language = "kotlin"
                     this.theme = if (darkMode) "vs-dark" else "vs-light"
@@ -62,8 +67,21 @@ fun ReadOnlyMonacoEditor(
                     }
                 }
             )
+        }
+    }
+
+    Div({
+        style {
+            borderRadius(1.r)
+            overflow("hidden")
+            styles()
+        }
+
+        ref {
+            container.value = it
 
             onDispose {
+                container.value = null
                 editor?.dispose()
                 editor = null
             }

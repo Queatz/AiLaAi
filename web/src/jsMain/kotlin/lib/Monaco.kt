@@ -3,9 +3,7 @@ package lib
 import org.w3c.dom.*
 import kotlin.js.*
 
-@JsModule("monaco-editor")
-@JsNonModule
-external object Monaco {
+external interface Monaco {
     val editor: EditorFactory
 
     interface EditorFactory {

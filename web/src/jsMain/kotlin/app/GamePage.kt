@@ -35,7 +35,9 @@ import game.Game
 import game.Side
 import getImageDimensions
 import kotlinx.browser.document
+import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.await
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import lib.FullscreenApi
@@ -408,6 +410,19 @@ fun GamePage(
     var isPlaying by remember { mutableStateOf(false) }
     var isPixelated by remember { mutableStateOf(false) }
     var allowPaste by remember { mutableStateOf(false) }
+    var isBabylonLoaded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        if (!isBabylonLoaded) {
+            val babylon = js("import('@babylonjs/core')").unsafeCast<kotlin.js.Promise<dynamic>>().await()
+            val materials = js("import('@babylonjs/materials')").unsafeCast<kotlin.js.Promise<dynamic>>().await()
+            val combined = js("({})")
+            js("Object.assign(combined, babylon)")
+            js("Object.assign(combined, materials)")
+            window.asDynamic().BABYLON_REAL = combined
+            isBabylonLoaded = true
+        }
+    }
 
     var showPanel by remember { mutableStateOf(showSidePanel) }
     // Hide play button when animation is playing
@@ -430,7 +445,8 @@ fun GamePage(
         }
     }
 
-    DisposableEffect(localGameScene, canvasRef, editable) {
+    DisposableEffect(localGameScene, canvasRef, editable, isBabylonLoaded) {
+        if (!isBabylonLoaded) return@DisposableEffect onDispose { }
         localGameScene ?: return@DisposableEffect onDispose { }
         canvasRef ?: return@DisposableEffect onDispose { }
 
