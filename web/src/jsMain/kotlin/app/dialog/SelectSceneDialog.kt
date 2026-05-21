@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import api
 import app.AppStyles
 import app.ailaai.api.gameScenes
+import app.components.FlexInput
 import appString
 import appText
 import application
@@ -86,14 +87,14 @@ suspend fun selectSceneDialog(
                     height(24.r)
                 }
             }) {
-                SearchField(
+                FlexInput(
                     value = search,
                     placeholder = appString { this.search },
-                    shadow = false,
+                    singleLine = true,
                     styles = {
                         margin(.5.r)
                     },
-                    onValue = {
+                    onChange = {
                         search = it
                     }
                 )

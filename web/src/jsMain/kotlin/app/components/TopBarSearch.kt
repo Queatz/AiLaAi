@@ -2,7 +2,6 @@ package app.components
 
 import androidx.compose.runtime.Composable
 import appString
-import components.SearchField
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.css.selectors.CSSSelector.PseudoClass.focus
 import org.jetbrains.compose.web.dom.Div
@@ -26,20 +25,22 @@ fun TopBarSearch(
             alignSelf(AlignSelf.Center)
         }
     }) {
-        SearchField(
+        FlexInput(
             value = value,
             placeholder = placeholder ?: appString { this.search },
-            focus = focus,
+            autoFocus = focus,
+            singleLine = true,
             styles = {
                 if (styles != null) {
                     styles()
                 } else {
                     margin(1.r)
                 }
+            },
+            onChange = {
+                onValue(it)
             }
-        ) {
-            onValue(it)
-        }
+        )
         content?.invoke()
     }
 }

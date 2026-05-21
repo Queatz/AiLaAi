@@ -111,6 +111,7 @@ object StyleManager {
 
     @OptIn(ExperimentalJsReflectionCreateInstance::class)
     fun <T : StyleSheet> style(kClass: KClass<T>): T {
+        @Suppress("UNCHECKED_CAST")
         return styles.getOrPut(kClass) { kClass.createInstance() } as T
     }
 

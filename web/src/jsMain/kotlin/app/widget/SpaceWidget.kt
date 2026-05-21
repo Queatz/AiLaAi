@@ -598,7 +598,7 @@ fun SpaceWidget(widgetId: String) {
             SpaceWidgetPath(
                 path = path,
                 currentPath = SpacePathItem(
-                    id = cardId!!,
+                    id = cardId,
                     card = card,
                 )
             ) { index ->

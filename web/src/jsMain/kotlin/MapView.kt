@@ -12,6 +12,7 @@ import app.ailaai.api.newCard
 import app.cards.MapList
 import app.cards.mapListDialog
 import app.components.Empty
+import app.components.FlexInput
 import app.components.Spacer
 import app.compose.rememberDarkMode
 import app.dialog.inputDialog
@@ -500,7 +501,8 @@ fun MapView(
                 }
 
                 on("click") {
-                    val event = it as mapboxgl.MapMouseEvent
+                    @Suppress("UNCHECKED_CAST_TO_EXTERNAL_INTERFACE")
+                    val event = it.asDynamic() as mapboxgl.MapMouseEvent
                     if (selectedCard != null) {
                         selectedCard = null
                     } else {
@@ -659,13 +661,18 @@ fun MapView(
                     boxSizing("border-box")
                 }
             }) {
-                SearchField(
+                FlexInput(
                     value = searchText,
                     placeholder = appString { searchForPlaces },
-                    shadow = true
-                ) {
-                    searchText = it
-                }
+                    singleLine = true,
+                    styles = {
+                        property("border", "none")
+                        property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.125)")
+                    },
+                    onChange = {
+                        searchText = it
+                    }
+                )
                 Div({
                     style {
                         display(DisplayStyle.Flex)

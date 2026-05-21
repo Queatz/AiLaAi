@@ -38,7 +38,7 @@ kotlin {
 }
 
 android {
-    compileSdk = 35
+    compileSdk = 36
     namespace = "com.queatz.ailaai"
 
     defaultConfig {
@@ -47,7 +47,7 @@ android {
 
         applicationId = "com.ailaai.app"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 109
         versionName = "1.0.9"
 
@@ -138,37 +138,37 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:${versions.ktor}")
 
     // Compose
-    implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.navigation:navigation-compose:2.9.0")
+    implementation("com.google.android.material:material:1.14.0")
+    implementation("androidx.navigation:navigation-compose:2.9.8")
     implementation("androidx.compose.ui:ui:${versions.compose}")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
     implementation("androidx.compose.ui:ui-tooling-preview:${versions.compose}")
     runtimeOnly("androidx.compose.runtime:runtime-rxjava3:${versions.compose}")
     implementation("androidx.compose.ui:ui-viewbinding:${versions.compose}")
-    implementation("androidx.compose.material3:material3:1.3.2")
-    implementation("androidx.compose.material3:material3-window-size-class:1.3.2")
+    implementation("androidx.compose.material3:material3:1.4.0")
+    implementation("androidx.compose.material3:material3-window-size-class:1.4.0")
     implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
 
     // Android
-    implementation("com.google.accompanist:accompanist-permissions:0.37.2")
+    implementation("com.google.accompanist:accompanist-permissions:0.37.3")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${versions.serialization}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.serialization}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutines}")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.1")
-    implementation("androidx.activity:activity-compose:1.10.1")
-    implementation("androidx.datastore:datastore-preferences:1.1.7")
-    implementation("androidx.core:core-ktx:1.16.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
+    implementation("androidx.activity:activity-compose:1.13.0")
+    implementation("androidx.datastore:datastore-preferences:1.2.1")
+    implementation("androidx.core:core-ktx:1.18.0")
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.appcompat:appcompat-resources:1.7.1")
     implementation("androidx.biometric:biometric-ktx:1.4.0-alpha02")
     implementation("dev.shreyaspatil:capturable:3.0.1")
-    implementation("com.github.skydoves:colorpicker-compose:1.1.2")
-    implementation("io.github.ehsannarmani:compose-charts:0.2.0")
+    implementation("com.github.skydoves:colorpicker-compose:1.1.4")
+    implementation("io.github.ehsannarmani:compose-charts:0.2.5")
     implementation("com.halilibo.compose-richtext:richtext-commonmark:${versions.richtext}")
-    implementation("androidx.work:work-runtime-ktx:2.11.0")
+    implementation("androidx.work:work-runtime-ktx:2.11.2")
 
     // HMS Support
     implementation("at.bluesource.choicesdk:choicesdk-location:${versions.choiceSdk}")
@@ -182,23 +182,23 @@ dependencies {
     implementation("com.huawei.hms:location:6.12.0.300")
 
     // Media
-    implementation("androidx.exifinterface:exifinterface:1.4.1")
-    implementation("io.coil-kt.coil3:coil-compose:3.0.4")
-    implementation("io.coil-kt.coil3:coil-network-ktor3:3.0.4")
-    implementation("me.saket.telephoto:zoomable-image-coil3:0.14.0")
-    implementation("androidx.media3:media3-exoplayer:1.7.1")
-    implementation("androidx.media3:media3-ui:1.7.1")
+    implementation("androidx.exifinterface:exifinterface:1.4.2")
+    implementation("io.coil-kt.coil3:coil-compose:3.4.0")
+    implementation("io.coil-kt.coil3:coil-network-ktor3:3.4.0")
+    implementation("me.saket.telephoto:zoomable-image-coil3:0.19.0")
+    implementation("androidx.media3:media3-exoplayer:1.10.1")
+    implementation("androidx.media3:media3-ui:1.10.1")
     implementation("com.otaliastudios:transcoder:0.11.2")
 
     // Logging & Crash Reporting
-    implementation("ch.acra:acra-core:5.11.3")
-    implementation("ch.acra:acra-toast:5.11.3")
-    implementation("com.ibm.icu:icu4j:76.1")
-    ksp("dev.zacsweers.autoservice:auto-service-ksp:1.1.0")
+    implementation("ch.acra:acra-core:5.13.1")
+    implementation("ch.acra:acra-toast:5.13.1")
+    implementation("com.ibm.icu:icu4j:78.3")
+    ksp("dev.zacsweers.autoservice:auto-service-ksp:1.2.0")
     implementation("com.google.auto.service:auto-service-annotations:1.1.1")
 
     // VideoSDK
-    implementation("live.videosdk:rtc-android-sdk:0.2.0") {
+    implementation("live.videosdk:rtc-android-sdk:0.2.0") { // todo 1.2.1
         exclude("androidx.core")
         exclude("com.android.support")
     }

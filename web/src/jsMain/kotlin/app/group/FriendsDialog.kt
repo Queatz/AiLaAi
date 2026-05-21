@@ -10,6 +10,7 @@ import api
 import app.AppStyles
 import app.ailaai.api.groups
 import app.components.Empty
+import app.components.FlexInput
 import app.dialog.dialog
 import appString
 import appText
@@ -111,9 +112,9 @@ suspend fun friendsDialog(
             }
 
             if (people.size > 5) {
-                SearchField(search, placeholder = appString { this.search }, shadow = false, styles = {
+                FlexInput(search, placeholder = appString { this.search }, singleLine = true, styles = {
                     marginBottom(1.r)
-                }) { search = it }
+                }, onChange = { search = it })
             }
 
             if (shownPeople.isEmpty()) {

@@ -59,7 +59,7 @@ fun GroupSidePanel(
                 is GroupContentModel.Card -> "description" to "Page"
                 is GroupContentModel.Script -> "code" to "Script"
                 is GroupContentModel.Website -> "public" to "Website"
-                else -> "" to ""
+                is GroupContentModel.None -> "" to ""
             }
 
             val title = dynamicTitle ?: defaultTitle

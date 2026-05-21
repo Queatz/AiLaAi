@@ -75,7 +75,7 @@ class Map(private val scene: Scene) {
         }
 
     // Reference to the player
-    private lateinit var player: Player
+    private var player: Player
 
     // Flow to track tilemap changes
     private val _tilemapChanges = MutableSharedFlow<Unit>(extraBufferCapacity = 1)

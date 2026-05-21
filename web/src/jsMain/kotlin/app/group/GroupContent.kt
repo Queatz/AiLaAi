@@ -165,7 +165,7 @@ fun GroupContent(
                     is GroupContentModel.Card -> GroupContentCard(content, setTitle)
                     is GroupContentModel.Script -> GroupContentScript(content, setTitle)
                     is GroupContentModel.Website -> GroupContentWebsite(group, content, onUpdated, setTitle)
-                    else -> Unit
+                    is GroupContentModel.None -> Unit
                 }
             }
         }

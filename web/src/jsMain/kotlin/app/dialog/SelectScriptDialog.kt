@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import api
 import app.AppStyles
 import app.ailaai.api.scripts
+import app.components.FlexInput
 import app.scripts.MonacoEditorState
 import appString
 import appText
@@ -104,14 +105,14 @@ suspend fun selectScriptDialog(
                     height(24.r)
                 }
             }) {
-                SearchField(
+                FlexInput(
                     value = search,
                     placeholder = appString { this.search },
-                    shadow = false,
+                    singleLine = true,
                     styles = {
                         margin(.5.r)
                     },
-                    onValue = {
+                    onChange = {
                         search = it
                     }
                 )
@@ -265,14 +266,14 @@ suspend fun addScriptDependencyDialog(
                     height(24.r)
                 }
             }) {
-                SearchField(
+                FlexInput(
                     value = search,
                     placeholder = appString { this.search },
-                    shadow = false,
+                    singleLine = true,
                     styles = {
                         margin(.5.r)
                     },
-                    onValue = {
+                    onChange = {
                         search = it
                     }
                 )

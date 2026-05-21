@@ -565,15 +565,14 @@ fun GamePage(
                     // Handle pasted text
                     event.preventDefault() // Prevent default only if we're handling the paste
 
-                    gameInstance.map.tilemapEditor?.let { editor ->
-                        // Get the current cursor position
-                        val position = editor.pickedPoint
+                    val editor = gameInstance.map.tilemapEditor
+                    // Get the current cursor position
+                    val position = editor.pickedPoint
 
-                        // Add a new saved position with the pasted text
-                        gameInstance.animationData.addSavedPosition(text, position)
-                        scope.launch {
-                            gameInstance.animationDataChanged.emit(Unit)
-                        }
+                    // Add a new saved position with the pasted text
+                    gameInstance.animationData.addSavedPosition(text, position)
+                    scope.launch {
+                        gameInstance.animationDataChanged.emit(Unit)
                     }
                 } else {
                     // No image or text found

@@ -74,19 +74,21 @@ fun SigninPage() {
             linkDeviceToken = it.token!!
         }
 
-        if (linkDeviceToken == null) {
+        val finalToken = linkDeviceToken
+
+        if (finalToken == null) {
             status = application.appString {
                 this.error
             }
             return@LaunchedEffect
         }
 
-        qrCode = "$webBaseUrl/link-device/$linkDeviceToken".qr
+        qrCode = "$webBaseUrl/link-device/$finalToken".qr
 
         withTimeoutOrNull(5.minutes) {
             while (!qrCodeLinked) {
                 delay(2.seconds)
-                api.linkDevice(linkDeviceToken!!) {
+                api.linkDevice(finalToken) {
                     if (it.person != null) {
                         qrCodeLinked = true
                     }
@@ -95,7 +97,7 @@ fun SigninPage() {
         }
         if (qrCodeLinked) {
             api.signInWithLink(
-                linkDeviceToken!!,
+                finalToken,
                 onError = {
                     status = application.appString { error }
                 }

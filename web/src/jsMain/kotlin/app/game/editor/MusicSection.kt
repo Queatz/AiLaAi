@@ -216,7 +216,7 @@ fun MusicSection(
                                 musicPlayerUtil.playMusicById(musicId)
                                 currentlyPlayingMusicId = musicId
                                 // Start the game animation
-                                game?.play()
+                                game.play()
                                 // Force UI update
                                 game.setTime(game.animationData.currentTime)
                             }

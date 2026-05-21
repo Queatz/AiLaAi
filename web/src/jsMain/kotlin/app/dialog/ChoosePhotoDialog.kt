@@ -324,7 +324,7 @@ private suspend fun choosePhotoDialog(
             var previousItem: String? = null
 
             aiStyles.forEach { (name, style) ->
-                if (previousItem != null && previousItem!!.endsWith("HD)") && !name.endsWith("HD)")) {
+                if (previousItem?.endsWith("HD)") == true && !name.endsWith("HD)")) {
                     Div({
                         style {
                             property("text-transform", "uppercase")

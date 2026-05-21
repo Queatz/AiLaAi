@@ -59,7 +59,7 @@ class MenuScope(val onDismissRequest: () -> Unit) {
         }) {
             Div {
                 Text(title)
-                if (description.isNullOrBlank().not()) {
+                description?.let {
                     Div(
                         attrs = {
                             style {
@@ -67,7 +67,7 @@ class MenuScope(val onDismissRequest: () -> Unit) {
                             }
                         }
                     ) {
-                        Text(description!!)
+                        Text(it)
                     }
                 }
             }

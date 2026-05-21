@@ -113,7 +113,7 @@ class SavedPositions(private val scene: Scene) {
 
         // Plane dimensions - match texture aspect ratio
         val planeHeight = .2f  // Increased from .125f to match the larger font size
-        val planeWidth = (planeHeight * textureAspectRatio).toFloat()
+        val planeWidth = planeHeight * textureAspectRatio
 
         // Create the plane
         val plane = MeshBuilder.CreatePlane("text-$id", object : CreatePlaneOptions {

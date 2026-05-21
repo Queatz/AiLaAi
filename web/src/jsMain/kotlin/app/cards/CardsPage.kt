@@ -175,7 +175,7 @@ fun CardsPage(
                                 is CardNav.Friends -> appText { noCards }
                                 is CardNav.Local -> appText { noCardsNearby }
                                 is CardNav.Saved -> appText { noSavedCards }
-                                else -> {}
+                                is CardNav.Map, is CardNav.Selected -> {}
                             }
                         }
                     } else {

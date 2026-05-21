@@ -66,7 +66,7 @@ class Tilemap(
     private val vertexData: VertexData
 
     // Base mesh for shadows
-    private lateinit var shadowBaseMesh: Mesh
+    private var shadowBaseMesh: Mesh
 
     // { 'x,y,z,d': index }
     private val tiles = mutableMapOf<String, Int>()

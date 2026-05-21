@@ -73,10 +73,8 @@ fun StoryComments(
     Div({
         classes(StoryStyles.comments)
     }) {
-        val maxShown = max != null && comments.size > max && !showAll
-
-        if (maxShown) {
-            comments.take(max!!)
+        if (max != null && comments.size > max && !showAll) {
+            comments.take(max)
         } else {
             comments
         }.forEach { comment ->
@@ -234,7 +232,7 @@ fun StoryComments(
             }
         }
 
-        if (maxShown) {
+        if (max != null && comments.size > max && !showAll) {
             Button({
                 classes(Styles.outlineButton)
 
@@ -247,7 +245,7 @@ fun StoryComments(
                     showAll = true
                 }
             }) {
-                val remaining = comments.size - max!!
+                val remaining = comments.size - max
                 Text(appString { if (remaining == 1) showAllComment else showAllComments }.format(
                     remaining.toLocaleString()
                 ))
