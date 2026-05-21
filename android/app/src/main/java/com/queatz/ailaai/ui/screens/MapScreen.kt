@@ -150,8 +150,6 @@ fun MapScreen(
     val recenter = remember { MutableSharedFlow<Pair<LatLng, Float?>>() }
     var showMapClickMenu by remember { mutableStateOf<LatLng?>(null) }
     var viewport by rememberStateOf(IntSize(0, 0))
-    val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
-    val coarseLocationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
 
     var mapKey by remember { mutableStateOf(0) }
     var composed by remember { mutableStateOf(false) }
