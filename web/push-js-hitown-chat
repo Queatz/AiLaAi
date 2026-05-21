@@ -1,4 +1,4 @@
 #! /bin/bash
-for file in build/kotlin-webpack/js/productionExecutable/*.js; do
+for file in build/kotlin-webpack/js/productionExecutable/*.js build/kotlin-webpack/js/productionExecutable/index.html build/kotlin-webpack/js/productionExecutable/*.txt build/kotlin-webpack/js/productionExecutable/*.ttf; do
   echo "put \"$file\""
 done | sftp root@hitown.chat:/root/ui

@@ -402,7 +402,8 @@ fun GroupsNavPage(
                                         title(
                                             bulletedString(
                                                 person.name.orEmpty(),
-                                                statuses[person.id!!]?.status
+                                                statuses[person.id!!]?.statusInfo?.name,
+                                                statuses[person.id!!]?.note,
                                             )
                                         )
 
@@ -415,7 +416,7 @@ fun GroupsNavPage(
                                                 position(Relative)
                                             }
                                         }) {
-                                            ProfilePhoto(person = person, size = 54.px)
+                                            ProfilePhoto(person = person, size = 54.px, showTitle = statuses[person.id!!] == null)
                                             statuses[person.id!!]?.let { status ->
                                                 // Status note
                                                 if (status.note?.notBlank != null || status.photo?.notBlank != null) {

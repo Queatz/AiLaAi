@@ -143,7 +143,6 @@ import com.queatz.ailaai.ui.screens.ProfileScreen
 import com.queatz.ailaai.ui.screens.ScheduleScreen
 import com.queatz.ailaai.ui.screens.SettingsScreen
 import com.queatz.ailaai.ui.screens.WelcomeDialog
-import com.queatz.ailaai.ui.shopping.ShoppingScreen
 import com.queatz.ailaai.ui.stickers.StickerPackEditorScreen
 import com.queatz.ailaai.ui.stickers.StickerPackScreen
 import com.queatz.ailaai.ui.stickers.StickerPacksScreen
@@ -217,8 +216,7 @@ fun background(url: String?) {
 class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
-            NavButton(AppNav.Messages, getString(R.string.messages), Icons.Outlined.Forum),
-            NavButton(AppNav.Shopping, getString(R.string.shopping), Icons.Outlined.ShoppingBag),
+            NavButton(AppNav.Messages, getString(R.string.chat), Icons.Outlined.Forum),
             NavButton(AppNav.Explore, getString(R.string.map), Icons.Outlined.Map),
             NavButton(AppNav.Schedule, getString(R.string.schedule), Icons.Outlined.CalendarMonth),
         )
@@ -845,9 +843,6 @@ class MainActivity : AppCompatActivity() {
                                                 StickerPackEditorScreen(
                                                     it.arguments!!.getString("id")!!
                                                 )
-                                            }
-                                            composable("shopping") {
-                                                ShoppingScreen()
                                             }
                                             composable("settings") {
                                                 SettingsScreen(appUi, { appUi = it }) {

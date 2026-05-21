@@ -727,18 +727,24 @@ class AppStyleSheet : StyleSheet() {
 
     val tray by style {
         display(DisplayStyle.Flex)
-        height(18.r)
-        maxHeight(50.vh)
-        overflowX("hidden")
-        overflowY("auto")
         flexDirection(FlexDirection.Column)
-        backgroundColor(Styles.colors.gray)
-        border(1.px, LineStyle.Solid, Styles.colors.lightgray)
+        gap(1.r)
+        padding(1.r)
+        property(
+            "background-color",
+            "color-mix(in srgb, ${Styles.colors.surface}, transparent 50%)"
+        )
         borderRadius(1.r)
+        border(1.px, LineStyle.Outset, rgba(0, 0, 0, 0.1))
+        property("backdrop-filter", "blur(6px)")
 
         dark(self) {
-            backgroundColor(Styles.colors.dark.background)
-            border(1.px, LineStyle.Solid, Styles.colors.darkgray)
+            property(
+                "background-color",
+                "color-mix(in srgb, ${Styles.colors.dark.surface}, transparent 50%)"
+            )
+            border(1.px, LineStyle.Outset, rgba(255, 255, 255, 0.2))
+            color(Color.white)
         }
     }
 

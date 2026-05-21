@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.ConnectWithoutContact
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
@@ -57,7 +56,6 @@ import app.ailaai.api.updateGroup
 import app.ailaai.api.updateMember
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.AppNav
-import com.queatz.ailaai.BuildConfig
 import com.queatz.ailaai.R
 import com.queatz.ailaai.cache.CacheKey
 import com.queatz.ailaai.cache.cache
@@ -74,7 +72,6 @@ import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.extensions.toGeo
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.helpers.locationSelector
-import com.queatz.ailaai.impromptu.ImpromptuDialog
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.joins
@@ -410,7 +407,7 @@ fun FriendsScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AppHeader(
-            title = stringResource(R.string.messages),
+            title = stringResource(R.string.chat),
             onTitleClick = {
                 scope.launch {
                     state.scrollToTop()
@@ -436,30 +433,6 @@ fun FriendsScreen() {
                     )
                 }
             }
-
-            // Only show Impromptu button if the feature is enabled
-            if (BuildConfig.ENABLE_IMPROMPTU) {
-                var showImpromptuDialog by rememberStateOf(false)
-                IconButton(
-                    onClick = {
-                        showImpromptuDialog = true
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.ConnectWithoutContact,
-                        contentDescription = stringResource(R.string.impromptu_mode)
-                    )
-                }
-
-                if (showImpromptuDialog) {
-                    ImpromptuDialog(
-                        onDismissRequest = {
-                            showImpromptuDialog = false
-                        }
-                    )
-                }
-            }
-            ScanQrCodeButton()
         }
 
         var h by rememberStateOf(80.dp.px)

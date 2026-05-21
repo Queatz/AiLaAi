@@ -1,7 +1,6 @@
 package com.queatz.ailaai
 
 sealed class AppNav(val route: String) {
-    data object Shopping : AppNav("shopping")
     data object Schedule : AppNav("schedule")
     data object Reminders : AppNav("reminders")
     data object Explore : AppNav("explore")

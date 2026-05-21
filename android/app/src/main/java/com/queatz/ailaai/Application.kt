@@ -12,8 +12,10 @@ import at.bluesource.choicesdk.core.ChoiceSdk
 import at.bluesource.choicesdk.messaging.common.RemoteMessage
 import at.bluesource.choicesdk.messaging.factory.MessagingRepositoryFactory
 import com.google.auto.service.AutoService
-import com.huawei.hms.api.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.huawei.hms.api.HuaweiApiAvailability
+import com.google.android.gms.common.ConnectionResult as GmsConnectionResult
+import com.huawei.hms.api.ConnectionResult as HmsConnectionResult
 import com.huawei.hms.maps.MapClientIdentify
 import com.huawei.hms.maps.MapsInitializer
 import com.queatz.ailaai.data.api
@@ -66,8 +68,9 @@ class Application : android.app.Application() {
 
         val scope = CoroutineScope(Dispatchers.IO)
 
-        val deviceType = when (HuaweiApiAvailability.getInstance().isHuaweiMobileServicesAvailable(this) == ConnectionResult.SUCCESS) {
-            true -> DeviceType.Hms
+        val deviceType = when {
+            GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this) == GmsConnectionResult.SUCCESS -> DeviceType.Gms
+            HuaweiApiAvailability.getInstance().isHuaweiMobileServicesAvailable(this) == HmsConnectionResult.SUCCESS -> DeviceType.Hms
             else -> DeviceType.Gms
         }
 

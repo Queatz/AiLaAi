@@ -422,15 +422,6 @@ fun InventoryScreen() {
                 ) {
                     Icon(Icons.Outlined.Add, stringResource(R.string.trade))
                 }
-                ScanQrCodeButton {
-                    when (it) {
-                        is ScanQrCodeResult.Profile -> {
-                            tradeWith(listOf(it.id))
-                        }
-
-                        else -> context.showDidntWork()
-                    }
-                }
             }
             if (isLoading) {
                 Loading()

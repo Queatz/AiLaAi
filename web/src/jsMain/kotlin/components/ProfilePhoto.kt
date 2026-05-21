@@ -26,6 +26,7 @@ fun ProfilePhoto(
     fontSize: CSSNumeric? = null,
     title: String? = null,
     border: Boolean = false,
+    showTitle: Boolean = true,
     onClick: (() -> Unit)? = null,
     styles: (StyleScope.() -> Unit)? = null
 ) {
@@ -36,6 +37,7 @@ fun ProfilePhoto(
         fontSize = fontSize,
         title = title,
         border = border,
+        showTitle = showTitle,
         onClick = onClick,
         styles = styles
     )

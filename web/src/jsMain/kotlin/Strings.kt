@@ -27,6 +27,12 @@ object Strings {
         vn = "Tải lên",
         ru = "Загрузить"
     )
+
+    val value = Translation(
+        en = "Value",
+        vn = "Giá trị",
+        ru = "Значение"
+    )
     val people = Translation(
         en = "People",
         vn = "Con người",
@@ -1367,6 +1373,11 @@ object Strings {
         en = "Okay",
         vn = "Đòng ý",
         ru = "Хорошо"
+    )
+    val continueTitle = Translation(
+        en = "Continue",
+        vn = "Tiếp tục",
+        ru = "Продолжить"
     )
     val sendMessage = Translation(
         en = "Send message",

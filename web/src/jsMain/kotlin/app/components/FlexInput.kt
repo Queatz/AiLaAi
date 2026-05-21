@@ -304,7 +304,7 @@ fun FlexInput(
                             it.preventDefault()
                             it.stopPropagation()
                             scope.launch {
-                                if (onSubmit()) {
+                                if (onSubmit() || it.ctrlKey) {
                                     valueChanged = false
                                 }
                             }
@@ -417,11 +417,11 @@ fun FlexInput(
                                 }
                             }
                         }
-                        it.key == "Enter" && !it.shiftKey -> {
+                        (it.key == "Enter" && !it.shiftKey) || (it.key == "Enter" && it.ctrlKey) -> {
                             it.preventDefault()
                             it.stopPropagation()
                             scope.launch {
-                                if (onSubmit()) {
+                                if (onSubmit() || it.ctrlKey) {
                                     valueChanged = false
                                 }
                                 delay(1)

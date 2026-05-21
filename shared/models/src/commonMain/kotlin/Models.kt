@@ -219,6 +219,13 @@ sealed class GroupContent {
     @Serializable
     data class Tasks(
         val fields: Map<String, String>? = null,
+        val search: String? = null,
+        val showSubtasks: Boolean? = null,
+        val showDone: Boolean? = null,
+        val sortByField: String? = null,
+        val filterByField: String? = null,
+        val filterByValue: String? = null,
+        val filters: Map<String, List<String>>? = null
     ) : GroupContent()
 
     @Serializable

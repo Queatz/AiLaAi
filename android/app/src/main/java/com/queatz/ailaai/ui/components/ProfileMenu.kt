@@ -3,6 +3,8 @@ package com.queatz.ailaai.ui.components
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.HistoryEdu
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.QrCodeScanner
+import androidx.compose.material.icons.outlined.ConnectWithoutContact
 import androidx.compose.material.icons.outlined.Rocket
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Wifi
@@ -13,9 +15,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.AppNav
+import com.queatz.ailaai.BuildConfig
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.impromptu.ImpromptuDialog
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.connectivity
@@ -29,7 +33,16 @@ fun ProfileMenu(onDismissRequest: () -> Unit) {
     val me = me
     val nav = nav
     var showScriptsDialog by rememberStateOf(false)
+    var showImpromptuDialog by rememberStateOf(false)
     val hasConnectivity = connectivity.hasConnectivity
+
+    if (showImpromptuDialog) {
+        ImpromptuDialog(
+            onDismissRequest = {
+                showImpromptuDialog = false
+            }
+        )
+    }
 
     if (showScriptsDialog) {
         ScriptsDialog(
@@ -59,6 +72,25 @@ fun ProfileMenu(onDismissRequest: () -> Unit) {
             ) {
                 nav.appNavigate(AppNav.Inventory)
                 onDismissRequest()
+            }
+            ScanQrCodeButton(
+                button = { onClick ->
+                    item(
+                        icon = Icons.Outlined.QrCodeScanner,
+                        name = stringResource(R.string.scan),
+                        onClick = onClick
+                    )
+                }
+            ) {
+                onDismissRequest()
+            }
+            if (BuildConfig.ENABLE_IMPROMPTU) {
+                item(
+                    icon = Icons.Outlined.ConnectWithoutContact,
+                    name = stringResource(R.string.impromptu_mode),
+                ) {
+                    showImpromptuDialog = true
+                }
             }
             item(
                 icon = Icons.Outlined.HistoryEdu,

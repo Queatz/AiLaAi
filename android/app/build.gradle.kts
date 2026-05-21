@@ -170,6 +170,9 @@ dependencies {
     implementation("com.halilibo.compose-richtext:richtext-commonmark:${versions.richtext}")
     implementation("androidx.work:work-runtime-ktx:2.11.2")
 
+    // GoogleApiAvailability
+    implementation("com.google.android.gms:play-services-base:18.10.0")
+
     // HMS Support
     implementation("at.bluesource.choicesdk:choicesdk-location:${versions.choiceSdk}")
     implementation("at.bluesource.choicesdk:choicesdk-maps:${versions.choiceSdk}")

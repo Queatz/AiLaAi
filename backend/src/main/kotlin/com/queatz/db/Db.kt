@@ -120,7 +120,14 @@ class Db {
 
     fun <T : Model> update(model: T) = synchronized(db) {
         db.collection(model::class.collection())
-            .updateDocument(model.id?.asKey(), model, DocumentUpdateOptions().returnNew(true))!!.new!!
+            .updateDocument(
+                model.id?.asKey(),
+                model,
+                DocumentUpdateOptions()
+                    .mergeObjects(false)
+                    .keepNull(true)
+                    .returnNew(true)
+            )!!.new!!
     }
 
     fun <T : Model> delete(model: T) =

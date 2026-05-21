@@ -38,6 +38,7 @@ class MenuScope(val onDismissRequest: () -> Unit) {
         textIcon: String? = null,
         iconTitle: String? = null,
         onIconClick: (() -> Unit)? = null,
+        dismissOnClick: Boolean = true,
         onClick: () -> Unit
     ) {
         Div({
@@ -53,7 +54,11 @@ class MenuScope(val onDismissRequest: () -> Unit) {
 
             onClick {
                 it.stopPropagation()
-                onDismissRequest()
+
+                if (dismissOnClick) {
+                    onDismissRequest()
+                }
+
                 onClick()
             }
         }) {
@@ -154,6 +159,9 @@ fun Menu(
                     top((top - y).px)
                     left(left.px)
                 }
+
+            maxHeight(100.vh)
+            overflow("auto")
         }
 
         onClick {

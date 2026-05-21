@@ -162,13 +162,22 @@ suspend fun editTaskDialog(
                 width(32.r)
                 maxWidth(100.percent)
             }
+            onKeyDown {
+                if (it.ctrlKey && it.key == "Enter") {
+                    resolve(true)
+                }
+            }
         }) {
             // Card name
             FlexInput(
                 value = name,
                 onChange = { name = it; nameValue = it },
                 placeholder = application.appString { Strings.name },
-                singleLine = true
+                singleLine = true,
+                onSubmit = {
+                    resolve(true)
+                    true
+                }
             )
 
             // Parent task (Owner)
@@ -267,7 +276,8 @@ suspend fun editTaskDialog(
                         scope.launch {
                             val select: suspend (List<String>) -> Unit = { items ->
                                 val newStatus = inputSelectDialog(
-                                    confirmButton = application.appString { okay },
+                                    confirmButton = application.appString { save },
+                                    title = application.appString { Strings.status },
                                     placeholder = application.appString { Strings.status },
                                     items = items
                                 )
@@ -341,7 +351,8 @@ suspend fun editTaskDialog(
                         scope.launch {
                             val select: suspend (List<String>) -> Unit = { items ->
                                 val newCategory = inputSelectDialog(
-                                    confirmButton = application.appString { okay },
+                                    confirmButton = application.appString { save },
+                                    title = application.appString { Strings.category },
                                     placeholder = application.appString { Strings.category },
                                     items = items
                                 )
@@ -373,7 +384,11 @@ suspend fun editTaskDialog(
                 value = description,
                 onChange = { description = it; descriptionValue = it },
                 placeholder = application.appString { Strings.description },
-                singleLine = false
+                singleLine = false,
+                onSubmit = {
+                    resolve(true)
+                    true
+                }
             )
 
             // Custom fields
@@ -396,7 +411,8 @@ suspend fun editTaskDialog(
                             scope.launch {
                                 val select: suspend (List<String>) -> Unit = { items ->
                                     val newValue = inputSelectDialog(
-                                        confirmButton = application.appString { okay },
+                                        confirmButton = application.appString { save },
+                                        title = "$fieldName value",
                                         placeholder = fieldName,
                                         defaultValue = fieldValue,
                                         items = items,
@@ -460,7 +476,8 @@ suspend fun editTaskDialog(
                         scope.launch {
                             val select: suspend (List<String>) -> Unit = { items ->
                                 val fieldName = inputSelectDialog(
-                                    confirmButton = application.appString { okay },
+                                    confirmButton = application.appString { continueTitle },
+                                    title = application.appString { Strings.field },
                                     placeholder = application.appString { Strings.field },
                                     items = items
                                 )
@@ -468,8 +485,9 @@ suspend fun editTaskDialog(
                                     scope.launch {
                                         val selectValue: suspend (List<String>) -> Unit = { valueItems ->
                                             val fieldValue = inputSelectDialog(
-                                                confirmButton = application.appString { okay },
-                                                placeholder = fieldName,
+                                                confirmButton = application.appString { save },
+                                                title = fieldName,
+                                                placeholder = application.appString { value },
                                                 items = valueItems
                                             )
                                             if (fieldValue != null) {

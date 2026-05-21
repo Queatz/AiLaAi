@@ -101,7 +101,8 @@ suspend fun batchTasksDialog(
                             scope.launch {
                                 val items = allCards.value?.mapNotNull { it.task?.status }?.filter { it.isNotBlank() }?.distinct()?.sorted() ?: emptyList()
                                 val newStatus = inputSelectDialog(
-                                    confirmButton = application.appString { okay },
+                                    confirmButton = application.appString { save },
+                                    title = application.appString { Strings.status },
                                     placeholder = application.appString { Strings.status },
                                     items = items
                                 )
@@ -137,7 +138,8 @@ suspend fun batchTasksDialog(
                             scope.launch {
                                 val items = allCards.value?.flatMap { it.categories.orEmpty() }?.filter { it.isNotBlank() }?.distinct()?.sorted() ?: emptyList()
                                 val newCategory = inputSelectDialog(
-                                    confirmButton = application.appString { okay },
+                                    confirmButton = application.appString { save },
+                                    title = application.appString { Strings.category },
                                     placeholder = application.appString { Strings.category },
                                     items = items
                                 )
@@ -210,7 +212,8 @@ suspend fun batchTasksDialog(
                             scope.launch {
                                 val fieldNameItems = allCards.value?.flatMap { it.task?.fields?.keys.orEmpty() }?.filter { it.isNotBlank() }?.distinct()?.sorted() ?: emptyList()
                                 val fieldName = inputSelectDialog(
-                                    confirmButton = application.appString { okay },
+                                    confirmButton = application.appString { continueTitle },
+                                    title = application.appString { Strings.field },
                                     placeholder = application.appString { Strings.field },
                                     items = fieldNameItems
                                 )
@@ -218,8 +221,9 @@ suspend fun batchTasksDialog(
                                 if (!fieldName.isNullOrBlank()) {
                                     val fieldValueItems = allCards.value?.mapNotNull { it.task?.fields?.get(fieldName) }?.filter { it.isNotBlank() }?.distinct()?.sorted() ?: emptyList()
                                     val fieldValue = inputSelectDialog(
-                                        confirmButton = application.appString { okay },
-                                        placeholder = fieldName,
+                                        confirmButton = application.appString { save },
+                                        title = fieldName,
+                                        placeholder = application.appString { value },
                                         items = fieldValueItems
                                     )
 

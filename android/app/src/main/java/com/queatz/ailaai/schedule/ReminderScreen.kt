@@ -2,6 +2,7 @@ package com.queatz.ailaai.schedule
 
 import ReminderEvent
 import android.app.Activity
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,8 @@ import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Place
@@ -57,6 +60,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
 import app.ailaai.api.deleteReminder
 import app.ailaai.api.joinReminder
 import app.ailaai.api.leaveReminder
@@ -68,6 +73,7 @@ import coil3.compose.AsyncImage
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.uploadPhotosFromUris
+import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.eventUrl
@@ -107,6 +113,7 @@ import com.queatz.ailaai.ui.story.StorySource
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Reminder
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 import kotlin.time.Instant.Companion.fromEpochMilliseconds
@@ -114,6 +121,8 @@ import toEvents
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
+
+private val showMyReminderTools = booleanPreferencesKey("ui.showMyReminderTools")
 
 @Composable
 fun DurationDialog(
@@ -203,6 +212,7 @@ fun DurationDialog(
 fun ReminderScreen(reminderId: String) {
     val scope = rememberCoroutineScope()
     var isLoading by rememberStateOf(true)
+    var showTools by rememberStateOf(true)
     var showEditNote by rememberStateOf(false)
     var showAddPerson by rememberStateOf(false)
     var showLocationDialog by rememberStateOf(false)
@@ -288,6 +298,20 @@ fun ReminderScreen(reminderId: String) {
 
     LaunchedEffect(Unit) {
         reload()
+        showTools = context.dataStore.data.first().let {
+            it[showMyReminderTools] ?: true
+        }
+    }
+
+    fun toggleShowTools() {
+        scope.launch {
+            showTools = context.dataStore.data.first().let {
+                it[showMyReminderTools]?.not() ?: false
+            }
+            context.dataStore.edit {
+                it[showMyReminderTools] = showTools
+            }
+        }
     }
 
     if (showCategory) {
@@ -550,6 +574,16 @@ fun ReminderScreen(reminderId: String) {
                 BackButton()
             },
             actions = {
+                if (isMine) {
+                    IconButton({
+                        toggleShowTools()
+                    }) {
+                        Icon(
+                            if (showTools) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+                            stringResource(R.string.tools)
+                        )
+                    }
+                }
                 if (!isMine && me?.id in (reminder?.people ?: emptyList())) {
                     var showMenu by remember { mutableStateOf(false) }
                     IconButton(onClick = { showMenu = true }) {
@@ -587,118 +621,120 @@ fun ReminderScreen(reminderId: String) {
             ) {
                 item {
                     if (isMine) {
-                        Toolbar {
-                            item(
-                                icon = if (reminder?.open == true) Icons.Outlined.ToggleOn else Icons.Outlined.ToggleOff,
-                                name = stringResource(if (reminder?.open == true) R.string.posted else R.string.not_posted),
-                                selected = reminder?.open == true
-                            ) {
-                                togglePosted()
-                            }
-                            if (reminder?.open == true) {
+                        AnimatedVisibility(showTools) {
+                            Toolbar {
                                 item(
-                                    icon = Icons.Outlined.Share,
-                                    name = stringResource(R.string.share)
+                                    icon = if (reminder?.open == true) Icons.Outlined.ToggleOn else Icons.Outlined.ToggleOff,
+                                    name = stringResource(if (reminder?.open == true) R.string.posted else R.string.not_posted),
+                                    selected = reminder?.open == true
                                 ) {
-                                    eventUrl(reminderId).shareAsUrl(
-                                        context = context,
-                                        name = reminder?.title
-                                    )
+                                    togglePosted()
                                 }
-                            }
-                            item(
-                                icon = Icons.Outlined.PersonAdd,
-                                name = stringResource(R.string.invite_someone)
-                            ) {
-                                showAddPerson = true
-                            }
-                            item(
-                                icon = Icons.Outlined.EditNote,
-                                name = stringResource(R.string.edit_note),
-                                selected = !reminder?.note.isNullOrBlank()
-                            ) {
-                                showEditNote = true
-                            }
-                            item(
-                                icon = Icons.Outlined.Update,
-                                name = stringResource(R.string.reschedule),
-                                selected = reminder?.schedule != null || reminder?.stickiness != null
-                            ) {
-                                showReschedule = true
-                            }
-                            item(
-                                icon = Icons.Outlined.Edit,
-                                name = stringResource(R.string.rename)
-                            ) {
-                                showEditTitle = true
-                            }
-                            item(
-                                icon = Icons.Outlined.CameraAlt,
-                                isLoading = isPhotoLoading,
-                                name = stringResource(
-                                    if (reminder?.photo.isNullOrBlank()) {
-                                        R.string.add_photo
-                                    } else {
-                                        R.string.set_photo
+                                if (reminder?.open == true) {
+                                    item(
+                                        icon = Icons.Outlined.Share,
+                                        name = stringResource(R.string.share)
+                                    ) {
+                                        eventUrl(reminderId).shareAsUrl(
+                                            context = context,
+                                            name = reminder?.title
+                                        )
                                     }
-                                ),
-                                selected = reminder?.photo != null
-                            ) {
-                                showPhotoDialog = true
-                            }
-                            item(
-                                icon = Icons.Outlined.EditNote,
-                                name = stringResource(R.string.edit_content),
-                                selected = !reminder?.content.isNullOrBlank()
-                            ) {
-                                nav.appNavigate(AppNav.EditReminder(reminderId))
-                            }
-                            item(
-                                icon = Icons.Outlined.Place,
-                                name = stringResource(R.string.choose_location),
-                                selected = reminder?.geo?.isNotEmpty() == true
-                            ) {
-                                showLocationDialog = true
-                            }
-                            item(
-                                icon = if (reminder?.alarm == true) Icons.Outlined.Alarm else Icons.Outlined.AlarmOff,
-                                name = if (reminder?.alarm == true) stringResource(R.string.alarm_on) else stringResource(
-                                    R.string.alarm_off
-                                ),
-                                selected = reminder?.alarm == true
-                            ) {
-                                toggleAlarm()
-                            }
-                            val category = reminder?.categories?.firstOrNull()
-                            item(
-                                icon = Icons.Outlined.Category,
-                                name = category ?: stringResource(R.string.set_category),
-                                selected = category != null
-                            ) {
-                                showCategory = true
-                            }
-                            item(
-                                icon = Icons.Outlined.Timer,
-                                name = reminder?.duration?.takeIf { it > 0 }?.let { it.milliseconds.format() } ?: stringResource(R.string.set_duration),
-                                selected = reminder?.duration != null && reminder?.duration!! > 0
-                            ) {
-                                showDurationDialog = true
-                            }
-                            if (reminder?.person == me?.id) {
-                                item(
-                                    icon = Icons.Outlined.Delete,
-                                    name = stringResource(R.string.delete),
-                                    color = MaterialTheme.colorScheme.error
-                                ) {
-                                    showDelete = true
                                 }
-                            } else if (me?.id in (reminder?.people ?: emptyList())) {
                                 item(
-                                    icon = Icons.Outlined.Clear,
-                                    name = stringResource(R.string.leave),
-                                    color = MaterialTheme.colorScheme.error
+                                    icon = Icons.Outlined.PersonAdd,
+                                    name = stringResource(R.string.invite_someone)
                                 ) {
-                                    showLeave = true
+                                    showAddPerson = true
+                                }
+                                item(
+                                    icon = Icons.Outlined.EditNote,
+                                    name = stringResource(R.string.edit_note),
+                                    selected = !reminder?.note.isNullOrBlank()
+                                ) {
+                                    showEditNote = true
+                                }
+                                item(
+                                    icon = Icons.Outlined.Update,
+                                    name = stringResource(R.string.reschedule),
+                                    selected = reminder?.schedule != null || reminder?.stickiness != null
+                                ) {
+                                    showReschedule = true
+                                }
+                                item(
+                                    icon = Icons.Outlined.Edit,
+                                    name = stringResource(R.string.rename)
+                                ) {
+                                    showEditTitle = true
+                                }
+                                item(
+                                    icon = Icons.Outlined.CameraAlt,
+                                    isLoading = isPhotoLoading,
+                                    name = stringResource(
+                                        if (reminder?.photo.isNullOrBlank()) {
+                                            R.string.add_photo
+                                        } else {
+                                            R.string.set_photo
+                                        }
+                                    ),
+                                    selected = reminder?.photo != null
+                                ) {
+                                    showPhotoDialog = true
+                                }
+                                item(
+                                    icon = Icons.Outlined.EditNote,
+                                    name = stringResource(R.string.edit_content),
+                                    selected = !reminder?.content.isNullOrBlank()
+                                ) {
+                                    nav.appNavigate(AppNav.EditReminder(reminderId))
+                                }
+                                item(
+                                    icon = Icons.Outlined.Place,
+                                    name = stringResource(R.string.choose_location),
+                                    selected = reminder?.geo?.isNotEmpty() == true
+                                ) {
+                                    showLocationDialog = true
+                                }
+                                item(
+                                    icon = if (reminder?.alarm == true) Icons.Outlined.Alarm else Icons.Outlined.AlarmOff,
+                                    name = if (reminder?.alarm == true) stringResource(R.string.alarm_on) else stringResource(
+                                        R.string.alarm_off
+                                    ),
+                                    selected = reminder?.alarm == true
+                                ) {
+                                    toggleAlarm()
+                                }
+                                val category = reminder?.categories?.firstOrNull()
+                                item(
+                                    icon = Icons.Outlined.Category,
+                                    name = category ?: stringResource(R.string.set_category),
+                                    selected = category != null
+                                ) {
+                                    showCategory = true
+                                }
+                                item(
+                                    icon = Icons.Outlined.Timer,
+                                    name = reminder?.duration?.takeIf { it > 0 }?.let { it.milliseconds.format() } ?: stringResource(R.string.set_duration),
+                                    selected = reminder?.duration != null && reminder?.duration!! > 0
+                                ) {
+                                    showDurationDialog = true
+                                }
+                                if (reminder?.person == me?.id) {
+                                    item(
+                                        icon = Icons.Outlined.Delete,
+                                        name = stringResource(R.string.delete),
+                                        color = MaterialTheme.colorScheme.error
+                                    ) {
+                                        showDelete = true
+                                    }
+                                } else if (me?.id in (reminder?.people ?: emptyList())) {
+                                    item(
+                                        icon = Icons.Outlined.Clear,
+                                        name = stringResource(R.string.leave),
+                                        color = MaterialTheme.colorScheme.error
+                                    ) {
+                                        showLeave = true
+                                    }
                                 }
                             }
                         }

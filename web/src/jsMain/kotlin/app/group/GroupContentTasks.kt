@@ -1,9 +1,13 @@
 package app.group
 
+import LocalConfiguration
+import Strings
 import Styles
+import app.AppStyles
 import androidx.compose.runtime.*
 import api
 import app.ailaai.api.groupCards
+import app.ailaai.api.updateGroup
 import app.cards.MapList
 import app.components.Empty
 import app.components.FlexInput
@@ -14,28 +18,31 @@ import app.dialog.inputSelectDialog
 import app.menu.Menu
 import appString
 import application
-import getString
-import Strings
-import LocalConfiguration
-import lib.ResizeObserver
 import com.queatz.db.Card
+import com.queatz.db.GroupContent
 import com.queatz.db.GroupExtended
 import components.Icon
 import components.IconButton
 import components.Loading
 import format
+import getString
+import json
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import lib.ResizeObserver
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Progress
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
-import org.w3c.dom.HTMLElement
 import org.w3c.dom.DOMRect
+import org.w3c.dom.HTMLElement
 import r
 import tagColor
+
+private const val filterStatusKey = ":status"
+private const val filterCategoryKey = ":category"
 
 @Composable
 fun GroupContentTasks(
@@ -58,20 +65,106 @@ fun GroupContentTasks(
     if (cards == null) {
         Loading()
     } else {
-        var search by remember { mutableStateOf("") }
+        val initialContent = remember(group.group?.id) {
+            group.group?.content?.let {
+                try {
+                    json.decodeFromString<GroupContent>(it) as? GroupContent.Tasks
+                } catch (e: Exception) {
+                    null
+                }
+            }
+        }
+        var search by remember(initialContent) { mutableStateOf(initialContent?.search ?: "") }
         var isSearchFocused by remember { mutableStateOf(false) }
-        var showSubtasks by remember { mutableStateOf(false) }
-        var showDone by remember { mutableStateOf(true) }
-        var sortByField by remember { mutableStateOf<String?>(null) }
-        var filterByField by remember { mutableStateOf<String?>(null) }
-        var filterByValue by remember { mutableStateOf<String?>(null) }
+        var showSubtasks by remember(initialContent) { mutableStateOf(initialContent?.showSubtasks ?: false) }
+        var showDone by remember(initialContent) { mutableStateOf(initialContent?.showDone ?: true) }
+        var sortByField by remember(initialContent) { mutableStateOf(initialContent?.sortByField) }
+        var filterByField by remember(initialContent) { mutableStateOf(initialContent?.filterByField) }
+        var filterByValue by remember(initialContent) { mutableStateOf(initialContent?.filterByValue) }
+        var filters by remember(initialContent) { mutableStateOf(initialContent?.filters ?: emptyMap()) }
+
+        LaunchedEffect(search, showSubtasks, showDone, sortByField, filterByField, filterByValue, filters) {
+            val content = group.group?.content?.let {
+                try {
+                    json.decodeFromString<GroupContent>(it) as? GroupContent.Tasks
+                } catch (e: Exception) {
+                    null
+                }
+            } ?: return@LaunchedEffect
+
+            val newContent = content.copy(
+                search = search.ifBlank { null },
+                showSubtasks = showSubtasks,
+                showDone = showDone,
+                sortByField = sortByField,
+                filterByField = filterByField,
+                filterByValue = filterByValue,
+                filters = filters.ifEmpty { null }
+            )
+
+            if (newContent == content) {
+                return@LaunchedEffect
+            }
+
+            delay(2000)
+
+            api.updateGroup(
+                id = group.group!!.id!!,
+                groupUpdate = com.queatz.db.Group(
+                    content = json.encodeToString<GroupContent>(newContent)
+                )
+            ) {
+                group.group!!.content = it.content
+            }
+        }
+
         var expandedCardId by remember { mutableStateOf<String?>(null) }
         var showColumns by remember { mutableStateOf(false) }
         var contentWidth by remember { mutableStateOf(0) }
         val isDarkMode = rememberDarkMode()
         val configuration = LocalConfiguration.current
 
-        val filteredCards = remember(cards, search, showSubtasks, showDone, sortByField, filterByField, filterByValue) {
+        val allStatuses = remember(cards) {
+            cards?.mapNotNull { it.task?.status }?.filter { it.isNotBlank() }?.distinct()?.sorted() ?: emptyList()
+        }
+        val allCategories = remember(cards) {
+            cards?.flatMap { it.categories.orEmpty() }?.filter { it.isNotBlank() }?.distinct()?.sorted() ?: emptyList()
+        }
+        val allFields = remember(cards) {
+            cards?.flatMap { it.task?.fields?.keys ?: emptySet() }?.distinct()?.sorted() ?: emptyList()
+        }
+
+        LaunchedEffect(cards, allStatuses, allCategories, allFields, filters) {
+            val newFilters = filters.mapValues { (key, selectedValues) ->
+                when (key) {
+                    filterStatusKey -> selectedValues.filter { it in allStatuses }
+                    filterCategoryKey -> selectedValues.filter { it in allCategories }
+                    else -> {
+                        if (key in allFields) {
+                            val availableValuesForField = cards?.mapNotNull { it.task?.fields?.get(key) }?.filter { it.isNotBlank() }?.distinct() ?: emptyList()
+                            selectedValues.filter { it in availableValuesForField }
+                        } else {
+                            emptyList()
+                        }
+                    }
+                }
+            }.filterValues { it.isNotEmpty() }
+
+            if (newFilters != filters) {
+                filters = newFilters
+            }
+
+            if (filterByField != null && (filterByField !in allFields || (filterByValue != null && filterByValue !in (cards?.mapNotNull { it.task?.fields?.get(filterByField!!) }?.filter { it.isNotBlank() }?.distinct() ?: emptyList())))) {
+                filterByField = null
+                filterByValue = null
+            }
+
+            if (sortByField != null && sortByField !in allFields) {
+                sortByField = null
+            }
+        }
+
+        val filteredCards = remember(cards, search, showSubtasks, showDone, sortByField, filterByField, filterByValue, filters) {
             val search = search.trim()
             var list = if (search.isBlank()) cards!! else cards!!.filter {
                 it.name?.contains(search, ignoreCase = true) == true ||
@@ -96,6 +189,16 @@ fun GroupContentTasks(
             filterByField?.let { field ->
                 filterByValue?.let { value ->
                     list = list.filter { it.task?.fields?.get(field) == value }
+                }
+            }
+
+            filters.forEach { (field, values) ->
+                if (values.isEmpty()) return@forEach
+
+                list = when (field) {
+                    filterStatusKey -> list.filter { (it.task?.status ?: "") in values }
+                    filterCategoryKey -> list.filter { it.categories.orEmpty().any { it in values } }
+                    else -> list.filter { (it.task?.fields?.get(field) ?: "") in values }
                 }
             }
 
@@ -272,14 +375,7 @@ fun GroupContentTasks(
         }
 
         if (isSearchFocused) {
-            val statuses = remember(cards) {
-                cards!!.mapNotNull { it.task?.status }.filter { it.isNotBlank() }.distinct().sorted()
-            }
-            val categories = remember(cards) {
-                cards!!.flatMap { it.categories.orEmpty() }.filter { it.isNotBlank() }.distinct().sorted()
-            }
-
-            if (statuses.isNotEmpty() || categories.isNotEmpty()) {
+            if (allStatuses.isNotEmpty() || allCategories.isNotEmpty()) {
                 Div({
                     style {
                         display(DisplayStyle.Flex)
@@ -291,7 +387,7 @@ fun GroupContentTasks(
                         padding(0.5.r, 0.r)
                     }
                 }) {
-                    statuses.forEach { status ->
+                    allStatuses.forEach { status ->
                         Span({
                             classes(Styles.button, Styles.buttonSmall)
                             style {
@@ -308,7 +404,7 @@ fun GroupContentTasks(
                             Text(status)
                         }
                     }
-                    categories.forEach { category ->
+                    allCategories.forEach { category ->
                         Span({
                             classes(Styles.button, Styles.buttonSmall)
                             style {
@@ -328,6 +424,228 @@ fun GroupContentTasks(
                 }
             }
         }
+
+        if (allStatuses.isNotEmpty() || allCategories.isNotEmpty() || allFields.isNotEmpty()) {
+            Div({
+                style {
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Row)
+                    gap(.5.r)
+                    overflowX("auto")
+                    padding(.5.r, 0.r)
+                    flexShrink(0)
+                    alignItems(AlignItems.Center)
+                }
+            }) {
+                if (allStatuses.isNotEmpty()) {
+                    var showMenu by remember { mutableStateOf(false) }
+                    var menuTarget by remember { mutableStateOf<DOMRect?>(null) }
+                    val selected = filters[filterStatusKey] ?: emptyList()
+                    val isActive = selected.isNotEmpty()
+
+                    Span({
+                        if (isActive) {
+                            classes(Styles.button, Styles.buttonSmall)
+                        } else {
+                            classes(Styles.outlineButton, Styles.outlineButtonSmall)
+                        }
+                        style {
+                            if (isActive) {
+                                backgroundColor(Styles.colors.primary)
+                                color(Color.white)
+                            }
+                            whiteSpace("nowrap")
+                            display(DisplayStyle.Flex)
+                            alignItems(AlignItems.Center)
+                            gap(.25.r)
+                            paddingRight(.5.r)
+                        }
+                        onClick {
+                            menuTarget = (it.target as HTMLElement).getBoundingClientRect()
+                            showMenu = true
+                        }
+                    }) {
+                        Text(if (isActive) "${appString { status }}: ${selected.joinToString(", ")}" else appString { status })
+                        Icon("arrow_drop_down", styles = {
+                            fontSize(1.2.r)
+                            marginRight(0.px)
+                        })
+                    }
+
+                    if (showMenu && menuTarget != null) {
+                        Menu(
+                            onDismissRequest = { showMenu = false },
+                            target = menuTarget!!
+                        ) {
+                            allStatuses.forEach { status ->
+                                val isSelected = status in selected
+                                item(
+                                    title = status,
+                                    selected = isSelected,
+                                    icon = if (isSelected) "check_box" else "check_box_outline_blank",
+                                    dismissOnClick = false
+                                ) {
+                                    filters = if (isSelected) {
+                                        filters + (filterStatusKey to (selected - status))
+                                    } else {
+                                        filters + (filterStatusKey to (selected + status))
+                                    }
+                                }
+                            }
+                            if (isActive) {
+                                item(
+                                    title = appString { clearAll },
+                                    icon = "clear_all"
+                                ) {
+                                    filters = filters - filterStatusKey
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (allCategories.isNotEmpty()) {
+                    var showMenu by remember { mutableStateOf(false) }
+                    var menuTarget by remember { mutableStateOf<DOMRect?>(null) }
+                    val selected = filters[filterCategoryKey] ?: emptyList()
+                    val isActive = selected.isNotEmpty()
+
+                    Span({
+                        if (isActive) {
+                            classes(Styles.button, Styles.buttonSmall)
+                        } else {
+                            classes(Styles.outlineButton, Styles.outlineButtonSmall)
+                        }
+                        style {
+                            if (isActive) {
+                                backgroundColor(Styles.colors.primary)
+                                color(Color.white)
+                            }
+                            whiteSpace("nowrap")
+                            display(DisplayStyle.Flex)
+                            alignItems(AlignItems.Center)
+                            gap(.25.r)
+                            paddingRight(.5.r)
+                        }
+                        onClick {
+                            menuTarget = (it.target as HTMLElement).getBoundingClientRect()
+                            showMenu = true
+                        }
+                    }) {
+                        Text(if (isActive) "${appString { category }}: ${selected.joinToString(", ")}" else appString { category })
+                        Icon("arrow_drop_down", styles = {
+                            fontSize(1.2.r)
+                            marginRight(0.px)
+                        })
+                    }
+
+                    if (showMenu && menuTarget != null) {
+                        Menu(
+                            onDismissRequest = { showMenu = false },
+                            target = menuTarget!!
+                        ) {
+                            allCategories.forEach { category ->
+                                val isSelected = category in selected
+                                item(
+                                    title = category,
+                                    selected = isSelected,
+                                    icon = if (isSelected) "check_box" else "check_box_outline_blank",
+                                    dismissOnClick = false
+                                ) {
+                                    filters = if (isSelected) {
+                                        filters + (filterCategoryKey to (selected - category))
+                                    } else {
+                                        filters + (filterCategoryKey to (selected + category))
+                                    }
+                                }
+                            }
+                            if (isActive) {
+                                item(
+                                    title = appString { clearAll },
+                                    icon = "clear_all"
+                                ) {
+                                    filters = filters - filterCategoryKey
+                                }
+                            }
+                        }
+                    }
+                }
+
+                allFields.forEach { field ->
+                    val values = remember(cards, field) {
+                        cards?.mapNotNull { it.task?.fields?.get(field) }?.filter { it.isNotBlank() }?.distinct()?.sorted() ?: emptyList()
+                    }
+
+                    if (values.isNotEmpty()) {
+                        var showMenu by remember { mutableStateOf(false) }
+                        var menuTarget by remember { mutableStateOf<DOMRect?>(null) }
+                        val selected = filters[field] ?: emptyList()
+                        val isActive = selected.isNotEmpty()
+
+                        Span({
+                            if (isActive) {
+                                classes(Styles.button, Styles.buttonSmall)
+                            } else {
+                                classes(Styles.outlineButton, Styles.outlineButtonSmall)
+                            }
+                            style {
+                                if (isActive) {
+                                    backgroundColor(Styles.colors.primary)
+                                    color(Color.white)
+                                }
+                                whiteSpace("nowrap")
+                                display(DisplayStyle.Flex)
+                                alignItems(AlignItems.Center)
+                                gap(.25.r)
+                                paddingRight(.5.r)
+                            }
+                            onClick {
+                                menuTarget = (it.target as HTMLElement).getBoundingClientRect()
+                                showMenu = true
+                            }
+                        }) {
+                            Text(if (isActive) "$field: ${selected.joinToString(", ")}" else field)
+                            Icon("arrow_drop_down", styles = {
+                                fontSize(1.2.r)
+                                marginRight(0.px)
+                            })
+                        }
+
+                        if (showMenu && menuTarget != null) {
+                            Menu(
+                                onDismissRequest = { showMenu = false },
+                                target = menuTarget!!
+                            ) {
+                                values.forEach { value ->
+                                    val isSelected = value in selected
+                                    item(
+                                        title = value,
+                                        selected = isSelected,
+                                        icon = if (isSelected) "check_box" else "check_box_outline_blank",
+                                        dismissOnClick = false
+                                    ) {
+                                        filters = if (isSelected) {
+                                            filters + (field to (selected - value))
+                                        } else {
+                                            filters + (field to (selected + value))
+                                        }
+                                    }
+                                }
+                                if (isActive) {
+                                    item(
+                                        title = appString { clearAll },
+                                        icon = "clear_all"
+                                    ) {
+                                        filters = filters - field
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
 
         if (filteredCards.isEmpty()) {
             Empty { Text(if (search.isBlank()) "No tasks." else "No results.") }
@@ -414,7 +732,8 @@ fun GroupContentTasks(
                                     alignItems(AlignItems.Center)
                                     justifyContent(JustifyContent.SpaceBetween)
                                     padding(.5.r, 1.r)
-                                    borderRadius(.5.r)
+                                    borderRadius(2.r)
+                                    backgroundImage("linear-gradient(to bottom, #ffffff20, #00000020)")
                                     backgroundColor(tagColor(status))
                                     color(Color.white)
                                     marginBottom(.5.r)
@@ -464,21 +783,9 @@ fun GroupContentTasks(
                     .sortedByDescending { it.second }
 
                 Div({
+                    classes(AppStyles.tray)
                     style {
-                        display(DisplayStyle.Flex)
-                        flexDirection(FlexDirection.Column)
-                        gap(1.r)
-                        padding(1.r)
                         marginTop(1.r)
-                        property(
-                            "background-color",
-                            (if (isDarkMode) Styles.colors.dark.surface else Styles.colors.surface).toString() + "80"
-                        )
-                        borderRadius(1.r)
-                        property("backdrop-filter", "blur(6px)")
-                        if (isDarkMode) {
-                            color(Color.white)
-                        }
                     }
                 }) {
                     Div({
@@ -499,7 +806,7 @@ fun GroupContentTasks(
                         }
                     }
 
-                    if (total > 0) {
+                    if (total > 0 && done > 0 && remaining > 0) {
                         Div({
                             style {
                                 display(DisplayStyle.Flex)
@@ -540,46 +847,48 @@ fun GroupContentTasks(
                         })
                     }
 
-                    Div({
-                        style {
-                            display(DisplayStyle.Flex)
-                            gap(.5.r)
-                            flexWrap(FlexWrap.Wrap)
-                            marginTop(.5.r)
-                        }
-                    }) {
-                        statusCounts.forEach { (status, count) ->
-                            Div({
-                                style {
-                                    display(DisplayStyle.Flex)
-                                    alignItems(AlignItems.Center)
-                                    backgroundColor(if (isDarkMode) rgba(255, 255, 255, 0.05) else rgba(0, 0, 0, 0.05))
-                                    borderRadius(1.r)
-                                    paddingRight(.75.r)
-                                }
-                            }) {
-                                Span({
-                                    classes(Styles.button, Styles.buttonSmall)
+                    if (statusCounts.isNotEmpty()) {
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                gap(.5.r)
+                                flexWrap(FlexWrap.Wrap)
+                                marginTop(.5.r)
+                            }
+                        }) {
+                            statusCounts.forEach { (status, count) ->
+                                Div({
                                     style {
-                                        backgroundColor(if (status.isBlank()) Styles.colors.gray else tagColor(status))
-                                        color(Color.white)
-                                        whiteSpace("nowrap")
-                                        flexShrink(0)
-                                        cursor("default")
-                                        property("pointer-events", "none")
-                                        marginRight(.5.r)
+                                        display(DisplayStyle.Flex)
+                                        alignItems(AlignItems.Center)
+                                        backgroundColor(if (isDarkMode) rgba(255, 255, 255, 0.05) else rgba(0, 0, 0, 0.05))
+                                        borderRadius(1.r)
+                                        paddingRight(.75.r)
                                     }
                                 }) {
-                                    Text(if (status.isBlank()) appString { noStatus } else status)
-                                }
-                                Span({
-                                    style {
-                                        fontWeight("bold")
-                                        fontSize(.9.r)
-                                        opacity(.8)
+                                    Span({
+                                        classes(Styles.button, Styles.buttonSmall)
+                                        style {
+                                            backgroundColor(if (status.isBlank()) Styles.colors.gray else tagColor(status))
+                                            color(Color.white)
+                                            whiteSpace("nowrap")
+                                            flexShrink(0)
+                                            cursor("default")
+                                            property("pointer-events", "none")
+                                            marginRight(.5.r)
+                                        }
+                                    }) {
+                                        Text(if (status.isBlank()) appString { noStatus } else status)
                                     }
-                                }) {
-                                    Text(count.toString())
+                                    Span({
+                                        style {
+                                            fontWeight("bold")
+                                            fontSize(.9.r)
+                                            opacity(.8)
+                                        }
+                                    }) {
+                                        Text(count.toString())
+                                    }
                                 }
                             }
                         }

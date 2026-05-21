@@ -60,7 +60,6 @@ import com.queatz.ailaai.ui.components.DisplayText
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.LocationScaffold
 import com.queatz.ailaai.ui.components.PageInput
-import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.SearchFilter
 import com.queatz.ailaai.ui.control.mapCardsControl
@@ -252,9 +251,7 @@ fun ExploreScreen() {
                 AppHeader(
                     title = title,
                     onTitleClick = {},
-                ) {
-                    ScanQrCodeButton()
-                }
+                )
             },
             modifier = Modifier.padding(paddingValues),
             rationale = {
@@ -272,9 +269,7 @@ fun ExploreScreen() {
                             state.scrollToTop()
                         }
                     }
-                ) {
-                    ScanQrCodeButton()
-                }
+                )
 
                 var viewportHeight by remember { mutableIntStateOf(0) }
                 Box(

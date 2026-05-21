@@ -16,13 +16,14 @@ import r
 
 suspend fun inputSelectDialog(
     confirmButton: String,
+    title: String? = null,
     defaultValue: String = "",
     items: List<String>? = null,
     placeholder: String = application.appString { search },
     extraButtons: (@Composable (resolve: (Boolean?) -> Unit) -> Unit)? = null,
     itemStyle: StyleScope.(String) -> Unit = {}
 ) = inputDialog(
-    title = null,
+    title = title,
     defaultValue = defaultValue,
     confirmButton = confirmButton,
     placeholder = placeholder,

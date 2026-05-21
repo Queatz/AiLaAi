@@ -1,14 +1,8 @@
 package app.group
 
+import Styles
 import aiTranscribe
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import api
 import app.AppStyles
 import app.StickersTray
@@ -22,68 +16,34 @@ import app.dialog.rememberChoosePhotoDialog
 import app.menu.Menu
 import app.messaages.attachmentText
 import appString
-import com.queatz.db.AiTranscribeResponse
-import com.queatz.db.GroupExtended
-import com.queatz.db.Message
-import com.queatz.db.PhotosAttachment
-import com.queatz.db.ReplyAttachment
-import com.queatz.db.Sticker
-import com.queatz.db.StickerAttachment
+import com.queatz.db.*
 import components.Icon
 import components.IconButton
 import js.typedarrays.toByteArray
 import json
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.web.css.DisplayStyle
-import org.jetbrains.compose.web.css.display
-import org.jetbrains.compose.web.css.flexGrow
-import org.jetbrains.compose.web.css.flexShrink
-import org.jetbrains.compose.web.css.marginBottom
-import org.jetbrains.compose.web.css.marginLeft
-import org.jetbrains.compose.web.css.marginRight
-import org.jetbrains.compose.web.css.opacity
-import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.dom.Button
-import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Span
-import org.jetbrains.compose.web.dom.Text
+import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.*
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import org.w3c.files.File
+import pad
 import pickAudio
 import r
+import stories.StoryStyles
 import toBytes
 import web.blob.Blob
-import web.events.EventHandler
-import web.navigator.navigator
-import Styles
-import baseUrl
-import com.queatz.db.StoryContent
-import format
-import format1Decimal
-import org.jetbrains.compose.web.css.AlignItems
-import org.jetbrains.compose.web.css.gap
-import org.jetbrains.compose.web.css.fontSize
-import org.jetbrains.compose.web.css.px
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import org.jetbrains.compose.web.css.FlexDirection
-import org.jetbrains.compose.web.css.alignItems
-import org.jetbrains.compose.web.css.flexDirection
-import org.jetbrains.compose.web.css.percent
-import org.jetbrains.compose.web.dom.Audio
-import org.jetbrains.compose.web.dom.Source
-import pad
-import stories.StoryStyles
-import toGameTileBlob
 import web.blob.bytes
-import web.cssom.HtmlAttributes.Companion.part
+import web.events.EventHandler
 import web.mediadevices.getUserMedia
 import web.mediarecorder.BlobEvent
 import web.mediarecorder.MediaRecorder
 import web.mediastreams.MediaStream
 import web.mediastreams.MediaStreamConstraints
 import web.mediastreams.MediaTrackConstraints
+import web.navigator.navigator
 import kotlin.js.Date
 
 @Composable
@@ -418,6 +378,10 @@ fun GroupMessageBar(
                 marginLeft(1.r)
                 marginRight(1.r)
                 marginBottom(1.r)
+                height(18.r)
+                maxHeight(50.vh)
+                overflowX("hidden")
+                overflowY("auto")
             }
         }) {
             StickersTray {

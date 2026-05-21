@@ -823,23 +823,13 @@ class MainStyleSheet : StyleSheet() {
         }
     }
 
-    val buttonSmall by style {}
-
-    val button by style {
+    fun CSSBuilder.buttonBaseStyle() {
         borderRadius(2.r)
-        border(0.px)
-        padding(0.r, 2.r)
         minHeight(3.r)
-        backgroundColor(colors.primary)
-        color(colors.white)
         cursor("pointer")
         display(DisplayStyle.Flex)
         alignItems(AlignItems.Center)
-        justifyContent(JustifyContent.Center)
         fontWeight("bold")
-        overflow("hidden")
-        backgroundImage("linear-gradient(to bottom, #ffffff36, #ffffff00)")
-        property("box-shadow", "0 0 4px 2px #ffffff36 inset")
 
         selector(".material-symbols-outlined") style {
             marginRight(.5.r)
@@ -848,6 +838,19 @@ class MainStyleSheet : StyleSheet() {
         self + disabled style {
             opacity(.5)
         }
+    }
+
+    val buttonSmall by style {}
+
+    val button by style {
+        buttonBaseStyle()
+        justifyContent(JustifyContent.Center)
+        border(0.px)
+        padding(0.r, 2.r)
+        backgroundColor(colors.primary)
+        color(colors.white)
+        backgroundImage("linear-gradient(to bottom, #ffffff36, #ffffff00)")
+        property("box-shadow", "0 0 4px 2px #ffffff36 inset")
 
         self + className(buttonSmall) style {
             padding(0.r, 1.r)
@@ -860,21 +863,12 @@ class MainStyleSheet : StyleSheet() {
     val outlineButtonTonal by style {}
 
     val outlineButton by style {
-        borderRadius(2.r)
+        buttonBaseStyle()
+        justifyContent(JustifyContent.Center)
         border(1.px, LineStyle.Solid, colors.primary)
         padding(0.r, 2.r)
-        minHeight(3.r)
         backgroundColor(Color.transparent)
         color(colors.primary)
-        cursor("pointer")
-        display(DisplayStyle.Flex)
-        alignItems(AlignItems.Center)
-        justifyContent(JustifyContent.Center)
-        fontWeight("bold")
-
-        selector(".material-symbols-outlined") style {
-            marginRight(.5.r)
-        }
 
         self + className(outlineButtonAlt) style {
             color(colors.black)
@@ -887,10 +881,6 @@ class MainStyleSheet : StyleSheet() {
         self + className(outlineButtonSmall) style {
             padding(0.r, 1.r)
             minHeight(2.r)
-        }
-
-        self + disabled style {
-            opacity(.5)
         }
 
         dark(self) {
@@ -907,25 +897,12 @@ class MainStyleSheet : StyleSheet() {
     val floatingButtonSelected by style {}
 
     val floatingButton by style {
-        borderRadius(2.r)
+        buttonBaseStyle()
         property("border", "none")
         padding(0.r, 2.r)
-        minHeight(3.r)
         backgroundColor(colors.background)
         color(colors.primary)
-        cursor("pointer")
-        display(DisplayStyle.Flex)
-        alignItems(AlignItems.Center)
-        fontWeight("bold")
         property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.125)")
-
-        selector(".material-symbols-outlined") style {
-            marginRight(.5.r)
-        }
-
-        self + disabled style {
-            opacity(.5)
-        }
 
         self + className(floatingButtonSelected) style {
             backgroundColor(colors.primary)
@@ -939,23 +916,11 @@ class MainStyleSheet : StyleSheet() {
     }
 
     val textButton by style {
+        buttonBaseStyle()
         property("border", "none")
-        borderRadius(2.r)
-        minHeight(3.r)
         backgroundColor(Color.transparent)
         color(colors.primary)
-        cursor("pointer")
-        display(DisplayStyle.Flex)
-        alignItems(AlignItems.Center)
-        fontWeight("bold")
         property("font-size", "inherit")
-        selector(".material-symbols-outlined") style {
-            marginRight(.5.r)
-        }
-
-        self + disabled style {
-            opacity(.5)
-        }
     }
 
     val inlineButton by style {
@@ -973,21 +938,6 @@ class MainStyleSheet : StyleSheet() {
 
         dark(self) {
             outlineColor(colors.white)
-        }
-    }
-
-    val mainContentCards by style {
-        boxSizing("border-box")
-        display(DisplayStyle.Flex)
-        flexWrap(FlexWrap.Wrap)
-        position(Position.Relative)
-
-        child(self, className(card)) style {
-            self style {
-                width(320.px)
-                marginTop(0.r)
-                marginLeft(0.r)
-            }
         }
     }
 
