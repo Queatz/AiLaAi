@@ -379,6 +379,48 @@ class UseInviteResponse(
 )
 
 @Serializable
+data class SendSignalBody(
+    val signal: String,
+    val message: String? = null,
+    val photo: String? = null,
+    val audio: String? = null,
+    val geo: List<Double>? = null,
+    val radius: Double? = null,
+    val audience: SignalAudience? = null,
+    val groups: List<String>? = null,
+    val duration: Long,
+    val localHour: Int? = null
+)
+
+@Serializable
+data class SignalReplyBody(
+    val message: String? = null,
+    val photo: String? = null,
+    val audio: String? = null
+)
+
+@Serializable
+data class ActiveSignalsResponse(
+    val mine: List<SignalSendExtended>,
+    val others: List<SignalSendExtended>
+)
+
+@Serializable
+data class SignalSendExtended(
+    val signalSend: SignalSend,
+    val signal: Signal? = null,
+    val person: Person? = null,
+    val replies: List<SignalReplyExtended>? = null
+)
+
+@Serializable
+data class SignalReplyExtended(
+    val signalReply: SignalReply,
+    val person: Person? = null,
+    val affinitySignals: List<Signal>? = null
+)
+
+@Serializable
 data class GameDiscussionExtended(
     val discussion: GameDiscussion? = null,
     val person: Person? = null,

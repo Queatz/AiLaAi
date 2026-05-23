@@ -3,6 +3,7 @@ package com.queatz.plugins
 import com.queatz.api.*
 import com.queatz.groupCall
 import com.queatz.impromptuService
+import com.queatz.signalService
 import com.queatz.remind
 import com.queatz.urlAttachmentFetcher
 import io.ktor.http.*
@@ -30,6 +31,7 @@ fun Application.configureRouting() {
     bots.start(this)
     apps.start(this)
     impromptuService.start(this)
+    signalService.start(this)
 
     routing {
         get("/hi") { call.respondText("{ \"hi\": true }", contentType = ContentType.Application.Json) }
@@ -75,6 +77,7 @@ fun Application.configureRouting() {
         appRoutes()
         inviteRoutes()
         impromptuRoutes()
+        signalRoutes()
         gameRoutes()
 
         staticFiles("/static", File("static")) {

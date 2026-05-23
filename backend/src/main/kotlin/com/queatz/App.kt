@@ -11,8 +11,18 @@ class App {
     fun createGroup(
         people: List<String>,
         hosts: List<String> = emptyList(),
+        name: String? = null,
+        description: String? = null,
+        categories: List<String>? = null,
+        open: Boolean = false
     ): Group =
-        db.insert(Group(seen = Clock.System.now()))
+        db.insert(Group(
+            name = name,
+            description = description,
+            categories = categories,
+            open = open,
+            seen = Clock.System.now()
+        ))
             .also {
                 val group = it.id!!.asId(Group::class)
 

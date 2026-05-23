@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -34,12 +35,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.LocalAppState
 import com.queatz.ailaai.R
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.ContactPhoto
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.connectivity
 import com.queatz.ailaai.services.ui
 import com.queatz.ailaai.ui.dialogs.Alert
@@ -54,6 +58,7 @@ private val offlineNoteKey = stringPreferencesKey("app.offlineNote")
 fun ColumnScope.AppHeader(
     title: String,
     onTitleClick: () -> Unit,
+    showSignalsButton: Boolean = false,
     showProfile: Boolean = true,
     showOfflineNote: Boolean = true,
     actions: @Composable (RowScope.() -> Unit) = {}
@@ -63,6 +68,7 @@ fun ColumnScope.AppHeader(
     val hasConnectivity = connectivity.hasConnectivity
     val apiIsReachable = LocalAppState.current.apiIsReachable
     val showOfflineNotes by ui.showOfflineNote.collectAsState()
+    val nav = nav
 
     Column(
         modifier = Modifier
@@ -116,61 +122,74 @@ fun ColumnScope.AppHeader(
             }
         }
 
-        AppBar(
-            title = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(1.pad)
-                ) {
-                    Text(
-                        title,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+        Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+            AppBar(
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(1.pad)
+                    ) {
+                        Text(
+                            title,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    onTitleClick()
+                                }
+                        )
+                    }
+                },
+                actions = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                onTitleClick()
-                            }
-                    )
-                }
-            },
-            actions = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .padding(start = .5f.pad)
-                ) {
-                    actions()
-                    me?.takeIf { showProfile }?.let { me ->
-                        var showProfileMenu by rememberStateOf(false)
+                            .padding(start = .5f.pad)
+                    ) {
+                        actions()
+                        me?.takeIf { showProfile }?.let { me ->
+                            var showProfileMenu by rememberStateOf(false)
 
-                        if (showProfileMenu) {
-                            ProfileMenu {
-                                showProfileMenu = false
+                            if (showProfileMenu) {
+                                ProfileMenu {
+                                    showProfileMenu = false
+                                }
                             }
-                        }
 
-                        if (me.name?.isNotBlank() == true || me.photo?.isNotBlank() == true) {
-                            GroupPhoto(
-                                listOf(ContactPhoto(me.name ?: "", me.photo, me.seen)),
-                                size = 40.dp,
-                                modifier = Modifier
-                                    .clickable {
-                                        showProfileMenu = true
-                                    }
-                            )
-                        } else {
-                            IconButton({
-                                showProfileMenu = true
-                            }) {
-                                Icon(Icons.Outlined.AccountCircle, Icons.Outlined.Settings.name)
+                            if (me.name?.isNotBlank() == true || me.photo?.isNotBlank() == true) {
+                                GroupPhoto(
+                                    listOf(ContactPhoto(me.name ?: "", me.photo, me.seen)),
+                                    size = 40.dp,
+                                    modifier = Modifier
+                                        .clickable {
+                                            showProfileMenu = true
+                                        }
+                                )
+                            } else {
+                                IconButton({
+                                    showProfileMenu = true
+                                }) {
+                                    Icon(Icons.Outlined.AccountCircle, Icons.Outlined.Settings.name)
+                                }
                             }
                         }
                     }
                 }
+            )
+
+            if (showSignalsButton) {
+                Box(
+                    modifier = Modifier.matchParentSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SignalsButton {
+                        nav.appNavigate(AppNav.Signals)
+                    }
+                }
             }
-        )
+        }
     }
 }

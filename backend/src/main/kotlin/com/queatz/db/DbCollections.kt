@@ -282,5 +282,29 @@ fun collections() = listOf(
     },
     Rating::class.db(CollectionType.EDGES, listOf(Card::class, Story::class, Message::class)) {
         ensurePersistentIndex(listOf(Rating::rating.name), PersistentIndexOptions())
+    },
+    Signal::class.db {
+        ensurePersistentIndex(listOf(Signal::name.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Signal::categories.name), PersistentIndexOptions())
+    },
+    SignalStats::class.db {
+        ensurePersistentIndex(listOf(SignalStats::signal.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(SignalStats::hour.name), PersistentIndexOptions())
+    },
+    PersonSignal::class.db {
+        ensurePersistentIndex(listOf(PersonSignal::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(PersonSignal::signal.name), PersistentIndexOptions())
+    },
+    SignalSend::class.db {
+        ensurePersistentIndex(listOf(SignalSend::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(SignalSend::signal.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(SignalSend::expiry.name), PersistentIndexOptions())
+        ensureGeoIndex(listOf(SignalSend::geo.name), GeoIndexOptions())
+    },
+    SignalReply::class.db {
+        ensurePersistentIndex(listOf(SignalReply::signalSend.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(SignalReply::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(SignalReply::released.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(SignalReply::releaseAt.name), PersistentIndexOptions())
     }
 )

@@ -20,7 +20,7 @@ import io.ktor.http.withCharset
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.*
 import java.util.logging.Logger.getAnonymousLogger
 import kotlin.text.Charsets.UTF_8
 import kotlin.time.Duration.Companion.minutes
@@ -289,12 +289,21 @@ class OpenAi {
                                 content = prompt
                             )
                         ),
-                        text = schema
+                        text = buildJsonObject {
+                            putJsonObject("format") {
+                                put("type", "json_schema")
+                                put("name", "response")
+                                put("strict", true)
+                                put("schema", schema)
+                            }
+                        }
                     )
                 )
             }.also {
                 getAnonymousLogger().warning("OpenAi JSON response: ${it.bodyAsText()}")
             }.body<OpenAiResponsesResponse>()
+        }.onFailure {
+            it.printStackTrace()
         }.getOrNull()?.let { response ->
             response.output
                 .firstOrNull { it.type == "message" }

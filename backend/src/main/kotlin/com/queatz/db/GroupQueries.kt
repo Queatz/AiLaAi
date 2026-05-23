@@ -74,6 +74,17 @@ fun Db.groupsPlain(person: String) = query(
     )
 )
 
+fun Db.peopleInGroups(groups: List<String>) = query(
+    String::class,
+    """
+        for group in @groups
+            for person, member in inbound group graph `${Member::class.graph()}`
+                filter member.${f(Member::gone)} != true
+                return distinct person._key
+    """.trimIndent(),
+    mapOf("groups" to groups.map { it.asId(Group::class) })
+)
+
 /**
  * @geo The geo to bias for
  * @search Search query

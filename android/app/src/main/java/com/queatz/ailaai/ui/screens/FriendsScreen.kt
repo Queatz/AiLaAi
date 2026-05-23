@@ -408,6 +408,7 @@ fun FriendsScreen() {
     ) {
         AppHeader(
             title = stringResource(R.string.chat),
+            showSignalsButton = true,
             onTitleClick = {
                 scope.launch {
                     state.scrollToTop()

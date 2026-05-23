@@ -18,7 +18,9 @@ enum class PushAction {
     CommentReply,
     MessageReaction,
     UpdateLocation,
-    Impromptu
+    Impromptu,
+    Signal,
+    SignalReply
 }
 
 enum class StoryEvent {
@@ -180,4 +182,21 @@ data class UpdateLocationPushData(
 data class ImpromptuPushData(
     val notificationType: ImpromptuNotificationStyle,
     val data: ImpromptuHistory? = null
+) : PushDataData()
+
+@Serializable
+data class SignalPushData(
+    val person: Person,
+    val signal: Signal,
+    val signalSend: SignalSend,
+    val transcription: String? = null
+) : PushDataData()
+
+@Serializable
+data class SignalReplyPushData(
+    val person: Person,
+    val signal: Signal,
+    val signalSend: SignalSend,
+    val signalReply: SignalReply,
+    val transcription: String? = null
 ) : PushDataData()

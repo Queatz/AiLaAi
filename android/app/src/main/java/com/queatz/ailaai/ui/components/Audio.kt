@@ -24,6 +24,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +36,7 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import android.net.Uri
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -76,6 +79,7 @@ fun Audio(
     Audio(AudioSource.Data(data, contentType), modifier, autoPlay)
 }
 
+@OptIn(UnstableApi::class)
 @Composable
 private fun Audio(
     source: AudioSource,
@@ -152,12 +156,19 @@ private fun Audio(
     LaunchedEffect(source) {
         when (source) {
             is AudioSource.Url -> {
-                exoPlayer.setMediaItem(MediaItem.fromUri(source.url))
+                val uri = if (source.url.contains("://")) {
+                    source.url
+                } else {
+                    Uri.fromFile(java.io.File(source.url)).toString()
+                }
+                exoPlayer.setMediaItem(MediaItem.fromUri(uri))
+                exoPlayer.prepare()
             }
             is AudioSource.Data -> {
                 val mediaSource = ProgressiveMediaSource.Factory({ ByteArrayDataSource(source.data) })
                     .createMediaSource(MediaItem.fromUri(""))
                 exoPlayer.setMediaSource(mediaSource)
+                exoPlayer.prepare()
             }
         }
     }
@@ -207,7 +218,7 @@ private fun Audio(
                 .padding(
                     horizontal = 1.pad
                 )
-                .fillMaxSize()
+                .fillMaxWidth()
         ) {
             IconButton(
                 onClick = {

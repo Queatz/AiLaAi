@@ -5,6 +5,7 @@ package com.queatz.ailaai.ui.permission
 import android.Manifest
 import android.os.Build
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import com.google.accompanist.permissions.*
 
 class PermissionRequester(val permission: String) {
@@ -31,10 +32,9 @@ class PermissionRequester(val permission: String) {
 
         if (state.status == PermissionStatus.Granted) {
             onGranted()
-        } else if (!state.status.shouldShowRationale) {
-            onPermanentlyDenied()
         } else {
             this.onGranted = onGranted
+            this.onDenied = onDenied
             this.onPermanentlyDenied = onPermanentlyDenied
             state.launchPermissionRequest()
         }
@@ -50,13 +50,14 @@ class PermissionRequester(val permission: String) {
         }
 
         onGranted = null
+        onDenied = null
         onPermanentlyDenied = null
     }
 }
 
 @Composable
 fun permissionRequester(permission: String): PermissionRequester {
-    val requester = PermissionRequester(permission)
+    val requester = remember(permission) { PermissionRequester(permission) }
 
     requester.state = rememberPermissionState(permission) {
         requester.resolve(it)

@@ -77,6 +77,34 @@ fun Db.subscribersOf(people: List<String>) = query(
     )
 )
 
+fun Db.friends(person: String) = query(
+    String::class,
+    """
+        for group in outbound @person graph `${Member::class.graph()}`
+            for friend, member in inbound group graph `${Member::class.graph()}`
+                filter friend._id != @person
+                    and member.${f(Member::gone)} != true
+                return distinct friend._key
+    """.trimIndent(),
+    mapOf(
+        "person" to person.asId(Person::class)
+    )
+)
+
+fun Db.peopleNearby(geo: List<Double>, radius: Double) = list(
+    Person::class,
+    """
+        for x in @@collection
+            let d = x.${f(Person::geo)} == null ? null : distance(x.${f(Person::geo)}[0], x.${f(Person::geo)}[1], @geo[0], @geo[1])
+            filter d != null and d <= @radius
+            return x
+    """.trimIndent(),
+    mapOf(
+        "geo" to geo,
+        "radius" to radius
+    )
+)
+
 fun Db.friendsCount(person: String) = query(
     Int::class,
     """

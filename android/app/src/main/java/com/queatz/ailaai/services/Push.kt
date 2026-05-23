@@ -43,6 +43,8 @@ import com.queatz.push.MessageReactionPushData
 import com.queatz.push.PushAction
 import com.queatz.push.PushDataData
 import com.queatz.push.ReminderPushData
+import com.queatz.push.SignalPushData
+import com.queatz.push.SignalReplyPushData
 import com.queatz.push.StoryPushData
 import com.queatz.push.TradePushData
 import com.queatz.push.UpdateLocationPushData
@@ -109,6 +111,8 @@ class Push {
                 PushAction.CommentReply -> receive(parse<CommentReplyPushData>(push))
                 PushAction.UpdateLocation -> receive(parse<UpdateLocationPushData>(push))
                 PushAction.Impromptu -> receive(parse<ImpromptuPushData>(push))
+                PushAction.Signal -> receive(parse<SignalPushData>(push))
+                PushAction.SignalReply -> receive(parse<SignalReplyPushData>(push))
             }
         } catch (ex: Throwable) {
             ex.printStackTrace()
@@ -367,6 +371,12 @@ enum class Notifications(
         R.string.impromptu,
         R.string.impromptu_notification_channel_description,
         NotificationManager.IMPORTANCE_DEFAULT,
+        NotificationCompat.CATEGORY_SOCIAL
+    ),
+    Signals(
+        R.string.signals,
+        R.string.signals_notification_channel_description,
+        NotificationManager.IMPORTANCE_HIGH,
         NotificationCompat.CATEGORY_SOCIAL
     ),
     ;

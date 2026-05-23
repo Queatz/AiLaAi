@@ -100,12 +100,12 @@ android {
         create("default") {
             dimension = "variant"
             manifestPlaceholders["IMPROMPTU_ENABLED"] = "merge" // true
-            buildConfigField("boolean", "ENABLE_IMPROMPTU", "true")
+            buildConfigField("boolean", "ENABLE_BACKGROUND_LOCATION", "true")
         }
         create("google") {
             dimension = "variant"
             manifestPlaceholders["IMPROMPTU_ENABLED"] = "remove" // false
-            buildConfigField("boolean", "ENABLE_IMPROMPTU", "false")
+            buildConfigField("boolean", "ENABLE_BACKGROUND_LOCATION", "false")
         }
     }
     compileOptions {

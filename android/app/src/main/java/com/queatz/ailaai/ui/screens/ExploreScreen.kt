@@ -218,6 +218,7 @@ fun ExploreScreen() {
             appHeader = {
                 AppHeader(
                     title = title,
+                    showSignalsButton = true,
                     onTitleClick = {},
                 )
             },
@@ -232,6 +233,7 @@ fun ExploreScreen() {
             ) {
                 AppHeader(
                     title = title,
+                    showSignalsButton = true,
                     onTitleClick = {
                         scope.launch {
                             state.scrollToTop()

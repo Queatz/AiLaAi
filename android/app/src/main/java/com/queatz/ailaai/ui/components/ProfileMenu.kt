@@ -84,7 +84,7 @@ fun ProfileMenu(onDismissRequest: () -> Unit) {
             ) {
                 onDismissRequest()
             }
-            if (BuildConfig.ENABLE_IMPROMPTU) {
+            if (BuildConfig.ENABLE_BACKGROUND_LOCATION) {
                 item(
                     icon = Icons.Outlined.ConnectWithoutContact,
                     name = stringResource(R.string.impromptu_mode),

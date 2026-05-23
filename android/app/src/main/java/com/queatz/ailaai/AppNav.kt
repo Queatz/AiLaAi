@@ -4,6 +4,8 @@ sealed class AppNav(val route: String) {
     data object Schedule : AppNav("schedule")
     data object Reminders : AppNav("reminders")
     data object Explore : AppNav("explore")
+    data object Signals : AppNav("signals")
+    class Signal(id: String) : AppNav("signals/$id")
     data object Write : AppNav("write")
     data object Messages : AppNav("messages")
     data object Inventory : AppNav("inventory")

@@ -710,6 +710,58 @@ data class PlatformConfig(
     var inviteOnly: Boolean? = null
 ) : Model()
 
+enum class SignalAudience {
+    Nearby,
+    Friends,
+    Groups
+}
+
+@Serializable
+class Signal(
+    var emoji: String? = null,
+    var name: String? = null,
+    var categories: List<String>? = null
+) : Model()
+
+@Serializable
+class SignalStats(
+    var signal: String? = null,
+    var hour: Int? = null,
+    var count: Long? = null
+) : Model()
+
+@Serializable
+class PersonSignal(
+    var person: String? = null,
+    var signal: String? = null,
+    var turnedOn: Boolean? = null
+) : Model()
+
+@Serializable
+class SignalSend(
+    var person: String? = null,
+    var signal: String? = null,
+    var message: String? = null,
+    var photo: String? = null,
+    var audio: String? = null,
+    var geo: List<Double>? = null,
+    var radius: Double? = null,
+    var audience: SignalAudience? = null,
+    var groups: List<String>? = null,
+    var expiry: Instant? = null
+) : Model()
+
+@Serializable
+class SignalReply(
+    var signalSend: String? = null,
+    var person: String? = null,
+    var message: String? = null,
+    var photo: String? = null,
+    var audio: String? = null,
+    var released: Boolean? = null,
+    var releaseAt: Instant? = null
+) : Model()
+
 @Serializable
 expect open class Model() {
     var id: String?

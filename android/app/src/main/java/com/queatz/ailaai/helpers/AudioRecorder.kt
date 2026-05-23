@@ -50,6 +50,13 @@ fun audioRecorder(
 ): AudioRecorderControl {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    val currentOnIsRecordingAudio by rememberUpdatedState(onIsRecordingAudio)
+    val currentOnRecordingAudioDuration by rememberUpdatedState(onRecordingAudioDuration)
+    val currentOnPermissionDenied by rememberUpdatedState(onPermissionDenied)
+    val currentOnFailed by rememberUpdatedState(onFailed)
+    val currentOnAudio by rememberUpdatedState(onAudio)
+
     val recordAudioPermissionRequester = permissionRequester(Manifest.permission.RECORD_AUDIO)
     var audioOutputFile by remember { mutableStateOf<File?>(null) }
     var audioRecorder by remember { mutableStateOf<MediaRecorder?>(null) }
@@ -85,8 +92,8 @@ fun audioRecorder(
             setAudioSource(MediaRecorder.AudioSource.MIC)
             setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
             setAudioEncoder(MediaRecorder.AudioEncoder.HE_AAC)
-            setAudioSamplingRate(96000)
-            setAudioEncodingBitRate(16 * 96000)
+            setAudioSamplingRate(44100)
+            setAudioEncodingBitRate(64000)
             setOutputFile(audioOutputFile)
 
             setOnErrorListener { mr, what, extra ->
@@ -101,21 +108,26 @@ fun audioRecorder(
     }
 
     fun recordTheAudio() {
-        onIsRecordingAudio(true)
-        prepareRecorder().start()
-        trackDurationJob = scope.launch {
-            val start = Clock.System.now().toEpochMilliseconds()
-            while (true) {
-                delay(100)
-                onRecordingAudioDuration(Clock.System.now().toEpochMilliseconds() - start)
+        currentOnIsRecordingAudio(true)
+        try {
+            prepareRecorder().start()
+            trackDurationJob = scope.launch {
+                val start = Clock.System.now().toEpochMilliseconds()
+                while (true) {
+                    delay(100)
+                    currentOnRecordingAudioDuration(Clock.System.now().toEpochMilliseconds() - start)
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            currentOnIsRecordingAudio(false)
         }
     }
 
     fun recordAudio() {
         recordAudioPermissionRequester.use(
             onPermanentlyDenied = {
-                onPermissionDenied()
+                currentOnPermissionDenied()
             }
         ) {
             recordTheAudio()
@@ -127,9 +139,10 @@ fun audioRecorder(
 
         try {
             audioRecorder?.stop()
-            onIsRecordingAudio(false)
-        } catch (e: IllegalStateException) {
+        } catch (e: Exception) {
             e.printStackTrace()
+        } finally {
+            currentOnIsRecordingAudio(false)
         }
     }
 
@@ -141,16 +154,17 @@ fun audioRecorder(
 
     fun sendActiveRecording() {
         stopRecording()
+        val file = audioOutputFile ?: return
+        audioOutputFile = null
         scope.launch {
             repeat(times = 3) {
-                var success = onAudio(audioOutputFile ?: return@launch)
+                var success = currentOnAudio(file)
                 if (success) {
-                    audioOutputFile?.delete()
-                    audioOutputFile = null
+                    file.delete()
                     return@launch
                 }
             }
-            onFailed(audioOutputFile ?: return@launch)
+            currentOnFailed(file)
         }
     }
 
@@ -160,15 +174,23 @@ fun audioRecorder(
         }
     }
 
-    LaunchedEffect(Unit) {
+    val currentRecordAudio by rememberUpdatedState(::recordAudio)
+    val currentCancelRecording by rememberUpdatedState(::cancelRecording)
+    val currentSendActiveRecording by rememberUpdatedState(::sendActiveRecording)
+
+    LaunchedEffect(events) {
         events.collect {
-            when (it) {
-                AudioRecorderControlEvent.Record -> recordAudio()
-                AudioRecorderControlEvent.Cancel -> cancelRecording()
-                AudioRecorderControlEvent.Send -> sendActiveRecording()
+            try {
+                when (it) {
+                    AudioRecorderControlEvent.Record -> currentRecordAudio()
+                    AudioRecorderControlEvent.Cancel -> currentCancelRecording()
+                    AudioRecorderControlEvent.Send -> currentSendActiveRecording()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
 
-    return AudioRecorderControl(scope, events)
+    return remember(scope, events) { AudioRecorderControl(scope, events) }
 }

@@ -267,6 +267,8 @@ class Push {
                                                 is MessageReactionPushData -> it
                                                 is UpdateLocationPushData -> it
                                                 is ImpromptuPushData -> it
+                                                is SignalPushData -> it
+                                                is SignalReplyPushData -> it
                                                 else -> error("Unknown push data type")
                                             }
                                         )

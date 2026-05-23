@@ -135,6 +135,7 @@ import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.screens.CardScreen
 import com.queatz.ailaai.ui.screens.ExploreScreen
 import com.queatz.ailaai.ui.screens.FriendsScreen
+import com.queatz.ailaai.ui.screens.SignalsScreen
 import com.queatz.ailaai.ui.screens.GroupScreen
 import com.queatz.ailaai.ui.screens.InitialScreen
 import com.queatz.ailaai.ui.screens.LinkDeviceScreen
@@ -744,6 +745,17 @@ class MainActivity : AppCompatActivity() {
                                             }
                                             composable("explore") {
                                                 ExploreScreen()
+                                            }
+                                            composable("signals") {
+                                                SignalsScreen(null)
+                                            }
+                                            composable(
+                                                "signals/{id}",
+                                                deepLinks = listOf(navDeepLink {
+                                                    uriPattern = "$appDomain/signals/{id}"
+                                                })
+                                            ) {
+                                                SignalsScreen(it.arguments!!.getString("id"))
                                             }
                                             composable(
                                                 "inventory",

@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="audience">Đối tượng</string>
+    <string name="attachments">Đính kèm</string>
+    <string name="permission_denied">Quyền bị từ chối</string>
+    <string name="nearby">Xung quanh</string>
+    <string name="attach_photo">Đính kèm ảnh</string>
+    <string name="your_signal">Tín hiệu của bạn</string>
+    <string name="active_signals">Tín hiệu đang hoạt động</string>
+    <string name="cancel_signal_confirmation">Điều này sẽ khiến người khác không còn thấy tín hiệu của bạn.</string>
+    <string name="cancel_signal_q">Hủy tín hiệu?</string>
     <string name="app_name">Chào Town</string>
     <string name="settings">Cài đặt</string>
     <string name="language_vietnamese">Tiếng Việt</string>
@@ -25,6 +34,31 @@
     <string name="add_a_card">Tạo trang mới</string>
     <string name="you_have_no_groups">Bạn hiện không có nhóm nào.</string>
     <string name="search">Tìm kiếm</string>
+    <string name="send_signal">Gửi tín hiệu</string>
+    <string name="signal_turned_off">%1$s đã tắt</string>
+    <string name="signal_turned_on">%1$s đã bật</string>
+    <string name="signal_settings">Cài đặt tín hiệu</string>
+    <string name="signal_reply_notifications_description">Trả lời tín hiệu của bạn</string>
+    <string name="signals">Tín hiệu</string>
+    <string name="signals_notification_channel_description">Tín hiệu từ bạn bè và xung quanh</string>
+    <string name="signal_notifications_description">Tín hiệu từ bạn bè và xung quanh</string>
+    <string name="create_group_from_signal">Tạo nhóm</string>
+    <string name="replies">Trả lời</string>
+    <string name="reply_title">Trả lời</string>
+    <string name="waiting_for_replies">Đang chờ phản hồi…</string>
+    <string name="signal_expired">Tín hiệu đã hết hạn</string>
+    <string name="already_replied">Đã phản hồi</string>
+    <string name="hours_and_minutes">%1$d giờ %2$d phút</string>
+    <string name="minutes_remaining">%1$d phút</string>
+    <string name="create_signal">Tạo tín hiệu</string>
+    <string name="optional_message">Tin nhắn tùy chọn</string>
+    <string name="radius">Bán kính</string>
+    <string name="radius_x_km">Bán kính: %1$s km</string>
+    <plurals name="x_signals">
+        <item quantity="other">%1$s tín hiệu</item>
+    </plurals>
+    <string name="background_location">Vị trí chạy ngầm</string>
+    <string name="configure_background_location">Cấu hình vị trí chạy ngầm</string>
     <string name="search_map">Tìm kiếm địa điểm, dịch vụ và nhiều hơn nữa</string>
     <string name="open_settings">Mở cài đặt</string>
     <string name="location_disabled_description">Quyền vị trí bị tắt trong cài đặt.</string>
@@ -174,6 +208,10 @@
     <string name="person_invited">%1$s được thêm vào nhóm</string>
     <string name="show_on_map">Mở trên bản đồ</string>
     <string name="map">Bản đồ</string>
+    <string name="no_people_nearby">Không có ai ở gần.</string>
+    <string name="link_device">Liên kết thiết bị</string>
+    <string name="started_a_call">Đã bắt đầu cuộc gọi</string>
+    <string name="video">Video</string>
     <string name="chat">Chat</string>
     <string name="youve_been_signed_out">Có vẻ như bạn đã bị đăng xuất.</string>
     <string name="add_collaborators">Thêm hợp tác viên</string>
