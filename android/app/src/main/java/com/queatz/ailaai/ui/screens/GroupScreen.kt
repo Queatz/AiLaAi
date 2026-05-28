@@ -85,6 +85,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
@@ -229,6 +230,7 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.ailaai.ui.theme.theme_call
 import com.queatz.db.Card
 import com.queatz.db.Group
+import com.queatz.db.GroupConfig
 import com.queatz.db.GroupAttachment
 import com.queatz.db.GroupEditsConfig
 import com.queatz.db.GroupExtended
@@ -264,6 +266,7 @@ import kotlinx.datetime.offsetAt
 import kotlinx.serialization.encodeToString
 import java.io.File
 import kotlin.math.absoluteValue
+import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 
@@ -287,6 +290,7 @@ fun GroupScreen(groupId: String) {
     var showDescriptionDialog by rememberStateOf(false)
     var showSetPhotoDialog by rememberStateOf(false)
     var showSetBackgroundDialog by rememberStateOf(false)
+    var showBackgroundOpacityDialog by rememberStateOf(false)
     var showCategoryDialog by rememberStateOf(false)
     var showLocationDialog by rememberStateOf(false)
     var showRenameGroup by rememberStateOf(false)
@@ -350,7 +354,7 @@ fun GroupScreen(groupId: String) {
         mutableStateOf(emptyList<JoinRequestAndPerson>())
     }
 
-    background(groupExtended?.group?.background?.let(api::url))
+    background(groupExtended?.group?.background?.let(api::url), groupExtended?.group?.config?.backgroundOpacity ?: 1f)
 
     LaunchedEffect(allJoinRequests) {
         joinRequests = allJoinRequests.filter { it.joinRequest?.group == groupId }
@@ -2304,6 +2308,14 @@ fun GroupScreen(groupId: String) {
                         showManageDialog = false
                         showSetBackgroundDialog = true
                     })
+                    if (groupExtended?.group?.background.isNullOrBlank().not()) {
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.background_opacity))
+                        }, {
+                            showManageDialog = false
+                            showBackgroundOpacityDialog = true
+                        })
+                    }
                     DropdownMenuItem({
                         Text(stringResource(R.string.set_category))
                     }, {
@@ -2375,6 +2387,54 @@ fun GroupScreen(groupId: String) {
                     dismissButton = {
                         TextButton({
                             showChangeGroupStatus = false
+                        }) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                    }
+                )
+            }
+
+            if (showBackgroundOpacityDialog) {
+                val groupConfig = groupExtended?.group?.config ?: GroupConfig()
+                var backgroundOpacity by remember {
+                    mutableStateOf(groupExtended?.group?.config?.backgroundOpacity ?: 1f)
+                }
+                AlertDialog(
+                    {
+                        showBackgroundOpacityDialog = false
+                    },
+                    title = {
+                        Text(stringResource(R.string.background_opacity))
+                    },
+                    text = {
+                        Column {
+                            Text("${(backgroundOpacity * 100f).roundToInt()}%")
+                            Slider(
+                                value = backgroundOpacity,
+                                onValueChange = {
+                                    backgroundOpacity = it
+                                },
+                                valueRange = 0f..1f,
+                                modifier = Modifier.padding(top = 1.pad)
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        TextButton({
+                            scope.launch {
+                                groupConfig.backgroundOpacity = backgroundOpacity
+                                api.updateGroup(groupId, Group(config = groupConfig)) {
+                                    reload()
+                                }
+                                showBackgroundOpacityDialog = false
+                            }
+                        }) {
+                            Text(stringResource(R.string.save))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton({
+                            showBackgroundOpacityDialog = false
                         }) {
                             Text(stringResource(R.string.cancel))
                         }

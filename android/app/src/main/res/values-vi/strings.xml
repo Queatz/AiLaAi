@@ -573,6 +573,7 @@
     <string name="describe_photo">Mô tả ảnh</string>
     <string name="photo_count">Số lượng</string>
     <string name="background">Nền</string>
+    <string name="background_opacity">Độ mờ của nền</string>
     <string name="open_link">Mở liên kết</string>
     <string name="search_cards_of_x">Tìm kiếm trang của %1$s</string>
     <string name="pages_of_x">Trang của %1$s</string>

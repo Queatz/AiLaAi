@@ -17,6 +17,7 @@ import r
 suspend fun inputSelectDialog(
     confirmButton: String,
     title: String? = null,
+    cancelButton: String? = application.appString { cancel },
     defaultValue: String = "",
     items: List<String>? = null,
     placeholder: String = application.appString { search },
@@ -26,6 +27,7 @@ suspend fun inputSelectDialog(
     title = title,
     defaultValue = defaultValue,
     confirmButton = confirmButton,
+    cancelButton = cancelButton,
     placeholder = placeholder,
     extraButtons = extraButtons,
     inputStyles = {

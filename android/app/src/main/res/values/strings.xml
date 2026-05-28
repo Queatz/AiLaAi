@@ -598,6 +598,7 @@
     <string name="describe_photo">Describe the photo</string>
     <string name="photo_count">Count</string>
     <string name="background">Background</string>
+    <string name="background_opacity">Background opacity</string>
     <string name="open_link">Open link</string>
     <string name="open">Open</string>
     <string name="confirm_link_device">Are you sure you want to link this device?</string>

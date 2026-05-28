@@ -112,10 +112,13 @@ fun TaskListItem(
                         onClick {
                             it.stopPropagation()
                             if (onUpdated != null) {
-                                val items = (allCards ?: listOf(card)).mapNotNull { it.task?.status }.filter { it.isNotBlank() }.distinct().sorted()
+                                val items =
+                                    (allCards ?: listOf(card)).mapNotNull { it.task?.status }.filter { it.isNotBlank() }
+                                        .distinct().sorted()
                                 scope.launch {
                                     val newStatus = inputSelectDialog(
-                                        confirmButton = application.appString { okay },
+                                        confirmButton = application.appString { close },
+                                        cancelButton = null,
                                         placeholder = application.appString { Strings.status },
                                         items = items
                                     )

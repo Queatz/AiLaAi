@@ -171,5 +171,3 @@ fun GroupContent(
         }
     }
 }
-
-private fun String.ensureScheme() = if (contains("://")) this else "https://$this"

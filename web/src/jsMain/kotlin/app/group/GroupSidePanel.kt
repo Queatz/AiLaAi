@@ -1,21 +1,37 @@
 package app.group
 
 import Styles
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.updateGroup
-import json
-import com.queatz.db.GroupContent as GroupContentModel
+import app.dialog.dialog
+import application
 import com.queatz.db.GroupExtended
-import components.Icon
 import components.IconButton
+import json
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
-import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.Button
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.boxSizing
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.flex
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Text
 import r
+import com.queatz.db.GroupContent as GroupContentModel
 
 @OptIn(ExperimentalComposeWebApi::class)
 @Composable
@@ -82,14 +98,20 @@ fun GroupSidePanel(
                     }
                 ) {
                     scope.launch {
-                        api.updateGroup(
-                            id = group.group!!.id!!,
-                            groupUpdate = com.queatz.db.Group(
-                                content = json.encodeToString<GroupContentModel>(GroupContentModel.None)
-                            )
-                        ) {
-                            onUpdated(group.apply { this.group!!.content = it.content })
-                            onClose?.invoke()
+                        if (content is GroupContentModel.Text) {
+                        if (dialog(application.appString { notesWillBeLost }) != true) {
+                            return@launch
+                        }
+                    }
+
+                    api.updateGroup(
+                        id = group.group!!.id!!,
+                        groupUpdate = com.queatz.db.Group(
+                            content = json.encodeToString<GroupContentModel>(GroupContentModel.None)
+                        )
+                    ) {
+                        onUpdated(group.apply { this.group!!.content = it.content })
+                        onClose?.invoke()
                         }
                     }
                 }

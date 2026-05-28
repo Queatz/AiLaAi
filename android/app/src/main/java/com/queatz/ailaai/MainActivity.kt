@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -68,6 +69,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
@@ -173,16 +175,16 @@ private val appTabKey = stringPreferencesKey("app.tab")
 private val appVersionCodeKey = intPreferencesKey("app.versionCode")
 private val appUiKey = stringPreferencesKey("app.ui")
 
-private class Background(val url: String)
+data class Background(val url: String, val opacity: Float = 1f)
 
 private val _background = MutableStateFlow<List<Background>>(emptyList())
 
-val background = _background.map { it.lastOrNull()?.url }
+val background = _background.map { it.lastOrNull() }
 
 @Composable
-fun background(url: String?) {
+fun background(url: String?, opacity: Float = 1f) {
     if (url != null) {
-        val value = Background(url)
+        val value = remember(url, opacity) { Background(url, opacity) }
         var stopped by rememberStateOf(false)
 
         StopEffect {
@@ -201,7 +203,7 @@ fun background(url: String?) {
             }
         }
 
-        DisposableEffect(url) {
+        DisposableEffect(value) {
             _background.update {
                 it + value
             }
@@ -675,9 +677,11 @@ class MainActivity : AppCompatActivity() {
 
                                 Crossfade(background != null) { show ->
                                     if (show) {
+                                        val alphaAnimated by animateFloatAsState(background?.opacity ?: 0f)
+
                                         AsyncImage(
                                             model = ImageRequest.Builder(LocalContext.current)
-                                                .data(lastBackground)
+                                                .data(lastBackground?.url)
                                                 .crossfade(true)
                                                 .build(),
                                             contentDescription = "",
@@ -685,6 +689,7 @@ class MainActivity : AppCompatActivity() {
                                             alignment = Alignment.Center,
                                             modifier = Modifier
                                                 .fillMaxSize()
+                                                .alpha(alphaAnimated)
                                         )
                                     }
                                 }

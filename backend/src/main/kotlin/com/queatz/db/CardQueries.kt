@@ -81,20 +81,30 @@ fun Db.equippedCardsOfPerson(person: String, me: String?) = list(
 fun Db.cardsOfGroup(me: String?, group: String) = list(
     Card::class,
     """
+        let isMember = @me != null && first(
+            for m in `${Member::class.collection()}`
+                filter m._from == @meId
+                    and m._to == @groupId
+                    and m.${f(Member::gone)} != true
+                limit 1
+                return true
+        ) == true
         for x in @@collection
             filter x.${f(Card::group)} == @group
-                and (x.${f(Card::person)} == @me or x.${f(Card::active)} == true)
+                and (isMember or x.${f(Card::person)} == @me or x.${f(Card::active)} == true)
             sort x.${f(Card::createdAt)} desc
             return merge(
                 x,
                 {
-                    ${f(Card::cardCount)}: count(for card in @@collection filter ((@me != null && card.${f(Card::person)} == @me) or card.${f(Card::active)} == true) && card.${f(Card::parent)} == x._key return true)
+                    ${f(Card::cardCount)}: count(for card in @@collection filter (isMember or (@me != null && card.${f(Card::person)} == @me) or card.${f(Card::active)} == true) && card.${f(Card::parent)} == x._key return true)
                 }
             )
     """.trimIndent(),
     mapOf(
         "me" to me,
+        "meId" to me?.asId(Person::class),
         "group" to group,
+        "groupId" to group.asId(Group::class)
     )
 )
 

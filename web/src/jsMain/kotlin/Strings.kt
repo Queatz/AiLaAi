@@ -944,6 +944,11 @@ object Strings {
         vn = "Đánh dấu hoàn thành",
         ru = "Отметить как выполненное"
     )
+    val notesWillBeLost = Translation(
+        en = "Notes will be lost, continue?",
+        vn = "Ghi chú sẽ bị mất, tiếp tục?",
+        ru = "Заметки будут потеряны, продолжить?"
+    )
     val open = Translation(
         en = "Open",
         vn = "Mở",
@@ -2330,6 +2335,7 @@ object Strings {
         vn = "Đánh dấu là chưa xong",
         ru = "Отметить как невыполненное"
     )
+    
 }
 
 /**
