@@ -6,6 +6,7 @@ import com.queatz.impromptuService
 import com.queatz.signalService
 import com.queatz.remind
 import com.queatz.urlAttachmentFetcher
+import com.queatz.audioTranscriber
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
@@ -28,6 +29,7 @@ fun Application.configureRouting() {
     groupCall.start(this)
     remind.start(this)
     urlAttachmentFetcher.start(this)
+    audioTranscriber.start(this)
     bots.start(this)
     apps.start(this)
     impromptuService.start(this)

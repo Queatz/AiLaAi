@@ -204,7 +204,8 @@ class Notify {
         group: Group,
         person: Person? = null,
         bot: Bot? = null,
-        message: Message
+        message: Message,
+        show: Boolean = true
     ) {
         val pushData = PushData(
             PushAction.Message,
@@ -225,7 +226,8 @@ class Notify {
                         id = bot.id
                     }
                 },
-                message = message
+                message = message,
+                show = show
             )
         )
 

@@ -405,8 +405,9 @@ fun AppPage(tabId: String? = null) {
         push.events.filter {
             it.action == PushAction.Message
         }.collect {
-            if (document.hidden) {
-                if ((it.data as? MessagePushData)?.person?.id != me?.id) {
+            val data = it.data as? MessagePushData
+            if (data?.show != false && document.hidden) {
+                if (data?.person?.id != me?.id) {
                     playMessageSound = true
                 }
             }

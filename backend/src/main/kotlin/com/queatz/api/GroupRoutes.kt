@@ -349,6 +349,7 @@ fun Route.groupRoutes() {
                         person = db.document(Person::class, member.from!!.asKey())!!
                     )
                     updateSeen(me, member, group)
+                    audioTranscriber.handle(newMessage)
                     notifyMessage(me, group, newMessage)
 
                     HttpStatusCode.OK
@@ -459,6 +460,7 @@ fun Route.groupRoutes() {
                         )
 
                         updateSeen(person, member, group)
+                        audioTranscriber.handle(message)
                         notifyMessage(me, group, message)
                     }
                 }
