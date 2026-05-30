@@ -60,7 +60,7 @@ fun MessageContent(
     }
 
     var reply by remember(message) {
-        mutableStateOf<Message?>(
+        mutableStateOf(
             (attachments.firstNotNullOfOrNull { it as? ReplyAttachment })
                 .takeIf { !isReply }
                 ?.let { attachment ->
@@ -96,6 +96,7 @@ fun MessageContent(
                 alignItems(AlignItems.FlexStart)
             }
             maxWidth(100.percent)
+            gap(.5.r)
         }
         title(
             "${message.createdAt?.let {

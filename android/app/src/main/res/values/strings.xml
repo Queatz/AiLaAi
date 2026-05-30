@@ -10,6 +10,10 @@
     <string name="cancel_signal_q">Cancel signal?</string>
     <string name="signal_reply_notifications_description">Replies to your signals</string>
     <string name="signals">Signals</string>
+    <string name="what_are_we_doing_this_morning">What are we doing this morning?</string>
+    <string name="what_are_we_doing_today">What are we doing today?</string>
+    <string name="what_are_we_doing_this_evening">What are we doing this evening?</string>
+    <string name="what_are_we_doing_tonight">What are we doing tonight?</string>
     <string name="signals_notification_channel_description">Signals from friends and nearby</string>
     <string name="signal_notifications_description">Signals from friends and nearby</string>
     <string name="create_group_from_signal">Create group</string>

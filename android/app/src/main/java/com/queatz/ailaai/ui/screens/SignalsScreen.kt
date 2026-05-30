@@ -2,9 +2,7 @@ package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
 import android.widget.Toast
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
@@ -14,6 +12,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
@@ -29,11 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
@@ -49,6 +51,7 @@ import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.push
 import com.queatz.ailaai.ui.components.AppHeader
+import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.dialogs.*
@@ -95,6 +98,30 @@ fun SignalsScreen(id: String? = null) {
     )
 
     var myId by remember { mutableStateOf<String?>(null) }
+
+    val greetingRes = greetingRes
+
+    val infiniteTransition = rememberInfiniteTransition(label = "GreetingAnimation")
+    val offset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 2000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(20000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "OffsetAnimation"
+    )
+
+    val brush = Brush.linearGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primary,
+            MaterialTheme.colorScheme.tertiary,
+            MaterialTheme.colorScheme.secondary,
+            MaterialTheme.colorScheme.primary
+        ),
+        start = Offset(offset, offset),
+        end = Offset(offset + 500f, offset + 500f)
+    )
 
     LaunchedEffect(id) {
         hasOpenedDeepLink = false
@@ -159,7 +186,10 @@ fun SignalsScreen(id: String? = null) {
     Column {
         AppHeader(
             title = stringResource(R.string.signals),
-            onTitleClick = {}
+            onTitleClick = {},
+            navigationIcon = {
+                BackButton()
+            }
         )
 
         if (isLoading && activeSignals == null) {
@@ -168,32 +198,6 @@ fun SignalsScreen(id: String? = null) {
 
         Box(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
-                activeSignals?.let { active ->
-                    if (active.mine.isNotEmpty() || active.others.isNotEmpty()) {
-                        Text(
-                            stringResource(R.string.active_signals),
-                            style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier.padding(horizontal = 2.pad, vertical = 1.pad)
-                        )
-                        LazyRow(
-                            contentPadding = PaddingValues(1.pad),
-                            horizontalArrangement = Arrangement.spacedBy(1.pad),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            items(active.mine) { send ->
-                                ActiveSignalCard(send, isMine = true, onClick = {
-                                    showRepliesDialog = send
-                                })
-                            }
-                            items(active.others) { send ->
-                                ActiveSignalCard(send, isMine = false, onClick = {
-                                    showReplyDialog = send
-                                })
-                            }
-                        }
-                    }
-                }
-
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(100.dp),
                     contentPadding = PaddingValues(
@@ -206,6 +210,50 @@ fun SignalsScreen(id: String? = null) {
                     verticalArrangement = Arrangement.spacedBy(1.pad),
                     modifier = Modifier.fillMaxSize().weight(1f)
                 ) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Text(
+                            stringResource(greetingRes),
+                            style = MaterialTheme.typography.displaySmall.copy(
+                                fontWeight = FontWeight.Light,
+                                textAlign = TextAlign.Center,
+                                brush = brush
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 1.pad, vertical = 2.pad)
+                        )
+                    }
+
+                    activeSignals?.let { active ->
+                        if (active.mine.isNotEmpty() || active.others.isNotEmpty()) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                Text(
+                                    stringResource(R.string.active_signals),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    modifier = Modifier.padding(horizontal = 1.pad, vertical = 1.pad)
+                                )
+                            }
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                LazyRow(
+                                    contentPadding = PaddingValues(horizontal = 0.pad, vertical = 1.pad),
+                                    horizontalArrangement = Arrangement.spacedBy(1.pad),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    items(active.mine) { send ->
+                                        ActiveSignalCard(send, isMine = true, onClick = {
+                                            showRepliesDialog = send
+                                        })
+                                    }
+                                    items(active.others) { send ->
+                                        ActiveSignalCard(send, isMine = false, onClick = {
+                                            showReplyDialog = send
+                                        })
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     items(filteredSignals) { signal ->
                         val personSignal = personSignals.find { it.signal == signal.id }
                         val isOn = personSignal?.turnedOn == true

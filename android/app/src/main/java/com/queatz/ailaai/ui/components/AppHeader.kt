@@ -61,6 +61,7 @@ fun ColumnScope.AppHeader(
     showSignalsButton: Boolean = false,
     showProfile: Boolean = true,
     showOfflineNote: Boolean = true,
+    navigationIcon: @Composable () -> Unit = {},
     actions: @Composable (RowScope.() -> Unit) = {}
 ) {
     val context = LocalContext.current
@@ -143,6 +144,7 @@ fun ColumnScope.AppHeader(
                         )
                     }
                 },
+                navigationIcon = navigationIcon,
                 actions = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

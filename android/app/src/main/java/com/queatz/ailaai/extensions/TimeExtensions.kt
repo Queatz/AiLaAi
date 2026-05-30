@@ -44,3 +44,11 @@ fun Instant.shortAgo(context: Context) = (Clock.System.now() - this).let {
         else -> context.resources.getString(R.string.now)
     }
 }
+
+val greetingRes: Int
+    get() = when (java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)) {
+        in 5..11 -> R.string.what_are_we_doing_this_morning
+        in 12..16 -> R.string.what_are_we_doing_today
+        in 17..20 -> R.string.what_are_we_doing_this_evening
+        else -> R.string.what_are_we_doing_tonight
+    }

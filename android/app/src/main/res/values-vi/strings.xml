@@ -40,6 +40,10 @@
     <string name="signal_settings">Cài đặt tín hiệu</string>
     <string name="signal_reply_notifications_description">Trả lời tín hiệu của bạn</string>
     <string name="signals">Tín hiệu</string>
+    <string name="what_are_we_doing_this_morning">Sáng nay làm gì thế?</string>
+    <string name="what_are_we_doing_today">Hôm nay làm gì thế?</string>
+    <string name="what_are_we_doing_this_evening">Chiều nay làm gì thế?</string>
+    <string name="what_are_we_doing_tonight">Tối nay làm gì thế?</string>
     <string name="signals_notification_channel_description">Tín hiệu từ bạn bè và xung quanh</string>
     <string name="signal_notifications_description">Tín hiệu từ bạn bè và xung quanh</string>
     <string name="create_group_from_signal">Tạo nhóm</string>
