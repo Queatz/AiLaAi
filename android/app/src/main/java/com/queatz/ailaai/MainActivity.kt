@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.Map
@@ -107,6 +108,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.data.appDomains
 import com.queatz.ailaai.data.json
+import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.copyToClipboard
 import com.queatz.ailaai.extensions.invoke
@@ -133,6 +135,8 @@ import com.queatz.ailaai.services.saves
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.services.trading
 import com.queatz.ailaai.slideshow.slideshow
+import com.queatz.ailaai.ui.components.GroupPhoto
+import com.queatz.ailaai.ui.components.ProfileMenu
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.screens.CardScreen
 import com.queatz.ailaai.ui.screens.ExploreScreen
@@ -338,6 +342,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     var me by remember { mutableStateOf<Person?>(cache.get(CacheKey.Me)) }
                     var showSignedOut by rememberStateOf(false)
+                    var showProfileMenu by rememberStateOf(false)
                     val snackbarHostState = remember { SnackbarHostState() }
                     val scope = rememberCoroutineScope()
                     val downloadString = stringResource(R.string.download)
@@ -520,6 +525,12 @@ class MainActivity : AppCompatActivity() {
                         )
                     }
 
+                    if (showProfileMenu) {
+                        ProfileMenu {
+                            showProfileMenu = false
+                        }
+                    }
+
                     // Navigation bar background color
                     WindowInsets.navigationBars.getBottom(LocalDensity.current).let { height ->
                         if (height > 0 && !isLandscape) {
@@ -608,6 +619,32 @@ class MainActivity : AppCompatActivity() {
                                                 }
                                             )
                                         }
+
+                                        NavigationBarItem(
+                                            icon = {
+                                                me?.let { me ->
+                                                    if (me.name?.isNotBlank() == true || me.photo?.isNotBlank() == true) {
+                                                        GroupPhoto(
+                                                            listOf(ContactPhoto(me.name ?: "", me.photo, me.seen)),
+                                                            size = 24.dp,
+                                                            padding = 0.dp
+                                                        )
+                                                    } else {
+                                                        Icon(Icons.Outlined.AccountCircle, contentDescription = null)
+                                                    }
+                                                } ?: Icon(Icons.Outlined.AccountCircle, contentDescription = null)
+                                            },
+                                            alwaysShowLabel = appUi.showNavLabels,
+                                            label = if (appUi.showNavLabels) {
+                                                { Text(stringResource(R.string.me)) }
+                                            } else {
+                                                null
+                                            },
+                                            selected = navController.currentDestination?.route == AppNav.Me.route,
+                                            onClick = {
+                                                showProfileMenu = true
+                                            }
+                                        )
                                     }
                                 }
                             }
@@ -652,6 +689,36 @@ class MainActivity : AppCompatActivity() {
                                                 modifier = Modifier.padding(horizontal = .5f.pad)
                                             )
                                         }
+
+                                        NavigationDrawerItem(
+                                            icon = {
+                                                me?.let { me ->
+                                                    if (me.name?.isNotBlank() == true || me.photo?.isNotBlank() == true) {
+                                                        GroupPhoto(
+                                                            listOf(ContactPhoto(me.name ?: "", me.photo, me.seen)),
+                                                            size = 24.dp,
+                                                            padding = 0.dp
+                                                        )
+                                                    } else {
+                                                        Icon(Icons.Outlined.AccountCircle, contentDescription = null)
+                                                    }
+                                                } ?: Icon(Icons.Outlined.AccountCircle, contentDescription = null)
+                                            },
+                                            label = {
+                                                Row(
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                ) {
+                                                    Text(stringResource(R.string.me))
+                                                }
+                                            },
+                                            selected = navController.currentDestination?.route == AppNav.Me.route,
+                                            onClick = {
+                                                showProfileMenu = true
+                                            },
+                                            modifier = Modifier.padding(horizontal = .5f.pad)
+                                        )
                                     }
                                 }
                             },

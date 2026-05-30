@@ -4,6 +4,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -46,23 +47,35 @@ fun SignalsButton(
         label = "OffsetAnimation"
     )
 
+    val isDark = isSystemInDarkTheme()
+
     val brush = Brush.linearGradient(
-        colors = listOf(
+        colors = if (isDark) listOf(
             MaterialTheme.colorScheme.primary,
             MaterialTheme.colorScheme.tertiary,
             MaterialTheme.colorScheme.secondary,
             MaterialTheme.colorScheme.primary
+        ) else listOf(
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.tertiaryContainer,
+            MaterialTheme.colorScheme.secondaryContainer,
+            MaterialTheme.colorScheme.primaryContainer
         ),
         start = Offset(offset, offset),
         end = Offset(offset + 500f, offset + 500f)
     )
 
     val borderBrush = Brush.linearGradient(
-        colors = listOf(
+        colors = if (isDark) listOf(
             MaterialTheme.colorScheme.secondary,
             MaterialTheme.colorScheme.primary,
             MaterialTheme.colorScheme.tertiary,
             MaterialTheme.colorScheme.secondary
+        ) else listOf(
+            MaterialTheme.colorScheme.secondaryContainer,
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.tertiaryContainer,
+            MaterialTheme.colorScheme.secondaryContainer
         ),
         start = Offset(offset, offset),
         end = Offset(offset + 500f, offset + 500f)
@@ -89,7 +102,7 @@ fun SignalsButton(
         Text(
             text = if (count == 0) stringResource(greetingRes) else pluralStringResource(R.plurals.x_signals, count, count),
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = if (isDark) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimaryContainer,
             textAlign = TextAlign.Center,
             modifier = Modifier.widthIn(max = 200.dp)
         )

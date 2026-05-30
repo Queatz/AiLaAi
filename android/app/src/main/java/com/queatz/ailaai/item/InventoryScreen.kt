@@ -391,8 +391,8 @@ fun InventoryScreen() {
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             AppHeader(
-                stringResource(R.string.items),
-                {
+                title = stringResource(R.string.items),
+                onTitleClick = {
                     scrollToTop()
                 },
             ) {

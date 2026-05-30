@@ -217,9 +217,7 @@ fun ExploreScreen() {
             locationSelector = locationSelector,
             appHeader = {
                 AppHeader(
-                    title = title,
                     showSignalsButton = true,
-                    onTitleClick = {},
                 )
             },
             modifier = Modifier.padding(paddingValues),
@@ -232,13 +230,7 @@ fun ExploreScreen() {
                 modifier = Modifier.padding(paddingValues),
             ) {
                 AppHeader(
-                    title = title,
-                    showSignalsButton = true,
-                    onTitleClick = {
-                        scope.launch {
-                            state.scrollToTop()
-                        }
-                    }
+                    showSignalsButton = true
                 )
 
                 var viewportHeight by remember { mutableIntStateOf(0) }

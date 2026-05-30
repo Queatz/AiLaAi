@@ -85,7 +85,6 @@ import com.queatz.ailaai.ui.components.GroupInfo
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.components.NotificationsDisabledBanner
 import com.queatz.ailaai.ui.components.PageInput
-import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.SearchResult
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
@@ -407,7 +406,6 @@ fun FriendsScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AppHeader(
-            title = stringResource(R.string.chat),
             showSignalsButton = true,
             onTitleClick = {
                 scope.launch {

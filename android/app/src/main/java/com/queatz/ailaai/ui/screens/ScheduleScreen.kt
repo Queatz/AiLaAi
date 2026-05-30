@@ -259,10 +259,7 @@ fun ScheduleScreen() {
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             AppHeader(
-                title = stringResource(R.string.schedule),
-                onTitleClick = {
-                    scrollToTop()
-                },
+                showSignalsButton = true,
             ) {
                 IconButton(
                     onClick = {

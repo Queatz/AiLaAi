@@ -44,8 +44,8 @@ fun MyStoriesScreen() {
 
     Column {
         AppHeader(
-            stringResource(R.string.write),
-            {
+            title = stringResource(R.string.write),
+            onTitleClick = {
                 scope.launch {
                     state.scrollToTop()
                 }

@@ -56,10 +56,10 @@ private val offlineNoteKey = stringPreferencesKey("app.offlineNote")
 
 @Composable
 fun ColumnScope.AppHeader(
-    title: String,
-    onTitleClick: () -> Unit,
+    title: String = "",
+    onTitleClick: () -> Unit = {},
     showSignalsButton: Boolean = false,
-    showProfile: Boolean = true,
+    showProfile: Boolean = false,
     showOfflineNote: Boolean = true,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable (RowScope.() -> Unit) = {}
@@ -184,7 +184,9 @@ fun ColumnScope.AppHeader(
 
             if (showSignalsButton) {
                 Box(
-                    modifier = Modifier.matchParentSize(),
+                    modifier = Modifier
+                        .matchParentSize()
+                        .padding(horizontal = 12.pad),
                     contentAlignment = Alignment.Center
                 ) {
                     SignalsButton {
