@@ -153,26 +153,18 @@ fun ColumnScope.AppHeader(
                     ) {
                         actions()
                         me?.takeIf { showProfile }?.let { me ->
-                            var showProfileMenu by rememberStateOf(false)
-
-                            if (showProfileMenu) {
-                                ProfileMenu {
-                                    showProfileMenu = false
-                                }
-                            }
-
                             if (me.name?.isNotBlank() == true || me.photo?.isNotBlank() == true) {
                                 GroupPhoto(
                                     listOf(ContactPhoto(me.name ?: "", me.photo, me.seen)),
                                     size = 40.dp,
                                     modifier = Modifier
                                         .clickable {
-                                            showProfileMenu = true
+                                            nav.appNavigate(AppNav.Profile(me.id!!))
                                         }
                                 )
                             } else {
                                 IconButton({
-                                    showProfileMenu = true
+                                    nav.appNavigate(AppNav.Profile(me.id!!))
                                 }) {
                                     Icon(Icons.Outlined.AccountCircle, Icons.Outlined.Settings.name)
                                 }

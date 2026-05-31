@@ -109,6 +109,7 @@ import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.GroupPhoto
 import com.queatz.ailaai.ui.components.LinkifyText
 import com.queatz.ailaai.ui.components.LoadingIcon
+import com.queatz.ailaai.ui.components.ProfileToolbar
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.Video
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
@@ -971,7 +972,9 @@ fun ProfileScreen(personId: String) {
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }
-                                if (!isMe) {
+                                if (isMe) {
+                                    ProfileToolbar()
+                                } else {
                                     Row(
                                         horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterHorizontally),
                                         verticalAlignment = Alignment.CenterVertically,

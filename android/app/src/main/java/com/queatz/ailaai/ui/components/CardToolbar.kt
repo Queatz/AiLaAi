@@ -5,11 +5,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,13 +30,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.ui.theme.pad
 
-class ToolbarScope internal constructor() {
+class ToolbarScope internal constructor(
+    private val outline: Boolean
+) {
     @Composable
     fun item(
         icon: ImageVector,
@@ -43,7 +49,12 @@ class ToolbarScope internal constructor() {
         isLoading: Boolean = false,
         onClick: () -> Unit
     ) {
-        TextButton(onClick, enabled = !isLoading) {
+        TextButton(
+            onClick = onClick,
+            enabled = !isLoading,
+            border = if (outline) ButtonDefaults.outlinedButtonBorder(enabled = !isLoading) else null,
+            modifier = if (outline) Modifier.aspectRatio(1f) else Modifier
+        ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(.5f.pad, Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -77,6 +88,7 @@ class ToolbarScope internal constructor() {
 fun Toolbar(
     modifier: Modifier = Modifier,
     singleLine: Boolean = false,
+    outline: Boolean = false,
     items: @Composable ToolbarScope.() -> Unit
 ) {
     if (singleLine) {
@@ -89,20 +101,23 @@ fun Toolbar(
                 .onPlaced { viewport = it.boundsInParent().size }
                 .horizontalFadingEdge(viewport, scrollState)
         ) {
-            ToolbarScope().apply {
+            ToolbarScope(outline).apply {
                 items()
             }
         }
     } else {
-        val configuration = LocalConfiguration.current
         FlowRow(
-            horizontalArrangement = Arrangement.Center,
+            horizontalArrangement = if (outline) {
+                Arrangement.spacedBy(1.pad, alignment = Alignment.CenterHorizontally)
+            } else {
+                Arrangement.Center
+            },
             verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterVertically),
             modifier = modifier
-                .widthIn(max = configuration.screenWidthDp.dp)
+                .widthIn(max = LocalWindowInfo.current.containerDpSize.width)
                 .fillMaxWidth()
         ) {
-            ToolbarScope().apply {
+            ToolbarScope(outline).apply {
                 items()
             }
         }

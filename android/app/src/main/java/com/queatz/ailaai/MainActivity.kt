@@ -136,7 +136,6 @@ import com.queatz.ailaai.services.say
 import com.queatz.ailaai.services.trading
 import com.queatz.ailaai.slideshow.slideshow
 import com.queatz.ailaai.ui.components.GroupPhoto
-import com.queatz.ailaai.ui.components.ProfileMenu
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.screens.CardScreen
 import com.queatz.ailaai.ui.screens.ExploreScreen
@@ -342,7 +341,6 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     var me by remember { mutableStateOf<Person?>(cache.get(CacheKey.Me)) }
                     var showSignedOut by rememberStateOf(false)
-                    var showProfileMenu by rememberStateOf(false)
                     val snackbarHostState = remember { SnackbarHostState() }
                     val scope = rememberCoroutineScope()
                     val downloadString = stringResource(R.string.download)
@@ -636,7 +634,9 @@ class MainActivity : AppCompatActivity() {
                                             },
                                             selected = navController.currentDestination?.route == AppNav.Me.route,
                                             onClick = {
-                                                showProfileMenu = true
+                                                me?.id?.let { id ->
+                                                    navController.appNavigate(AppNav.Profile(id))
+                                                }
                                             }
                                         )
                                     }
@@ -709,7 +709,9 @@ class MainActivity : AppCompatActivity() {
                                             },
                                             selected = navController.currentDestination?.route == AppNav.Me.route,
                                             onClick = {
-                                                showProfileMenu = true
+                                                me?.id?.let { id ->
+                                                    navController.appNavigate(AppNav.Profile(id))
+                                                }
                                             },
                                             modifier = Modifier.padding(horizontal = .5f.pad)
                                         )
@@ -759,11 +761,6 @@ class MainActivity : AppCompatActivity() {
                                     CompositionLocalProvider(
                                         LocalAppState provides AppState(me, navController, apiIsReachable)
                                     ) {
-                                        if (showProfileMenu) {
-                                            ProfileMenu {
-                                                showProfileMenu = false
-                                            }
-                                        }
 
                                         if (showWelcomeDialog) {
                                             WelcomeDialog(

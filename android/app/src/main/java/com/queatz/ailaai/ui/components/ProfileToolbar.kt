@@ -41,7 +41,6 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.connectivity
 import com.queatz.ailaai.services.ui
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
-import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.scripts.PreviewScriptAction
 import com.queatz.ailaai.ui.scripts.ScriptsDialog
 import com.queatz.ailaai.ui.theme.pad
@@ -56,7 +55,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Instant
 
 @Composable
-fun ProfileMenu(onDismissRequest: () -> Unit) {
+fun ProfileToolbar() {
     val me = me
     val nav = nav
     val scope = rememberCoroutineScope()
@@ -186,25 +185,13 @@ fun ProfileMenu(onDismissRequest: () -> Unit) {
             })
     }
 
-    Menu(onDismissRequest = onDismissRequest) {
-        Toolbar {
+    Toolbar(outline = true) {
             val showOfflineNote by ui.showOfflineNote.collectAsState()
-
-            me?.let { me ->
-                item(
-                    icon = Icons.Outlined.Person,
-                    name = stringResource(R.string.profile)
-                ) {
-                    nav.appNavigate(AppNav.Profile(me.id!!))
-                    onDismissRequest()
-                }
-            }
             item(
                 icon = Icons.Outlined.Rocket,
                 name = stringResource(R.string.inventory),
             ) {
                 nav.appNavigate(AppNav.Inventory)
-                onDismissRequest()
             }
             item(
                 icon = Icons.Outlined.VisibilityOff,
@@ -221,7 +208,6 @@ fun ProfileMenu(onDismissRequest: () -> Unit) {
                     )
                 }
             ) {
-                onDismissRequest()
             }
             if (BuildConfig.ENABLE_BACKGROUND_LOCATION) {
                 item(
@@ -246,17 +232,14 @@ fun ProfileMenu(onDismissRequest: () -> Unit) {
                 },
             ) {
                 ui.showOfflineNote(!showOfflineNote)
-                onDismissRequest()
             }
             item(
                 icon = Icons.Outlined.Settings,
                 name = stringResource(R.string.settings),
             ) {
                 nav.appNavigate(AppNav.Settings)
-                onDismissRequest()
             }
         }
-    }
 }
 
 fun GroupExtended.seenText(active: String, me: Person?): String? {
