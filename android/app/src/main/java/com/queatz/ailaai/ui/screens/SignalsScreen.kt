@@ -77,6 +77,8 @@ fun SignalsScreen(id: String? = null) {
     var personSignals by remember { mutableStateOf(emptyList<PersonSignal>()) }
     var activeSignals by remember { mutableStateOf<ActiveSignalsResponse?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var signalsOffset by remember { mutableIntStateOf(0) }
+    var canLoadMore by remember { mutableStateOf(true) }
 
     var searchText by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
@@ -149,16 +151,35 @@ fun SignalsScreen(id: String? = null) {
         }
     }
 
+    fun loadSignals(reset: Boolean = false) {
+        if (reset) {
+            signalsOffset = 0
+            canLoadMore = true
+        }
+
+        if (!canLoadMore || (isLoading && !reset)) {
+            return
+        }
+
+        isLoading = true
+        scope.launch {
+            api.signals(
+                localHour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY),
+                offset = signalsOffset,
+                onError = { isLoading = false }
+            ) {
+                signals = if (reset) it else signals + it
+                signalsOffset = signals.size
+                canLoadMore = it.size >= 20
+                categories = signals.flatMap { it.categories ?: emptyList() }.distinct().sorted()
+                isLoading = false
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         api.me { myId = it.id }
-        api.signals(
-            localHour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY),
-            onError = { isLoading = false }
-        ) {
-            signals = it
-            categories = it.flatMap { it.categories ?: emptyList() }.distinct().sorted()
-            isLoading = false
-        }
+        loadSignals(true)
         api.mySignals { personSignals = it }
     }
 
@@ -279,6 +300,23 @@ fun SignalsScreen(id: String? = null) {
                                 }
                             } else {
                                 showSendDialog = signal
+                            }
+                        }
+                    }
+
+                    if (canLoadMore && signals.isNotEmpty()) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(1.pad),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+
+                            LaunchedEffect(Unit) {
+                                loadSignals()
                             }
                         }
                     }

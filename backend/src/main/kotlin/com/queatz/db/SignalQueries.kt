@@ -2,7 +2,7 @@ package com.queatz.db
 
 import kotlin.time.Instant
 
-fun Db.signals(hour: Int) = list(
+fun Db.signals(hour: Int, offset: Int = 0) = list(
     Signal::class,
     """
         for x in `${Signal::class.collection()}`
@@ -12,9 +12,10 @@ fun Db.signals(hour: Int) = list(
                     return s.${f(SignalStats::count)}
             )[0]
             sort stats desc, x.${f(Signal::name)} asc
+            limit @offset, 20
             return x
     """.trimIndent(),
-    mapOf("hour" to hour)
+    mapOf("hour" to hour, "offset" to offset)
 )
 
 fun Db.incrementSignalStats(signal: String, hour: Int) = query(

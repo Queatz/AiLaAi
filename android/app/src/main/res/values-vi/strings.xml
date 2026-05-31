@@ -387,6 +387,7 @@
     <string name="add_a_location">Thêm vị trí</string>
     <string name="add_a_location_description">Thêm vị trí để chia sẻ bài viết của bạn với những người ở gần (tùy chọn)</string>
     <string name="share_to_groups">Chia sẻ với nhóm</string>
+    <string name="select_groups">Chọn nhóm</string>
     <string name="share_to_groups_description">Chia sẻ bài viết của bạn tại thời điểm đăng (tùy chọn)</string>
     <string name="all_cards_are_posted">Tất cả trang đã đăng</string>
     <string name="story_contains_unposted_cards">Bài viết chứa trang chưa đăng</string>

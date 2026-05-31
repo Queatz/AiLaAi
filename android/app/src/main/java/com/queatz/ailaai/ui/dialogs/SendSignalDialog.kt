@@ -1,53 +1,73 @@
 package com.queatz.ailaai.ui.dialogs
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Send
-import androidx.compose.material.icons.outlined.AudioFile
-import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Forum
+import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.Photo
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import at.bluesource.choicesdk.maps.common.LatLng
-import coil3.compose.rememberAsyncImagePainter
-import com.queatz.ailaai.extensions.formatTime
-import com.queatz.ailaai.extensions.toList
-import com.queatz.ailaai.R
 import app.ailaai.api.uploadAudio
+import at.bluesource.choicesdk.maps.common.LatLng
+import com.queatz.ailaai.R
 import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.asInputProvider
+import com.queatz.ailaai.extensions.formatTime
 import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.helpers.audioRecorder
+import com.queatz.ailaai.ui.components.ChooseGroups
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.SignalAttachmentsEditor
 import com.queatz.ailaai.ui.theme.pad
-import kotlin.math.roundToInt
-import java.util.Calendar
-import com.queatz.db.*
+import com.queatz.db.Group
+import com.queatz.db.SendSignalBody
+import com.queatz.db.Signal
+import com.queatz.db.SignalAudience
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @Composable
 fun SendSignalDialog(
@@ -63,7 +83,6 @@ fun SendSignalDialog(
     var duration by remember { mutableLongStateOf(60 * 60 * 1000L) }
     var audience by remember { mutableStateOf(SignalAudience.Nearby) }
     var selectedGroups by remember { mutableStateOf(listOf<Group>()) }
-    var showChooseGroups by remember { mutableStateOf(false) }
     var photo by remember { mutableStateOf<android.net.Uri?>(null) }
     var audio by remember { mutableStateOf<String?>(null) }
     var showChoosePhoto by remember { mutableStateOf(false) }
@@ -166,24 +185,30 @@ fun SendSignalDialog(
                                         }
                                     )
                                 },
+                                leadingIcon = {
+                                    Icon(
+                                        when (a) {
+                                            SignalAudience.Nearby -> Icons.Outlined.Place
+                                            SignalAudience.Friends -> Icons.Outlined.Group
+                                            SignalAudience.Groups -> Icons.Outlined.Forum
+                                        },
+                                        contentDescription = null,
+                                        modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                    )
+                                },
                                 shape = MaterialTheme.shapes.large
                             )
                         }
                     }
 
                     if (audience == SignalAudience.Groups) {
-                        Button(
-                            onClick = { showChooseGroups = true },
-                            modifier = Modifier.padding(vertical = 0.5f.pad)
+                        ChooseGroups(
+                            groups = selectedGroups,
+                            selectedPrefix = null,
+                            label = stringResource(R.string.select_groups),
+                            showIcon = false
                         ) {
-                            Text(
-                                if (selectedGroups.isEmpty()) stringResource(R.string.choose_group)
-                                else pluralStringResource(
-                                    R.plurals.x_groups,
-                                    selectedGroups.size,
-                                    selectedGroups.size.toString()
-                                )
-                            )
+                            selectedGroups = it
                         }
                     }
 
@@ -352,19 +377,6 @@ fun SendSignalDialog(
             },
             onIsGeneratingPhoto = {},
             onGeneratedPhoto = {}
-        )
-    }
-
-    if (showChooseGroups) {
-        ChooseGroupDialog(
-            onDismissRequest = { showChooseGroups = false },
-            title = stringResource(R.string.choose_group),
-            confirmFormatter = { pluralStringResource(R.plurals.x_groups, it.size, it.size.toString()) },
-            preselect = selectedGroups,
-            onGroupsSelected = {
-                selectedGroups = it
-                showChooseGroups = false
-            }
         )
     }
 }

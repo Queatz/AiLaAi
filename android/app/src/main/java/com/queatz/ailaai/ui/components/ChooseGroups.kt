@@ -37,6 +37,9 @@ import com.queatz.db.Group
 fun ChooseGroups(
     groups: List<Group>,
     hint: String? = null,
+    selectedPrefix: String? = stringResource(R.string.shared_in_),
+    label: String = stringResource(R.string.share_to_groups),
+    showIcon: Boolean = true,
     onGroups: (List<Group>) -> Unit)
 {
     val me = me
@@ -75,16 +78,20 @@ fun ChooseGroups(
                 }
                 .padding(vertical = .5f.pad)
         ) {
-            Icon(
-                imageVector = Icons.Outlined.Forum,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(end = 1.pad)
-            )
+            if (showIcon) {
+                Icon(
+                    imageVector = Icons.Outlined.Forum,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(end = 1.pad)
+                )
+            }
             Text(
                 buildAnnotatedString {
-                    append(stringResource(R.string.shared_in_))
-                    append(" ")
+                    if (selectedPrefix?.isNotBlank() == true) {
+                        append(selectedPrefix)
+                        append(" ")
+                    }
                     groups.forEachIndexed { index, group ->
                         if (index > 0) append(", ")
                         bold {
@@ -110,12 +117,14 @@ fun ChooseGroups(
                 showGroupsDialog = true
             }
         ) {
-            Icon(
-                imageVector = Icons.Outlined.GroupAdd,
-                contentDescription = null,
-                modifier = Modifier.padding(end = 1.pad)
-            )
-            Text(stringResource(R.string.share_to_groups))
+            if (showIcon) {
+                Icon(
+                    imageVector = Icons.Outlined.GroupAdd,
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 1.pad)
+                )
+            }
+            Text(label)
         }
         hint?.let { hint ->
             Text(

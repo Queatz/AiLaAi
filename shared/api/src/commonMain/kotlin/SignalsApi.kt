@@ -6,9 +6,13 @@ import app.ailaai.api.SuccessBlock
 
 suspend fun Api.signals(
     localHour: Int? = null,
+    offset: Int = 0,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Signal>> = {}
-) = get("signals", localHour?.let { mapOf("localHour" to it.toString()) }, onError = onError, onSuccess = onSuccess)
+) = get("signals", buildMap {
+    localHour?.let { put("localHour", it.toString()) }
+    if (offset > 0) put("offset", offset.toString())
+}, onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.createSignal(
     signal: Signal,

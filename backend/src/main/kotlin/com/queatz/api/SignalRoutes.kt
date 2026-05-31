@@ -27,7 +27,8 @@ fun Route.signalRoutes() {
                 val now = Clock.System.now().toJavaInstant().atZone(java.time.ZoneOffset.UTC)
                 ((now.hour + (me.utcOffset ?: 0.0).toInt()) % 24 + 24) % 24
             }
-            respond { db.signals(localHour) }
+            val offset = call.parameters["offset"]?.toIntOrNull() ?: 0
+            respond { db.signals(localHour, offset) }
         }
 
         post("signals") {

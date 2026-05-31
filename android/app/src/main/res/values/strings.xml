@@ -397,6 +397,7 @@
     <string name="add_a_location">Add a location</string>
     <string name="add_a_location_description">Add a location to share your post with people nearby (optional)</string>
     <string name="share_to_groups">Share to groups</string>
+    <string name="select_groups">Select groups</string>
     <string name="share_to_groups_description">Share your post at time of publishing (optional)</string>
     <string name="all_cards_are_posted">All pages are posted</string>
     <string name="story_contains_unposted_cards">Post contains unposted pages</string>
