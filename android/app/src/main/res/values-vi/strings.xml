@@ -840,10 +840,12 @@
     <string name="discover_and_post_pages">Khám phá và đăng trang trong thị trấn của bạn.</string>
     <string name="kotlin_scripts">Tập lệnh Kotlin</string>
     <string name="sheet_content_posts">Bài viết</string>
+    <string name="sheet_content_places">Địa điểm</string>
     <string name="sheet_content_groups">Nhóm</string>
     <string name="sheet_content_pages">Trang</string>
     <string name="sheet_content_events">Sự kiện</string>
     <string name="sheet_content_people">Con người</string>
+    <string name="sheet_content_friends">Bạn bè</string>
     <string name="calls">Cuộc gọi</string>
     <string name="tap_to_answer">Nhấn để trả lời</string>
     <string name="subscriptions">Đăng ký</string>

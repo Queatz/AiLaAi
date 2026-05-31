@@ -80,10 +80,10 @@ fun SheetHeader(
                 horizontalArrangement = Arrangement.spacedBy(1.pad)
             ) {
                 listOf(
-                    SheetContent.Events,
-                    SheetContent.Groups,
                     SheetContent.Posts,
                     SheetContent.Pages,
+                    SheetContent.Events,
+                    SheetContent.Groups,
                     SheetContent.People
                 ).forEach { button ->
                     FilledTonalButton(
@@ -100,9 +100,9 @@ fun SheetHeader(
                             when (button) {
                                 SheetContent.Posts -> stringResource(R.string.sheet_content_posts)
                                 SheetContent.Groups -> stringResource(R.string.sheet_content_groups)
-                                SheetContent.Pages -> stringResource(R.string.sheet_content_pages)
+                                SheetContent.Pages -> stringResource(R.string.sheet_content_places)
                                 SheetContent.Events -> stringResource(R.string.sheet_content_events)
-                                SheetContent.People -> "People"
+                                SheetContent.People -> stringResource(R.string.sheet_content_friends)
                             }
                         )
                         // todo load counts from server

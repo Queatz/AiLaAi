@@ -629,10 +629,12 @@
     <string name="discover_and_post_pages">Discover and post pages in your town.</string>
     <string name="kotlin_scripts">Kotlin Scripts</string>
     <string name="sheet_content_posts">Posts</string>
+    <string name="sheet_content_places">Places</string>
     <string name="sheet_content_groups">Groups</string>
     <string name="sheet_content_pages">Pages</string>
     <string name="sheet_content_events">Events</string>
     <string name="sheet_content_people">People</string>
+    <string name="sheet_content_friends">Friends</string>
     <string name="search_cards_of_x">Search %1$s\'s pages</string>
     <string name="pages_of_x">%1$s\'s pages</string>
     <string name="call">Call</string>
