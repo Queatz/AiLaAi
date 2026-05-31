@@ -749,6 +749,19 @@ fun ProfileScreen(personId: String) {
                             ) {
                                 IconButton(
                                     {
+                                        showQrCodeDialog = true
+                                    },
+                                    Modifier
+                                        .size(42.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Outlined.QrCode2,
+                                        stringResource(R.string.my_qr),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                IconButton(
+                                    {
                                         showMyMenu = true
                                     },
                                     Modifier
@@ -805,23 +818,10 @@ fun ProfileScreen(personId: String) {
                                         })
                                     }
                                 }
-                                IconButton(
-                                    {
-                                        showQrCodeDialog = true
-                                    },
-                                    Modifier
-                                        .size(42.dp)
-                                ) {
-                                    Icon(
-                                        Icons.Outlined.QrCode2,
-                                        stringResource(R.string.my_qr),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
                             }
                         } else {
                             IconButton(
-                                {
+                                onClick = {
                                     showMenu = true
                                 },
                                 colors = colors,
@@ -878,7 +878,7 @@ fun ProfileScreen(personId: String) {
                                 .align(Alignment.BottomCenter)
                         ) {
                             GroupPhoto(
-                                listOf(
+                                photos = listOf(
                                     ContactPhoto(
                                         person?.name ?: "",
                                         person?.photo,

@@ -3,11 +3,13 @@ package com.queatz.ailaai.ui.components
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -29,7 +31,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -38,7 +39,8 @@ import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.ui.theme.pad
 
 class ToolbarScope internal constructor(
-    private val outline: Boolean
+    private val outline: Boolean,
+    private val itemModifier: Modifier
 ) {
     @Composable
     fun item(
@@ -53,7 +55,7 @@ class ToolbarScope internal constructor(
             onClick = onClick,
             enabled = !isLoading,
             border = if (outline) ButtonDefaults.outlinedButtonBorder(enabled = !isLoading) else null,
-            modifier = if (outline) Modifier.aspectRatio(1f) else Modifier
+            modifier = itemModifier
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(.5f.pad, Alignment.CenterVertically),
@@ -84,6 +86,7 @@ class ToolbarScope internal constructor(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Toolbar(
     modifier: Modifier = Modifier,
@@ -97,11 +100,12 @@ fun Toolbar(
         Row(
             modifier = modifier
                 .fillMaxWidth()
+                .height(IntrinsicSize.Max)
                 .horizontalScroll(scrollState)
                 .onPlaced { viewport = it.boundsInParent().size }
                 .horizontalFadingEdge(viewport, scrollState)
         ) {
-            ToolbarScope(outline).apply {
+            ToolbarScope(outline, itemModifier = Modifier.fillMaxHeight()).apply {
                 items()
             }
         }
@@ -116,8 +120,9 @@ fun Toolbar(
             modifier = modifier
                 .widthIn(max = LocalWindowInfo.current.containerDpSize.width)
                 .fillMaxWidth()
+                .height(IntrinsicSize.Max)
         ) {
-            ToolbarScope(outline).apply {
+            ToolbarScope(outline, itemModifier = Modifier.fillMaxRowHeight()).apply {
                 items()
             }
         }

@@ -42,8 +42,6 @@ import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.ShoppingBag
-import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -76,10 +74,11 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -278,6 +277,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 val context = LocalContext.current
+                val resources = LocalResources.current
                 var startDestination by remember { mutableStateOf<String?>(null) }
                 var startDestinationLoaded by rememberStateOf(false)
 
@@ -307,7 +307,8 @@ class MainActivity : AppCompatActivity() {
                 val userIsInactive by slideshow.userIsInactive.collectAsState()
                 val fullscreen by slideshow.fullscreen.collectAsState()
 
-                val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
+                val windowSize = LocalWindowInfo.current.containerDpSize
+                val isLandscape = windowSize.width > windowSize.height
                 val showNavigation = !fullscreen && (navController.currentBackStackEntryAsState()
                     .value
                     ?.destination
@@ -445,7 +446,7 @@ class MainActivity : AppCompatActivity() {
 
                                 if (versionInfo.versionCode > BuildConfig.VERSION_CODE) {
                                     if (snackbarHostState.showSnackbar(
-                                            context.getString(
+                                            message = resources.getString(
                                                 R.string.version_x_available,
                                                 versionInfo.versionName,
                                                 BuildConfig.VERSION_NAME
@@ -474,7 +475,7 @@ class MainActivity : AppCompatActivity() {
                                     it[appVersionCodeKey] = BuildConfig.VERSION_CODE
                                 }
                                 if (snackbarHostState.showSnackbar(
-                                        context.getString(R.string.updated_to_x, BuildConfig.VERSION_NAME),
+                                        message = resources.getString(R.string.updated_to_x, BuildConfig.VERSION_NAME),
                                         actionLabel = seeWhatsNewString,
                                         withDismissAction = true
                                     ) == SnackbarResult.ActionPerformed
@@ -571,7 +572,7 @@ class MainActivity : AppCompatActivity() {
                                         modifier = Modifier.height(53.dp) // 54 - 1 border
                                     ) {
                                         menuItems.forEach { item ->
-                                            val selected = navController.currentDestination?.route == item.route.route
+                                            val selected = navController.currentDestination?.route?.substringBefore("/") == item.route.route.substringBefore("/")
                                             NavigationBarItem(
                                                 icon = {
                                                     Box {
@@ -632,7 +633,8 @@ class MainActivity : AppCompatActivity() {
                                             } else {
                                                 null
                                             },
-                                            selected = navController.currentDestination?.route == AppNav.Me.route,
+                                            selected = navController.currentDestination?.route?.substringBefore("/") ==
+                                                    AppNav.Profile(me?.id.orEmpty()).route.substringBefore("/"),
                                             onClick = {
                                                 me?.id?.let { id ->
                                                     navController.appNavigate(AppNav.Profile(id))
@@ -673,7 +675,7 @@ class MainActivity : AppCompatActivity() {
                                                         }
                                                     }
                                                 },
-                                                selected = navController.currentDestination?.route == item.route.route,
+                                                selected = navController.currentDestination?.route?.substringBefore("/") == item.route.route.substringBefore("/"),
                                                 onClick = {
                                                     if (startDestinationLoaded) {
                                                         navController.popBackStack()
@@ -707,7 +709,8 @@ class MainActivity : AppCompatActivity() {
                                                     Text(stringResource(R.string.me))
                                                 }
                                             },
-                                            selected = navController.currentDestination?.route == AppNav.Me.route,
+                                            selected = navController.currentDestination?.route?.substringBefore("/") ==
+                                                    AppNav.Profile(me?.id.orEmpty()).route.substringBefore("/"),
                                             onClick = {
                                                 me?.id?.let { id ->
                                                     navController.appNavigate(AppNav.Profile(id))
