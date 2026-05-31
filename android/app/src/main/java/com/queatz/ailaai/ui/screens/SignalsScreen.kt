@@ -32,8 +32,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -204,6 +206,8 @@ fun SignalsScreen(id: String? = null) {
 
     var h by rememberStateOf(80.dp.px)
 
+    val isMobile = LocalWindowInfo.current.containerDpSize.width < 600.dp
+
     Column {
         AppHeader(
             title = stringResource(R.string.signals),
@@ -249,30 +253,51 @@ fun SignalsScreen(id: String? = null) {
                         if (active.mine.isNotEmpty() || active.others.isNotEmpty()) {
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 Text(
-                                    stringResource(R.string.active_signals),
+                                    text = stringResource(R.string.active_now),
                                     style = MaterialTheme.typography.titleSmall,
                                     modifier = Modifier.padding(horizontal = 1.pad, vertical = 1.pad)
                                 )
                             }
-                            item(span = { GridItemSpan(maxLineSpan) }) {
-                                LazyRow(
-                                    contentPadding = PaddingValues(horizontal = 0.pad, vertical = 1.pad),
-                                    horizontalArrangement = Arrangement.spacedBy(1.pad),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    items(active.mine) { send ->
-                                        ActiveSignalCard(send, isMine = true, onClick = {
-                                            showRepliesDialog = send
-                                        })
+                            items(active.mine, span = { GridItemSpan(if (isMobile) maxLineSpan else 1) }) { send ->
+                                ActiveSignalCard(
+                                    send = send,
+                                    isMine = true,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = {
+                                        showRepliesDialog = send
                                     }
-                                    items(active.others) { send ->
-                                        ActiveSignalCard(send, isMine = false, onClick = {
-                                            showReplyDialog = send
-                                        })
+                                )
+                            }
+                            items(active.others, span = { GridItemSpan(if (isMobile) maxLineSpan else 1) }) { send ->
+                                ActiveSignalCard(
+                                    send = send,
+                                    isMine = false,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = {
+                                        showReplyDialog = send
                                     }
-                                }
+                                )
                             }
                         }
+                    }
+
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Text(
+                            text = stringResource(R.string.send_a_signal),
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.padding(horizontal = 1.pad, vertical = 1.pad)
+                        )
+                    }
+
+                    if (filteredSignals.isEmpty()) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Text(
+                                text = stringResource(R.string.no_signals),
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(horizontal = 1.pad, vertical = 1.pad)
+                            )
+                        }
+                        return@LazyVerticalGrid
                     }
 
                     items(filteredSignals) { signal ->
@@ -506,6 +531,7 @@ fun SignalsScreen(id: String? = null) {
 fun ActiveSignalCard(
     send: SignalSendExtended,
     isMine: Boolean,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     val now = Clock.System.now()
@@ -515,9 +541,10 @@ fun ActiveSignalCard(
 
     Card(
         onClick = onClick,
-        modifier = Modifier.width(180.dp)
+        modifier = modifier,
+        shape = MaterialTheme.shapes.large,
     ) {
-        Column(modifier = Modifier.padding(1.pad)) {
+        Column(modifier = Modifier.padding(1.5f.pad)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(send.signal?.emoji ?: "👋", style = MaterialTheme.typography.headlineSmall)
                 Spacer(Modifier.width(0.5f.pad))

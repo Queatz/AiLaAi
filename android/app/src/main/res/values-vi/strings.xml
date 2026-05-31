@@ -1061,4 +1061,7 @@
     <string name="inline_to">đến</string>
     <string name="create_event">Tạo sự kiện</string>
     <string name="choose_photo">Chọn ảnh</string>
+    <string name="active_now">Đang hoạt động</string>
+    <string name="no_signals">Không có tín hiệu.</string>
+    <string name="send_a_signal">Gửi tín hiệu</string>
 </resources>

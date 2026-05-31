@@ -1123,4 +1123,7 @@
     <string name="link_device">Link device</string>
     <string name="started_a_call">Started a call</string>
     <string name="chat">Chat</string>
+    <string name="active_now">Active now</string>
+    <string name="no_signals">No signals.</string>
+    <string name="send_a_signal">Send a signal</string>
 </resources>

@@ -159,7 +159,7 @@ fun SendSignalDialog(
                     OutlinedTextField(
                         value = message,
                         onValueChange = { message = it },
-                        label = { Text(stringResource(R.string.optional_message)) },
+                        label = { Text(stringResource(R.string.message)) },
                         shape = MaterialTheme.shapes.large,
                         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                         modifier = Modifier.fillMaxWidth()
