@@ -525,12 +525,6 @@ class MainActivity : AppCompatActivity() {
                         )
                     }
 
-                    if (showProfileMenu) {
-                        ProfileMenu {
-                            showProfileMenu = false
-                        }
-                    }
-
                     // Navigation bar background color
                     WindowInsets.navigationBars.getBottom(LocalDensity.current).let { height ->
                         if (height > 0 && !isLandscape) {
@@ -765,6 +759,12 @@ class MainActivity : AppCompatActivity() {
                                     CompositionLocalProvider(
                                         LocalAppState provides AppState(me, navController, apiIsReachable)
                                     ) {
+                                        if (showProfileMenu) {
+                                            ProfileMenu {
+                                                showProfileMenu = false
+                                            }
+                                        }
+
                                         if (showWelcomeDialog) {
                                             WelcomeDialog(
                                                 {

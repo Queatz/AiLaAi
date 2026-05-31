@@ -186,7 +186,7 @@ fun ColumnScope.AppHeader(
                 Box(
                     modifier = Modifier
                         .matchParentSize()
-                        .padding(horizontal = 12.pad),
+                        .padding(horizontal = 6.pad),
                     contentAlignment = Alignment.Center
                 ) {
                     SignalsButton {
