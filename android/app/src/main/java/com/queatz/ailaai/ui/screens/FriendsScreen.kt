@@ -15,17 +15,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -47,13 +42,10 @@ import app.ailaai.api.exploreGroups
 import app.ailaai.api.friendStatuses
 import app.ailaai.api.groups
 import app.ailaai.api.groupsWith
-import app.ailaai.api.hiddenGroups
 import app.ailaai.api.myGeo
 import app.ailaai.api.people
 import app.ailaai.api.recentStatuses
-import app.ailaai.api.removeMember
 import app.ailaai.api.updateGroup
-import app.ailaai.api.updateMember
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
@@ -79,7 +71,6 @@ import com.queatz.ailaai.services.messages
 import com.queatz.ailaai.services.push
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.ContactItem
-import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.components.Friends
 import com.queatz.ailaai.ui.components.GroupInfo
 import com.queatz.ailaai.ui.components.Loading
@@ -96,7 +87,6 @@ import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Group
 import com.queatz.db.GroupExtended
-import com.queatz.db.Member
 import com.queatz.db.Person
 import com.queatz.db.PersonProfile
 import com.queatz.db.PersonStatus
@@ -104,9 +94,6 @@ import com.queatz.db.Status
 import com.queatz.db.people
 import com.queatz.push.GroupPushData
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
@@ -120,16 +107,13 @@ fun FriendsScreen() {
     val context = LocalContext.current
     val state = rememberLazyListState()
     var searchText by rememberSaveable { mutableStateOf("") }
-    var allHiddenGroups by remember { mutableStateOf(emptyList<GroupExtended>()) }
     var allPeople by remember { mutableStateOf(emptyList<PersonProfile>()) }
     var createGroupName by remember { mutableStateOf("") }
     var showCreateGroupName by rememberStateOf(false)
     var showCreateGroupMembers by rememberStateOf(false)
-    var showHiddenGroupsDialog by rememberStateOf(false)
     var showSharedGroupsDialogPerson by rememberStateOf<Person?>(null)
     var showSharedGroupsDialog by rememberStateOf<List<GroupExtended>>(emptyList())
     val scope = rememberCoroutineScope()
-    var selectedHiddenGroups by rememberStateOf(listOf<Group>())
     var allGroups by remember {
         mutableStateOf(
             groupsCache.notEmpty
@@ -328,80 +312,6 @@ fun FriendsScreen() {
         }
     }
 
-    if (selectedHiddenGroups.isNotEmpty()) {
-        AlertDialog(
-            onDismissRequest = {
-                selectedHiddenGroups = emptyList()
-            },
-            title = {
-                Text(pluralStringResource(R.plurals.x_groups, selectedHiddenGroups.size, selectedHiddenGroups.size))
-            },
-            dismissButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(1.pad)) {
-                    TextButton(
-                        {
-                            selectedHiddenGroups = emptyList()
-                        }
-                    ) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                    TextButton(
-                        {
-                            scope.launch {
-                                coroutineScope {
-                                    allHiddenGroups
-                                        .filter { group -> selectedHiddenGroups.any { it.id == group.group?.id } }
-                                        .mapNotNull { groupExtended ->
-                                            val member =
-                                                groupExtended.members?.firstOrNull { it.person?.id == me?.id }?.member
-                                                    ?: return@mapNotNull null
-
-                                            async {
-                                                api.removeMember(member.id!!)
-                                            }
-                                        }.awaitAll()
-                                    reloadFlow.emit(true)
-                                    selectedHiddenGroups = emptyList()
-                                }
-                            }
-                        }
-                    ) {
-                        Text(stringResource(R.string.leave), color = MaterialTheme.colorScheme.error)
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        scope.launch {
-                            coroutineScope {
-                                allHiddenGroups
-                                    .filter { group -> selectedHiddenGroups.any { it.id == group.group?.id } }
-                                    .mapNotNull { groupExtended ->
-                                        val member =
-                                            groupExtended.members?.firstOrNull { it.person?.id == me?.id }?.member
-                                                ?: return@mapNotNull null
-
-                                        async {
-                                            api.updateMember(
-                                                member.id!!,
-                                                Member(
-                                                    hide = false
-                                                )
-                                            )
-                                        }
-                                    }.awaitAll()
-                                reloadFlow.emit(true)
-                                selectedHiddenGroups = emptyList()
-                            }
-                        }
-                    }
-                ) {
-                    Text(stringResource(R.string.show))
-                }
-            })
-    }
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -412,27 +322,7 @@ fun FriendsScreen() {
                     state.scrollToTop()
                 }
             }
-        ) {
-            var showMenu by rememberStateOf(false)
-            IconButton(
-                onClick = {
-                    showMenu = true
-                }
-            ) {
-                Icon(Icons.Outlined.MoreVert, null)
-                Dropdown(showMenu, { showMenu = false }) {
-                    DropdownMenuItem(
-                        text = {
-                            Text(stringResource(R.string.hidden_groups))
-                        },
-                        onClick = {
-                            showMenu = false
-                            showHiddenGroupsDialog = true
-                        }
-                    )
-                }
-            }
-        }
+        )
 
         var h by rememberStateOf(80.dp.px)
 
@@ -519,6 +409,7 @@ fun FriendsScreen() {
                                 .fillMaxWidth()
                         ) {
                             NotificationsDisabledBanner()
+                            val setStatusString = stringResource(R.string.set_status)
                             AnimatedVisibility(searchText.isBlank() && selectedCategory == null) {
                                 Friends(
                                     people = remember(allGroups) {
@@ -527,7 +418,7 @@ fun FriendsScreen() {
                                     statuses = statuses,
                                     title = {
                                         if (it.id == me?.id) {
-                                            context.getString(R.string.set_status)
+                                            setStatusString
                                         } else {
                                             null
                                         }
@@ -597,27 +488,6 @@ fun FriendsScreen() {
                     },
                 )
             }
-        }
-    }
-
-    if (showHiddenGroupsDialog) {
-        var groups by rememberStateOf(listOf<GroupExtended>())
-        ChooseGroupDialog(
-            {
-                showHiddenGroupsDialog = false
-            },
-            title = stringResource(R.string.hidden_groups),
-            confirmFormatter = { stringResource(R.string.next) },
-            infoFormatter = { it.seenText(context.getString(R.string.active), me) },
-            groups = {
-                api.hiddenGroups {
-                    groups = it
-                }
-                allHiddenGroups = groups
-                groups
-            }
-        ) { selected ->
-            selectedHiddenGroups = selected
         }
     }
 
