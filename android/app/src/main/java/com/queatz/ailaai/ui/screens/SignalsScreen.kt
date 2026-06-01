@@ -216,7 +216,14 @@ fun SignalsScreen(id: String? = null) {
                 }
 
                 activeSignals?.let { active ->
-                    if (active.mine.isNotEmpty() || active.others.isNotEmpty()) {
+                    val mineFiltered = active.mine.filter { send ->
+                        selectedCategory == null || send.signal?.categories?.contains(selectedCategory) == true
+                    }
+                    val othersFiltered = active.others.filter { send ->
+                        selectedCategory == null || send.signal?.categories?.contains(selectedCategory) == true
+                    }
+
+                    if (mineFiltered.isNotEmpty() || othersFiltered.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             Text(
                                 text = stringResource(R.string.active_now),
@@ -224,7 +231,7 @@ fun SignalsScreen(id: String? = null) {
                                 modifier = Modifier.padding(horizontal = 1.pad, vertical = 1.pad)
                             )
                         }
-                        items(active.mine, span = { GridItemSpan(if (isMobile) maxLineSpan else 1) }) { send ->
+                        items(mineFiltered, span = { GridItemSpan(if (isMobile) maxLineSpan else 1) }) { send ->
                             ActiveSignalCard(
                                 send = send,
                                 isMine = true,
@@ -234,7 +241,7 @@ fun SignalsScreen(id: String? = null) {
                                 }
                             )
                         }
-                        items(active.others, span = { GridItemSpan(if (isMobile) maxLineSpan else 1) }) { send ->
+                        items(othersFiltered, span = { GridItemSpan(if (isMobile) maxLineSpan else 1) }) { send ->
                             ActiveSignalCard(
                                 send = send,
                                 isMine = false,

@@ -7,8 +7,8 @@ suspend fun Api.categories(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<String>>,
 ) = get(
-    "categories",
-    mapOf(
+    url = "categories",
+    parameters = mapOf(
         "geo" to geo.toString()
     ),
     onError = onError,

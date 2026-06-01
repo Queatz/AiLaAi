@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import aiJson
+import androidx.compose.ui.platform.LocalResources
+import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.AiJsonRequest
@@ -32,8 +34,10 @@ fun CreateSignalDialog(
     var emoji by remember { mutableStateOf("") }
     var isEmojiSuggested by remember { mutableStateOf(false) }
     var isEmojiLoading by remember { mutableStateOf(false) }
-    var categories by remember { mutableStateOf("") }
+    var categories by remember { mutableStateOf(emptyList<String>()) }
+    var showCategoryDialog by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
+    val resources = LocalResources.current
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -84,6 +88,19 @@ fun CreateSignalDialog(
         )
     }
 
+    if (showCategoryDialog) {
+        ChooseCategoryDialog(
+            onDismissRequest = {
+                showCategoryDialog = false
+            },
+            preselect = categories.firstOrNull(),
+            onCategory = {
+                categories = it.inList()
+                showCategoryDialog = false
+            }
+        )
+    }
+
     DialogBase(onDismissRequest) {
         Column(
             modifier = Modifier
@@ -127,14 +144,28 @@ fun CreateSignalDialog(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 1.pad)
             )
 
-            OutlinedTextField(
-                value = categories,
-                onValueChange = { categories = it },
-                label = { Text("Categories") },
+            val category = categories.firstOrNull()
+            OutlinedCard(
+                onClick = {
+                    showCategoryDialog = true
+                },
                 shape = MaterialTheme.shapes.large,
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                modifier = Modifier.fillMaxWidth().padding(bottom = 1.pad)
-            )
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 1.pad)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = category ?: resources.getString(R.string.set_category),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if (category == null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
 
             Row(
                 horizontalArrangement = Arrangement.End,
@@ -149,7 +180,7 @@ fun CreateSignalDialog(
                             Signal(
                                 name = name,
                                 emoji = emoji,
-                                categories = categories.split(",").map { it.trim() }.filter { it.isNotBlank() }
+                                categories = categories
                             )
                         )
                     },

@@ -1,26 +1,41 @@
 package com.queatz.ailaai.ui.dialogs
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -28,7 +43,6 @@ import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.appNavigate
-import com.queatz.ailaai.extensions.asInputProvider
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.SignalAttachments
@@ -43,7 +57,7 @@ fun SignalRepliesDialog(
     signalSend: SignalSendExtended,
     onDismissRequest: () -> Unit,
     onCancelSignal: () -> Unit,
-    onCreateGroup: (List<String>) -> Unit
+    onCreateGroup: (List<String>) -> Unit,
 ) {
     val selectedPeople = remember { mutableStateListOf<String>() }
     var showCancelConfirmation by remember { mutableStateOf(false) }
@@ -53,22 +67,12 @@ fun SignalRepliesDialog(
     val nav = nav
 
     val someone = stringResource(R.string.someone)
-    val replies = signalSend.replies ?: emptyList()
     val confirmFormatter = defaultConfirmFormatter<Person>(
         R.string.create_group,
         R.string.new_group_with_person,
         R.string.new_group_with_people,
         R.string.new_group_with_x_people
     ) { it.name ?: someone }
-
-    val selectedPeopleObjects = remember(selectedPeople, replies) {
-        selectedPeople.map { id ->
-            replies.find { (it.person?.id ?: it.signalReply.person) == id }?.person ?: Person().apply {
-                this.id = id
-                this.name = someone
-            }
-        }
-    }
 
     personToStatus?.let { person ->
         PersonStatusDialog(
@@ -122,7 +126,9 @@ fun SignalRepliesDialog(
                         text = signalSend.signal?.name ?: "",
                         style = MaterialTheme.typography.titleLarge,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 1.pad)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 1.pad)
                     )
 
                     if (!signalSend.signalSend.message.isNullOrBlank()) {
@@ -130,7 +136,9 @@ fun SignalRepliesDialog(
                             text = signalSend.signalSend.message!!,
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 1.pad)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 1.pad)
                         )
                     }
 
@@ -138,18 +146,24 @@ fun SignalRepliesDialog(
                         photo = signalSend.signalSend.photo,
                         audio = signalSend.signalSend.audio,
                         api = api,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 1.pad),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 1.pad),
                         onClickPhoto = { photoToShow = it }
                     )
 
                     val now = Clock.System.now()
-                    val totalDuration = (signalSend.signalSend.expiry!! - signalSend.signalSend.createdAt!!).inWholeMilliseconds
+                    val totalDuration =
+                        (signalSend.signalSend.expiry!! - signalSend.signalSend.createdAt!!).inWholeMilliseconds
                     val remaining = (signalSend.signalSend.expiry!! - now).inWholeMilliseconds
                     val progress = (remaining.toFloat() / totalDuration.toFloat()).coerceIn(0f, 1f)
 
                     LinearProgressIndicator(
                         progress = { progress },
-                        modifier = Modifier.fillMaxWidth().clip(CircleShape).padding(top = 1.pad)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(CircleShape)
+                            .padding(top = 1.pad)
                     )
 
                     val remainingDuration = (signalSend.signalSend.expiry!! - now)
@@ -157,11 +171,17 @@ fun SignalRepliesDialog(
                     val minutes = remainingDuration.inWholeMinutes % 60
 
                     Text(
-                        text = if (hours > 0) stringResource(R.string.hours_and_minutes, hours, minutes) else stringResource(R.string.minutes_remaining, minutes),
+                        text = if (hours > 0) stringResource(
+                            R.string.hours_and_minutes,
+                            hours,
+                            minutes
+                        ) else stringResource(R.string.minutes_remaining, minutes),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.secondary,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 1.pad)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 1.pad)
                     )
 
                     Text(
@@ -201,7 +221,8 @@ fun SignalRepliesDialog(
                             modifier = Modifier.padding(1.pad)
                         ) {
                             Checkbox(
-                                checked = (person?.id ?: reply.signalReply.person)?.let { selectedPeople.contains(it) } ?: false,
+                                checked = (person?.id ?: reply.signalReply.person)?.let { selectedPeople.contains(it) }
+                                    ?: false,
                                 onCheckedChange = null,
                                 modifier = Modifier.padding(horizontal = 0.5f.pad)
                             )
@@ -221,9 +242,14 @@ fun SignalRepliesDialog(
                                         affinitySignalsToDialog = reply.affinitySignals
                                     }
                             )
-                            Column(modifier = Modifier.padding(start = 1.pad).weight(1f)) {
-                                Text(person?.name ?: stringResource(R.string.someone), style = MaterialTheme.typography.titleSmall)
-                                
+                            Column(modifier = Modifier
+                                .padding(start = 1.pad)
+                                .weight(1f)) {
+                                Text(
+                                    person?.name ?: stringResource(R.string.someone),
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+
                                 val affinitySignals = reply.affinitySignals
                                 if (!affinitySignals.isNullOrEmpty()) {
                                     Text(
@@ -232,11 +258,11 @@ fun SignalRepliesDialog(
                                         color = MaterialTheme.colorScheme.secondary
                                     )
                                 }
-                                
+
                                 if (!reply.signalReply.message.isNullOrBlank()) {
                                     Text(reply.signalReply.message!!, style = MaterialTheme.typography.bodyMedium)
                                 }
-                                
+
                                 SignalAttachments(
                                     photo = reply.signalReply.photo,
                                     audio = reply.signalReply.audio,
@@ -253,12 +279,16 @@ fun SignalRepliesDialog(
 
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth().padding(top = 2.pad)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 2.pad)
             ) {
-                TextButton(onClick = { showCancelConfirmation = true }) {
-                    Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.error)
+                if (selectedPeople.isEmpty()) {
+                    TextButton(onClick = { showCancelConfirmation = true }) {
+                        Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.error)
+                    }
                 }
-                Row {
+                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
                     TextButton(onClick = onDismissRequest) {
                         Text(stringResource(R.string.close))
                     }
@@ -266,7 +296,16 @@ fun SignalRepliesDialog(
                         onClick = { onCreateGroup(selectedPeople.toList()) },
                         enabled = selectedPeople.isNotEmpty()
                     ) {
-                        Text(confirmFormatter(selectedPeopleObjects))
+                        Text(
+                            confirmFormatter(
+                                selectedPeople.map { id ->
+                                    signalSend.replies?.find { (it.person?.id ?: it.signalReply.person) == id }?.person
+                                        ?: Person().apply {
+                                            this.id = id
+                                        }
+                                }
+                            )
+                        )
                     }
                 }
             }

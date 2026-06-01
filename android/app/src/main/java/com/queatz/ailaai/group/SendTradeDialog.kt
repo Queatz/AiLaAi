@@ -9,7 +9,6 @@ import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.db.Message
 import com.queatz.db.TradeAttachment
-import kotlinx.serialization.encodeToString
 
 @Composable
 fun SendTradeDialog(
