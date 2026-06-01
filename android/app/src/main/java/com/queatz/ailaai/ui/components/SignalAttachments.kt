@@ -3,6 +3,7 @@ package com.queatz.ailaai.ui.components
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -26,6 +27,7 @@ fun SignalAttachments(
     api: Api,
     modifier: Modifier = Modifier,
     horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
+    onClickPhoto: (String) -> Unit = {}
 ) {
     if (photo.isNullOrBlank() && audio.isNullOrBlank()) return
 
@@ -41,14 +43,13 @@ fun SignalAttachments(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(100.dp)
-                    .clip(MaterialTheme.shapes.medium)
+                    .clip(MaterialTheme.shapes.large)
+                    .clickable { onClickPhoto(photo) }
             )
         }
 
         if (!audio.isNullOrBlank()) {
-            Box(modifier = Modifier.weight(1f, fill = false).widthIn(max = 240.dp)) {
-                Audio(api.url(audio))
-            }
+            Audio(api.url(audio))
         }
     }
 }

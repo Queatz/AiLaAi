@@ -63,6 +63,7 @@ fun ReplySignalDialog(
     var isRecordingAudio by remember { mutableStateOf(false) }
     var recordingAudioDuration by remember { mutableLongStateOf(0L) }
     var isUploading by remember { mutableStateOf(false) }
+    var photoToShow by remember { mutableStateOf<String?>(null) }
     val focusRequester = remember { FocusRequester() }
 
     val audioRecorder = audioRecorder(
@@ -97,6 +98,14 @@ fun ReplySignalDialog(
     }
 
 
+    photoToShow?.let {
+        PhotoDialog(
+            onDismissRequest = { photoToShow = null },
+            initialMedia = Media.Photo(it),
+            medias = listOf(Media.Photo(it))
+        )
+    }
+
     DialogBase(onDismissRequest) {
         Column(
             modifier = Modifier
@@ -121,7 +130,8 @@ fun ReplySignalDialog(
                 photo = signalSend.signalSend.photo,
                 audio = signalSend.signalSend.audio,
                 api = api,
-                modifier = Modifier.padding(bottom = 2.pad)
+                modifier = Modifier.padding(bottom = 2.pad),
+                onClickPhoto = { photoToShow = it }
             )
 
             if (isExpired) {

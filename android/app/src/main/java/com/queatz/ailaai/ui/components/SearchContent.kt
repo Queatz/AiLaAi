@@ -44,7 +44,7 @@ fun SearchContent(
         categories = categories,
         category = category,
         filters = filters,
-        visible = category != null || (filters.isNotEmpty() || categories.size > 2) && !isLoading,
+        visible = category != null || (filters.isNotEmpty() || categories.size > 2),
         onCategory = onCategory
     )
 }

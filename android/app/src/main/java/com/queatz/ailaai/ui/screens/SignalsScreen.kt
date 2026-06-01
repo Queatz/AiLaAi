@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -32,6 +33,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -102,30 +105,6 @@ fun SignalsScreen(id: String? = null) {
     )
 
     var myId by remember { mutableStateOf<String?>(null) }
-
-    val greetingRes = greetingRes
-
-    val infiniteTransition = rememberInfiniteTransition(label = "GreetingAnimation")
-    val offset by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 2000f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(20000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "OffsetAnimation"
-    )
-
-    val brush = Brush.linearGradient(
-        colors = listOf(
-            MaterialTheme.colorScheme.primary,
-            MaterialTheme.colorScheme.tertiary,
-            MaterialTheme.colorScheme.secondary,
-            MaterialTheme.colorScheme.primary
-        ),
-        start = Offset(offset, offset),
-        end = Offset(offset + 500f, offset + 500f)
-    )
 
     LaunchedEffect(id) {
         hasOpenedDeepLink = false
@@ -205,10 +184,11 @@ fun SignalsScreen(id: String? = null) {
     }
 
     var h by rememberStateOf(80.dp.px)
+    val gridState = rememberLazyGridState()
 
     val isMobile = LocalWindowInfo.current.containerDpSize.width < 600.dp
 
-    Column {
+    Column(modifier = Modifier.fillMaxSize()) {
         AppHeader(
             title = stringResource(R.string.signals),
             onTitleClick = {},
@@ -217,142 +197,133 @@ fun SignalsScreen(id: String? = null) {
             }
         )
 
-        if (isLoading && activeSignals == null) {
-            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-        }
-
         Box(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(100.dp),
-                    contentPadding = PaddingValues(
-                        start = 1.pad,
-                        top = 1.pad,
-                        end = 1.pad,
-                        bottom = 3.pad + h.inDp()
-                    ),
-                    horizontalArrangement = Arrangement.spacedBy(1.pad),
-                    verticalArrangement = Arrangement.spacedBy(1.pad),
-                    modifier = Modifier.fillMaxSize().weight(1f)
-                ) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Text(
-                            stringResource(greetingRes),
-                            style = MaterialTheme.typography.displaySmall.copy(
-                                fontWeight = FontWeight.Light,
-                                textAlign = TextAlign.Center,
-                                brush = brush
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 1.pad, vertical = 2.pad)
-                        )
-                    }
+            LazyVerticalGrid(
+                state = gridState,
+                columns = GridCells.Adaptive(100.dp),
+                contentPadding = PaddingValues(
+                    start = 1.pad,
+                    top = 1.pad,
+                    end = 1.pad,
+                    bottom = 3.pad + h.inDp()
+                ),
+                horizontalArrangement = Arrangement.spacedBy(1.pad),
+                verticalArrangement = Arrangement.spacedBy(1.pad),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    SignalsGreeting()
+                }
 
-                    activeSignals?.let { active ->
-                        if (active.mine.isNotEmpty() || active.others.isNotEmpty()) {
-                            item(span = { GridItemSpan(maxLineSpan) }) {
-                                Text(
-                                    text = stringResource(R.string.active_now),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    modifier = Modifier.padding(horizontal = 1.pad, vertical = 1.pad)
-                                )
-                            }
-                            items(active.mine, span = { GridItemSpan(if (isMobile) maxLineSpan else 1) }) { send ->
-                                ActiveSignalCard(
-                                    send = send,
-                                    isMine = true,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    onClick = {
-                                        showRepliesDialog = send
-                                    }
-                                )
-                            }
-                            items(active.others, span = { GridItemSpan(if (isMobile) maxLineSpan else 1) }) { send ->
-                                ActiveSignalCard(
-                                    send = send,
-                                    isMine = false,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    onClick = {
-                                        showReplyDialog = send
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Text(
-                            text = stringResource(R.string.send_a_signal),
-                            style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier.padding(horizontal = 1.pad, vertical = 1.pad)
-                        )
-                    }
-
-                    if (filteredSignals.isEmpty()) {
+                activeSignals?.let { active ->
+                    if (active.mine.isNotEmpty() || active.others.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             Text(
-                                text = stringResource(R.string.no_signals),
-                                style = MaterialTheme.typography.bodySmall,
+                                text = stringResource(R.string.active_now),
+                                style = MaterialTheme.typography.titleSmall,
                                 modifier = Modifier.padding(horizontal = 1.pad, vertical = 1.pad)
                             )
                         }
-                        return@LazyVerticalGrid
-                    }
-
-                    items(filteredSignals) { signal ->
-                        val personSignal = personSignals.find { it.signal == signal.id }
-                        val isOn = personSignal?.turnedOn == true
-
-                        SignalBubble(signal, isOn = isOn, onLongClick = {
-                            if (isOn) {
-                                scope.launch {
-                                    api.toggleSignal(signal.id!!) {
-                                        personSignals = personSignals.filter { it.signal != signal.id } + it
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        Toast.makeText(nav.context, nav.context.getString(R.string.signal_turned_off, signal.name), Toast.LENGTH_SHORT).show()
-                                    }
+                        items(active.mine, span = { GridItemSpan(if (isMobile) maxLineSpan else 1) }) { send ->
+                            ActiveSignalCard(
+                                send = send,
+                                isMine = true,
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    showRepliesDialog = send
                                 }
-                            }
-                        }) {
-                            if (!isOn) {
-                                scope.launch {
-                                    api.toggleSignal(signal.id!!) {
-                                        personSignals = personSignals.filter { it.signal != signal.id } + it
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        Toast.makeText(nav.context, nav.context.getString(R.string.signal_turned_on, signal.name), Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            } else {
-                                showSendDialog = signal
-                            }
+                            )
                         }
-                    }
-
-                    if (canLoadMore && signals.isNotEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(1.pad),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
-
-                            LaunchedEffect(Unit) {
-                                loadSignals()
-                            }
+                        items(active.others, span = { GridItemSpan(if (isMobile) maxLineSpan else 1) }) { send ->
+                            ActiveSignalCard(
+                                send = send,
+                                isMine = false,
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    showReplyDialog = send
+                                }
+                            )
                         }
                     }
                 }
+
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Text(
+                        text = stringResource(R.string.send_a_signal),
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.padding(horizontal = 1.pad, vertical = 1.pad)
+                    )
+                }
+
+                if (filteredSignals.isEmpty()) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Text(
+                            text = stringResource(R.string.no_signals),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(horizontal = 1.pad, vertical = 1.pad)
+                        )
+                    }
+                    return@LazyVerticalGrid
+                }
+
+                items(filteredSignals) { signal ->
+                    val personSignal = personSignals.find { it.signal == signal.id }
+                    val isOn = personSignal?.turnedOn == true
+
+                    SignalBubble(signal, isOn = isOn, onLongClick = {
+                        if (isOn) {
+                            scope.launch {
+                                api.toggleSignal(signal.id!!) {
+                                    personSignals = personSignals.filter { it.signal != signal.id } + it
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    Toast.makeText(nav.context, nav.context.getString(R.string.signal_turned_off, signal.name), Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                    }) {
+                        if (!isOn) {
+                            scope.launch {
+                                api.toggleSignal(signal.id!!) {
+                                    personSignals = personSignals.filter { it.signal != signal.id } + it
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    Toast.makeText(nav.context, nav.context.getString(R.string.signal_turned_on, signal.name), Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        } else {
+                            showSendDialog = signal
+                        }
+                    }
+                }
+
+                if (canLoadMore && signals.isNotEmpty()) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(1.pad),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+
+                        LaunchedEffect(Unit) {
+                            loadSignals()
+                        }
+                    }
+                }
+            }
+
+            if (isLoading && activeSignals == null) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter))
             }
 
             PageInput(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .onPlaced {
-                        h = it.size.height
+                        if (!gridState.isScrollInProgress) {
+                            h = it.size.height
+                        }
                     }
             ) {
                 SearchContent(
@@ -525,6 +496,37 @@ fun SignalsScreen(id: String? = null) {
             }
         }
     }
+}
+
+@Composable
+fun SignalsGreeting() {
+    var size by remember { mutableStateOf(androidx.compose.ui.geometry.Size.Zero) }
+
+    val colors = listOf(
+        MaterialTheme.colorScheme.primary,
+        MaterialTheme.colorScheme.tertiary,
+        MaterialTheme.colorScheme.secondary,
+        MaterialTheme.colorScheme.primary
+    )
+
+    val brush = rememberAnimatedGradientBrush(
+        colors = colors,
+        size = size,
+        label = "Greeting"
+    )
+
+    Text(
+        stringResource(greetingRes),
+        style = MaterialTheme.typography.displaySmall.copy(
+            fontWeight = FontWeight.Light,
+            textAlign = TextAlign.Center,
+            brush = brush
+        ),
+        modifier = Modifier
+            .onSizeChanged { size = it.toSize() }
+            .fillMaxWidth()
+            .padding(horizontal = 1.pad, vertical = 2.pad)
+    )
 }
 
 @Composable

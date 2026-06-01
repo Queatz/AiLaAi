@@ -22,8 +22,8 @@
     <string name="waiting_for_replies">Waiting for replies…</string>
     <string name="signal_expired">Signal expired</string>
     <string name="already_replied">Already replied</string>
-    <string name="hours_and_minutes">%1$d h %2$d m</string>
-    <string name="minutes_remaining">%1$d m</string>
+    <string name="hours_and_minutes">%1$d h %2$d m left</string>
+    <string name="minutes_remaining">%1$d m left</string>
     <string name="create_signal">Create Signal</string>
     <string name="optional_message">Optional message</string>
     <string name="send_signal">Send signal</string>

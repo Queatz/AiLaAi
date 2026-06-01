@@ -24,12 +24,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.asInputProvider
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.SignalAttachments
 import com.queatz.ailaai.ui.theme.pad
+import com.queatz.db.Person
+import com.queatz.db.Signal
 import com.queatz.db.SignalSendExtended
 import kotlin.time.Clock
 
@@ -42,6 +47,56 @@ fun SignalRepliesDialog(
 ) {
     val selectedPeople = remember { mutableStateListOf<String>() }
     var showCancelConfirmation by remember { mutableStateOf(false) }
+    var personToStatus by remember { mutableStateOf<Person?>(null) }
+    var affinitySignalsToDialog by remember { mutableStateOf<List<Signal>?>(null) }
+    var photoToShow by remember { mutableStateOf<String?>(null) }
+    val nav = nav
+
+    val someone = stringResource(R.string.someone)
+    val replies = signalSend.replies ?: emptyList()
+    val confirmFormatter = defaultConfirmFormatter<Person>(
+        R.string.create_group,
+        R.string.new_group_with_person,
+        R.string.new_group_with_people,
+        R.string.new_group_with_x_people
+    ) { it.name ?: someone }
+
+    val selectedPeopleObjects = remember(selectedPeople, replies) {
+        selectedPeople.map { id ->
+            replies.find { (it.person?.id ?: it.signalReply.person) == id }?.person ?: Person().apply {
+                this.id = id
+                this.name = someone
+            }
+        }
+    }
+
+    personToStatus?.let { person ->
+        PersonStatusDialog(
+            onDismissRequest = { personToStatus = null },
+            person = person,
+            personStatus = null,
+            onMessageClick = {
+                personToStatus = null
+                person.id?.let { nav.appNavigate(AppNav.Group(it)) }
+            },
+            onProfileClick = {
+                personToStatus = null
+                person.id?.let { nav.appNavigate(AppNav.Profile(it)) }
+            },
+            onUseStatus = {
+                personToStatus = null
+            },
+            affinitySignals = affinitySignalsToDialog
+        )
+    }
+
+    photoToShow?.let {
+        PhotoDialog(
+            onDismissRequest = { photoToShow = null },
+            initialMedia = Media.Photo(it),
+            medias = listOf(Media.Photo(it))
+        )
+    }
 
     DialogBase(
         onDismissRequest,
@@ -83,7 +138,8 @@ fun SignalRepliesDialog(
                         photo = signalSend.signalSend.photo,
                         audio = signalSend.signalSend.audio,
                         api = api,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 1.pad)
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 1.pad),
+                        onClickPhoto = { photoToShow = it }
                     )
 
                     val now = Clock.System.now()
@@ -99,6 +155,7 @@ fun SignalRepliesDialog(
                     val remainingDuration = (signalSend.signalSend.expiry!! - now)
                     val hours = remainingDuration.inWholeHours
                     val minutes = remainingDuration.inWholeMinutes % 60
+
                     Text(
                         text = if (hours > 0) stringResource(R.string.hours_and_minutes, hours, minutes) else stringResource(R.string.minutes_remaining, minutes),
                         style = MaterialTheme.typography.labelSmall,
@@ -127,35 +184,42 @@ fun SignalRepliesDialog(
                 items(replies) { reply ->
                     val person = reply.person
                     Surface(
-                        color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-                        shape = MaterialTheme.shapes.medium,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                val id = person?.id ?: reply.signalReply.person
-                                id?.let {
-                                    if (selectedPeople.contains(it)) selectedPeople.remove(it)
-                                    else selectedPeople.add(it)
-                                }
+                        onClick = {
+                            val id = person?.id ?: reply.signalReply.person
+                            id?.let {
+                                if (selectedPeople.contains(it)) selectedPeople.remove(it)
+                                else selectedPeople.add(it)
                             }
+                        },
+                        color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+                        shape = MaterialTheme.shapes.large,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
-                            verticalAlignment = Alignment.Top,
+                            horizontalArrangement = Arrangement.spacedBy(1.pad),
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.padding(1.pad)
                         ) {
                             Checkbox(
                                 checked = (person?.id ?: reply.signalReply.person)?.let { selectedPeople.contains(it) } ?: false,
                                 onCheckedChange = null,
-                                modifier = Modifier.padding(top = 6.dp)
+                                modifier = Modifier.padding(horizontal = 0.5f.pad)
                             )
                             AsyncImage(
                                 model = person?.photo?.let { api.url(it) },
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
-                                    .padding(top = 1.pad)
+                                    .padding(vertical = 1.pad)
                                     .size(40.dp)
                                     .clip(CircleShape)
+                                    .clickable {
+                                        personToStatus = person ?: Person().apply {
+                                            id = reply.signalReply.person
+                                            name = someone
+                                        }
+                                        affinitySignalsToDialog = reply.affinitySignals
+                                    }
                             )
                             Column(modifier = Modifier.padding(start = 1.pad).weight(1f)) {
                                 Text(person?.name ?: stringResource(R.string.someone), style = MaterialTheme.typography.titleSmall)
@@ -178,7 +242,8 @@ fun SignalRepliesDialog(
                                     audio = reply.signalReply.audio,
                                     api = api,
                                     modifier = Modifier.padding(top = 0.5f.pad),
-                                    horizontalAlignment = Alignment.Start
+                                    horizontalAlignment = Alignment.Start,
+                                    onClickPhoto = { photoToShow = it }
                                 )
                             }
                         }
@@ -201,7 +266,7 @@ fun SignalRepliesDialog(
                         onClick = { onCreateGroup(selectedPeople.toList()) },
                         enabled = selectedPeople.isNotEmpty()
                     ) {
-                        Text(stringResource(R.string.create_group_from_signal))
+                        Text(confirmFormatter(selectedPeopleObjects))
                     }
                 }
             }

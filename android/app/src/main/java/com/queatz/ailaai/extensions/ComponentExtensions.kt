@@ -2,6 +2,7 @@ package com.queatz.ailaai.extensions
 
 import android.content.Context
 import android.net.Uri
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.LazyListState
@@ -16,11 +17,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.LinearGradientShader
+import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.layout.LayoutModifier
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
@@ -343,4 +348,34 @@ fun FocusRequester.tryRequestFocus() = try {
     requestFocus()
 } catch (e: IllegalStateException) {
     // ignored
+}
+
+@Composable
+fun rememberAnimatedGradientBrush(
+    colors: List<Color>,
+    size: Size,
+    label: String = "AnimatedGradient"
+): Brush {
+    val infiniteTransition = rememberInfiniteTransition(label = "${label}Transition")
+    val progress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(20000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "${label}Progress"
+    )
+
+    return remember(colors) {
+        object : ShaderBrush() {
+            override fun createShader(size: Size): Shader {
+                return LinearGradientShader(
+                    from = Offset(size.width * progress, size.height * progress),
+                    to = Offset(size.width * progress + size.width, size.height * progress + size.height),
+                    colors = colors
+                )
+            }
+        }
+    }
 }

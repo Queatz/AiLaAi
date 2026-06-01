@@ -464,7 +464,9 @@ fun FriendsScreen() {
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .onPlaced {
-                        h = it.size.height
+                        if (!state.isScrollInProgress) {
+                            h = it.size.height
+                        }
                     }
             ) {
                 SearchContent(

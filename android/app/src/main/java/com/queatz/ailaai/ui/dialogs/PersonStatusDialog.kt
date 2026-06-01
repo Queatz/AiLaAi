@@ -1,10 +1,14 @@
 package com.queatz.ailaai.ui.dialogs
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material3.Icon
@@ -27,8 +31,10 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.GroupPhoto
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Person
 import com.queatz.db.PersonStatus
+import com.queatz.db.Signal
 
 @Composable
 fun PersonStatusDialog(
@@ -38,6 +44,7 @@ fun PersonStatusDialog(
     onMessageClick: () -> Unit,
     onProfileClick: () -> Unit,
     onUseStatus: (PersonStatus) -> Unit,
+    affinitySignals: List<Signal>? = null,
 ) {
     DialogBase(onDismissRequest) {
         DialogLayout(
@@ -77,6 +84,32 @@ fun PersonStatusDialog(
                         style = MaterialTheme.typography.titleMedium,
                         textAlign = TextAlign.Center
                     )
+                    affinitySignals?.takeIf { it.isNotEmpty() }?.let { signals ->
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterHorizontally),
+                            verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterVertically),
+                            modifier = Modifier
+                                .padding(vertical = 2.pad)
+                                .fillMaxWidth()
+                        ) {
+                            signals.forEach { signal ->
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.padding(horizontal = 0.5f.pad)
+                                ) {
+                                    Text(
+                                        text = signal.emoji ?: "👋",
+                                        style = MaterialTheme.typography.titleLarge
+                                    )
+                                    Text(
+                                        text = signal.name ?: "",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.secondary
+                                    )
+                                }
+                            }
+                        }
+                    }
                     Statuses(
                         personId = person.id!!,
                         initialValue = personStatus.inList(),
