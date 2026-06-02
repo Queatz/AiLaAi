@@ -300,7 +300,7 @@ fun GroupContentTasks(
                     target = menuTarget!!
                 ) {
                     item(
-                        title = appString { subtasks },
+                        title = appString { this.showSubtasks },
                         selected = showSubtasks,
                         icon = if (showSubtasks) "check_box" else "check_box_outline_blank"
                     ) {

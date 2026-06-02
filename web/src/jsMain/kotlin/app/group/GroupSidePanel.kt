@@ -40,7 +40,7 @@ fun GroupSidePanel(
     isSwapped: Boolean = false,
     onSwap: () -> Unit = {},
     onClose: (() -> Unit)? = null,
-    onUpdated: (GroupExtended) -> Unit
+    onUpdated: (GroupExtended) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     var dynamicTitle by remember(group.group?.id) { mutableStateOf<String?>(null) }
@@ -99,19 +99,23 @@ fun GroupSidePanel(
                 ) {
                     scope.launch {
                         if (content is GroupContentModel.Text) {
-                        if (dialog(application.appString { notesWillBeLost }) != true) {
-                            return@launch
+                            if (dialog(application.appString { notesWillBeLost }) != true) {
+                                return@launch
+                            }
+                        } else {
+                            if (dialog(application.appString { removeGroupPanel }) != true) {
+                                return@launch
+                            }
                         }
-                    }
 
-                    api.updateGroup(
-                        id = group.group!!.id!!,
-                        groupUpdate = com.queatz.db.Group(
-                            content = json.encodeToString<GroupContentModel>(GroupContentModel.None)
-                        )
-                    ) {
-                        onUpdated(group.apply { this.group!!.content = it.content })
-                        onClose?.invoke()
+                        api.updateGroup(
+                            id = group.group!!.id!!,
+                            groupUpdate = com.queatz.db.Group(
+                                content = json.encodeToString<GroupContentModel>(GroupContentModel.None)
+                            )
+                        ) {
+                            onUpdated(group.apply { this.group!!.content = it.content })
+                            onClose?.invoke()
                         }
                     }
                 }

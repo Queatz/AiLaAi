@@ -949,6 +949,11 @@ object Strings {
         vn = "Ghi chú sẽ bị mất, tiếp tục?",
         ru = "Заметки будут потеряны, продолжить?"
     )
+    val removeGroupPanel = Translation(
+        en = "Remove group panel?",
+        vn = "Xóa bảng nhóm?",
+        ru = "Удалить панель группы?"
+    )
     val open = Translation(
         en = "Open",
         vn = "Mở",
@@ -1949,6 +1954,11 @@ object Strings {
         en = "Subtasks",
         vn = "Nhiệm vụ phụ",
         ru = "Подзадачи"
+    )
+    val showSubtasks = Translation(
+        en = "Show subtasks",
+        vn = "Hiển thị nhiệm vụ phụ",
+        ru = "Показать подзадачи"
     )
     val showDoneTasks = Translation(
         en = "Show done tasks",
