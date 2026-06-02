@@ -147,7 +147,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-viewbinding:${versions.compose}")
     implementation("androidx.compose.material3:material3:1.4.0")
     implementation("androidx.compose.material3:material3-window-size-class:1.4.0")
-    implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
+    implementation("sh.calvin.reorderable:reorderable:2.4.3")
 
     // Android
     implementation("com.google.accompanist:accompanist-permissions:0.37.3")

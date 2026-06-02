@@ -51,7 +51,7 @@ fun ExploreScreen() {
     var filterPaid by rememberSavableStateOf(false)
     var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var mapGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
-    var mapAltitude: Double? by rememberSaveable { mutableStateOf<Double?>(null) }
+    var mapAltitude: Double? by rememberSaveable { mutableStateOf(null) }
     var shownGeo: LatLng? by remember { mutableStateOf(null) }
     val nav = nav
     val locationSelector = locationSelector(
@@ -211,7 +211,6 @@ fun ExploreScreen() {
             }
         }
     ) { paddingValues ->
-        val title = stringResource(R.string.map)
         LocationScaffold(
             geo = geo,
             locationSelector = locationSelector,

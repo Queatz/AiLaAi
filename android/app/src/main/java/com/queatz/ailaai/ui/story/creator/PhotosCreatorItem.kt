@@ -9,9 +9,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +25,7 @@ import com.queatz.ailaai.api.uploadProfileContentPhotosFromUri
 import com.queatz.ailaai.api.uploadStoryPhotosFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.token
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.menuItem
@@ -200,20 +199,23 @@ fun LazyGridScope.photosCreatorItem(creatorScope: CreatorScope<StoryContent.Phot
         }
 
         if (showReorderDialog) {
+            val currentPhotos = remember {
+                part.photos.map { it to (1..16).token() }
+            }
             ReorderDialog(
                 { showReorderDialog = false },
                 onMove = { from, to ->
                     edit {
                         copy(
                             photos = photos.toMutableList().apply {
-                                add(to.index, removeAt(from.index))
+                                add(to, removeAt(from))
                             }
                         )
                     }
                 },
-                items = part.photos,
-                key = { it }
-            ) { photo, elevation ->
+                items = currentPhotos,
+                key = { it.second }
+            ) { (photo, id), elevation ->
                 AsyncImage(
                     model = api.url(photo),
                     contentDescription = null,

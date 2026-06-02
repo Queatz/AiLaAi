@@ -74,6 +74,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
@@ -88,6 +89,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.media3.common.MediaItem
 import androidx.navigation.NavDeepLink
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -308,7 +310,9 @@ class MainActivity : AppCompatActivity() {
                 val fullscreen by slideshow.fullscreen.collectAsState()
 
                 val windowSize = LocalWindowInfo.current.containerDpSize
-                val isLandscape = windowSize.width > windowSize.height
+                val isLandscape = remember(LocalConfiguration.current.orientation) {
+                    windowSize.width > windowSize.height
+                }
                 val showNavigation = !fullscreen && (navController.currentBackStackEntryAsState()
                     .value
                     ?.destination

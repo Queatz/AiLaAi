@@ -370,6 +370,7 @@ fun SendSignalDialog(
         ChoosePhotoDialog(
             scope = scope,
             multiple = false,
+            imagesOnly = true,
             onDismissRequest = { showChoosePhoto = false },
             onPhotos = {
                 photo = it.firstOrNull()

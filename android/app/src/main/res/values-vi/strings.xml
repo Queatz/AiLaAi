@@ -49,6 +49,8 @@
     <string name="create_group_from_signal">Tạo nhóm</string>
     <string name="replies">Trả lời</string>
     <string name="reply_title">Trả lời</string>
+    <string name="replies_inline">trả lời</string>
+    <string name="reply_inline">trả lời</string>
     <string name="waiting_for_replies">Đang chờ phản hồi…</string>w
     <string name="signal_expired">Tín hiệu đã hết hạn</string>
     <string name="already_replied">Đã phản hồi</string>
@@ -63,7 +65,7 @@
     </plurals>
     <string name="background_location">Vị trí chạy ngầm</string>
     <string name="configure_background_location">Cấu hình vị trí chạy ngầm</string>
-    <string name="search_map">Tìm kiếm địa điểm, dịch vụ và nhiều hơn nữa</string>
+    <string name="search_map">Tìm kiếm hoạt động</string>
     <string name="open_settings">Mở cài đặt</string>
     <string name="location_disabled_description">Quyền vị trí bị tắt trong cài đặt.</string>
     <string name="camera_disabled_description">Quyền chụp ảnh bị tắt trong cài đặt.</string>
@@ -843,6 +845,7 @@
     <string name="sheet_content_posts">Bài viết</string>
     <string name="sheet_content_places">Địa điểm</string>
     <string name="sheet_content_groups">Nhóm</string>
+    <string name="sheet_content_things_to_do">Hoạt động</string>
     <string name="sheet_content_pages">Trang</string>
     <string name="sheet_content_events">Sự kiện</string>
     <string name="sheet_content_people">Con người</string>

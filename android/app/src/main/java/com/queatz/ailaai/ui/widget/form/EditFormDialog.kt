@@ -24,7 +24,6 @@ import com.queatz.widgets.widgets.FormData
 import com.queatz.widgets.widgets.FormField
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import org.burnoutcrew.reorderable.ItemPosition
 
 @Composable
 fun EditFormDialog(
@@ -77,15 +76,15 @@ fun EditFormDialog(
                     onFormData = {
                         formData = it
                     },
-                    onMove = { from: ItemPosition, to: ItemPosition ->
+                    onMove = { from: Int, to: Int ->
                         formData = formData.copy(
                             fields = formData.fields.toMutableList().apply {
-                                add(to.index, removeAt(from.index))
+                                add(to, removeAt(from))
                             }.toList()
                         )
                     },
                     onDrag = { draggedOver, dragging ->
-                        draggedOver.index <= formData.fields.lastIndex && dragging.index <= formData.fields.lastIndex
+                        draggedOver <= formData.fields.lastIndex && dragging <= formData.fields.lastIndex
                     },
                     onAdd = onAdd,
                     add = ::add,

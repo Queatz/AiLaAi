@@ -19,6 +19,8 @@
     <string name="create_group_from_signal">Create group</string>
     <string name="replies">Replies</string>
     <string name="reply_title">Reply</string>
+    <string name="replies_inline">replies</string>
+    <string name="reply_inline">reply</string>
     <string name="waiting_for_replies">Waiting for replies…</string>
     <string name="signal_expired">Signal expired</string>
     <string name="already_replied">Already replied</string>
@@ -78,7 +80,7 @@
     <string name="location_disabled_description">The location permission is disabled in settings.</string>
     <string name="camera_disabled_description">The camera permission is disabled in settings.</string>
     <string name="search">Search</string>
-    <string name="search_map">Search for places, services, and more</string>
+    <string name="search_map">Search for things to do</string>
     <string name="explore">Explore</string>
     <string name="messages">Messages</string>
     <string name="me">Me</string>
@@ -632,6 +634,7 @@
     <string name="sheet_content_posts">Posts</string>
     <string name="sheet_content_places">Places</string>
     <string name="sheet_content_groups">Groups</string>
+    <string name="sheet_content_things_to_do">Things to do</string>
     <string name="sheet_content_pages">Pages</string>
     <string name="sheet_content_events">Events</string>
     <string name="sheet_content_people">People</string>

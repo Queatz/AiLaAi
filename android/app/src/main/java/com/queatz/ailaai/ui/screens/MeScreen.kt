@@ -19,11 +19,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Handyman
-import androidx.compose.material.icons.outlined.MusicNote
-import androidx.compose.material.icons.outlined.School
-import androidx.compose.material.icons.outlined.ShoppingBag
-import androidx.compose.material.icons.outlined.Work
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -63,15 +58,11 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.toggle
 import com.queatz.ailaai.nav
-import com.queatz.ailaai.ui.card.template.CreateCardWithTemplate
-import com.queatz.ailaai.ui.card.template.CreateCardWithTemplateDialog
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.CardLayout
 import com.queatz.ailaai.ui.components.CardParentSelector
 import com.queatz.ailaai.ui.components.CardParentType
 import com.queatz.ailaai.ui.components.Loading
-import com.queatz.ailaai.ui.components.Recommendation
-import com.queatz.ailaai.ui.components.Recommendations
 import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.theme.elevation
@@ -102,54 +93,6 @@ fun MeScreen() {
     val nav = nav
 
     var newCard by rememberStateOf<Card?>(null)
-
-    // List of card templates
-    // todo: translate
-    val cardTemplates = remember {
-        listOf(
-            Recommendation(
-                value = CreateCardWithTemplate.Product,
-                name = "Sell a product",
-                icon = Icons.Outlined.ShoppingBag,
-                description = "List an item for sale"
-            ),
-            Recommendation(
-                value = CreateCardWithTemplate.Service,
-                name = "Provide a service",
-                icon = Icons.Outlined.Handyman,
-                description = "Offer your skills and services"
-            ),
-            Recommendation(
-                value = CreateCardWithTemplate.Job,
-                name = "Post a job",
-                icon = Icons.Outlined.Work,
-                description = "Find someone for a job"
-            ),
-            Recommendation(
-                value = CreateCardWithTemplate.Classes,
-                name = "Education",
-                icon = Icons.Outlined.School,
-                description = "Offer classes or tutoring"
-            ),
-            Recommendation(
-                value = CreateCardWithTemplate.Music,
-                name = "Music",
-                icon = Icons.Outlined.MusicNote,
-                description = "Lessons and performances"
-            ),
-        )
-    }
-
-    var showTemplate by remember { mutableStateOf<CreateCardWithTemplate?>(null) }
-
-    showTemplate?.let {
-        CreateCardWithTemplateDialog(
-            onDismissRequest = { showTemplate = null },
-            template = it
-        ) {
-            nav.appNavigate(AppNav.Page(it.id!!))
-        }
-    }
 
     LaunchedEffect(Unit) {
         context.dataStore.data.first().let {
@@ -280,17 +223,6 @@ fun MeScreen() {
                     modifier = Modifier.fillMaxSize(),
                     columns = GridCells.Adaptive(240.dp)
                 ) {
-                    // Card Template Selector
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Recommendations(
-                            items = cardTemplates,
-                            modifier = Modifier
-                                .padding(vertical = 1.pad)
-                        ) {
-                            showTemplate = it
-                        }
-                    }
-
                     items(cards, key = { it.id!! }) { card ->
                         CardLayout(
                             card = card,

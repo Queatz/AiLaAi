@@ -140,7 +140,7 @@ fun LazyGridScope.groupsCreatorItem(creatorScope: CreatorScope<StoryContent.Grou
                     edit {
                         copy(
                             groups = groups.toMutableList().apply {
-                                add(to.index, removeAt(from.index))
+                                add(to, removeAt(from))
                             }
                         )
                     }

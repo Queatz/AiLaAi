@@ -5,6 +5,7 @@ import com.queatz.db.explore
 import com.queatz.db.groupsPlain
 import com.queatz.db.reminders
 import com.queatz.db.scriptsOfPerson
+import com.queatz.db.signals
 import com.queatz.notBlank
 import com.queatz.parameter
 import com.queatz.plugins.db
@@ -39,7 +40,9 @@ fun Route.categoryRoutes() {
                             ) + db.cardsOfPerson(person.id!!)).flatMap {
                         it.categories ?: emptyList()
                         }
-                    ) + db.groupsPlain(person.id!!).flatMap {
+                    ) + db.signals(0).flatMap {
+                        it.categories ?: emptyList()
+                    } + db.groupsPlain(person.id!!).flatMap {
                         it.categories ?: emptyList()
                     } + db.reminders(person.id!!, limit = 200).flatMap {
                         it.categories ?: emptyList()

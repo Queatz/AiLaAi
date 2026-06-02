@@ -1,8 +1,10 @@
 package com.queatz.ailaai.ui.widget.form
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.DropdownMenuItem
@@ -30,12 +32,8 @@ import com.queatz.widgets.widgets.FormFieldData
 import com.queatz.widgets.widgets.FormFieldType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
-import org.burnoutcrew.reorderable.ItemPosition
-import org.burnoutcrew.reorderable.ReorderableItem
-import org.burnoutcrew.reorderable.detectReorder
-import org.burnoutcrew.reorderable.detectReorderAfterLongPress
-import org.burnoutcrew.reorderable.rememberReorderableLazyListState
-import org.burnoutcrew.reorderable.reorderable
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun EditFormFields(
@@ -44,8 +42,8 @@ fun EditFormFields(
     formData: FormData,
     onFormData: (FormData) -> Unit,
     modifier: Modifier = Modifier,
-    onMove: (from: ItemPosition, to: ItemPosition) -> Unit,
-    onDrag: (from: ItemPosition, to: ItemPosition) -> Boolean,
+    onMove: (from: Int, to: Int) -> Unit,
+    onDrag: (from: Int, to: Int) -> Boolean,
     onAdd: SharedFlow<Unit>,
     add: (FormField) -> Unit,
 ) {
@@ -61,45 +59,48 @@ fun EditFormFields(
         }
     }
 
-    val reorderState = rememberReorderableLazyListState(
-        onMove = onMove,
-        canDragOver = onDrag
-    )
+    val lazyListState = rememberLazyListState()
+    val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        if (from.index in formFields.indices && to.index in formFields.indices) {
+            if (onDrag(from.index, to.index)) {
+                onMove(from.index, to.index)
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         onAdd.collect {
             delay(100)
-            reorderState.listState.animateScrollToItem(
-                (reorderState.listState.layoutInfo.totalItemsCount - 1 - 1).coerceAtLeast(0)
+            lazyListState.animateScrollToItem(
+                (lazyListState.layoutInfo.totalItemsCount - 1 - 1).coerceAtLeast(0)
             )
         }
     }
 
     LazyColumn(
-        state = reorderState.listState,
+        state = lazyListState,
         verticalArrangement = Arrangement.spacedBy(1.pad),
         modifier = modifier
-            .reorderable(reorderState)
-            .detectReorder(reorderState)
-            .detectReorderAfterLongPress(reorderState)
     ) {
         itemsIndexed(items = formFields, key = { _, it -> it.data.key }) { index, formField ->
             ReorderableItem(reorderState, key = formField.data.key) {
-                EditFormField(
-                    formField = formField,
-                    onFormField = {
-                        onFormFields(
-                            formFields.replace(index, it)
-                        )
-                    },
-                    onDelete = {
-                        onFormFields(
-                            formFields.toMutableList().apply {
-                                removeAt(index)
-                            }.toList()
-                        )
-                    }
-                )
+                Box(modifier = Modifier.longPressDraggableHandle()) {
+                    EditFormField(
+                        formField = formField,
+                        onFormField = {
+                            onFormFields(
+                                formFields.replace(index, it)
+                            )
+                        },
+                        onDelete = {
+                            onFormFields(
+                                formFields.toMutableList().apply {
+                                    removeAt(index)
+                                }.toList()
+                            )
+                        }
+                    )
+                }
             }
         }
 

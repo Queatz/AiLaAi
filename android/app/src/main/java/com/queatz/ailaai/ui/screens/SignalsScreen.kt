@@ -231,7 +231,7 @@ fun SignalsScreen(id: String? = null) {
                                 modifier = Modifier.padding(horizontal = 1.pad, vertical = 1.pad)
                             )
                         }
-                        items(mineFiltered, span = { GridItemSpan(if (isMobile) maxLineSpan else 1) }) { send ->
+                        items(mineFiltered, span = { GridItemSpan(if (isMobile) maxLineSpan else 2) }) { send ->
                             ActiveSignalCard(
                                 send = send,
                                 isMine = true,
@@ -241,7 +241,7 @@ fun SignalsScreen(id: String? = null) {
                                 }
                             )
                         }
-                        items(othersFiltered, span = { GridItemSpan(if (isMobile) maxLineSpan else 1) }) { send ->
+                        items(othersFiltered, span = { GridItemSpan(if (isMobile) maxLineSpan else 2) }) { send ->
                             ActiveSignalCard(
                                 send = send,
                                 isMine = false,
@@ -579,7 +579,7 @@ fun ActiveSignalCard(
                     val replies = send.replies
                     if (!replies.isNullOrEmpty()) {
                         Text(
-                            " • ${replies.size} ${if (replies.size == 1) stringResource(R.string.reply_title) else stringResource(R.string.replies)}",
+                            " • ${replies.size} ${if (replies.size == 1) stringResource(R.string.reply_inline) else stringResource(R.string.replies_inline)}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary
                         )

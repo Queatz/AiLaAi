@@ -1,34 +1,42 @@
 package com.queatz.ailaai.ui.story
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
-import org.burnoutcrew.reorderable.*
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyGridState
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun <T> ReorderDialog(
     onDismissRequest: () -> Unit,
     items: List<T>,
     key: (T) -> Any,
-    onMove: (from: ItemPosition, to: ItemPosition) -> Unit,
+    onMove: (from: Int, to: Int) -> Unit,
     list: Boolean = false,
     draggable: (T) -> Boolean = { true },
     item: @Composable (item: T, elevation: Dp) -> Unit,
@@ -37,28 +45,27 @@ fun <T> ReorderDialog(
         onDismissRequest
     ) {
         if (list) {
-            val reorderState = rememberReorderableLazyListState(
-                onMove = { from, to ->
+            val lazyListState = rememberLazyListState()
+            val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
+                if (from.index in items.indices && to.index in items.indices) {
                     if (draggable(items[from.index]) && draggable(items[to.index])) {
-                        onMove(from, to)
+                        onMove(from.index, to.index)
                     }
-                },
-                canDragOver = { draggedOver, dragging -> draggable(items[draggedOver.index]) }
-            )
+                }
+            }
             LazyColumn(
-                state = reorderState.listState,
+                state = lazyListState,
                 contentPadding = PaddingValues(2.pad),
                 verticalArrangement = Arrangement.spacedBy(2.pad),
-                modifier = Modifier
-                    .reorderable(reorderState)
-                    .detectReorder(reorderState)
-                    .detectReorderAfterLongPress(reorderState)
+                modifier = Modifier.fillMaxSize()
             ) {
                 items(items, key = key) {
                     if (draggable(it)) {
                         ReorderableItem(reorderState, key = key(it)) { isDragging ->
                             val elevation by animateDpAsState(if (isDragging) 2.elevation else 0.dp)
-                            item(it, elevation)
+                            Box(modifier = Modifier.longPressDraggableHandle()) {
+                                item(it, elevation)
+                            }
                         }
                     } else {
                         item(it, 0.dp)
@@ -66,23 +73,29 @@ fun <T> ReorderDialog(
                 }
             }
         } else {
-            val reorderState = rememberReorderableLazyGridState(onMove = onMove)
+            val lazyGridState = rememberLazyGridState()
+            val reorderState = rememberReorderableLazyGridState(lazyGridState) { from, to ->
+                if (from.index in items.indices && to.index in items.indices) {
+                    if (draggable(items[from.index]) && draggable(items[to.index])) {
+                        onMove(from.index, to.index)
+                    }
+                }
+            }
             LazyVerticalGrid(
-                state = reorderState.gridState,
+                state = lazyGridState,
                 columns = GridCells.Adaptive(80.dp),
                 contentPadding = PaddingValues(2.pad),
                 horizontalArrangement = Arrangement.spacedBy(2.pad),
                 verticalArrangement = Arrangement.spacedBy(2.pad),
-                modifier = Modifier
-                    .reorderable(reorderState)
-                    .detectReorder(reorderState)
-                    .detectReorderAfterLongPress(reorderState)
+                modifier = Modifier.fillMaxSize()
             ) {
                 items(items, key = key) {
                     if (draggable(it)) {
                         ReorderableItem(reorderState, key(it)) { isDragging ->
                             val elevation by animateDpAsState(if (isDragging) 2.elevation else 0.dp)
-                            item(it, elevation)
+                            Box(modifier = Modifier.longPressDraggableHandle()) {
+                                item(it, elevation)
+                            }
                         }
                     } else {
                         item(it, 0.dp)

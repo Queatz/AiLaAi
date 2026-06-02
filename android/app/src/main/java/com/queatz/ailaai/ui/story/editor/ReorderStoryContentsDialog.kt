@@ -24,6 +24,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.bulletedString
+import com.queatz.ailaai.extensions.token
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.story.ReorderDialog
 import com.queatz.ailaai.ui.story.Stub
@@ -41,7 +42,9 @@ fun ReorderStoryContentsDialog(
     onStoryContents: (List<StoryContent>) -> Unit
 ) {
     // todo, why can't just use storyContents?
-    var currentStoryContents by remember { mutableStateOf(storyContents) }
+    var currentStoryContents by remember {
+        mutableStateOf(storyContents.map { it to (1..16).token() })
+    }
 
     ReorderDialog(
         {
@@ -49,18 +52,15 @@ fun ReorderStoryContentsDialog(
         },
         list = true,
         items = currentStoryContents,
-        key = { it.hashCode().toString() },
+        key = { it.second },
         onMove = { from, to ->
-            onStoryContents(
-                currentStoryContents.toMutableList().apply {
-                    add(to.index, removeAt(from.index))
-                }.also {
-                    currentStoryContents = it
-                }
-            )
+            currentStoryContents = currentStoryContents.toMutableList().apply {
+                add(to, removeAt(from))
+            }
+            onStoryContents(currentStoryContents.map { it.first })
         },
-        draggable = { it !is StoryContent.Title }
-    ) { it, elevation ->
+        draggable = { it.first !is StoryContent.Title }
+    ) { (it, id), elevation ->
         when (it) {
             is StoryContent.Cards -> {
                 LazyRow(

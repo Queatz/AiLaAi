@@ -57,7 +57,7 @@ fun LazyGridScope.cardsCreatorItem(creatorScope: CreatorScope<StoryContent.Cards
                     edit {
                         copy(
                             cards = cards.toMutableList().apply {
-                                add(to.index, removeAt(from.index))
+                                add(to, removeAt(from))
                             }
                         )
                     }
