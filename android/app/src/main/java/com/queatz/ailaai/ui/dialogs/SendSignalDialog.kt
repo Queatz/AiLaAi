@@ -74,7 +74,7 @@ fun SendSignalDialog(
     signal: Signal,
     geo: LatLng?,
     onDismissRequest: () -> Unit,
-    onSubmit: (SendSignalBody) -> Unit
+    onSubmit: (SendSignalBody) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -154,112 +154,111 @@ fun SendSignalDialog(
                     .padding(bottom = 2.pad)
             )
 
-            AnimatedVisibility(!isRecordingAudio) {
-                Column {
-                    OutlinedTextField(
-                        value = message,
-                        onValueChange = { message = it },
-                        label = { Text(stringResource(R.string.message)) },
-                        shape = MaterialTheme.shapes.large,
-                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                        modifier = Modifier.fillMaxWidth()
-                    )
+            Column {
+                OutlinedTextField(
+                    value = message,
+                    onValueChange = { message = it },
+                    label = { Text(stringResource(R.string.message)) },
+                    shape = MaterialTheme.shapes.large,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-                    Spacer(Modifier.height(2.pad))
+                Spacer(Modifier.height(2.pad))
 
-                    Text(stringResource(R.string.audience), style = MaterialTheme.typography.labelMedium)
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(0.5f.pad),
-                        modifier = Modifier.padding(vertical = 0.5f.pad)
-                    ) {
-                        SignalAudience.entries.forEach { a ->
-                            FilterChip(
-                                selected = audience == a,
-                                onClick = { audience = a },
-                                label = {
-                                    Text(
-                                        when (a) {
-                                            SignalAudience.Nearby -> stringResource(R.string.nearby)
-                                            SignalAudience.Friends -> stringResource(R.string.friends)
-                                            SignalAudience.Groups -> stringResource(R.string.groups)
-                                        }
-                                    )
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        when (a) {
-                                            SignalAudience.Nearby -> Icons.Outlined.Place
-                                            SignalAudience.Friends -> Icons.Outlined.Group
-                                            SignalAudience.Groups -> Icons.Outlined.Forum
-                                        },
-                                        contentDescription = null,
-                                        modifier = Modifier.size(FilterChipDefaults.IconSize)
-                                    )
-                                },
-                                shape = MaterialTheme.shapes.large
-                            )
-                        }
-                    }
-
-                    if (audience == SignalAudience.Groups) {
-                        ChooseGroups(
-                            groups = selectedGroups,
-                            selectedPrefix = null,
-                            label = stringResource(R.string.select_groups),
-                            showIcon = false
-                        ) {
-                            selectedGroups = it
-                        }
-                    }
-
-                    if (audience == SignalAudience.Nearby) {
-                        Spacer(Modifier.height(1.pad))
-                        Text(
-                            text = if (radius >= 1000) {
-                                pluralStringResource(
-                                    R.plurals.x_km,
-                                    (radius / 1000).toInt(),
-                                    if (radius % 1000 == 0.0) (radius / 1000).toInt().toString() else (radius / 1000).toString()
+                Text(stringResource(R.string.audience), style = MaterialTheme.typography.labelMedium)
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(0.5f.pad),
+                    modifier = Modifier.padding(vertical = 0.5f.pad)
+                ) {
+                    SignalAudience.entries.forEach { a ->
+                        FilterChip(
+                            selected = audience == a,
+                            onClick = { audience = a },
+                            label = {
+                                Text(
+                                    when (a) {
+                                        SignalAudience.Nearby -> stringResource(R.string.nearby)
+                                        SignalAudience.Friends -> stringResource(R.string.friends)
+                                        SignalAudience.Groups -> stringResource(R.string.groups)
+                                    }
                                 )
-                            } else {
-                                pluralStringResource(R.plurals.x_m, radius.toInt(), radius.toInt().toString())
                             },
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                        Slider(
-                            value = radii.indexOf(radius).toFloat(),
-                            onValueChange = { radius = radii[it.roundToInt()] },
-                            valueRange = 0f..(radii.size - 1).toFloat(),
-                            steps = radii.size - 2
+                            leadingIcon = {
+                                Icon(
+                                    when (a) {
+                                        SignalAudience.Nearby -> Icons.Outlined.Place
+                                        SignalAudience.Friends -> Icons.Outlined.Group
+                                        SignalAudience.Groups -> Icons.Outlined.Forum
+                                    },
+                                    contentDescription = null,
+                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                )
+                            },
+                            shape = MaterialTheme.shapes.large
                         )
                     }
+                }
 
-                    Spacer(Modifier.height(1.pad))
-
-                    Text(stringResource(R.string.duration), style = MaterialTheme.typography.labelMedium)
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(0.5f.pad),
-                        modifier = Modifier.padding(vertical = 0.5f.pad)
+                if (audience == SignalAudience.Groups) {
+                    ChooseGroups(
+                        groups = selectedGroups,
+                        selectedPrefix = null,
+                        label = stringResource(R.string.select_groups),
+                        showIcon = false
                     ) {
-                        durations.forEach { (d, label) ->
-                            FilterChip(
-                                selected = duration == d,
-                                onClick = { duration = d },
-                                label = { Text(label) },
-                                shape = MaterialTheme.shapes.large
+                        selectedGroups = it
+                    }
+                }
+
+                if (audience == SignalAudience.Nearby) {
+                    Spacer(Modifier.height(1.pad))
+                    Text(
+                        text = if (radius >= 1000) {
+                            pluralStringResource(
+                                R.plurals.x_km,
+                                (radius / 1000).toInt(),
+                                if (radius % 1000 == 0.0) (radius / 1000).toInt()
+                                    .toString() else (radius / 1000).toString()
                             )
-                        }
+                        } else {
+                            pluralStringResource(R.plurals.x_m, radius.toInt(), radius.toInt().toString())
+                        },
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Slider(
+                        value = radii.indexOf(radius).toFloat(),
+                        onValueChange = { radius = radii[it.roundToInt()] },
+                        valueRange = 0f..(radii.size - 1).toFloat(),
+                        steps = radii.size - 2
+                    )
+                }
+
+                Spacer(Modifier.height(1.pad))
+
+                Text(stringResource(R.string.duration), style = MaterialTheme.typography.labelMedium)
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(0.5f.pad),
+                    modifier = Modifier.padding(vertical = 0.5f.pad)
+                ) {
+                    durations.forEach { (d, label) ->
+                        FilterChip(
+                            selected = duration == d,
+                            onClick = { duration = d },
+                            label = { Text(label) },
+                            shape = MaterialTheme.shapes.large
+                        )
                     }
                 }
             }
 
-            AnimatedVisibility(isRecordingAudio) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 2.pad)
-                ) {
+            Text(stringResource(R.string.attachments), style = MaterialTheme.typography.labelMedium)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(1.pad),
+                modifier = Modifier.padding(vertical = 0.5f.pad)
+            ) {
+                if (isRecordingAudio) {
                     IconButton(onClick = { audioRecorder.cancelRecording() }) {
                         Icon(
                             Icons.Outlined.Delete,
@@ -270,22 +269,15 @@ fun SendSignalDialog(
                     Text(
                         stringResource(R.string.recording_audio, recordingAudioDuration.formatTime()),
                         style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.weight(1f)
                     )
-                }
-            }
-
-            Spacer(Modifier.height(1.pad))
-
-            Text(stringResource(R.string.attachments), style = MaterialTheme.typography.labelMedium)
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(1.pad),
-                modifier = Modifier.padding(vertical = 0.5f.pad)
-            ) {
-                IconButton(onClick = { showChoosePhoto = true }, enabled = !isRecordingAudio) {
-                    Icon(Icons.Outlined.Photo, stringResource(R.string.attach_photo))
+                } else {
+                    IconButton(onClick = { showChoosePhoto = true }) {
+                        Icon(Icons.Outlined.Photo, stringResource(R.string.attach_photo))
+                    }
+                    Spacer(Modifier.weight(1f))
                 }
                 IconButton(
                     onClick = {
@@ -297,7 +289,10 @@ fun SendSignalDialog(
                     },
                     colors = if (isRecordingAudio) IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primaryContainer) else IconButtonDefaults.iconButtonColors()
                 ) {
-                    Icon(if (isRecordingAudio) Icons.AutoMirrored.Outlined.Send else Icons.Outlined.Mic, stringResource(R.string.record_audio))
+                    Icon(
+                        if (isRecordingAudio) Icons.AutoMirrored.Outlined.Send else Icons.Outlined.Mic,
+                        stringResource(R.string.record_audio)
+                    )
                 }
             }
 
@@ -311,7 +306,9 @@ fun SendSignalDialog(
             )
 
             if (isUploading) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(vertical = 1.pad))
+                LinearProgressIndicator(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 1.pad))
             }
 
             Row(

@@ -1,42 +1,49 @@
 package com.queatz.ailaai.ui.dialogs
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Send
-import androidx.compose.material.icons.outlined.AudioFile
-import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.Photo
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
-import coil3.compose.rememberAsyncImagePainter
-import com.queatz.ailaai.extensions.formatTime
-import com.queatz.ailaai.R
 import app.ailaai.api.uploadAudio
+import com.queatz.ailaai.R
 import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.asInputProvider
+import com.queatz.ailaai.extensions.formatTime
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.helpers.audioRecorder
@@ -52,7 +59,7 @@ import kotlinx.coroutines.launch
 fun ReplySignalDialog(
     signalSend: SignalSendExtended,
     onDismissRequest: () -> Unit,
-    onSubmit: (SignalReplyBody) -> Unit
+    onSubmit: (SignalReplyBody) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -113,7 +120,10 @@ fun ReplySignalDialog(
                 .verticalScroll(rememberScrollState())
         ) {
             Text(
-                text = stringResource(R.string.reply_to_x, signalSend.person?.name ?: stringResource(R.string.someone)) + " ${signalSend.signal?.emoji ?: ""} ${signalSend.signal?.name ?: ""}",
+                text = stringResource(
+                    R.string.reply_to_x,
+                    signalSend.person?.name ?: stringResource(R.string.someone)
+                ) + " ${signalSend.signal?.emoji ?: ""} ${signalSend.signal?.name ?: ""}",
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = 1.pad)
             )
@@ -149,28 +159,26 @@ fun ReplySignalDialog(
             }
 
             if (!isExpired && !alreadyReplied) {
-                AnimatedVisibility(!isRecordingAudio) {
-                    Column {
-                        OutlinedTextField(
-                            value = message,
-                            onValueChange = { message = it },
-                            label = { Text(stringResource(R.string.your_reply)) },
-                            shape = MaterialTheme.shapes.large,
-                            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .focusRequester(focusRequester)
-                        )
-                    }
-                }
-
-                AnimatedVisibility(isRecordingAudio) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
+                Column {
+                    OutlinedTextField(
+                        value = message,
+                        onValueChange = { message = it },
+                        label = { Text(stringResource(R.string.your_reply)) },
+                        shape = MaterialTheme.shapes.large,
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 2.pad)
-                    ) {
+                            .focusRequester(focusRequester)
+                    )
+                }
+
+                Text(stringResource(R.string.attachments), style = MaterialTheme.typography.labelMedium)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(1.pad),
+                    modifier = Modifier.padding(vertical = 0.5f.pad)
+                ) {
+                    if (isRecordingAudio) {
                         IconButton(onClick = { audioRecorder.cancelRecording() }) {
                             Icon(
                                 Icons.Outlined.Delete,
@@ -181,22 +189,15 @@ fun ReplySignalDialog(
                         Text(
                             stringResource(R.string.recording_audio, recordingAudioDuration.formatTime()),
                             style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.weight(1f)
                         )
-                    }
-                }
-
-                Spacer(Modifier.height(1.pad))
-
-                Text(stringResource(R.string.attachments), style = MaterialTheme.typography.labelMedium)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(1.pad),
-                    modifier = Modifier.padding(vertical = 0.5f.pad)
-                ) {
-                    IconButton(onClick = { showChoosePhoto = true }, enabled = !isRecordingAudio) {
-                        Icon(Icons.Outlined.Photo, stringResource(R.string.attach_photo))
+                    } else {
+                        IconButton(onClick = { showChoosePhoto = true }) {
+                            Icon(Icons.Outlined.Photo, stringResource(R.string.attach_photo))
+                        }
+                        Spacer(Modifier.weight(1f))
                     }
                     IconButton(
                         onClick = {
@@ -226,12 +227,16 @@ fun ReplySignalDialog(
             }
 
             if (isUploading) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(vertical = 1.pad))
+                LinearProgressIndicator(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 1.pad))
             }
 
             Row(
                 horizontalArrangement = Arrangement.End,
-                modifier = Modifier.fillMaxWidth().padding(top = 2.pad)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 2.pad)
             ) {
                 TextButton(onClick = onDismissRequest, enabled = !isUploading) {
                     Text(if (isExpired || alreadyReplied) stringResource(R.string.close) else stringResource(R.string.cancel))
