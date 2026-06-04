@@ -59,6 +59,7 @@ import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
+import com.queatz.ailaai.ui.components.SignalAttachments
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.pad
@@ -96,6 +97,7 @@ fun SignalsScreen(id: String? = null) {
     var showSettingsDialog by remember { mutableStateOf(false) }
     var signalSentAnimation by remember { mutableStateOf<Signal?>(null) }
     var hasOpenedDeepLink by rememberSaveable { mutableStateOf(false) }
+    var photoToShow by remember { mutableStateOf<String?>(null) }
 
     var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     val locationSelector = locationSelector(
@@ -238,7 +240,8 @@ fun SignalsScreen(id: String? = null) {
                                 modifier = Modifier.fillMaxWidth(),
                                 onClick = {
                                     showRepliesDialog = send
-                                }
+                                },
+                                onClickPhoto = { photoToShow = it }
                             )
                         }
                         items(othersFiltered, span = { GridItemSpan(if (isMobile) maxLineSpan else 2) }) { send ->
@@ -248,7 +251,8 @@ fun SignalsScreen(id: String? = null) {
                                 modifier = Modifier.fillMaxWidth(),
                                 onClick = {
                                     showReplyDialog = send
-                                }
+                                },
+                                onClickPhoto = { photoToShow = it }
                             )
                         }
                     }
@@ -503,6 +507,14 @@ fun SignalsScreen(id: String? = null) {
             }
         }
     }
+
+    if (photoToShow != null) {
+        PhotoDialog(
+            onDismissRequest = { photoToShow = null },
+            initialMedia = Media.Photo(photoToShow!!),
+            medias = listOf(Media.Photo(photoToShow!!))
+        )
+    }
 }
 
 @Composable
@@ -541,7 +553,8 @@ fun ActiveSignalCard(
     send: SignalSendExtended,
     isMine: Boolean,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onClickPhoto: (String) -> Unit
 ) {
     val now = Clock.System.now()
     val totalDuration = if (send.signalSend.expiry != null && send.signalSend.createdAt != null) (send.signalSend.expiry!! - send.signalSend.createdAt!!).inWholeMilliseconds else 0L
@@ -595,6 +608,14 @@ fun ActiveSignalCard(
                     modifier = Modifier.padding(top = 0.5f.pad)
                 )
             }
+            SignalAttachments(
+                photo = send.signalSend.photo,
+                audio = send.signalSend.audio,
+                api = api,
+                modifier = Modifier.padding(top = 0.5f.pad),
+                horizontalAlignment = Alignment.Start,
+                onClickPhoto = onClickPhoto
+            )
             Spacer(Modifier.height(0.5f.pad))
             LinearProgressIndicator(
                 progress = { progress },
