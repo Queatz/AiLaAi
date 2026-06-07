@@ -23,7 +23,6 @@ import com.queatz.db.formatPay
 import components.CardContent
 import components.Icon
 import components.IconButton
-import components.SearchField
 import components.Switch
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
@@ -663,7 +662,7 @@ fun MapView(
             }) {
                 FlexInput(
                     value = searchText,
-                    placeholder = appString { searchForPlaces },
+                    placeholder = appString { searchForThings },
                     singleLine = true,
                     styles = {
                         property("border", "none")

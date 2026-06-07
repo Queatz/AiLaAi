@@ -377,10 +377,10 @@ object Strings {
         vn = "Mở rộng",
         ru = "Развернуть"
     )
-    val searchForPlaces = Translation(
-        en = "Search for places, services, and more",
-        vn = "Tìm kiếm địa điểm, dịch vụ và hơn thế nữa",
-        ru = "Поиск мест, услуг и многое другое"
+    val searchForThings = Translation(
+        en = "Search for things to do",
+        vn = "Tìm kiếm hoạt động",
+        ru = "Поиск занятий"
     )
     val paid = Translation(
         en = "Paid",
