@@ -111,13 +111,10 @@ fun Route.cardRoutes() {
 
                 val search = call.parameters["search"]?.notBlank
 
-                val paid = call.parameters["paid"]?.toBoolean()
-
                 db.explore(
                     geo = geo,
                     altitude = call.parameters["altitude"]?.toDoubleOrNull(),
                     search = search,
-                    paid = paid,
                     nearbyMaxDistance = defaultNearbyMaxDistanceInMeters,
                     offset = call.parameters["offset"]?.toInt() ?: 0,
                     limit = call.parameters["limit"]?.toInt() ?: 20,

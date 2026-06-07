@@ -34,7 +34,6 @@ private var cache = listOf<Card>()
 fun mapCardsControl(
     geo: LatLng?,
     altitude: Double?,
-    filterPaid: Boolean,
     value: String,
     onLoadNewPage: (geo: LatLng?, value: String, clear: Boolean) -> Unit
 ): MapCardsControl {
@@ -89,7 +88,6 @@ fun mapCardsControl(
             geo = geo.toGeo(),
             altitude = (altitude ?: 0.0) / 1000.0,
             offset = offset,
-            paid = filterPaid.takeIf { it },
             search = value.notBlank ?: mapCategoriesControl.selectedCategory,
             public = true,
             onError = { ex ->

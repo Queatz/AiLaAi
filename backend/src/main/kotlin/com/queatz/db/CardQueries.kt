@@ -229,7 +229,6 @@ fun Db.explore(
     geo: List<Double>,
     altitude: Double? = null,
     search: String? = null,
-    paid: Boolean? = null,
     nearbyMaxDistance: Double = 0.0,
     offset: Int = 0,
     limit: Int = 20
@@ -238,7 +237,6 @@ fun Db.explore(
     """
         for x in @@collection
             filter x.${f(Card::active)} == true
-                ${if (paid != null) "and x.${f(Card::pay)} ${if (paid) "!=" else "=="} null" else ""}
                 and x.${f(Card::offline)} != true
                 and (
                     @search == null 

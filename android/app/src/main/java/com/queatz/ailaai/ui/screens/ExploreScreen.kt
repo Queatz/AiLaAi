@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -43,12 +42,10 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExploreScreen() {
-    val paidString = stringResource(R.string.paid)
     val state = rememberLazyGridState()
     val scope = rememberCoroutineScope()
     var value by rememberSavableStateOf("")
     var shownValue by rememberSavableStateOf(value)
-    var filterPaid by rememberSavableStateOf(false)
     var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var mapGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var mapAltitude: Double? by rememberSaveable { mutableStateOf(null) }
@@ -63,7 +60,6 @@ fun ExploreScreen() {
     val mapCardsControl = mapCardsControl(
         geo = mapGeo ?: geo,
         altitude = mapAltitude,
-        filterPaid = filterPaid,
         value = value,
         onLoadNewPage = { geo, value, clear ->
             shownGeo = geo
@@ -77,22 +73,7 @@ fun ExploreScreen() {
     )
 
     val cards = mapCardsControl.cards
-
-    val filters by remember(filterPaid, cards) {
-        mutableStateOf(
-            if (cards.any { it.pay != null }) {
-                SearchFilter(
-                    name = paidString,
-                    icon = Icons.Outlined.Payments,
-                    selected = filterPaid
-                ) {
-                    filterPaid = !filterPaid
-                }.inList()
-            } else {
-                emptyList()
-            }
-        )
-    }
+    val filters = emptyList<SearchFilter>()
 
     val mapInventoryControl = mapInventoryControl(geo = mapGeo ?: geo)
     val mapControl = remember { MapControl() }
@@ -113,9 +94,6 @@ fun ExploreScreen() {
         }
     }
 
-    LaunchedEffect(filterPaid) {
-        mapCardsControl.loadMore(true)
-    }
 
     LaunchedEffect(geo, mapGeo, value, mapCategoriesControl.selectedCategory) {
         if (geo == null && mapGeo == null) {

@@ -93,9 +93,6 @@ data class CardMarker(
     val marker: mapboxgl.Marker
 )
 
-sealed interface SearchFilter {
-    data object Paid : SearchFilter
-}
 
 @Composable
 fun MapView(
@@ -115,7 +112,6 @@ fun MapView(
     val hasHash = remember { window.location.hash.isBlank() }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var categoriesCache by remember { mutableStateOf(emptyList<String>()) }
-    var selectedFilters by remember { mutableStateOf(emptyList<SearchFilter>()) }
     var cardNavHistory by remember { mutableStateOf(listOf<Card>()) }
     val isDarkMode = rememberDarkMode()
     var currentStyleIndex by remember { mutableStateOf(0) }
@@ -230,25 +226,11 @@ fun MapView(
         }
     }
 
-    val shownCards = remember(searchResults, selectedCategory, selectedFilters) {
+    val shownCards = remember(searchResults, selectedCategory) {
         if (selectedCategory == null) {
             searchResults
         } else {
             searchResults.filter { it.categories?.contains(selectedCategory) == true }
-        }.let {
-            if (selectedFilters.isEmpty()) {
-                it
-            } else {
-                it.filter { card ->
-                    selectedFilters.all { filter ->
-                        when (filter) {
-                            is SearchFilter.Paid -> {
-                                card.pay != null
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -682,43 +664,6 @@ fun MapView(
                         position(Position.Relative)
                     }
                 }) {
-                    if (searchResults.any { it.pay != null }) {
-                        val paidFilterSelected = selectedFilters.any { it is SearchFilter.Paid }
-                        Div({
-                            classes(Styles.floatingButton)
-
-                            if (paidFilterSelected) {
-                                classes(Styles.floatingButtonSelected)
-                            }
-
-                            style {
-                                flexShrink(0)
-                            }
-
-                            onClick {
-                                selectedFilters = if (paidFilterSelected) {
-                                    emptyList()
-                                } else {
-                                    SearchFilter.Paid.inList()
-                                }
-                            }
-                        }) {
-                            Icon("payments")
-                            appText { paid }
-                        }
-                        if (categories.isNotEmpty()) {
-                            Div({
-                                style {
-                                    margin(.5f.r)
-                                    borderRadius(.5f.r)
-                                    backgroundColor(Styles.colors.tertiary)
-                                    flexShrink(0)
-                                    width(.25.r)
-                                    property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.125)")
-                                }
-                            })
-                        }
-                    }
                     categories.forEach { category ->
                         Button({
                             classes(Styles.floatingButton)
