@@ -81,6 +81,7 @@ external object mapboxgl {
 
     interface FlyToOptions {
         var center: LngLat
+        var zoom: Double?
     }
 
     class Marker(options: MarkerOptions?) {

@@ -74,8 +74,10 @@ import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.paddingBottom
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.paddingRight
+import org.jetbrains.compose.web.css.paddingTop
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
@@ -1036,6 +1038,10 @@ class MainStyleSheet : StyleSheet() {
         mobile(self) {
             width(100.percent)
         }
+
+        desktop(self) {
+            width(0.px)
+        }
     }
 
     val stickyHeader by style {
@@ -1098,6 +1104,7 @@ class MainStyleSheet : StyleSheet() {
 
         desktop(self) {
             width(360.px)
+            minWidth(360.px)
             property("max-height", "calc(${100.percent} - ${1.r})")
         }
 
@@ -1105,6 +1112,61 @@ class MainStyleSheet : StyleSheet() {
             property("width", "calc(${100.percent} - ${2.r})")
             property("max-height", "calc(${50.percent} - ${1.r})")
         }
+    }
+
+    val bottomSheetContainer by style {
+        position(Position.Fixed)
+        bottom(0.px)
+        left(0.px)
+        right(0.px)
+        backgroundColor(colors.white)
+        property("z-index", "1000")
+        property("box-shadow", "0 -2px 16px rgba(0, 0, 0, 0.125)")
+        property("border-top-left-radius", "1.5.r")
+        property("border-top-right-radius", "1.5.r")
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        property("transition", "transform 0.3s ease-out")
+        property("will-change", "transform")
+        property("max-height", "95vh")
+        height(95.vh)
+        property("pointer-events", "auto")
+
+        dark(self) {
+            backgroundColor(colors.dark.background)
+        }
+    }
+
+    val bottomSheetHandleContainer by style {
+        width(100.percent)
+        paddingTop(1.r)
+        paddingBottom(1.r)
+        display(DisplayStyle.Flex)
+        justifyContent(JustifyContent.Center)
+        cursor("grab")
+        flexShrink(0)
+        backgroundColor(rgba(255, 255, 255, .04))
+        property("touch-action", "none")
+        property("user-select", "none")
+        property("-webkit-user-select", "none")
+    }
+
+    val bottomSheetHandle by style {
+        width(40.px)
+        height(4.px)
+        backgroundColor(colors.lightgray)
+        borderRadius(2.px)
+
+        dark(self) {
+            backgroundColor(colors.darkgray)
+        }
+    }
+
+    val bottomSheetContent by style {
+        flexGrow(1)
+        overflowY("auto")
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
     }
 
     val mapCardContent by style {
