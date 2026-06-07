@@ -124,6 +124,8 @@ fun MapView(
         "mapbox://styles/mapbox/navigation-night-v1"
     )
 
+    var expanded by remember { mutableStateOf(true) }
+
     val categories = remember(searchResults) {
         if (selectedCategory == null) {
             searchResults
@@ -570,55 +572,139 @@ fun MapView(
     Div({
         classes(Styles.mapContainer)
     }) {
-        if (showList) {
-            Div({
-                classes(Styles.navContainer, Styles.mapList)
+        if (showList || selectedCard != null) {
+            var panelRef by remember { mutableStateOf<HTMLElement?>(null) }
 
-                if (autoHideList) {
+            LaunchedEffect(selectedCard) {
+                panelRef?.scrollTop = 0.0
+            }
+
+            Div({
+                classes(Styles.navContainer)
+                if (selectedCard != null) {
+                    classes(Styles.mapPanel)
+                } else {
+                    classes(Styles.mapList)
+                }
+
+                if (autoHideList && selectedCard == null) {
                     classes(Styles.mapListAutoHide)
+                }
+
+                if (selectedCard != null) {
+                    ref { ref ->
+                        panelRef = ref
+
+                        onDispose {
+                            panelRef = null
+                        }
+                    }
                 }
             }) {
                 Div({
                     classes(Styles.navContent)
                 }) {
-                    var expanded by remember { mutableStateOf(true) }
-
-                    Div({
-                        style {
-                            fontWeight("bold")
-                            padding(1.r)
-                            fontSize(24.px)
-                            display(DisplayStyle.Flex)
-                            alignItems(AlignItems.Center)
-                            justifyContent(JustifyContent.SpaceBetween)
-                        }
-                    }) {
-                        Text("${appString { pages }} (${shownCards.size})")
-                        IconButton(
-                            name = if (expanded) "expand_less" else "expand_more",
-                            title = if (expanded) appString { collapse } else appString { expand },
-                            styles = {
-                                property("border", "1px solid ${if (isDarkMode) Styles.colors.dark.outline else Styles.colors.outline}")
-                                borderRadius(2.r)
-
+                    if (selectedCard == null) {
+                        Div({
+                            classes(Styles.stickyHeader)
+                            style {
+                                fontWeight("bold")
+                                padding(1.r)
+                                fontSize(24.px)
+                                display(DisplayStyle.Flex)
+                                alignItems(AlignItems.Center)
+                                justifyContent(JustifyContent.SpaceBetween)
                             }
-                        ) {
-                            expanded = !expanded
-                        }
-                    }
-                    if (expanded) {
-                        if (shownCards.isEmpty()) {
-                            Empty { appText { noCardsNearby } }
-                        } else {
-                            MapList(
-                                shownCards,
+                        }) {
+                            Text("${appString { pages }} (${shownCards.size})")
+                            IconButton(
+                                name = if (expanded) "expand_less" else "expand_more",
+                                title = if (expanded) appString { collapse } else appString { expand },
                                 styles = {
-                                    padding(1.r)
+                                    property("border", "1px solid ${if (isDarkMode) Styles.colors.dark.outline else Styles.colors.outline}")
+                                    borderRadius(2.r)
+
                                 }
-                            ) { card ->
-                                cardNavHistory = emptyList()
-                                selectedCard = if (selectedCard?.id == card.id) null else card
-                                centerMapOnCard(selectedCard)
+                            ) {
+                                expanded = !expanded
+                            }
+                        }
+                        if (expanded) {
+                            if (shownCards.isEmpty()) {
+                                Empty { appText { noCardsNearby } }
+                            } else {
+                                MapList(
+                                    shownCards,
+                                    styles = {
+                                        padding(1.r)
+                                    }
+                                ) { card ->
+                                    cardNavHistory = emptyList()
+                                    selectedCard = if (selectedCard?.id == card.id) null else card
+                                    centerMapOnCard(selectedCard)
+                                }
+                            }
+                        }
+                    } else {
+                        Div({
+                            classes(Styles.stickyHeader)
+                            style {
+                                display(DisplayStyle.Flex)
+                                alignItems(AlignItems.Center)
+                                justifyContent(JustifyContent.SpaceBetween)
+                                padding(1.r)
+                            }
+                        }) {
+                            IconButton(
+                                name = "arrow_back",
+                                title = appString { goBack },
+                                background = true
+                            ) {
+                                if (cardNavHistory.isNotEmpty()) {
+                                    selectedCard = cardNavHistory.last()
+                                    cardNavHistory = cardNavHistory.dropLast(1)
+                                    centerMapOnCard(selectedCard)
+                                } else {
+                                    selectedCard = null
+                                }
+                            }
+
+                            IconButton(
+                                name = "open_in_new",
+                                title = appString { openPage },
+                                background = true
+                            ) {
+                                window.open("/page/${selectedCard!!.id!!}", target = "_blank")
+                            }
+                        }
+
+                        Div({
+                            classes(Styles.mapCardContent)
+                        }) {
+                            selectedCard?.let {
+                                CardContent(
+                                    card = it,
+                                    mediaStyles = {
+                                        with(Styles) {
+                                            mapCardMediaStyle()
+                                        }
+                                    },
+                                    onCardClick = { cardId, openInNewWindow ->
+                                        if (openInNewWindow) {
+                                            window.open("/page/$cardId", target = "_blank")
+                                        } else {
+                                            scope.launch {
+                                                api.card(cardId) {
+                                                    selectedCard?.let {
+                                                        cardNavHistory += it
+                                                    }
+                                                    selectedCard = it
+                                                    centerMapOnCard(it)
+                                                }
+                                            }
+                                        }
+                                    }
+                                )
                             }
                         }
                     }
@@ -686,93 +772,7 @@ fun MapView(
                 }
             }
         }
-        if (selectedCard != null) {
-            var panelRef by remember { mutableStateOf<HTMLElement?>(null) }
-
-            LaunchedEffect(selectedCard) {
-                panelRef?.scrollTop = 0.0
-            }
-
-            Div({
-                classes(Styles.navContainer, Styles.mapPanel)
-
-                ref { ref ->
-                    panelRef = ref
-
-                    onDispose {
-                        panelRef = null
-                    }
-                }
-            }) {
-                Div({
-                    classes(Styles.navContent)
-                }) {
-                    Div {
-                        selectedCard?.let {
-                            CardContent(
-                                card = it,
-                                onCardClick = { cardId, openInNewWindow ->
-                                    if (openInNewWindow) {
-                                        window.open("/page/$cardId", target = "_blank")
-                                    } else {
-                                        scope.launch {
-                                            api.card(cardId) {
-                                                selectedCard?.let {
-                                                    cardNavHistory += it
-                                                }
-                                                selectedCard = it
-                                                centerMapOnCard(it)
-                                            }
-                                        }
-                                    }
-                                }
-                            )
-                        }
-                    }
-                    cardNavHistory.lastOrNull()?.let { card ->
-                        IconButton(
-                            name = "arrow_back",
-                            title = appString { goBack },
-                            background = true,
-                            styles = {
-                                position(Position.Absolute)
-                                top(1.r)
-                                left(1.r)
-                            }
-                        ) {
-                            cardNavHistory -= card
-                            selectedCard = card
-                            centerMapOnCard(card)
-                        }
-                }
-                    Button({
-                        classes(Styles.button)
-
-                        style {
-                            position(Position.Absolute)
-                            top(1.r)
-                            right(1.r)
-                        }
-
-                        onClick { event ->
-                            window.open("/page/${selectedCard!!.id!!}", target = "_blank")
-                        }
-                    }) {
-                        Span {
-                            appText { openPage }
-                        }
-                        Span({
-                            classes("material-symbols-outlined")
-                            style {
-                                paddingLeft(1.r)
-                            }
-                        }) {
-                            Text("open_in_new")
-                        }
-                    }
-                }
-            }
-        } else {
+        if (selectedCard == null) {
             Div({
                 classes(Styles.mobileOnly)
 

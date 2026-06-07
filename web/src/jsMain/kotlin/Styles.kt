@@ -1038,6 +1038,17 @@ class MainStyleSheet : StyleSheet() {
         }
     }
 
+    val stickyHeader by style {
+        position(Position.Sticky)
+        top(0.px)
+        backgroundColor(colors.white)
+        property("z-index", "1")
+
+        dark(self) {
+            backgroundColor(colors.dark.background)
+        }
+    }
+
     val mapListAutoHide by style {  }
 
     val mapList by style {
@@ -1066,8 +1077,8 @@ class MainStyleSheet : StyleSheet() {
         }
 
         desktop(self) {
-            width(24.r)
-            property("max-height", "calc(${100.percent} - ${6.r})")
+            width(360.px)
+            property("max-height", "calc(${100.percent} - ${1.r})")
         }
 
         mobile(self) {
@@ -1086,8 +1097,7 @@ class MainStyleSheet : StyleSheet() {
         property("z-index", "10")
 
         desktop(self) {
-            marginLeft(0.r)
-            width(36.r)
+            width(360.px)
             property("max-height", "calc(${100.percent} - ${1.r})")
         }
 
@@ -1095,6 +1105,22 @@ class MainStyleSheet : StyleSheet() {
             property("width", "calc(${100.percent} - ${2.r})")
             property("max-height", "calc(${50.percent} - ${1.r})")
         }
+    }
+
+    val mapCardContent by style {
+        boxSizing("border-box")
+    }
+
+    fun StyleScope.mapCardMediaStyle() {
+        borderRadius(1.r)
+        margin(1.r)
+        marginBottom(0.r)
+        property("width", "calc(${100.percent} - ${2.r})")
+        boxSizing("border-box")
+    }
+
+    val mapCardMedia by style {
+        mapCardMediaStyle()
     }
 
     val mapMarker by style {

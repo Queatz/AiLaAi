@@ -20,6 +20,7 @@ import hint
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import notBlank
+import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.opacity
@@ -34,6 +35,7 @@ import stories.asStoryContents
 fun CardContent(
     card: Card,
     onCardClick: ((cardId: String, openInNewWindow: Boolean) -> Unit)? = null,
+    mediaStyles: (StyleScope.() -> Unit)? = null,
 ) {
     val me = application.me.collectAsState().value
     val scope = rememberCoroutineScope()
@@ -53,7 +55,7 @@ fun CardContent(
         stack.clear()
     }
 
-    CardPhotoOrVideo(card)
+    CardPhotoOrVideo(card, styles = mediaStyles ?: {})
 
     Div({
         classes(Styles.cardContent)

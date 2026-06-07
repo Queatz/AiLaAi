@@ -236,7 +236,7 @@ fun FlexInput(
             position(Position.Relative)
             display(DisplayStyle.Flex)
             if (defaultMargins) margin(.5.r, 1.r)
-            else width(100.percent)
+            else if (useDefaultWidth) width(100.percent)
             styles()
         }
 
