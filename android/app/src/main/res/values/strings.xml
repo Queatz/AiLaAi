@@ -352,6 +352,9 @@
     <string name="write">Write</string>
     <string name="choose_location">Choose location</string>
     <string name="reorder">Reorder</string>
+    <string name="additional_photos">Additional photos</string>
+    <string name="move_up">Move up</string>
+    <string name="move_down">Move down</string>
     <string name="sent_a_story">Sent a post</string>
     <string name="sent_a_group">Sent a group</string>
     <string name="sent_a_link">Sent a link</string>

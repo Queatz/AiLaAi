@@ -296,7 +296,7 @@ fun MapView(
                                     boxSizing("border-box")
 
                                     if (isNpc) {
-                                        property("box-shadow", "0 2px 16px rgba(0, 0, 0, 0.125)")
+                                        property("box-shadow", "rgba(0, 0, 0, 0.25) 0px 32px 64px")
                                         borderRadius(6.r)
                                         backgroundColor(Styles.colors.white)
                                     }
@@ -828,7 +828,7 @@ fun MapView(
                             Empty { appText { noCardsNearby } }
                         } else {
                             MapList(
-                                shownCards,
+                                cards = shownCards,
                                 styles = {
                                     padding(1.r)
                                 }

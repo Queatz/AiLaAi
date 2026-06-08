@@ -19,6 +19,7 @@ import app.ailaai.api.deleteCard
 import app.ailaai.api.generateCardPhoto
 import app.ailaai.api.newCard
 import app.ailaai.api.updateCard
+import app.dialog.additionalPhotosDialog
 import app.components.FlexInput
 import app.dialog.categoryDialog
 import app.dialog.dialog
@@ -559,6 +560,16 @@ fun ExplorePage(
                         api.card(card.parent!!) {
                             onCard(it)
                         }
+                    }
+                }
+            }
+
+            if (me?.id == card.person) {
+                IconButton("collections", appString { additionalPhotos }, styles = {
+                    marginRight(.5f.r)
+                }) {
+                    scope.launch {
+                        additionalPhotosDialog(card, onCardUpdated)
                     }
                 }
             }

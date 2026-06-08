@@ -3,6 +3,7 @@ package components
 import Styles
 import androidx.compose.runtime.*
 import app.dialog.photoDialog
+import appString
 import baseUrl
 import com.queatz.db.Card
 import kotlinx.coroutines.launch
@@ -11,6 +12,7 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Source
 import org.jetbrains.compose.web.dom.Video
 import org.w3c.dom.HTMLVideoElement
+import r
 
 @Composable
 fun CardPhotoOrVideo(
@@ -19,9 +21,13 @@ fun CardPhotoOrVideo(
     styles: StyleScope.() -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
+    val allPhotos = remember(card.photo, card.photos) {
+        listOfNotNull(card.photo) + (card.photos ?: emptyList())
+    }
+    var photoIndex by remember(allPhotos) { mutableStateOf(0) }
 
-    card.photo?.let {
-        val url = "$baseUrl$it"
+    if (allPhotos.isNotEmpty()) {
+        val url = "$baseUrl${allPhotos[photoIndex]}"
 
         Div({
             style {
@@ -35,6 +41,7 @@ fun CardPhotoOrVideo(
                 maxHeight(50.vh)
                 property("aspect-ratio", "2")
                 cursor("pointer")
+                position(Position.Relative)
                 styles()
             }
 
@@ -43,8 +50,51 @@ fun CardPhotoOrVideo(
                     photoDialog(url)
                 }
             }
-        }) {}
-    } ?: card.video?.let {
+
+            var startX = 0.0
+
+            onTouchStart {
+                startX = it.touches.item(0)?.clientX?.toDouble() ?: 0.0
+            }
+
+            onTouchEnd {
+                val endX = it.changedTouches.item(0)?.clientX?.toDouble() ?: 0.0
+                val diff = startX - endX
+                if (kotlin.math.abs(diff) > 50) {
+                    if (diff > 0) {
+                        photoIndex = (photoIndex + 1) % allPhotos.size
+                    } else {
+                        photoIndex = (photoIndex - 1 + allPhotos.size) % allPhotos.size
+                    }
+                }
+            }
+        }) {
+            if (allPhotos.size > 1) {
+                IconButton("chevron_left", appString { previous }, styles = {
+                    position(Position.Absolute)
+                    left(0.5.r)
+                    top(50.percent)
+                    property("transform", "translateY(-50%)")
+                    property("background-color", "rgba(0, 0, 0, 0.25)")
+                    borderRadius(50.percent)
+                    color(Color.white)
+                }) {
+                    photoIndex = (photoIndex - 1 + allPhotos.size) % allPhotos.size
+                }
+                IconButton("chevron_right", appString { next }, styles = {
+                    position(Position.Absolute)
+                    right(0.5.r)
+                    top(50.percent)
+                    property("transform", "translateY(-50%)")
+                    property("background-color", "rgba(0, 0, 0, 0.25)")
+                    borderRadius(50.percent)
+                    color(Color.white)
+                }) {
+                    photoIndex = (photoIndex + 1) % allPhotos.size
+                }
+            }
+        }
+    } else card.video?.let {
         var videoElement by remember { mutableStateOf<HTMLVideoElement?>(null) }
 //                            LaunchedEffect(videoElement) {
 //                                if (videoElement != null) {

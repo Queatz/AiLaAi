@@ -28,6 +28,17 @@ import com.queatz.ailaai.ui.card.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.menuItem
+import com.queatz.ailaai.ui.story.ReorderDialog
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.CardAttachment
@@ -612,6 +623,108 @@ fun CardDialogs(state: CardScreenState) {
             ) {
                 state.reload()
                 state.showPageSizeDialog = false
+            }
+        }
+    }
+    if (state.showAdditionalPhotosDialog) {
+        val card = state.card ?: return
+        var photos by remember(card.photos) { mutableStateOf(card.photos ?: emptyList()) }
+        val scope = rememberCoroutineScope()
+        var showChoosePhoto by remember { mutableStateOf(false) }
+
+        if (showChoosePhoto) {
+            ChoosePhotoDialog(
+                scope = scope,
+                onDismissRequest = { showChoosePhoto = false },
+                onPhotos = { uris ->
+                    uris.forEach { uri ->
+                        val bytes = context.contentResolver.openInputStream(uri)?.readBytes() ?: return@forEach
+                        api.uploadCardContentPhotos(card.id!!, listOf(bytes)) {
+                            photos = photos + it
+                            scope.launch {
+                                api.updateCard(card.id!!, Card(photos = photos)) {
+                                    state.card = it
+                                }
+                            }
+                        }
+                    }
+                },
+                onGeneratedPhoto = { photo ->
+                    photos = photos + photo
+                    scope.launch {
+                        api.updateCard(card.id!!, Card(photos = photos)) {
+                            state.card = it
+                        }
+                    }
+                }
+            )
+        }
+
+        ReorderDialog(
+            onDismissRequest = {
+                state.showAdditionalPhotosDialog = false
+            },
+            items = photos + "ADD_BUTTON",
+            key = { it },
+            onMove = { from, to ->
+                val newPhotos = photos.toMutableList().apply {
+                    add(to, removeAt(from))
+                }
+                photos = newPhotos
+                scope.launch {
+                    api.updateCard(card.id!!, Card(photos = newPhotos)) {
+                        state.card = it
+                    }
+                }
+            },
+            draggable = { it != "ADD_BUTTON" }
+        ) { photo, elevation ->
+            if (photo == "ADD_BUTTON") {
+                OutlinedCard(
+                    onClick = {
+                        showChoosePhoto = true
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1.5f)
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Default.Add, null)
+                    }
+                }
+            } else {
+                Card(
+                    elevation = CardDefaults.cardElevation(defaultElevation = elevation),
+                    shape = MaterialTheme.shapes.large
+                ) {
+                    Box {
+                        AsyncImage(
+                            model = api.url(photo),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(1.5f)
+                        )
+                        IconButton(
+                            {
+                                val newPhotos = photos.toMutableList().apply { remove(photo) }
+                                photos = newPhotos
+                                scope.launch {
+                                    api.updateCard(card.id!!, Card(photos = newPhotos)) {
+                                        state.card = it
+                                    }
+                                }
+                            },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(paddingValues = PaddingValues(1.pad))
+                                .background(MaterialTheme.colorScheme.surface.copy(alpha = .5f), CircleShape)
+                        ) {
+                            Icon(Icons.Default.Close, null)
+                        }
+                    }
+                }
             }
         }
     }

@@ -1203,7 +1203,6 @@ class MainStyleSheet : StyleSheet() {
         property("pointer-events", "auto")
         property("will-change", "transform")
         property("transform-origin", "bottom center")
-        overflow("hidden")
 
         transitions {
             "transform" {

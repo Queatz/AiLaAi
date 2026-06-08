@@ -148,6 +148,7 @@ fun Route.cardRoutes() {
                             name = card.name,
                             location = card.location,
                             photo = card.photo,
+                            photos = card.photos,
                             video = card.video,
                             background = card.background,
                             pay = card.pay,
@@ -387,6 +388,9 @@ fun Route.cardRoutes() {
                         if (update.photo != null && update.photo != card.photo) {
                             notifyCardUpdated(person, card.people(), card, CollaborationEventDataDetails.Photo)
                         }
+                        if (update.photos != null && update.photos != card.photos) {
+                            notifyCardUpdated(person, card.people(), card, CollaborationEventDataDetails.Photos)
+                        }
                         if (update.video != null && update.video != card.video) {
                             notifyCardUpdated(person, card.people(), card, CollaborationEventDataDetails.Video)
                         }
@@ -440,6 +444,7 @@ fun Route.cardRoutes() {
                     check(Card::photo) {
                         card.video = update.video
                     }
+                    check(Card::photos)
                     check(Card::video) {
                         card.photo = update.photo
                     }

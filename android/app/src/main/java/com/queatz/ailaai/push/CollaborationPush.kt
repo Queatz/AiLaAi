@@ -74,7 +74,7 @@ private fun Push.eventForCollaborationNotification(data: CollaborationPushData):
 
 private fun Push.cardDetailName(detail: CollaborationEventDataDetails?): String {
     return when (detail) {
-        CollaborationEventDataDetails.Photo -> context.getString(R.string.inline_photo)
+        CollaborationEventDataDetails.Photo, CollaborationEventDataDetails.Photos -> context.getString(R.string.inline_photo)
         CollaborationEventDataDetails.Video -> context.getString(R.string.inline_video)
         CollaborationEventDataDetails.Conversation -> context.getString(R.string.inline_group)
         CollaborationEventDataDetails.Name -> context.getString(R.string.inline_name)

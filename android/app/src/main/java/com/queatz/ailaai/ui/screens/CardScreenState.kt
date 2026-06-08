@@ -77,6 +77,7 @@ class CardScreenState(
     var notFound by notFoundState
     var showMenu by mutableStateOf(false)
     var showManageMenu by mutableStateOf(false)
+    var showAdditionalPhotosDialog by mutableStateOf(false)
     var showStatisticsDialog by mutableStateOf(false)
     var openDeleteCard by mutableStateOf(false)
     var openLocationDialog by mutableStateOf(false)

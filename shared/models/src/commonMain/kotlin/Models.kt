@@ -143,6 +143,7 @@ class Card(
     var group: String? = null,
     var name: String? = null,
     var photo: String? = null,
+    var photos: List<String>? = null,
     var video: String? = null,
     var background: String? = null,
     var location: String? = null,

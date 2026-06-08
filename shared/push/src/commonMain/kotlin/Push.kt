@@ -49,6 +49,7 @@ enum class CollaborationEvent {
 
 enum class CollaborationEventDataDetails {
     Photo,
+    Photos,
     Video,
     Conversation,
     Name,

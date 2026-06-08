@@ -28,6 +28,48 @@ object Strings {
         ru = "Загрузить"
     )
 
+    val previous = Translation(
+        en = "Previous",
+        vn = "Trước đó",
+        ru = "Предыдущий"
+    )
+
+    val next = Translation(
+        en = "Next",
+        vn = "Kế tiếp",
+        ru = "Tiếp theo"
+    )
+
+    val additionalPhotos = Translation(
+        en = "Additional photos",
+        vn = "Ảnh bổ sung",
+        ru = "Дополнительные фотографии"
+    )
+
+    val addPhoto = Translation(
+        en = "Add photo",
+        vn = "Thêm ảnh",
+        ru = "Добавить фото"
+    )
+
+    val moveUp = Translation(
+        en = "Move up",
+        vn = "Di chuyển lên",
+        ru = "Переместить вверх"
+    )
+
+    val moveDown = Translation(
+        en = "Move down",
+        vn = "Di chuyển xuống",
+        ru = "Переместить вниз"
+    )
+
+    val done = Translation(
+        en = "Done",
+        vn = "Xong",
+        ru = "Готово"
+    )
+
     val value = Translation(
         en = "Value",
         vn = "Giá trị",

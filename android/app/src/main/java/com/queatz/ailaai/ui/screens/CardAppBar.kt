@@ -134,6 +134,12 @@ fun CardAppBar(state: CardScreenState, showInFullscreen: Boolean) {
                                 state.showMenu = false
                             })
                             DropdownMenuItem({
+                                Text(stringResource(R.string.additional_photos))
+                            }, {
+                                state.showAdditionalPhotosDialog = true
+                                state.showMenu = false
+                            })
+                            DropdownMenuItem({
                                 Text(stringResource(R.string.statistics))
                             }, {
                                 state.showStatisticsDialog = true

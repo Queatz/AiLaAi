@@ -343,6 +343,9 @@
     <string name="write">Viết</string>
     <string name="choose_location">Chọn vị trí</string>
     <string name="reorder">Đổi thứ tự</string>
+    <string name="additional_photos">Ảnh bổ sung</string>
+    <string name="move_up">Di chuyển lên</string>
+    <string name="move_down">Di chuyển xuống</string>
     <string name="sent_a_story">Đã gửi bài viết</string>
     <string name="sent_a_group">Đã gửi nhóm</string>
     <string name="sent_a_link">Đã gửi liên kết</string>
