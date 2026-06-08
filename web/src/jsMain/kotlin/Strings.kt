@@ -2158,14 +2158,14 @@ object Strings {
         ru = "Загрузка комментариев…"
     )
     val addPay = Translation(
-        en = "Add pay / price",
-        vn = "Thêm lương / giá",
-        ru = "Добавить оплату / цену"
+        en = "Add price",
+        vn = "Thêm giá",
+        ru = "Добавить цену"
     )
     val changePay = Translation(
-        en = "Change pay / price",
-        vn = "Đổi lương / giá",
-        ru = "Изменить оплату / цену"
+        en = "Change price",
+        vn = "Đổi giá",
+        ru = "Изменить цену"
     )
     val pay = Translation(
         en = "Pay",

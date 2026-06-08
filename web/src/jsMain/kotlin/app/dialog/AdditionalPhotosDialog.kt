@@ -69,7 +69,7 @@ suspend fun additionalPhotosDialog(
             }
 
             IconButton("add", application.appString { addPhoto }, text = application.appString { addPhoto }) {
-                choosePhotoDialog.launch { photo, _, _ ->
+                choosePhotoDialog.launch(multiple = true) { photo, _, _ ->
                     photos = photos + photo
                 }
             }

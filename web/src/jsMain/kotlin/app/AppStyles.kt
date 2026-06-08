@@ -1,12 +1,69 @@
 package app
 
+import StyleManager
 import Styles
 import ellipsize
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.Color
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.FlexWrap
+import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.LineStyle
+import org.jetbrains.compose.web.css.Position
+import org.jetbrains.compose.web.css.StyleSheet
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.backgroundPosition
+import org.jetbrains.compose.web.css.backgroundSize
+import org.jetbrains.compose.web.css.border
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.boxSizing
+import org.jetbrains.compose.web.css.color
+import org.jetbrains.compose.web.css.cursor
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.div
+import org.jetbrains.compose.web.css.flex
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.flexGrow
+import org.jetbrains.compose.web.css.flexShrink
+import org.jetbrains.compose.web.css.flexWrap
+import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.fontWeight
+import org.jetbrains.compose.web.css.gap
+import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.left
+import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.marginTop
+import org.jetbrains.compose.web.css.maxHeight
+import org.jetbrains.compose.web.css.maxWidth
+import org.jetbrains.compose.web.css.ms
+import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.outline
+import org.jetbrains.compose.web.css.overflow
+import org.jetbrains.compose.web.css.overflowX
+import org.jetbrains.compose.web.css.overflowY
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.position
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.rgba
+import org.jetbrains.compose.web.css.right
+import org.jetbrains.compose.web.css.textAlign
+import org.jetbrains.compose.web.css.top
+import org.jetbrains.compose.web.css.transform
+import org.jetbrains.compose.web.css.transitions
+import org.jetbrains.compose.web.css.unaryMinus
+import org.jetbrains.compose.web.css.vh
+import org.jetbrains.compose.web.css.vw
+import org.jetbrains.compose.web.css.whiteSpace
+import org.jetbrains.compose.web.css.width
 import r
-import web.cssom.AspectRatio
-import web.cssom.PropertyName.Companion.aspectRatio
 
 val AppStyles get() = StyleManager.style(AppStyleSheet::class)
 
@@ -410,6 +467,14 @@ class AppStyleSheet : StyleSheet() {
                 marginBottom(1.r)
             }
         }
+    }
+
+    val groupItemMainPhoto by style {
+        backgroundPosition("center")
+        backgroundSize("cover")
+        property("aspect-ratio", "2")
+        property("width", "100%")
+        borderRadius(1.r)
     }
 
     val groupItem by style {

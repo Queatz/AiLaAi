@@ -60,3 +60,14 @@ fun Markdown(content: String) {
         }
     )
 }
+
+fun String.stripMarkdown(): String {
+    return this
+        .replace(Regex("""!\[.*?\]\(.*?\)|\[(.*?)\]\(.*?\)|<.*?>""", RegexOption.IGNORE_CASE), "$1") // Links, images, and HTML tags
+        .replace(Regex("""[*_~`]{1,3}(.*?)[*_~`]{1,3}"""), "$1") // Bold, italic, strikethrough, code
+        .replace(Regex("""^#+\s+(.*)$""", RegexOption.MULTILINE), "$1") // Headers
+        .replace(Regex("""^>\s+(.*)$""", RegexOption.MULTILINE), "$1") // Blockquotes
+        .replace(Regex("""^\s*[-*+]\s+(.*)$""", RegexOption.MULTILINE), "$1") // Unordered lists
+        .replace(Regex("""^\s*\d+\.\s+(.*)$""", RegexOption.MULTILINE), "$1") // Ordered lists
+        .trim()
+}

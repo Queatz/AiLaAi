@@ -470,6 +470,12 @@ fun ExplorePage(
                 }
             }
 
+            item(appString { additionalPhotos }) {
+                scope.launch {
+                    additionalPhotosDialog(card, onCardUpdated)
+                }
+            }
+
             if (card.video == null) {
                 item(if (card.photo == null) appString { this.generatePhoto } else appString { regeneratePhoto }) {
                     if (card.photo == null) {
@@ -564,15 +570,6 @@ fun ExplorePage(
                 }
             }
 
-            if (me?.id == card.person) {
-                IconButton("collections", appString { additionalPhotos }, styles = {
-                    marginRight(.5f.r)
-                }) {
-                    scope.launch {
-                        additionalPhotosDialog(card, onCardUpdated)
-                    }
-                }
-            }
         },
         isMenuLoading = choosePhotoDialog.isGenerating.collectAsState().value,
         actions = {
