@@ -1,4 +1,29 @@
 #! /bin/bash
-for file in build/kotlin-webpack/js/productionExecutable/*.js build/kotlin-webpack/js/productionExecutable/index.html build/kotlin-webpack/js/productionExecutable/*.txt build/kotlin-webpack/js/productionExecutable/*.ttf; do
-  echo "put \"$file\""
-done | sftp root@hitown.chat:/root/ui
+shopt -s nullglob
+files=(
+  build/kotlin-webpack/js/productionExecutable/*.js
+  build/kotlin-webpack/js/productionExecutable/index.html
+  build/kotlin-webpack/js/productionExecutable/*.txt
+  build/kotlin-webpack/js/productionExecutable/*.ttf
+)
+
+CONTROL_PATH="/tmp/ssh-%r@%h:%p"
+HOST="root@hitown.chat"
+
+# 1. Establish the master connection.
+# This ensures you only enter the password once and avoids race conditions.
+echo "Opening connection to $HOST..."
+ssh -o ControlMaster=auto -o ControlPath="$CONTROL_PATH" -o ControlPersist=600 "$HOST" exit || exit 1
+
+# 2. Run parallel uploads using the established connection.
+for i in {0..2}; do
+  (
+    for ((j=i; j<${#files[@]}; j+=3)); do
+      echo "put \"${files[j]}\""
+    done | sftp -o ControlPath="$CONTROL_PATH" "$HOST":/root/ui
+  ) &
+done
+wait
+
+# 3. Close the master connection.
+ssh -o ControlPath="$CONTROL_PATH" -O exit "$HOST"
