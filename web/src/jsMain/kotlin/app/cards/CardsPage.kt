@@ -16,6 +16,7 @@ import app.ailaai.api.card
 import app.ailaai.api.cards
 import app.ailaai.api.savedCards
 import app.components.TopBarSearch
+import app.compose.rememberMobileMode
 import app.nav.CardNav
 import appText
 import application
@@ -120,6 +121,8 @@ fun CardsPage(
     if (isLoading) {
         Loading()
     } else {
+        val isMobile = rememberMobileMode()
+
         FullPageLayout(maxWidth = null) {
             if (nav !is CardNav.Selected) {
                 if (nav is CardNav.Map) {
@@ -128,8 +131,10 @@ fun CardsPage(
                     Div({
                         style {
                             flexGrow(1)
-                            borderRadius(1.r)
-                            margin(1.r)
+                            if (!isMobile) {
+                                borderRadius(1.r)
+                                margin(1.r)
+                            }
                             position(Position.Relative)
                             overflow("hidden")
                             display(DisplayStyle.Flex)

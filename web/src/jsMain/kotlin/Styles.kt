@@ -1126,10 +1126,10 @@ class MainStyleSheet : StyleSheet() {
         property("border-top-right-radius", "1.5.r")
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.Column)
-        property("transition", "transform 0.3s ease-out")
-        property("will-change", "transform")
-        property("max-height", "95vh")
-        height(95.vh)
+        property("transition", "height 0.3s ease-out")
+        property("will-change", "height")
+        property("max-height", "95%")
+        height(95.percent)
         property("pointer-events", "auto")
 
         dark(self) {

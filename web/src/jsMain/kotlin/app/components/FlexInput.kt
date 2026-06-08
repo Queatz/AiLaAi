@@ -94,6 +94,7 @@ fun FlexInput(
     selectAll: Boolean = false,
     enabled: Boolean = true,
     autoSize: Boolean = true,
+    use100Width: Boolean = false,
     monospace: Boolean = false,
     // Style configuration
     styles: StyleScope.() -> Unit = {},
@@ -236,7 +237,7 @@ fun FlexInput(
             position(Position.Relative)
             display(DisplayStyle.Flex)
             if (defaultMargins) margin(.5.r, 1.r)
-            else if (useDefaultWidth) width(100.percent)
+            else if (use100Width) width(100.percent)
             styles()
         }
 

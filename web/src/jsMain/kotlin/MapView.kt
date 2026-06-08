@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import kotlinx.browser.document
 import app.ailaai.api.card
 import app.ailaai.api.cards
 import app.ailaai.api.newCard
@@ -18,23 +17,22 @@ import app.components.Spacer
 import app.compose.rememberDarkMode
 import app.compose.rememberMobileMode
 import app.dialog.inputDialog
-import app.messaages.inList
 import com.queatz.db.Card
 import com.queatz.db.Geo
 import com.queatz.db.formatPay
 import components.CardContent
-import components.Icon
 import components.IconButton
 import components.Markdown
 import components.Switch
+import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.dom.addClass
 import lib.ResizeObserver
 import lib.getCameraLngLat
-import lib.mapboxgl
 import lib.mapboxCss
+import lib.mapboxgl
 import lib.mapboxgl.MarkerOptions
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.AlignSelf
@@ -60,9 +58,7 @@ import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
-import org.jetbrains.compose.web.css.left
 import org.jetbrains.compose.web.css.lineHeight
-import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflowY
@@ -74,11 +70,8 @@ import org.jetbrains.compose.web.css.paddingTop
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
-import org.jetbrains.compose.web.css.right
 import org.jetbrains.compose.web.css.textAlign
-import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.dom.B
 import org.jetbrains.compose.web.dom.Br
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
@@ -309,10 +302,14 @@ fun MapView(
                                             textAlign("left")
                                         }
                                     }) {
-                                        B {
+                                        Div({
+                                            style {
+                                                fontWeight("bold")
+                                            }
+                                        }) {
                                             Text(card.npc?.name.orEmpty())
                                         }
-                                        Span({
+                                        Div({
                                             style {
                                                 opacity(.5)
                                                 paddingLeft(1.r)
@@ -679,6 +676,35 @@ fun MapView(
                                 }
                             }
 
+                            Div({
+                                style {
+                                    display(DisplayStyle.Flex)
+                                    flexDirection(FlexDirection.Column)
+                                    justifyContent(JustifyContent.Center)
+                                    property("flex", "1")
+                                    paddingLeft(1.r)
+                                    paddingRight(1.r)
+                                }
+                            }) {
+                                Span({
+                                    style {
+                                        fontWeight("bold")
+                                    }
+                                }) {
+                                    Text(selectedCard?.name ?: application.appString { newCard })
+                                }
+                                selectedCard?.hint?.notBlank?.let { hint ->
+                                    Span({
+                                        style {
+                                            fontSize(14.px)
+                                            opacity(.75f)
+                                        }
+                                    }) {
+                                        Text(hint)
+                                    }
+                                }
+                            }
+
                             IconButton(
                                 name = "open_in_new",
                                 title = appString { openPage },
@@ -694,6 +720,7 @@ fun MapView(
                             selectedCard?.let {
                                 CardContent(
                                     card = it,
+                                    showTitle = false,
                                     mediaStyles = {
                                         with(Styles) {
                                             mapCardMediaStyle()
@@ -829,6 +856,35 @@ fun MapView(
                                 }
                             }
 
+                            Div({
+                                style {
+                                    display(DisplayStyle.Flex)
+                                    flexDirection(FlexDirection.Column)
+                                    justifyContent(JustifyContent.Center)
+                                    property("flex", "1")
+                                    paddingLeft(1.r)
+                                    paddingRight(1.r)
+                                }
+                            }) {
+                                Span({
+                                    style {
+                                        fontWeight("bold")
+                                    }
+                                }) {
+                                    Text(selectedCard?.name ?: application.appString { newCard })
+                                }
+                                selectedCard?.hint?.notBlank?.let { hint ->
+                                    Span({
+                                        style {
+                                            fontSize(14.px)
+                                            opacity(.75f)
+                                        }
+                                    }) {
+                                        Text(hint)
+                                    }
+                                }
+                            }
+
                             IconButton(
                                 name = "open_in_new",
                                 title = appString { openPage },
@@ -844,6 +900,7 @@ fun MapView(
                             selectedCard?.let {
                                 CardContent(
                                     card = it,
+                                    showTitle = false,
                                     mediaStyles = {
                                         with(Styles) {
                                             mapCardMediaStyle()

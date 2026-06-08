@@ -36,6 +36,7 @@ fun CardContent(
     card: Card,
     onCardClick: ((cardId: String, openInNewWindow: Boolean) -> Unit)? = null,
     mediaStyles: (StyleScope.() -> Unit)? = null,
+    showTitle: Boolean = true,
 ) {
     val me = application.me.collectAsState().value
     val scope = rememberCoroutineScope()
@@ -60,34 +61,19 @@ fun CardContent(
     Div({
         classes(Styles.cardContent)
     }) {
-        Div {
+        if (showTitle) {
             Div {
-                NameAndLocation(card.name, card.hint)
-                val viewProfileString = appString { viewProfile }
-                Icon(
-                    name = "person",
-                    title = viewProfileString,
-                    onClick = { ctrlKey ->
-                        if (ctrlKey) {
-                            window.open("/profile/${card.person}", target = "_blank")
-                        } else {
-                            router.navigate("/profile/${card.person}")
-                        }
-                    },
-                    styles = {
-                        cursor("pointer")
-                        opacity(.5f)
-                        marginLeft(.25.r)
-                        property("vertical-align", "text-bottom")
-                    }
-                )
-                if (card.person == me?.id) {
+                Div {
+                    NameAndLocation(card.name, card.hint)
+                    val viewProfileString = appString { viewProfile }
                     Icon(
-                        name = "edit",
-                        title = appString { edit },
-                        onClick = {
-                            scope.launch {
-                                appNav.navigate(AppNavigation.Page(id = card.id!!, card = card))
+                        name = "person",
+                        title = viewProfileString,
+                        onClick = { ctrlKey ->
+                            if (ctrlKey) {
+                                window.open("/profile/${card.person}", target = "_blank")
+                            } else {
+                                router.navigate("/profile/${card.person}")
                             }
                         },
                         styles = {
@@ -97,6 +83,23 @@ fun CardContent(
                             property("vertical-align", "text-bottom")
                         }
                     )
+                    if (card.person == me?.id) {
+                        Icon(
+                            name = "edit",
+                            title = appString { edit },
+                            onClick = {
+                                scope.launch {
+                                    appNav.navigate(AppNavigation.Page(id = card.id!!, card = card))
+                                }
+                            },
+                            styles = {
+                                cursor("pointer")
+                                opacity(.5f)
+                                marginLeft(.25.r)
+                                property("vertical-align", "text-bottom")
+                            }
+                        )
+                    }
                 }
             }
         }

@@ -1,7 +1,6 @@
 package app.cards
 
 import LocalConfiguration
-import Strings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -18,8 +17,6 @@ import app.ailaai.api.cardsCards
 import app.ailaai.api.categories
 import app.ailaai.api.deleteCard
 import app.ailaai.api.generateCardPhoto
-import app.ailaai.api.groups
-import app.ailaai.api.myCollaborations
 import app.ailaai.api.newCard
 import app.ailaai.api.updateCard
 import app.components.FlexInput
@@ -28,11 +25,8 @@ import app.dialog.dialog
 import app.dialog.editFormDialog
 import app.dialog.inputDialog
 import app.dialog.rememberChoosePhotoDialog
-import app.dialog.searchDialog
 import app.dialog.selectCardDialog
 import app.dialog.selectGroupDialog
-import app.group.GroupInfo
-import app.group.GroupItem
 import app.menu.InlineMenu
 import app.menu.Menu
 import app.messaages.inList
@@ -40,7 +34,6 @@ import appString
 import appText
 import application
 import com.queatz.db.Card
-import com.queatz.db.GroupExtended
 import com.queatz.db.Pay
 import com.queatz.db.PayFrequency
 import com.queatz.db.StoryContent

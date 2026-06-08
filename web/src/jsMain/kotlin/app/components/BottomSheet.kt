@@ -27,7 +27,19 @@ fun BottomSheet(
     var startY by remember { mutableStateOf(0.0) }
     var startOffset by remember { mutableStateOf(0.0) }
 
-    val sheetHeight = window.innerHeight * 0.95
+    var windowHeight by remember { mutableStateOf(window.innerHeight) }
+
+    DisposableEffect(Unit) {
+        val listener = { _: Event ->
+            windowHeight = window.innerHeight
+        }
+        window.addEventListener("resize", listener)
+        onDispose {
+            window.removeEventListener("resize", listener)
+        }
+    }
+
+    val sheetHeight = windowHeight * 0.95
     val fullY = 0.0
     val halfY = sheetHeight * 0.45
     val collapsedY = sheetHeight - 200.0 // Peak height
@@ -49,7 +61,7 @@ fun BottomSheet(
     Div({
         classes(Styles.bottomSheetContainer)
         style {
-            property("transform", "translateY(${currentY}px)")
+            height((sheetHeight - currentY).px)
             if (isDragging) {
                 property("transition", "none")
             }
