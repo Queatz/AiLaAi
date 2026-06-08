@@ -161,7 +161,7 @@ fun CardsPage(
 
                         MapView(
                             showList = mapWidth >= 800,
-                            autoHideList = mapWidth < 1400,
+                            autoHideList = false,
                             onCardAdded = onCardUpdated
                         )
                     }

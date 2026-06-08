@@ -9,6 +9,7 @@ import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.Event
 import org.w3c.dom.pointerevents.PointerEvent
 import kotlin.math.abs
+import kotlin.time.Duration.Companion.seconds
 
 enum class BottomSheetState {
     Collapsed,
@@ -28,6 +29,8 @@ fun BottomSheet(
     var startOffset by remember { mutableStateOf(0.0) }
 
     var windowHeight by remember { mutableStateOf(window.innerHeight) }
+    var isHidden by remember { mutableStateOf(false) }
+    var dragBeyondStartTime by remember { mutableStateOf<Double?>(null) }
 
     DisposableEffect(Unit) {
         val listener = { _: Event ->
@@ -52,8 +55,17 @@ fun BottomSheet(
         )
     }
 
-    LaunchedEffect(state, sheetHeight) {
-        if (!isDragging) {
+    LaunchedEffect(state, sheetHeight, isHidden) {
+        if (!isDragging && !isHidden) {
+            currentY = offsets[state] ?: collapsedY
+        }
+    }
+
+    LaunchedEffect(isHidden) {
+        if (isHidden) {
+            currentY = sheetHeight
+            kotlinx.coroutines.delay(3.seconds)
+            isHidden = false
             currentY = offsets[state] ?: collapsedY
         }
     }
@@ -89,7 +101,23 @@ fun BottomSheet(
                     if (isDragging) {
                         val clientY = event.clientY.toDouble()
                         val deltaY = clientY - startY
-                        currentY = (startOffset + deltaY).coerceAtLeast(fullY).coerceAtMost(collapsedY)
+                        currentY = (startOffset + deltaY).coerceAtLeast(fullY).coerceAtMost(sheetHeight)
+
+                        if (currentY > collapsedY) {
+                            if (dragBeyondStartTime == null) {
+                                dragBeyondStartTime = window.performance.now()
+                            } else if (window.performance.now() - dragBeyondStartTime!! > 500) {
+                                isHidden = true
+                                isDragging = false
+                                dragBeyondStartTime = null
+                                try {
+                                    element.releasePointerCapture(event.pointerId)
+                                } catch (e: Exception) {
+                                }
+                            }
+                        } else {
+                            dragBeyondStartTime = null
+                        }
                     }
                     Unit
                 }
@@ -97,6 +125,7 @@ fun BottomSheet(
                     event as PointerEvent
                     if (isDragging) {
                         isDragging = false
+                        dragBeyondStartTime = null
                         val closest = offsets.minByOrNull { abs(it.value - currentY) }?.key ?: BottomSheetState.Collapsed
                         onStateChange(closest)
                         currentY = offsets[closest] ?: collapsedY

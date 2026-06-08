@@ -1189,7 +1189,9 @@ class MainStyleSheet : StyleSheet() {
         position(Absolute)
         top(0.px)
         left(0.px)
+        property("width", "max-content")
         property("will-change", "transform")
+        overflow("hidden")
     }
 
     val mapMarkerContent by style {
@@ -1201,6 +1203,7 @@ class MainStyleSheet : StyleSheet() {
         property("pointer-events", "auto")
         property("will-change", "transform")
         property("transform-origin", "bottom center")
+        overflow("hidden")
 
         transitions {
             "transform" {

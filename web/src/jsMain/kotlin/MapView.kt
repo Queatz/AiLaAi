@@ -61,6 +61,7 @@ import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.lineHeight
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.paddingBottom
@@ -214,7 +215,9 @@ fun MapView(
 
             val scale = 100.0 / sqrt(groundDistance.pow(2.0) + altitude.pow(2.0))
             val element = marker.marker.getElement().firstElementChild as HTMLElement
-            element.style.transform = "scale(${scale.coerceIn(0.125, 100.0) * nearScale})"
+            val totalScale = scale.coerceIn(0.125, 100.0) * nearScale
+            element.style.transform = "scale($totalScale)"
+            element.style.maxWidth = "calc(100vw / ${totalScale * 2})"
             marker.marker.getElement().style.zIndex = (scale * 1000.0).toInt().toString()
             val ele = marker.marker.getElement() // for the following line
             js("ele.style.pointerEvents = \"none\"")
@@ -288,6 +291,9 @@ fun MapView(
                                     color(Styles.colors.black)
                                     padding(4.r)
                                     lineHeight(120.percent)
+                                    overflow("auto")
+                                    maxWidth(100.percent)
+                                    boxSizing("border-box")
 
                                     if (isNpc) {
                                         property("box-shadow", "0 2px 16px rgba(0, 0, 0, 0.125)")
