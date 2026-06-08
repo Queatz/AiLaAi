@@ -684,6 +684,7 @@ fun CardDialogs(state: CardScreenState) {
                     onClick = {
                         showChoosePhoto = true
                     },
+                    shape = MaterialTheme.shapes.large,
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1.5f)

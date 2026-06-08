@@ -1,8 +1,15 @@
 package com.queatz.ailaai.ui.components
 
 import android.os.Build
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -32,7 +39,8 @@ fun DialogBase(
             shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier
                 .padding(2.pad)
-                .imePadding()
+                .padding(WindowInsets.ime.only(WindowInsetsSides.Horizontal).asPaddingValues())
+                .padding(WindowInsets.safeContent.only(WindowInsetsSides.Vertical).asPaddingValues())
                 .then(modifier)
         ) {
             content()

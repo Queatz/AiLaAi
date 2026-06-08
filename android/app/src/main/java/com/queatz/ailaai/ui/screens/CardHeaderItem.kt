@@ -128,6 +128,14 @@ private fun CardHeaderItemContent(
                     }
 
                     item(
+                        icon = Icons.Outlined.PhotoLibrary,
+                        name = stringResource(R.string.additional_photos),
+                        selected = (card.photos?.size ?: 0) > 0
+                    ) {
+                        state.showAdditionalPhotosDialog = true
+                    }
+
+                    item(
                         icon = Icons.Outlined.Wallpaper,
                         name = stringResource(R.string.background),
                         selected = !card.background.isNullOrBlank(),

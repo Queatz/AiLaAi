@@ -123,7 +123,7 @@ fun CardsPage(
     } else {
         val isMobile = rememberMobileMode()
 
-        FullPageLayout(maxWidth = null) {
+        FullPageLayout(useBorderRadius = true, maxWidth = null) {
             if (nav !is CardNav.Selected) {
                 if (nav is CardNav.Map) {
                     var mapWidth by remember { mutableStateOf(0) }

@@ -10,6 +10,7 @@ fun FullPageLayout(
     maxWidth: CSSpxValue? = 800.px,
     useVh: Boolean = false,
     usePadding: Boolean = false,
+    useBorderRadius: Boolean = false,
     content: @Composable () -> Unit
 ) {
     Div({
@@ -29,6 +30,9 @@ fun FullPageLayout(
             if (usePadding) {
                 padding(1.r)
                 boxSizing("border-box")
+            }
+            if (useBorderRadius) {
+                borderRadius(1.r)
             }
         }
     }) {

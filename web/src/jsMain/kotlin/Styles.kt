@@ -1131,7 +1131,7 @@ class MainStyleSheet : StyleSheet() {
         property("max-height", "95%")
         height(95.percent)
         property("pointer-events", "auto")
-        borderRadius(1.r)
+        borderRadius(1.r, 1.r, 0.r, 0.r)
 
         dark(self) {
             backgroundColor(colors.dark.background)
