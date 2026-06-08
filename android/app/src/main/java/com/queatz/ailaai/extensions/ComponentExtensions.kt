@@ -353,7 +353,6 @@ fun FocusRequester.tryRequestFocus() = try {
 @Composable
 fun rememberAnimatedGradientBrush(
     colors: List<Color>,
-    size: Size,
     label: String = "AnimatedGradient"
 ): Brush {
     val infiniteTransition = rememberInfiniteTransition(label = "${label}Transition")
@@ -367,7 +366,7 @@ fun rememberAnimatedGradientBrush(
         label = "${label}Progress"
     )
 
-    return remember(colors) {
+    return remember(colors, progress) {
         object : ShaderBrush() {
             override fun createShader(size: Size): Shader {
                 return LinearGradientShader(

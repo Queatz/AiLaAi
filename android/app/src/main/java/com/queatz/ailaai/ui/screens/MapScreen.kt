@@ -98,6 +98,7 @@ import com.queatz.ailaai.extensions.toLatLng
 import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.helpers.geoKey
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.ui.components.LinkifyText
 import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.dialogs.Menu
@@ -510,7 +511,7 @@ fun MapScreen(
                                             }
                                         )
                                         card.npc?.text?.let {
-                                            Text(text = it)
+                                            LinkifyText(text = it)
                                         }
                                     }
                                 } else {

@@ -1,30 +1,20 @@
 package com.queatz.ailaai.ui.components
 
-import android.R.attr.fontFamily
-import androidx.compose.foundation.background
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import com.halilibo.richtext.commonmark.Markdown
-import com.halilibo.richtext.ui.BasicRichText
-import com.halilibo.richtext.ui.CodeBlockStyle
-import com.halilibo.richtext.ui.RichTextStyle
-import com.halilibo.richtext.ui.RichTextThemeProvider
-import com.halilibo.richtext.ui.string.RichTextString.Format.Code
-import com.halilibo.richtext.ui.string.RichTextStringStyle
+import com.mikepenz.markdown.m3.Markdown
+import com.mikepenz.markdown.m3.markdownColor
+import com.mikepenz.markdown.m3.markdownTypography
 import com.queatz.db.splitByUrls
 
 @Composable
@@ -34,7 +24,7 @@ fun LinkifyText(
     color: Color = LocalContentColor.current,
     style: TextStyle = LocalTextStyle.current,
 ) {
-    val text = remember(text) {
+    val textProcessed = remember(text) {
         text.splitByUrls().joinToString("") { (part, isUrl) ->
             if (isUrl) {
                 part.let {
@@ -49,52 +39,28 @@ fun LinkifyText(
             }
         }
     }
-    RichTextThemeProvider(
-        contentColorProvider = {
-            color
-        },
-        textStyleProvider = {
-            style.copy(color = color)
-        },
-        contentColorBackProvider = { newContentColor, content ->
-            CompositionLocalProvider(LocalContentColor provides newContentColor) {
-                content()
-            }
-        },
-        textStyleBackProvider = { newTextStyle, content ->
-            ProvideTextStyle(newTextStyle, content)
-        }
-    ) {
-        BasicRichText(
-            modifier = modifier,
-            style = RichTextStyle(
-                // todo - this isn't applied to code blocks - investigate
-                codeBlockStyle = CodeBlockStyle(
-                    modifier = Modifier
-                        .clip(MaterialTheme.shapes.medium)
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    textStyle = style.copy(
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 14.sp,
-                    ),
-                    wordWrap = true,
-                ),
-                stringStyle = RichTextStringStyle(
-                    codeStyle = style.copy(
-                        color = MaterialTheme.colorScheme.secondary,
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                    ).toSpanStyle(),
-                    linkStyle = TextLinkStyles(
-                        style = style.copy(color = MaterialTheme.colorScheme.primary).toSpanStyle()
-                    )
-                )
+    Markdown(
+        content = textProcessed,
+        colors = markdownColor(
+            text = color,
+            codeBackground = MaterialTheme.colorScheme.surfaceVariant,
+        ),
+        typography = markdownTypography(
+            text = style.copy(color = color),
+            code = style.copy(
+                fontFamily = FontFamily.Monospace,
+                fontSize = 14.sp,
+            ),
+            inlineCode = style.copy(
+                color = MaterialTheme.colorScheme.secondary,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+            ),
+            textLink = TextLinkStyles(
+                style = style.copy(color = MaterialTheme.colorScheme.primary).toSpanStyle()
             )
-        ) {
-            Markdown(
-                content = text
-            )
-        }
-    }
+        ),
+        modifier = modifier
+    )
 }

@@ -165,9 +165,11 @@ dependencies {
     implementation("androidx.appcompat:appcompat-resources:1.7.1")
     implementation("androidx.biometric:biometric-ktx:1.4.0-alpha02")
     implementation("dev.shreyaspatil:capturable:3.0.1")
-    implementation("com.github.skydoves:colorpicker-compose:1.1.4")
+    implementation("com.github.skydoves:colorpicker-compose:1.2.0")
     implementation("io.github.ehsannarmani:compose-charts:0.2.5")
-    implementation("com.halilibo.compose-richtext:richtext-commonmark:${versions.richtext}")
+    implementation("com.mikepenz:multiplatform-markdown-renderer-m3:${versions.markdownRenderer}")
+    implementation("com.mikepenz:multiplatform-markdown-renderer-coil3:${versions.markdownRenderer}")
+    implementation("com.mikepenz:multiplatform-markdown-renderer-code:${versions.markdownRenderer}")
     implementation("androidx.work:work-runtime-ktx:2.11.2")
 
     // GoogleApiAvailability

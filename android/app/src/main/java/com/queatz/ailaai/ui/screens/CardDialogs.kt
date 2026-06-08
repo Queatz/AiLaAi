@@ -636,6 +636,9 @@ fun CardDialogs(state: CardScreenState) {
             ChoosePhotoDialog(
                 scope = scope,
                 onDismissRequest = { showChoosePhoto = false },
+                onIsGeneratingPhoto = {
+                    state.isGeneratingPhoto = it
+                },
                 onPhotos = { uris ->
                     uris.forEach { uri ->
                         val bytes = context.contentResolver.openInputStream(uri)?.readBytes() ?: return@forEach
@@ -690,7 +693,14 @@ fun CardDialogs(state: CardScreenState) {
                         .aspectRatio(1.5f)
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Add, null)
+                        if (state.isGeneratingPhoto) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(Icons.Default.Add, null)
+                        }
                     }
                 }
             } else {

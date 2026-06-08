@@ -15,15 +15,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.toSize
 import com.queatz.ailaai.R
 import app.ailaai.api.activeSignals
 import com.queatz.ailaai.data.api
@@ -38,8 +33,6 @@ fun SignalsButton(
     onClick: () -> Unit
 ) {
     var count by remember { mutableIntStateOf(0) }
-
-    var size by remember { mutableStateOf(androidx.compose.ui.geometry.Size.Zero) }
 
     val isDark = isSystemInDarkTheme()
 
@@ -69,13 +62,11 @@ fun SignalsButton(
 
     val brush = rememberAnimatedGradientBrush(
         colors = colors,
-        size = size,
         label = "SignalsButton"
     )
 
     val borderBrush = rememberAnimatedGradientBrush(
         colors = borderColors,
-        size = size,
         label = "SignalsButtonBorder"
     )
 
@@ -90,7 +81,6 @@ fun SignalsButton(
 
     Box(
         modifier = Modifier
-            .onSizeChanged { size = it.toSize() }
             .clip(CircleShape)
             .background(brush)
             .border(2.dp, borderBrush, CircleShape)

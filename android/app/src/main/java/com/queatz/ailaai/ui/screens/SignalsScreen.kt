@@ -29,12 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -519,8 +515,6 @@ fun SignalsScreen(id: String? = null) {
 
 @Composable
 fun SignalsGreeting() {
-    var size by remember { mutableStateOf(androidx.compose.ui.geometry.Size.Zero) }
-
     val colors = listOf(
         MaterialTheme.colorScheme.primary,
         MaterialTheme.colorScheme.tertiary,
@@ -530,7 +524,6 @@ fun SignalsGreeting() {
 
     val brush = rememberAnimatedGradientBrush(
         colors = colors,
-        size = size,
         label = "Greeting"
     )
 
@@ -542,7 +535,6 @@ fun SignalsGreeting() {
             brush = brush
         ),
         modifier = Modifier
-            .onSizeChanged { size = it.toSize() }
             .fillMaxWidth()
             .padding(horizontal = 1.pad, vertical = 2.pad)
     )
