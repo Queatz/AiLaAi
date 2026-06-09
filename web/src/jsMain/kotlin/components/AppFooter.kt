@@ -141,6 +141,26 @@ fun AppFooter(
         Bullet()
         Span({
             classes(Styles.menuButton)
+            onClick {
+                scope.launch {
+                    getAppDialog()
+                }
+            }
+        }) {
+            appText { getTheApp }
+        }
+        Bullet()
+        Span({
+            classes(Styles.menuButton)
+            onClick {
+                router.navigate("/signin")
+            }
+        }) {
+            appText { signUp }
+        }
+        Bullet()
+        Span({
+            classes(Styles.menuButton)
 
             onClick {
                 scope.launch {

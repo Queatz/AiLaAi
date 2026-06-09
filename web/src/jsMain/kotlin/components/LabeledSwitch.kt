@@ -1,9 +1,8 @@
 package components
 
 import androidx.compose.runtime.Composable
-import org.jetbrains.compose.web.css.StyleScope
-import org.jetbrains.compose.web.css.marginLeft
-import org.jetbrains.compose.web.css.px
+import app.compose.rememberDarkMode
+import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
@@ -17,6 +16,7 @@ fun LabeledSwitch(
     border: Boolean = false,
     styles: StyleScope.() -> Unit = {}
 ) {
+    val darkMode = rememberDarkMode()
     Div({
         style {
             // Apply any custom styles
@@ -45,6 +45,9 @@ fun LabeledSwitch(
                 Span({
                     style {
                         marginLeft(8.px)
+                        fontSize(14.px)
+                        opacity(0.9)
+                        color(if (darkMode) Color("white") else Color("black"))
                     }
                 }) {
                     Text(title)

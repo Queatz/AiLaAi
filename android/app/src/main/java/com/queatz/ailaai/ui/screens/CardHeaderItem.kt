@@ -111,7 +111,8 @@ private fun CardHeaderItemContent(
                     item(
                         icon = Icons.Outlined.CameraAlt,
                         name = stringResource(R.string.set_photo),
-                        isLoading = state.isGeneratingPhoto
+                        isLoading = state.isGeneratingPhoto,
+                        selected = !card.photo.isNullOrBlank() || !card.video.isNullOrBlank()
                     ) {
                         state.showPhotoDialog = true
                     }

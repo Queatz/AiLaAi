@@ -229,6 +229,15 @@ fun Db.explore(
     geo: List<Double>,
     altitude: Double? = null,
     search: String? = null,
+    availableNow: Boolean? = null,
+    pets: Boolean? = null,
+    outdoors: Boolean? = null,
+    languages: List<String>? = null,
+    minAge: Int? = null,
+    maxAge: Int? = null,
+    minGroupSize: Int? = null,
+    maxGroupSize: Int? = null,
+    activityActive: Boolean? = null,
     nearbyMaxDistance: Double = 0.0,
     offset: Int = 0,
     limit: Int = 20
@@ -236,8 +245,45 @@ fun Db.explore(
     Card::class,
     """
         for x in @@collection
+            let utcOffset = x.${f(Card::activity)}.${f(Activity::utcOffset)} || 0.0
+            let localNow = date_add(date_now(), utcOffset, 'h')
+            let dayOfWeek = date_dayofweek(localNow) + 1
+            let dayOfMonth = date_day(localNow)
+            let daysInMonth = date_days_in_month(localNow)
+            let week = floor((dayOfMonth - 1) / 7) + 1
+            let month = date_month(localNow)
+            let year = date_year(localNow)
+            let hour = date_hour(localNow)
             filter x.${f(Card::active)} == true
                 and x.${f(Card::offline)} != true
+                and (@activityActive == null or x.${f(Card::activity)}.${f(Activity::active)} == @activityActive)
+                and (@pets == null or x.${f(Card::activity)}.${f(Activity::pets)} == @pets)
+                and (@outdoors == null or x.${f(Card::activity)}.${f(Activity::outdoors)} == @outdoors)
+                and (@minAge == null or x.${f(Card::activity)}.${f(Activity::maxAge)} == null or x.${f(Card::activity)}.${f(Activity::maxAge)} >= @minAge)
+                and (@maxAge == null or x.${f(Card::activity)}.${f(Activity::minAge)} == null or x.${f(Card::activity)}.${f(Activity::minAge)} <= @maxAge)
+                and (@minGroupSize == null or x.${f(Card::activity)}.${f(Activity::maxGroupSize)} == null or x.${f(Card::activity)}.${f(Activity::maxGroupSize)} >= @minGroupSize)
+                and (@maxGroupSize == null or x.${f(Card::activity)}.${f(Activity::minGroupSize)} == null or x.${f(Card::activity)}.${f(Activity::minGroupSize)} <= @maxGroupSize)
+                and (@languages == null or (is_array(x.${f(Card::activity)}.${f(Activity::languages)}) and first(for l in x.${f(Card::activity)}.${f(Activity::languages)} filter l in @languages return true) == true))
+                and (@availableNow == null or @availableNow == false or x.${f(Card::activity)}.${f(Activity::schedule)} == null or (
+                    (count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::days)}) == 0 and count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::weekdays)}) == 0)
+                    or (
+                        dayOfMonth in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::days)} || [])
+                        or (dayOfMonth == daysInMonth and -1 in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::days)} || []))
+                        or dayOfWeek in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::weekdays)} || [])
+                    )
+                ) and (
+                    count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::weeks)}) == 0
+                    or week in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::weeks)} || [])
+                ) and (
+                    count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::months)}) == 0
+                    or month in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::months)} || [])
+                ) and (
+                    count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::years)}) == 0
+                    or year in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::years)} || [])
+                ) and (
+                    count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::hours)}) == 0
+                    or hour in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::hours)} || [])
+                ))
                 and (
                     @search == null 
                         or contains(lower(x.${f(Card::name)}), @search)
@@ -270,6 +316,15 @@ fun Db.explore(
             put("altitude", altitude)
         }
         put("search", search?.trim()?.lowercase())
+        put("availableNow", availableNow)
+        put("pets", pets)
+        put("outdoors", outdoors)
+        put("languages", languages)
+        put("minAge", minAge)
+        put("maxAge", maxAge)
+        put("minGroupSize", minGroupSize)
+        put("maxGroupSize", maxGroupSize)
+        put("activityActive", activityActive)
         put("nearbyMaxDistance", nearbyMaxDistance)
         put("offset", offset)
         put("limit", limit)

@@ -6,11 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import app.AppStyleSheet
-import app.AppStyles
 import app.appNav
 import app.call.CallLayout
 import app.call.CallStyleSheet
-import app.call.CallStyles
 import app.components.Background
 import app.compose.rememberMobileMode
 import app.game.GameCoverPage
@@ -25,12 +23,12 @@ import app.softwork.routingcompose.Router
 import app.theme.ThemeManager
 import app.theme.ThemeSettingsPage
 import app.widget.WidgetStyleSheet
-import app.widget.WidgetStyles
 import components.AppFooter
 import components.AppHeader
 import components.CardPage
 import components.IconButton
 import components.InfoPage
+import components.MainPage
 import components.NotificationsLayout
 import components.ProfilePage
 import components.SigninPage
@@ -55,7 +53,6 @@ import org.w3c.dom.HTMLLinkElement
 import org.w3c.dom.get
 import org.w3c.dom.set
 import stories.StoryStyleSheet
-import stories.StoryStyles
 
 //const val baseUrl = "http://0.0.0.0:8080"
 const val baseUrl = "https://api.ailaai.app"

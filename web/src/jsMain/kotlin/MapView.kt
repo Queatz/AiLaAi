@@ -16,6 +16,7 @@ import app.components.FlexInput
 import app.components.Spacer
 import app.compose.rememberDarkMode
 import app.compose.rememberMobileMode
+import app.AppStyles
 import app.dialog.inputDialog
 import com.queatz.db.Card
 import com.queatz.db.Geo
@@ -36,6 +37,7 @@ import lib.mapboxgl
 import lib.mapboxgl.MarkerOptions
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.AlignSelf
+import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.JustifyContent
@@ -59,11 +61,14 @@ import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.lineHeight
+import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.whiteSpace
+import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.paddingBottom
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.paddingRight
@@ -114,6 +119,22 @@ fun MapView(
     val isMobile = rememberMobileMode()
     var bottomSheetState by remember { mutableStateOf(BottomSheetState.Collapsed) }
     var currentStyleIndex by remember { mutableStateOf(0) }
+    var availableNowFilter by remember { mutableStateOf(true) }
+    var petsFilter by remember { mutableStateOf(false) }
+    var outdoorsFilter by remember { mutableStateOf(false) }
+    var selectedLanguages by remember { mutableStateOf<List<String>>(emptyList()) }
+    var ageMin by remember { mutableStateOf<Int?>(null) }
+    var ageMax by remember { mutableStateOf<Int?>(null) }
+    var groupSizeMin by remember { mutableStateOf<Int?>(null) }
+    var groupSizeMax by remember { mutableStateOf<Int?>(null) }
+    var filtersExpanded by remember { mutableStateOf(true) }
+
+    val allLanguages = remember(searchResults) {
+        searchResults
+            .flatMap { it.activity?.languages ?: emptyList() }
+            .distinct()
+            .sorted()
+    }
 
     // Define map styles
     val mapStyles = listOf(
@@ -155,7 +176,7 @@ fun MapView(
         }
     }
 
-    LaunchedEffect(geo, searchText, selectedCategory) {
+    LaunchedEffect(geo, searchText, selectedCategory, availableNowFilter, petsFilter, outdoorsFilter, selectedLanguages, ageMin, ageMax, groupSizeMin, groupSizeMax) {
         geo ?: return@LaunchedEffect
         isLoading = true
         delay(250)
@@ -166,7 +187,16 @@ fun MapView(
             geo = geo!!,
             altitude = altitude / 1000,
             search = searchText.notBlank ?: selectedCategory?.notBlank,
-            public = true
+            public = true,
+            availableNow = availableNowFilter,
+            pets = petsFilter,
+            outdoors = outdoorsFilter,
+            languages = selectedLanguages.takeIf { it.isNotEmpty() },
+            minAge = ageMin,
+            maxAge = ageMax,
+            minGroupSize = groupSizeMin,
+            maxGroupSize = groupSizeMax,
+            activityActive = true
         ) {
             // todo: filter geo != null on backend
             searchResults = it.filter { it.geo != null }
@@ -500,7 +530,7 @@ fun MapView(
                     val event = it.asDynamic() as mapboxgl.MapMouseEvent
                     if (selectedCard != null) {
                         selectedCard = null
-                    } else {
+                    } else if (application.me.value != null) {
                         val click = event.lngLat
                         scope.launch {
                             var active = false
@@ -810,6 +840,146 @@ fun MapView(
                             }
                         }) {
                             Text(category)
+                        }
+                    }
+                }
+                Div({
+                    classes(AppStyles.tray)
+                    style {
+                        marginTop(.5.r)
+                        alignSelf(AlignSelf.Center)
+                        width(100.percent)
+                        boxSizing("border-box")
+                    }
+                    if (!filtersExpanded) {
+                        onClick {
+                            filtersExpanded = true
+                        }
+                    }
+                }) {
+                    if (filtersExpanded) {
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                flexDirection(FlexDirection.Row)
+                                gap(1.r)
+                                alignItems(AlignItems.Center)
+                                property("flex-wrap", "wrap")
+                            }
+                        }) {
+                            components.LabeledSwitch(
+                                value = availableNowFilter,
+                                onValue = { availableNowFilter = it },
+                                onChange = { availableNowFilter = it },
+                                title = appString { availableNow }
+                            )
+                            components.LabeledSwitch(
+                                value = petsFilter,
+                                onValue = { petsFilter = it },
+                                onChange = { petsFilter = it },
+                                title = appString { pets }
+                            )
+                            components.LabeledSwitch(
+                                value = outdoorsFilter,
+                                onValue = { outdoorsFilter = it },
+                                onChange = { outdoorsFilter = it },
+                                title = appString { outdoors }
+                            )
+
+                            if (allLanguages.isNotEmpty()) {
+                                app.components.MultiSelect(
+                                    selected = selectedLanguages,
+                                    onSelected = { selectedLanguages = it },
+                                    multiple = true
+                                ) {
+                                    allLanguages.forEach { lang ->
+                                        option(lang, lang)
+                                    }
+                                }
+                            }
+
+                            IconButton(
+                                name = "expand_less",
+                                title = appString { collapse },
+                                styles = {
+                                    property("margin-left", "auto")
+                                }
+                            ) {
+                                filtersExpanded = false
+                            }
+                        }
+
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                flexDirection(FlexDirection.Row)
+                                gap(1.5.r)
+                                paddingTop(.5.r)
+                                alignItems(AlignItems.Center)
+                            }
+                        }) {
+                            components.RangeSlider(
+                                minValue = ageMin ?: 0,
+                                maxValue = ageMax ?: 100,
+                                minLimit = 0,
+                                maxLimit = 100,
+                                label = appString { ageRange },
+                                onValueChange = { min, max ->
+                                    ageMin = min.takeIf { it > 0 }
+                                    ageMax = max.takeIf { it < 100 }
+                                }
+                            )
+
+                            components.RangeSlider(
+                                minValue = groupSizeMin ?: 1,
+                                maxValue = groupSizeMax ?: 50,
+                                minLimit = 1,
+                                maxLimit = 50,
+                                label = appString { groupSize },
+                                onValueChange = { min, max ->
+                                    groupSizeMin = min.takeIf { it > 1 }
+                                    groupSizeMax = max.takeIf { it < 50 }
+                                }
+                            )
+                        }
+                    } else {
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                alignItems(AlignItems.Center)
+                                justifyContent(JustifyContent.SpaceBetween)
+                            }
+                        }) {
+                            val summary = buildString {
+                                if (availableNowFilter) append(appString { availableNow } + " • ")
+                                if (petsFilter) append(appString { pets } + " • ")
+                                if (outdoorsFilter) append(appString { outdoors } + " • ")
+                                if (selectedLanguages.isNotEmpty()) append(selectedLanguages.joinToString() + " • ")
+                                if (ageMin != null || ageMax != null) append("Age ${ageMin ?: 0}-${ageMax ?: 100} • ")
+                                if (groupSizeMin != null || groupSizeMax != null) append("Group ${groupSizeMin ?: 1}-${groupSizeMax ?: 50}")
+                            }.trimEnd(' ', '•')
+                            Span({
+                                style {
+                                    fontSize(14.px)
+                                    opacity(0.8)
+                                    overflow("hidden")
+                                    whiteSpace("nowrap")
+                                    property("text-overflow", "ellipsis")
+                                    flex(1)
+                                }
+                            }) {
+                                Text(summary.ifEmpty { "Filters" })
+                            }
+                            IconButton(
+                                name = "expand_more",
+                                title = appString { expand },
+                                styles = {
+                                    property("border", "1px solid ${if (isDarkMode) Styles.colors.dark.outline else Styles.colors.outline}")
+                                    borderRadius(2.r)
+                                }
+                            ) {
+                                filtersExpanded = true
+                            }
                         }
                     }
                 }

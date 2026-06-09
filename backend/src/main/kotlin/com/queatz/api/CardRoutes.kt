@@ -115,6 +115,15 @@ fun Route.cardRoutes() {
                     geo = geo,
                     altitude = call.parameters["altitude"]?.toDoubleOrNull(),
                     search = search,
+                    availableNow = call.parameters["availableNow"]?.toBooleanStrictOrNull(),
+                    pets = call.parameters["pets"]?.toBooleanStrictOrNull(),
+                    outdoors = call.parameters["outdoors"]?.toBooleanStrictOrNull(),
+                    languages = call.parameters["languages"]?.split(",")?.filter { it.isNotBlank() },
+                    minAge = call.parameters["minAge"]?.toIntOrNull(),
+                    maxAge = call.parameters["maxAge"]?.toIntOrNull(),
+                    minGroupSize = call.parameters["minGroupSize"]?.toIntOrNull(),
+                    maxGroupSize = call.parameters["maxGroupSize"]?.toIntOrNull(),
+                    activityActive = call.parameters["activityActive"]?.toBooleanStrictOrNull(),
                     nearbyMaxDistance = defaultNearbyMaxDistanceInMeters,
                     offset = call.parameters["offset"]?.toInt() ?: 0,
                     limit = call.parameters["limit"]?.toInt() ?: 20,
@@ -431,6 +440,7 @@ fun Route.cardRoutes() {
                     check(Card::conversation)
                     check(Card::content)
                     check(Card::options)
+                    check(Card::activity)
                     check(Card::pay) {
                         if (it?.pay.isNullOrBlank()) {
                             card.pay = null

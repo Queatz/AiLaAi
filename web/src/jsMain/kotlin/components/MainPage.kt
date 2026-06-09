@@ -1,7 +1,11 @@
+package components
+
+import MapView
+import Styles
 import androidx.compose.runtime.Composable
 import app.AppPage
-import components.AppFooter
-import components.AppHeader
+import appString
+import application
 import org.jetbrains.compose.web.dom.Div
 
 @Composable
@@ -14,7 +18,8 @@ fun MainPage(tabId: String? = null) {
                 AppHeader(
                     title = appString { appName },
                     background = false,
-                    showDownloadApp = true
+                    showDownloadApp = false,
+                    showMe = false
                 )
             }
             AppFooter()

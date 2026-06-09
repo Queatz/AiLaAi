@@ -108,6 +108,36 @@ object Strings {
         vn = "Chỉnh sửa tin nhắn",
         ru = "Редактировать сообщение"
     )
+    val groupSize = Translation(
+        en = "Group size",
+        vn = "Quy mô nhóm",
+        ru = "Размер группы"
+    )
+    val ageRange = Translation(
+        en = "Age range",
+        vn = "Độ tuổi",
+        ru = "Возрастной диапазон"
+    )
+    val languages = Translation(
+        en = "Languages",
+        vn = "Ngôn ngữ",
+        ru = "Языки"
+    )
+    val outdoors = Translation(
+        en = "Outdoors",
+        vn = "Ngoài trời",
+        ru = "На открытом воздухе"
+    )
+    val pets = Translation(
+        en = "Pets",
+        vn = "Thú cưng",
+        ru = "Домашние животные"
+    )
+    val availableNow = Translation(
+        en = "Available now",
+        vn = "Sẵn sàng ngay",
+        ru = "Доступно сейчас"
+    )
     val deleteThisMessage = Translation(
         en = "Delete this message?",
         vn = "Xóa tin nhắn này?",
