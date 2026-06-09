@@ -629,7 +629,7 @@ fun MapView(
                                 justifyContent(JustifyContent.SpaceBetween)
                             }
                         }) {
-                            Text("${appString { pages }} (${shownCards.size})")
+                            Text(appString { pages })
                             IconButton(
                                 name = if (expanded) "expand_less" else "expand_more",
                                 title = if (expanded) appString { collapse } else appString { expand },

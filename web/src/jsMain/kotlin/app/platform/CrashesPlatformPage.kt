@@ -12,6 +12,8 @@ import kotlinx.coroutines.launch
 import api
 import app.ailaai.api.crashes
 import app.ailaai.api.resolveCrash
+import app.components.Empty
+import appText
 import com.queatz.db.Crash
 import components.IconButton
 import components.LazyColumn
@@ -52,6 +54,7 @@ fun CrashesPlatformPage() {
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(refreshTrigger) {
+        isLoading = true
         api.crashes {
             crashes = it
             isLoading = false
@@ -60,10 +63,14 @@ fun CrashesPlatformPage() {
 
     if (isLoading) {
         Loading()
+    } else if (crashes.isEmpty()) {
+        Empty {
+            appText { noCrashes }
+        }
     } else {
         LazyColumn {
             items(crashes) { crash ->
-                val details = remember {
+                val details = remember(crash.id) {
                     json.decodeFromString<JsonObject>(crash.details.orEmpty())
                 }
 
@@ -90,9 +97,9 @@ fun CrashesPlatformPage() {
                     }
 
                     IconButton(
-                        "check",
+                        name = "check",
                         // todo: translate
-                        "Resolve",
+                        title = "Resolve",
                         onClick = {
                             scope.launch {
                                 api.resolveCrash(crash.id!!) {

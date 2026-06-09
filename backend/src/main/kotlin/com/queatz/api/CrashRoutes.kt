@@ -6,7 +6,6 @@ import com.queatz.plugins.db
 import com.queatz.plugins.meOrNull
 import com.queatz.plugins.respond
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.*
 import io.ktor.server.routing.*

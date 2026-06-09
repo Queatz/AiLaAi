@@ -1541,6 +1541,11 @@ object Strings {
         vn = "Kết quả tìm kiếm",
         ru = "Результаты поиска"
     )
+    val noCrashes = Translation(
+        en = "No crashes",
+        vn = "Không tìm được sự cố",
+        ru = "Нет ошибок"
+    )
     val noCards = Translation(
         "No pages",
         "Không tìm được trang để cho bạn xem.",
