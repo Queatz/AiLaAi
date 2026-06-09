@@ -105,6 +105,7 @@ class CardScreenState(
     var showBackgroundDialog by mutableStateOf(false)
     var showPay by mutableStateOf(false)
     var showNpc by mutableStateOf(false)
+    var showActivityDialog by mutableStateOf(false)
     var showRegeneratePhotoDialog by mutableStateOf(false)
     var showGeneratingPhotoDialog by mutableStateOf(false)
     var isGeneratingPhoto by mutableStateOf(false)

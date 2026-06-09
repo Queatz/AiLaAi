@@ -93,6 +93,16 @@
     <string name="message">Message</string>
     <string name="someone">Someone</string>
     <string name="active">Active</string>
+    <string name="activity">Activity</string>
+    <string name="add_activity">Add activity</string>
+    <string name="remove_activity">Remove activity</string>
+    <string name="min_age">Min age</string>
+    <string name="max_age">Max age</string>
+    <string name="min_group_size">Min group size</string>
+    <string name="max_group_size">Max group size</string>
+    <string name="pets">Pets</string>
+    <string name="languages">Languages</string>
+    <string name="outdoors">Outdoors</string>
     <string name="reminders_notification_channel_description">Your reminders</string>
     <string name="messages_notification_channel_description">Messages from people</string>
     <string name="collaboration_notification_channel_description">Collaboration notifications</string>

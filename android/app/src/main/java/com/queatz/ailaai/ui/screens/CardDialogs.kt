@@ -329,6 +329,23 @@ fun CardDialogs(state: CardScreenState) {
         }
     }
 
+    if (state.showActivityDialog) {
+        ActivityDialog(
+            activity = state.card?.activity,
+            onDismissRequest = {
+                state.showActivityDialog = false
+            }
+        ) { activity ->
+            api.updateCard(
+                cardId,
+                Card(activity = activity)
+            ) {
+                state.reload()
+                state.showActivityDialog = false
+            }
+        }
+    }
+
     if (state.showReportDialog) {
         ReportDialog("card/$cardId") {
             state.showReportDialog = false

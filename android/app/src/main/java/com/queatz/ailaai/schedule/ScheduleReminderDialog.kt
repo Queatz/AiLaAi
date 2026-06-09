@@ -34,6 +34,7 @@ fun ScheduleReminderDialog(
     initialReminder: Reminder,
     confirmText: String? = null,
     showTitle: Boolean = false,
+    includeStickiness: Boolean = true,
     onUpdate: suspend (Reminder) -> Unit
 ) {
     var reminder by remember(initialReminder) {
@@ -216,23 +217,25 @@ fun ScheduleReminderDialog(
                     }
                 }
 
-                OutlinedButton(
-                    onClick = {
-                        showStickiness = true
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        "${stringResource(R.string.stickiness)}: " + when (reminder.stickiness) {
-                            ReminderStickiness.None -> stringResource(R.string.none)
-                            ReminderStickiness.Hourly -> stringResource(R.string.hourly)
-                            ReminderStickiness.Daily -> stringResource(R.string.daily)
-                            ReminderStickiness.Weekly -> stringResource(R.string.weekly)
-                            ReminderStickiness.Monthly -> stringResource(R.string.monthly)
-                            ReminderStickiness.Yearly -> stringResource(R.string.yearly)
-                            else -> stringResource(R.string.none)
-                        }
-                    )
+                if (includeStickiness) {
+                    OutlinedButton(
+                        onClick = {
+                            showStickiness = true
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            "${stringResource(R.string.stickiness)}: " + when (reminder.stickiness) {
+                                ReminderStickiness.None -> stringResource(R.string.none)
+                                ReminderStickiness.Hourly -> stringResource(R.string.hourly)
+                                ReminderStickiness.Daily -> stringResource(R.string.daily)
+                                ReminderStickiness.Weekly -> stringResource(R.string.weekly)
+                                ReminderStickiness.Monthly -> stringResource(R.string.monthly)
+                                ReminderStickiness.Yearly -> stringResource(R.string.yearly)
+                                else -> stringResource(R.string.none)
+                            }
+                        )
+                    }
                 }
             }
             Row(

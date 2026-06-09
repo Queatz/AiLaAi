@@ -162,10 +162,27 @@ class Card(
     var level: Int? = null,
     var size: Double? = null,
     var task: Task? = null,
+    var activity: Activity? = null,
 
     // Transient from db
     var cardCount: Int? = null
 ) : Model()
+
+@Serializable
+class Activity(
+    var active: Boolean? = null, // Enable/disable the activity entirely
+    var minAge: Int? = null,
+    var maxAge: Int? = null,
+    var minGroupSize: Int? = null,
+    var maxGroupSize: Int? = null,
+    var pets: Boolean? = null,
+    var languages: List<String>? = null,
+    var duration: Long? = null,
+    var outdoors: Boolean? = null,
+    var timezone: String? = null,
+    var utcOffset: Double? = null,
+    var schedule: ReminderSchedule? = null, // Enable/disable the activity based on a schedule
+)
 
 @Serializable
 class Task(

@@ -173,6 +173,15 @@ private fun CardHeaderItemContent(
                     }
 
                     item(
+                        icon = Icons.Outlined.Hiking,
+                        name = stringResource(if (card.activity == null) R.string.add_activity else R.string.activity),
+                        selected = card.activity != null
+                    ) {
+                        state.showActivityDialog = true
+                        state.showMenu = false
+                    }
+
+                    item(
                         icon = Icons.Outlined.AddBox,
                         name = stringResource(if (card.content?.notBlank == null) R.string.add_content else R.string.content),
                         selected = card.content?.notBlank != null
