@@ -253,6 +253,23 @@ class MainStyleSheet : StyleSheet() {
         }
     }
 
+    val cardActivity by style {
+        marginTop(1.r)
+        marginBottom(1.r)
+        padding(1.r)
+        borderRadius(1.r)
+        backgroundColor(colors.surface)
+        property("width", "fit-content")
+        property("box-shadow", "0 2px 4px #0004")
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        gap(.5.r)
+
+        dark(self) {
+            backgroundColor(colors.dark.surface)
+        }
+    }
+
     val video by style {
         width(100.percent)
         property("z-index", "0")

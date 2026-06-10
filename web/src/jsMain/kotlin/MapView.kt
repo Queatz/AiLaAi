@@ -178,7 +178,19 @@ fun MapView(
         }
     }
 
-    LaunchedEffect(geo, searchText, selectedCategory, availableNowFilter, petsFilter, outdoorsFilter, selectedLanguages, ageMin, ageMax, groupSizeMin, groupSizeMax) {
+    LaunchedEffect(
+        geo,
+        searchText,
+        selectedCategory,
+        availableNowFilter,
+        petsFilter,
+        outdoorsFilter,
+        selectedLanguages,
+        ageMin,
+        ageMax,
+        groupSizeMin,
+        groupSizeMax
+    ) {
         geo ?: return@LaunchedEffect
         isLoading = true
         delay(250)
@@ -947,13 +959,13 @@ fun MapView(
 
                             components.RangeSlider(
                                 minValue = groupSizeMin ?: 1,
-                                maxValue = groupSizeMax ?: 50,
+                                maxValue = groupSizeMax ?: 20,
                                 minLimit = 1,
-                                maxLimit = 50,
+                                maxLimit = 20,
                                 label = appString { groupSize },
                                 onValueChange = { min, max ->
                                     groupSizeMin = min.takeIf { it > 1 }
-                                    groupSizeMax = max.takeIf { it < 50 }
+                                    groupSizeMax = max.takeIf { it < 20 }
                                 }
                             )
                         }
@@ -972,7 +984,7 @@ fun MapView(
                                 if (selectedLanguages.isNotEmpty()) append(selectedLanguages.joinToString() + ", ")
                                 if (ageMin != null || ageMax != null) append("Ages ${ageMin ?: 0}-${ageMax ?: 100}, ")
                                 if (groupSizeMin != null || groupSizeMax != null) append("Group size ${groupSizeMin ?: 1}-${groupSizeMax ?: 50}")
-                            }.trimEnd(' ', '•')
+                            }.trimEnd(' ', ',')
                             Span({
                                 style {
                                     overflow("hidden")

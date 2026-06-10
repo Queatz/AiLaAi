@@ -103,6 +103,9 @@ fun CardContent(
                 }
             }
         }
+        card.activity?.let {
+            CardActivity(it)
+        }
         cardConversation?.message?.notBlank?.let { message ->
             Div({
                 style {

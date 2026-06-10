@@ -114,7 +114,7 @@ fun RangeSlider(
                     right(0.5.cssRem)
                 }
             }) {
-                Text("$label   ")
+                Text("$label ")
                 B {
                     Text("$minValue - $maxValue")
                 }
@@ -152,7 +152,7 @@ fun RangeSlider(
             val leftPercent = ((minValue - minLimit).toDouble() / range * 100).coerceIn(0.0, 100.0)
             val rightPercent = ((maxValue - minLimit).toDouble() / range * 100).coerceIn(0.0, 100.0)
             val widthPercent = rightPercent - leftPercent
-            val heightValue = 18 - (widthPercent / 100 * 12)
+            val heightValue = 18.0 - (widthPercent / 100.0 * 12.0)
 
             Div({
                 style {
@@ -160,7 +160,7 @@ fun RangeSlider(
                     height(heightValue.px)
                     left(leftPercent.percent)
                     width(widthPercent.percent)
-                    backgroundColor(if (darkMode) Styles.colors.dark.outline else Styles.colors.outline)
+                    backgroundColor(Styles.colors.primary)
                     borderRadius(heightValue.px)
                 }
             })
@@ -178,8 +178,8 @@ fun RangeSlider(
                     cursor("pointer")
                     property("z-index", "2")
                 }
-                onMouseDown { dragging = Handle.MIN }
-                onTouchStart { dragging = Handle.MIN }
+                onMouseDown { it.preventDefault(); dragging = Handle.MIN }
+                onTouchStart { it.preventDefault(); dragging = Handle.MIN }
             })
 
             // Max handle
@@ -195,8 +195,8 @@ fun RangeSlider(
                     cursor("pointer")
                     property("z-index", "2")
                 }
-                onMouseDown { dragging = Handle.MAX }
-                onTouchStart { dragging = Handle.MAX }
+                onMouseDown { it.preventDefault(); dragging = Handle.MAX }
+                onTouchStart { it.preventDefault(); dragging = Handle.MAX }
             })
         }
     }
