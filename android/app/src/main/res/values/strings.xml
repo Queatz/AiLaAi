@@ -1145,12 +1145,12 @@
     <string name="today_inline">today</string>
     <string name="not_available_today">Not available today</string>
     <string name="duration_minutes">%1$s minutes</string>
-    <string name="age_range_value">Ages %1$s-%2$s</string>
+    <string name="age_range_value">Ages %1$s - %2$s</string>
     <string name="age_min_value">Ages %1$s+</string>
     <string name="age_max_value">Ages up to %1$s</string>
-    <string name="group_size_range_value">Group size %1$s-%2$s</string>
-    <string name="group_size_min_value">Group size %1$s+</string>
-    <string name="group_size_max_value">Group size up to %1$s</string>
+    <string name="group_size_range_value">%1$s - %2$s people</string>
+    <string name="group_size_min_value">%1$s+ people</string>
+    <string name="group_size_max_value">Up to %1$s people</string>
     <string name="pets_allowed">Pets allowed</string>
     <string name="no_pets">No pets</string>
     <string name="languages_value">Languages: %1$s</string>

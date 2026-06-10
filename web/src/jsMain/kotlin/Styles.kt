@@ -254,8 +254,6 @@ class MainStyleSheet : StyleSheet() {
     }
 
     val cardActivity by style {
-        marginTop(1.r)
-        marginBottom(1.r)
         padding(1.r)
         borderRadius(1.r)
         backgroundColor(colors.surface)

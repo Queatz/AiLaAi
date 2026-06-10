@@ -75,6 +75,7 @@ fun CardListItem(
         style {
             display(DisplayStyle.Flex)
             flexDirection(FlexDirection.Column)
+            gap(.5.r)
         }
     }) {
         if (showPhoto && allPhotos.isNotEmpty()) {
@@ -145,15 +146,14 @@ fun CardListItem(
                         )
                     )
                 }
-                card.getConversation().message.notBlank?.let { message ->
-                    Div({
-                        style {
-                            marginTop(.5.r)
-                        }
-                    }) {
-                        Text(message.stripMarkdown().ellipsize(120))
-                    }
-                }
+            }
+        }
+        card.activity?.let {
+            CardActivity(it)
+        }
+        card.getConversation().message.notBlank?.let { message ->
+            Div {
+                Text(message.stripMarkdown().ellipsize(120))
             }
         }
     }

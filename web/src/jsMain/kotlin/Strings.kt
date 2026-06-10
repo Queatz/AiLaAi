@@ -2433,39 +2433,39 @@ object Strings {
         ru = "Отметить как невыполненное"
     )
     val durationMinutes = Translation(
-        en = "Duration: %1\$s minutes",
-        vn = "Thời lượng: %1\$s phút",
-        ru = "Продолжительность: %1\$s минут"
+        en = "%1\$s minutes",
+        vn = "%1\$s phút",
+        ru = "%1\$s минут"
     )
     val ageRangeValue = Translation(
-        en = "Age: %1\$s - %2\$s",
-        vn = "Độ tuổi: %1\$s - %2\$s",
-        ru = "Возраст: %1\$s - %2\$s"
+        en = "Ages %1\$s - %2\$s",
+        vn = "Độ tuổi %1\$s - %2\$s",
+        ru = "Возраст %1\$s - %2\$s"
     )
     val ageMinValue = Translation(
-        en = "Age: %1\$s+",
-        vn = "Độ tuổi: %1\$s+",
-        ru = "Возраст: %1\$s+"
+        en = "Ages %1\$s+",
+        vn = "Độ tuổi %1\$s+",
+        ru = "Возраст %1\$s+"
     )
     val ageMaxValue = Translation(
-        en = "Age: up to %1\$s",
-        vn = "Độ tuổi: tối đa %1\$s",
-        ru = "Возраст: до %1\$s"
+        en = "Ages up to %1\$s",
+        vn = "Độ tuổi tối đa %1\$s",
+        ru = "Возраст до %1\$s"
     )
     val groupSizeRangeValue = Translation(
-        en = "Group size: %1\$s - %2\$s",
-        vn = "Kích thước nhóm: %1\$s - %2\$s",
-        ru = "Размер группы: %1\$s - %2\$s"
+        en = "%1\$s - %2\$s people",
+        vn = "%1\$s - %2\$s người",
+        ru = "%1\$s - %2\$s человек"
     )
     val groupSizeMinValue = Translation(
-        en = "Group size: %1\$s+",
-        vn = "Kích thước nhóm: %1\$s+",
-        ru = "Размер группы: %1\$s+"
+        en = "%1\$s+ people",
+        vn = "%1\$s+ người",
+        ru = "%1\$s+ человек"
     )
     val groupSizeMaxValue = Translation(
-        en = "Group size: up to %1\$s",
-        vn = "Kích thước nhóm: tối đa %1\$s",
-        ru = "Размер группы: до %1\$s"
+        en = "Up to %1\$s people",
+        vn = "Tối đa %1\$s người",
+        ru = "До %1\$s человек"
     )
     val petsAllowed = Translation(
         en = "Pets allowed",
