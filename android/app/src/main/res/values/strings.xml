@@ -502,11 +502,6 @@
     <string name="no">No</string>
     <string name="yes">Yes</string>
     <string name="generate_photo">Generate photo</string>
-    <string name="generate_a_new_photo">Generate a new photo?</string>
-    <string name="this_will_replace_the_current_photo">This will replace the current photo.</string>
-    <string name="generating">Generating</string>
-    <string name="generating_description">The page will be updated when the photo is generated.\n\nPage title, hint, and details are shared with a 3rd party.
-    </string>
     <string name="reminders">Reminders</string>
     <string name="hourly">Hourly</string>
     <string name="daily">Daily</string>

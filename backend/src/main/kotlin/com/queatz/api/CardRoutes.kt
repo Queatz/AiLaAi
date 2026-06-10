@@ -606,64 +606,6 @@ fun Route.cardRoutes() {
             }
         }
 
-        post("/cards/{id}/photo/generate") {
-            respond {
-                val card = db.document(Card::class, parameter("id"))
-                val person = me
-
-                if (card == null) {
-                    HttpStatusCode.NotFound
-                } else if (card.person!!.asKey() != person.id) {
-                    HttpStatusCode.Forbidden
-                } else {
-                    launch {
-                        val url = ai.photo(
-                            prefix = "card-${card.id!!}",
-                            prompts = buildList {
-                                add(
-                                    TextPrompt(
-                                        card.name!!
-                                    )
-                                )
-
-                                val message = card.getConversation().message
-
-                                if (message.isNotBlank()) {
-                                    add(
-                                        TextPrompt(message, .5)
-                                    )
-                                }
-
-                                if (!card.location.isNullOrBlank()) {
-                                    add(
-                                        TextPrompt(card.location!!, .25)
-                                    )
-                                }
-                            }
-                        )
-
-                        card.photo = url.first
-                        db.update(card)
-
-                        if (card.active == true) {
-                            card.parent?.let { db.document(Card::class, it) }?.let { parentCard ->
-                                notifyCardInCardUpdated(
-                                    person,
-                                    parentCard.people(),
-                                    parentCard,
-                                    card,
-                                    CollaborationEventDataDetails.Photo
-                                )
-                            }
-                            notifyCardUpdated(person, card.people(), card, CollaborationEventDataDetails.Photo)
-                        }
-                    }
-
-                    HttpStatusCode.OK
-                }
-            }
-        }
-
         post("/cards/{id}/video") {
             respond {
                 val card = db.document(Card::class, parameter("id"))

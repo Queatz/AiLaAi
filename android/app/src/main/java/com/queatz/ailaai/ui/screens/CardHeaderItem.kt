@@ -117,17 +117,6 @@ private fun CardHeaderItemContent(
                         state.showPhotoDialog = true
                     }
 
-                    if (card.photo.isNullOrEmpty() && card.video.isNullOrEmpty()) {
-                        item(
-                            icon = Icons.Outlined.AutoAwesome,
-                            name = stringResource(R.string.generate_photo),
-                            isLoading = state.isRegeneratingPhoto
-                        ) {
-                            state.regeneratePhoto()
-                            state.showMenu = false
-                        }
-                    }
-
                     item(
                         icon = Icons.Outlined.PhotoLibrary,
                         name = stringResource(R.string.additional_photos),

@@ -221,59 +221,6 @@ fun CardDialogs(state: CardScreenState) {
         )
     }
 
-    if (state.showRegeneratePhotoDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                state.showRegeneratePhotoDialog = false
-            },
-            title = {
-                Text(stringResource(R.string.generate_a_new_photo))
-            },
-            text = {
-                Text(stringResource(R.string.this_will_replace_the_current_photo))
-            },
-            confirmButton = {
-                TextButton({
-                    state.showRegeneratePhotoDialog = false
-                    state.generatePhoto()
-                }) {
-                    Text(stringResource(R.string.yes))
-                }
-            }
-        )
-    }
-
-    if (state.showGeneratingPhotoDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                state.showGeneratingPhotoDialog = false
-            },
-            title = {
-                Text(stringResource(R.string.generating))
-            },
-            text = {
-                Text(stringResource(R.string.generating_description))
-            },
-            dismissButton = {
-                DialogCloseButton {
-                    state.showGeneratingPhotoDialog = false
-                }
-            },
-            confirmButton = {
-                TextButton({
-                    state.showGeneratingPhotoDialog = false
-                    scope.launch {
-                        context.dataStore.edit {
-                            it[booleanPreferencesKey("ui.showGeneratingMessage")] = false
-                        }
-                    }
-                }) {
-                    Text(stringResource(R.string.dont_show))
-                }
-            },
-        )
-    }
-
     if (state.showSetCategory) {
         ChooseCategoryDialog(
             {

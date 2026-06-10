@@ -135,7 +135,7 @@ object Strings {
     )
     val availableToday = Translation(
         en = "Available today",
-        vn = "Sẵn sàng hôm nay",
+        vn = "Có sẵn hôm nay",
         ru = "Доступно сегодня"
     )
     val notAvailableToday = Translation(

@@ -106,12 +106,8 @@ class CardScreenState(
     var showPay by mutableStateOf(false)
     var showNpc by mutableStateOf(false)
     var showActivityDialog by mutableStateOf(false)
-    var showRegeneratePhotoDialog by mutableStateOf(false)
-    var showGeneratingPhotoDialog by mutableStateOf(false)
     var isGeneratingPhoto by mutableStateOf(false)
-    var isRegeneratingPhoto by mutableStateOf(false)
     var showPhotoDialog by mutableStateOf(false)
-    var oldPhoto by mutableStateOf<String?>(null)
     var showSourceDialog by mutableStateOf(false)
     var showScanMe by mutableStateOf(false)
     var newCard by mutableStateOf<Card?>(null)
@@ -143,31 +139,6 @@ class CardScreenState(
             context.dataStore.edit {
                 it[booleanPreferencesKey("ui.showMyCardTools")] = showTools
             }
-        }
-    }
-
-    fun generatePhoto() {
-        isRegeneratingPhoto = true
-        scope.launch {
-            api.generateCardPhoto(cardId) {
-                if (
-                    context.dataStore.data.first().let {
-                        it[booleanPreferencesKey("ui.showGeneratingMessage")] != false
-                    }
-                ) {
-                    showGeneratingPhotoDialog = true
-                }
-                oldPhoto = card?.photo ?: ""
-            }
-            isRegeneratingPhoto = false
-        }
-    }
-
-    fun regeneratePhoto() {
-        if (card?.photo.isNullOrBlank()) {
-            generatePhoto()
-        } else {
-            showRegeneratePhotoDialog = true
         }
     }
 

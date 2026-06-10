@@ -16,7 +16,6 @@ import app.ailaai.api.card
 import app.ailaai.api.cardsCards
 import app.ailaai.api.categories
 import app.ailaai.api.deleteCard
-import app.ailaai.api.generateCardPhoto
 import app.ailaai.api.newCard
 import app.ailaai.api.updateCard
 import app.dialog.additionalPhotosDialog
@@ -118,10 +117,6 @@ fun ExplorePage(
         mutableStateOf(true)
     }
 
-    var oldPhoto by remember(card.id) {
-        mutableStateOf<String?>(null)
-    }
-
     var menuTarget by remember {
         mutableStateOf<DOMRect?>(null)
     }
@@ -139,32 +134,11 @@ fun ExplorePage(
         reload()
     }
 
-    LaunchedEffect(oldPhoto) {
-        var tries = 0
-        while (tries++ < 5 && oldPhoto != null) {
-            delay(3.seconds)
-            api.card(card.id!!) {
-                if (it.photo != oldPhoto) {
-                    onCardUpdated(it)
-                    oldPhoto = null
-                }
-            }
-        }
-    }
-
     fun newSubCard(inCard: Card, name: String, active: Boolean) {
         scope.launch {
             api.newCard(Card(name = name, parent = inCard.id!!, active = active)) {
                 reload()
                 onCardUpdated(it)
-            }
-        }
-    }
-
-    fun generatePhoto() {
-        scope.launch {
-            api.generateCardPhoto(card.id!!) {
-                oldPhoto = card.photo ?: ""
             }
         }
     }
@@ -473,26 +447,6 @@ fun ExplorePage(
             item(appString { additionalPhotos }) {
                 scope.launch {
                     additionalPhotosDialog(card, onCardUpdated)
-                }
-            }
-
-            if (card.video == null) {
-                item(if (card.photo == null) appString { this.generatePhoto } else appString { regeneratePhoto }) {
-                    if (card.photo == null) {
-                        generatePhoto()
-                    } else {
-                        scope.launch {
-                            val result = dialog(
-                                title = application.appString { generateNewPhoto }
-                            ) {
-                                appText { thisWillReplaceCurrentPhoto }
-                            }
-
-                            if (result == true) {
-                                generatePhoto()
-                            }
-                        }
-                    }
                 }
             }
 

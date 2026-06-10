@@ -197,16 +197,6 @@ suspend fun Api.unsaveCard(
     onSuccess = onSuccess
 )
 
-suspend fun Api.generateCardPhoto(
-    cardId: String,
-    onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<HttpStatusCode> = {},
-) = post(
-    url = "cards/$cardId/photo/generate",
-    onError = onError,
-    onSuccess = onSuccess
-)
-
 suspend fun Api.uploadCardPhoto(
     id: String,
     photo: ByteArray,

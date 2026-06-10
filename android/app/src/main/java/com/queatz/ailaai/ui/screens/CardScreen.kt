@@ -93,21 +93,6 @@ fun CardScreen(
         }
     }
 
-    LaunchedEffect(state.oldPhoto) {
-        if (state.oldPhoto == null) return@LaunchedEffect
-
-        var tries = 0
-        while (tries++ < 5 && state.oldPhoto != null) {
-            delay(3.seconds)
-            api.card(cardId) {
-                if (if (state.oldPhoto.isNullOrBlank()) !it.photo.isNullOrBlank() else it.photo != state.oldPhoto) {
-                    state.reload()
-                    state.oldPhoto = null
-                }
-            }
-        }
-    }
-
     background(state.card?.background?.takeIf { showInFullscreen }?.let(api::url))
 
     Column(
