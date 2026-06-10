@@ -1711,6 +1711,36 @@ object Strings {
         vn = "Cập nhật",
         ru = "Обновить"
     )
+    val activity = Translation(
+        en = "Activity",
+        vn = "Hoạt động",
+        ru = "Действия"
+    )
+    val languagesPlaceholder = Translation(
+        en = "Languages e.g. English, Vietnamese",
+        vn = "Ngôn ngữ ví dụ: Tiếng Anh, Tiếng Việt",
+        ru = "Языки, напр. Английский, Вьетнамский"
+    )
+    val minAge = Translation(
+        en = "Min age",
+        vn = "Tuổi tối thiểu",
+        ru = "Мин. возраст"
+    )
+    val maxAge = Translation(
+        en = "Max age",
+        vn = "Tuổi tối đa",
+        ru = "Макс. возраст"
+    )
+    val minGroupSize = Translation(
+        en = "Min group size",
+        vn = "Quy mô nhóm tối thiểu",
+        ru = "Мин. размер группы"
+    )
+    val maxGroupSize = Translation(
+        en = "Max group size",
+        vn = "Quy mô nhóm tối đa",
+        ru = "Макс. размер группы"
+    )
     val introduceYourself = Translation(
         en = "Introduce yourself here",
         vn = "Viết chút về bạn",
@@ -2171,6 +2201,11 @@ object Strings {
         en = "Active",
         vn = "Truy cập",
         ru = "Активный"
+    )
+    var notActive = Translation(
+        en = "Not active",
+        vn = "Không truy cập",
+        ru = "Не активный"
     )
     val discard = Translation(
         en = "Discard",

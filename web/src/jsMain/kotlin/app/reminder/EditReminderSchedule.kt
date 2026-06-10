@@ -78,7 +78,8 @@ val EditSchedule.end get() = if (until) parseDateTime(untilDate, untilTime).toKo
 @Composable
 fun EditReminderSchedule(
     schedule: EditSchedule,
-    disabled: Boolean = false
+    disabled: Boolean = false,
+    includeStickiness: Boolean = true
 ) {
     LaunchedEffect(schedule.reoccurringHours) {
         if (schedule.reoccurringHours.isEmpty()) schedule.reoccurringHours = listOf("${parseDateTime(schedule.date, schedule.time).getHours()}")
@@ -227,55 +228,57 @@ fun EditReminderSchedule(
         )
     }
 
-    LabeledCheckbox(
-        value = schedule.hasStickiness,
-        onValue = {
-            schedule.hasStickiness = it
-        },
-        enabled = !disabled,
-        text = appString { stickiness },
-        styles = {
-            padding(0.r, .5.r, 1.r, .5.r)
-        }
-    )
-
-    if (schedule.hasStickiness) {
-        Div({
-            style {
+    if (includeStickiness) {
+        LabeledCheckbox(
+            value = schedule.hasStickiness,
+            onValue = {
+                schedule.hasStickiness = it
+            },
+            enabled = !disabled,
+            text = appString { stickiness },
+            styles = {
                 padding(0.r, .5.r, 1.r, .5.r)
-                marginBottom(1.r)
             }
-        }) {
-            MultiSelect(
-                selected = listOf(schedule.stickiness.toString()),
-                onSelected = { newValue ->
-                    if (newValue.isNotEmpty()) {
-                        schedule.stickiness = ReminderStickiness.valueOf(newValue.first())
-                    } else {
-                        schedule.stickiness = ReminderStickiness.None
-                    }
-                }, attrs = {
-                    style {
-                        width(100.percent)
-                    }
+        )
 
-                    if (disabled) {
-                        disabled()
-                    }
+        if (schedule.hasStickiness) {
+            Div({
+                style {
+                    padding(0.r, .5.r, 1.r, .5.r)
+                    marginBottom(1.r)
                 }
-            ) {
-                ReminderStickiness.entries.forEach { stickinessOption ->
-                    option(
-                        value = stickinessOption.toString(),
-                        title = when(stickinessOption) {
-                            ReminderStickiness.None -> application.appString { none }
-                            ReminderStickiness.Hourly -> application.appString { hourly }
-                            ReminderStickiness.Daily -> application.appString { daily }
-                            ReminderStickiness.Weekly -> application.appString { weekly }
-                            ReminderStickiness.Monthly -> application.appString { monthly }
-                            ReminderStickiness.Yearly -> application.appString { yearly }
+            }) {
+                MultiSelect(
+                    selected = listOf(schedule.stickiness.toString()),
+                    onSelected = { newValue ->
+                        if (newValue.isNotEmpty()) {
+                            schedule.stickiness = ReminderStickiness.valueOf(newValue.first())
+                        } else {
+                            schedule.stickiness = ReminderStickiness.None
                         }
-                    )
+                    }, attrs = {
+                        style {
+                            width(100.percent)
+                        }
+
+                        if (disabled) {
+                            disabled()
+                        }
+                    }
+                ) {
+                    ReminderStickiness.entries.forEach { stickinessOption ->
+                        option(
+                            value = stickinessOption.toString(),
+                            title = when(stickinessOption) {
+                                ReminderStickiness.None -> application.appString { none }
+                                ReminderStickiness.Hourly -> application.appString { hourly }
+                                ReminderStickiness.Daily -> application.appString { daily }
+                                ReminderStickiness.Weekly -> application.appString { weekly }
+                                ReminderStickiness.Monthly -> application.appString { monthly }
+                                ReminderStickiness.Yearly -> application.appString { yearly }
+                            }
+                        )
+                    }
                 }
             }
         }

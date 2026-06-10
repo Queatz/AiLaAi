@@ -18,8 +18,9 @@ import app.ailaai.api.categories
 import app.ailaai.api.deleteCard
 import app.ailaai.api.newCard
 import app.ailaai.api.updateCard
-import app.dialog.additionalPhotosDialog
 import app.components.FlexInput
+import app.dialog.activityDialog
+import app.dialog.additionalPhotosDialog
 import app.dialog.categoryDialog
 import app.dialog.dialog
 import app.dialog.editFormDialog
@@ -87,6 +88,7 @@ import r
 import saves
 import stories.asStoryContents
 import updateWidget
+import web.cssom.PropertyName.Companion.marginBottom
 import webBaseUrl
 import widget
 import kotlin.time.Duration.Companion.seconds
@@ -185,6 +187,7 @@ fun ExplorePage(
     val category = appString { category }
     val hint = appString { hint }
     val update = appString { update }
+    val activity = appString { activity }
 
     fun rename() {
         scope.launch {
@@ -286,6 +289,14 @@ fun ExplorePage(
 
             item(category) {
                 setCategory()
+            }
+
+            item(activity) {
+                scope.launch {
+                    activityDialog(card) { updated ->
+                        onCardUpdated(updated)
+                    }
+                }
             }
 
             item(hint) {

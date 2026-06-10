@@ -245,6 +245,7 @@ fun Db.explore(
     Card::class,
     """
         for x in @@collection
+            let now = date_iso8601(date_now())
             let utcOffset = x.${f(Card::activity)}.${f(Activity::utcOffset)} || 0.0
             let localNow = date_add(date_now(), utcOffset, 'h')
             let dayOfWeek = date_dayofweek(localNow) + 1
@@ -264,22 +265,35 @@ fun Db.explore(
                 and (@minGroupSize == null or x.${f(Card::activity)}.${f(Activity::maxGroupSize)} == null or x.${f(Card::activity)}.${f(Activity::maxGroupSize)} >= @minGroupSize)
                 and (@maxGroupSize == null or x.${f(Card::activity)}.${f(Activity::minGroupSize)} == null or x.${f(Card::activity)}.${f(Activity::minGroupSize)} <= @maxGroupSize)
                 and (@languages == null or (is_array(x.${f(Card::activity)}.${f(Activity::languages)}) and first(for l in x.${f(Card::activity)}.${f(Activity::languages)} filter l in @languages return true) == true))
-                and (@availableNow == null or @availableNow == false or x.${f(Card::activity)}.${f(Activity::schedule)} == null or (
-                    (count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::days)}) == 0 and count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::weekdays)}) == 0)
-                    or (
-                        dayOfMonth in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::days)} || [])
-                        or (dayOfMonth == daysInMonth and -1 in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::days)} || []))
-                        or dayOfWeek in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::weekdays)} || [])
+                and (@availableNow == null or @availableNow == false or (
+                    (x.${f(Card::activity)}.${f(Activity::start)} == null or x.${f(Card::activity)}.${f(Activity::start)} <= now)
+                    and (x.${f(Card::activity)}.${f(Activity::end)} == null or x.${f(Card::activity)}.${f(Activity::end)} >= now)
+                    and (
+                        x.${f(Card::activity)}.${f(Activity::schedule)} == null
+                        or (
+                            (
+                                count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::days)}) == 0
+                                and count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::weekdays)}) == 0
+                            )
+                            or (
+                                dayOfMonth in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::days)} || [])
+                                or (dayOfMonth == daysInMonth and -1 in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::days)} || []))
+                                or dayOfWeek in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::weekdays)} || [])
+                            )
+                        )
+                        and (
+                            count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::weeks)}) == 0
+                            or week in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::weeks)} || [])
+                        )
+                        and (
+                            count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::months)}) == 0
+                            or month in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::months)} || [])
+                        )
+                        and (
+                            count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::years)}) == 0
+                            or year in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::years)} || [])
+                        )
                     )
-                ) and (
-                    count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::weeks)}) == 0
-                    or week in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::weeks)} || [])
-                ) and (
-                    count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::months)}) == 0
-                    or month in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::months)} || [])
-                ) and (
-                    count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::years)}) == 0
-                    or year in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::years)} || [])
                 ))
                 and (
                     @search == null 

@@ -179,6 +179,8 @@ class Activity(
     var languages: List<String>? = null,
     var duration: Long? = null,
     var outdoors: Boolean? = null,
+    var start: Instant? = null,
+    var end: Instant? = null,
     var timezone: String? = null,
     var utcOffset: Double? = null,
     var schedule: ReminderSchedule? = null, // Enable/disable the activity based on a schedule

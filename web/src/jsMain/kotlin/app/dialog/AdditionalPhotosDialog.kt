@@ -39,7 +39,7 @@ suspend fun additionalPhotosDialog(
                             width(4.r)
                             height(4.r)
                             property("object-fit", "cover")
-                            borderRadius(0.5.r)
+                            borderRadius(1.r)
                         }
                     }
 
