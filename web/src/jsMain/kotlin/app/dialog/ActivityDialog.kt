@@ -18,6 +18,7 @@ import application
 import com.queatz.db.Activity
 import com.queatz.db.Card
 import com.queatz.db.Reminder
+import components.IconButton
 import components.Switch
 import focusable
 import kotlinx.coroutines.launch
@@ -55,6 +56,34 @@ suspend fun activityDialog(
                 onChange = { isActiveState.value = it },
                 border = true,
                 title = if (isActiveState.value) appString { Strings.active } else appString { Strings.notActive }
+            )
+        },
+        extraButtons = { resolve ->
+            val scope = rememberCoroutineScope()
+            IconButton(
+                name = "delete",
+                title = application.appString { delete },
+                onClick = {
+                    scope.launch {
+                        val result = dialog(
+                            title = application.appString { remove },
+                            confirmButton = application.appString { delete },
+                            cancelButton = application.appString { cancel }
+                        ) {
+                            Text(application.appString { youCannotUndoThis })
+                        }
+
+                        if (result == true) {
+                            api.updateCard(
+                                card.id!!,
+                                Card(activity = null)
+                            ) {
+                                onUpdated(it)
+                                resolve(true)
+                            }
+                        }
+                    }
+                }
             )
         }
     ) { _ ->
