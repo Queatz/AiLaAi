@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Activity
@@ -98,9 +99,9 @@ fun ActivityItem(icon: ImageVector, text: String, color: Color? = null) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = color ?: MaterialTheme.colorScheme.onSurface
+            tint = color ?: MaterialTheme.colorScheme.onSurface.copy(alpha = .5f),
         )
-        Text(text, color = color ?: MaterialTheme.colorScheme.onSurface)
+        Text(text, color = color ?: MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
     }
 }
 

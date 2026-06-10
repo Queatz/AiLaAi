@@ -114,7 +114,7 @@ object Strings {
         ru = "Размер группы"
     )
     val ageRange = Translation(
-        en = "Age range",
+        en = "Ages",
         vn = "Độ tuổi",
         ru = "Возрастной диапазон"
     )
@@ -167,6 +167,11 @@ object Strings {
         en = "Clear all",
         vn = "Xóa tất cả",
         ru = "Очистить все"
+    )
+    val filters = Translation(
+        en = "Filters",
+        vn = "Bộ lọc",
+        ru = "Фильтры"
     )
     val yourProfileUrl = Translation(
         en = "Your profile URL",

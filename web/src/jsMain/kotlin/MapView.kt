@@ -858,9 +858,7 @@ fun MapView(
                 }
                 Div({
                     classes(AppStyles.tray, AppStyles.trayShadow)
-                    style {
-                        marginTop(.5.r)
-                        alignSelf(AlignSelf.Center)
+                    style { alignSelf(AlignSelf.Center)
                         if (filtersExpanded) {
                             width(100.percent)
                         }
@@ -981,8 +979,16 @@ fun MapView(
                                 if (petsFilter) append(appString { pets } + ", ")
                                 if (outdoorsFilter) append(appString { outdoors } + ", ")
                                 if (selectedLanguages.isNotEmpty()) append(selectedLanguages.joinToString() + ", ")
-                                if (ageMin != null || ageMax != null) append("Ages ${ageMin ?: 0}-${ageMax ?: 100}, ")
-                                if (groupSizeMin != null || groupSizeMax != null) append("Group size ${groupSizeMin ?: 1}-${groupSizeMax ?: 50}")
+                                if (ageMin != null || ageMax != null) {
+                                    val min = ageMin ?: 0
+                                    val max = ageMax ?: 100
+                                    append("${appString { ageRange }} ${if (min == max) min else "$min-$max"}, ")
+                                }
+                                if (groupSizeMin != null || groupSizeMax != null) {
+                                    val min = groupSizeMin ?: 1
+                                    val max = groupSizeMax ?: 20
+                                    append("${if (min == max) min else "$min-$max"} ${appString { people }}")
+                                }
                             }.trimEnd(' ', ',')
                             Span({
                                 style {
@@ -992,7 +998,7 @@ fun MapView(
                                     flex(1)
                                 }
                             }) {
-                                Text(summary.ifEmpty { "Filters" })
+                                Text(summary.ifEmpty { appString { filters } })
                             }
                             IconButton(
                                 name = "expand_more",

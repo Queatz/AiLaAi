@@ -65,9 +65,12 @@ fun ActivityItem(iconName: String, text: String, color: CSSColorValue? = null) {
             alignItems(AlignItems.Center)
             gap(.5.r)
             color?.let { color(it) }
+            fontWeight("bold")
         }
     }) {
-        Icon(iconName)
+        Icon(iconName) {
+            opacity(.5f)
+        }
         Text(text)
     }
 }

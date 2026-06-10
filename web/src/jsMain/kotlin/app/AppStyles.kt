@@ -797,7 +797,7 @@ class AppStyleSheet : StyleSheet() {
     val tray by style {
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.Column)
-        gap(1.r)
+        gap(.5.r)
         padding(1.r)
         property(
             "background-color",
