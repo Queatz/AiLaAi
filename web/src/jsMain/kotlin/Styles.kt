@@ -198,7 +198,7 @@ class MainStyleSheet : StyleSheet() {
         white = StyleManager.currentTheme?.light?.white?.let { Color(it) } ?: Color("#fff"),
         black = StyleManager.currentTheme?.light?.black?.let { Color(it) } ?: Color("#000"),
         gray = StyleManager.currentTheme?.light?.gray?.let { Color(it) } ?: Color("#808080"),
-        lightgray = StyleManager.currentTheme?.light?.lightgray?.let { Color(it) } ?: Color("#fafafa"),
+        lightgray = StyleManager.currentTheme?.light?.lightgray?.let { Color(it) } ?: Color("#e4e4e4"),
         darkgray = StyleManager.currentTheme?.light?.darkgray?.let { Color(it) } ?: Color("#242424"),
         dark = DarkColors(
             background = StyleManager.currentTheme?.dark?.background?.let { Color(it) }
@@ -536,7 +536,7 @@ class MainStyleSheet : StyleSheet() {
         cursor("pointer")
         property("inset", "0")
         borderRadius(2.r)
-        backgroundColor(Color("#e4e4e4"))
+        backgroundColor(colors.lightgray)
         property("transition", ".5s")
 
         dark(self) {

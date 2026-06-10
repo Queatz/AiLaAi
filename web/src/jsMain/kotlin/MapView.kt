@@ -40,6 +40,7 @@ import org.jetbrains.compose.web.css.AlignSelf
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.FlexWrap
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.alignItems
@@ -69,6 +70,7 @@ import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.css.flex
+import org.jetbrains.compose.web.css.flexWrap
 import org.jetbrains.compose.web.css.paddingBottom
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.paddingRight
@@ -188,9 +190,9 @@ fun MapView(
             altitude = altitude / 1000,
             search = searchText.notBlank ?: selectedCategory?.notBlank,
             public = true,
-            availableNow = availableNowFilter,
-            pets = petsFilter,
-            outdoors = outdoorsFilter,
+            availableNow = availableNowFilter.takeIf { it }, // null means both
+            pets = petsFilter.takeIf { it }, // null means both
+            outdoors = outdoorsFilter.takeIf { it }, // null means both
             languages = selectedLanguages.takeIf { it.isNotEmpty() },
             minAge = ageMin,
             maxAge = ageMax,
@@ -844,12 +846,17 @@ fun MapView(
                     }
                 }
                 Div({
-                    classes(AppStyles.tray)
+                    classes(AppStyles.tray, AppStyles.trayShadow)
                     style {
                         marginTop(.5.r)
                         alignSelf(AlignSelf.Center)
-                        width(100.percent)
+                        if (filtersExpanded) {
+                            width(100.percent)
+                        }
+                        maxWidth(100.percent)
                         boxSizing("border-box")
+                        overflow("hidden")
+                        borderRadius(1.5.r)
                     }
                     if (!filtersExpanded) {
                         onClick {
@@ -863,37 +870,47 @@ fun MapView(
                                 display(DisplayStyle.Flex)
                                 flexDirection(FlexDirection.Row)
                                 gap(1.r)
-                                alignItems(AlignItems.Center)
-                                property("flex-wrap", "wrap")
+                                alignItems(AlignItems.Start)
                             }
                         }) {
-                            components.LabeledSwitch(
-                                value = availableNowFilter,
-                                onValue = { availableNowFilter = it },
-                                onChange = { availableNowFilter = it },
-                                title = appString { availableNow }
-                            )
-                            components.LabeledSwitch(
-                                value = petsFilter,
-                                onValue = { petsFilter = it },
-                                onChange = { petsFilter = it },
-                                title = appString { pets }
-                            )
-                            components.LabeledSwitch(
-                                value = outdoorsFilter,
-                                onValue = { outdoorsFilter = it },
-                                onChange = { outdoorsFilter = it },
-                                title = appString { outdoors }
-                            )
+                            Div({
+                                style {
+                                    display(DisplayStyle.Flex)
+                                    flexDirection(FlexDirection.Row)
+                                    gap(1.r)
+                                    alignItems(AlignItems.Center)
+                                    property("flex-wrap", "wrap")
+                                    property("flex", "1")
+                                }
+                            }) {
+                                components.LabeledSwitch(
+                                    value = availableNowFilter,
+                                    onValue = { availableNowFilter = it },
+                                    onChange = { availableNowFilter = it },
+                                    title = appString { availableNow }
+                                )
+                                components.LabeledSwitch(
+                                    value = petsFilter,
+                                    onValue = { petsFilter = it },
+                                    onChange = { petsFilter = it },
+                                    title = appString { pets }
+                                )
+                                components.LabeledSwitch(
+                                    value = outdoorsFilter,
+                                    onValue = { outdoorsFilter = it },
+                                    onChange = { outdoorsFilter = it },
+                                    title = appString { outdoors }
+                                )
 
-                            if (allLanguages.isNotEmpty()) {
-                                app.components.MultiSelect(
-                                    selected = selectedLanguages,
-                                    onSelected = { selectedLanguages = it },
-                                    multiple = true
-                                ) {
-                                    allLanguages.forEach { lang ->
-                                        option(lang, lang)
+                                if (allLanguages.isNotEmpty()) {
+                                    app.components.MultiSelect(
+                                        selected = selectedLanguages,
+                                        onSelected = { selectedLanguages = it },
+                                        multiple = true
+                                    ) {
+                                        allLanguages.forEach { lang ->
+                                            option(lang, lang)
+                                        }
                                     }
                                 }
                             }
@@ -901,9 +918,6 @@ fun MapView(
                             IconButton(
                                 name = "expand_less",
                                 title = appString { collapse },
-                                styles = {
-                                    property("margin-left", "auto")
-                                }
                             ) {
                                 filtersExpanded = false
                             }
@@ -916,6 +930,7 @@ fun MapView(
                                 gap(1.5.r)
                                 paddingTop(.5.r)
                                 alignItems(AlignItems.Center)
+                                flexWrap(FlexWrap.Wrap)
                             }
                         }) {
                             components.RangeSlider(
@@ -951,17 +966,15 @@ fun MapView(
                             }
                         }) {
                             val summary = buildString {
-                                if (availableNowFilter) append(appString { availableNow } + " • ")
-                                if (petsFilter) append(appString { pets } + " • ")
-                                if (outdoorsFilter) append(appString { outdoors } + " • ")
-                                if (selectedLanguages.isNotEmpty()) append(selectedLanguages.joinToString() + " • ")
-                                if (ageMin != null || ageMax != null) append("Age ${ageMin ?: 0}-${ageMax ?: 100} • ")
-                                if (groupSizeMin != null || groupSizeMax != null) append("Group ${groupSizeMin ?: 1}-${groupSizeMax ?: 50}")
+                                if (availableNowFilter) append(appString { availableNow } + ", ")
+                                if (petsFilter) append(appString { pets } + ", ")
+                                if (outdoorsFilter) append(appString { outdoors } + ", ")
+                                if (selectedLanguages.isNotEmpty()) append(selectedLanguages.joinToString() + ", ")
+                                if (ageMin != null || ageMax != null) append("Ages ${ageMin ?: 0}-${ageMax ?: 100}, ")
+                                if (groupSizeMin != null || groupSizeMax != null) append("Group size ${groupSizeMin ?: 1}-${groupSizeMax ?: 50}")
                             }.trimEnd(' ', '•')
                             Span({
                                 style {
-                                    fontSize(14.px)
-                                    opacity(0.8)
                                     overflow("hidden")
                                     whiteSpace("nowrap")
                                     property("text-overflow", "ellipsis")
@@ -973,10 +986,6 @@ fun MapView(
                             IconButton(
                                 name = "expand_more",
                                 title = appString { expand },
-                                styles = {
-                                    property("border", "1px solid ${if (isDarkMode) Styles.colors.dark.outline else Styles.colors.outline}")
-                                    borderRadius(2.r)
-                                }
                             ) {
                                 filtersExpanded = true
                             }

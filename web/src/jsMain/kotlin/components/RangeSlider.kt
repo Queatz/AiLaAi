@@ -1,13 +1,13 @@
 package components
 
-import androidx.compose.runtime.Composable
-import app.compose.rememberDarkMode
-import org.jetbrains.compose.web.attributes.InputType
-import org.jetbrains.compose.web.attributes.max
-import org.jetbrains.compose.web.attributes.min
-import org.jetbrains.compose.web.attributes.step
+import androidx.compose.runtime.*
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
+import app.compose.rememberDarkMode
+import org.w3c.dom.HTMLElement
+import org.w3c.dom.Touch
+import org.w3c.dom.events.*
+import Styles
 
 @Composable
 fun RangeSlider(
@@ -19,26 +19,102 @@ fun RangeSlider(
     label: String? = null
 ) {
     val darkMode = rememberDarkMode()
+    var dragging by remember { mutableStateOf<Handle?>(null) }
+    
+    // We need a ref to the slider container to calculate positions
+    val containerRef = remember { mutableStateOf<HTMLElement?>(null) }
+
+    fun getPercentFromPointer(clientX: Double): Double {
+        val rect = containerRef.value?.getBoundingClientRect() ?: return 0.0
+        val x = clientX - rect.left
+        return (x / rect.width * 100).coerceIn(0.0, 100.0)
+    }
+
+    fun getValueFromPercent(percent: Double): Int {
+        val range = maxLimit - minLimit
+        return (minLimit + (percent / 100 * range)).toInt()
+    }
+
     Div({
         style {
             display(DisplayStyle.Flex)
             flexDirection(FlexDirection.Column)
             gap(0.5.cssRem)
-            width(100.percent)
-            padding(0.5.cssRem)
             minWidth(120.px)
+            flexGrow(1)
+            padding(0.5.cssRem)
+            position(Position.Relative)
         }
+        // Handle global drag
+        onMouseMove { event ->
+            dragging?.let { handle ->
+                val percent = getPercentFromPointer(event.clientX.toDouble())
+                val value = getValueFromPercent(percent)
+                
+                when (handle) {
+                    Handle.MIN -> {
+                        if (value >= maxValue) {
+                            onValueChange(value, value)
+                        } else {
+                            onValueChange(value, maxValue)
+                        }
+                    }
+                    Handle.MAX -> {
+                        if (value <= minValue) {
+                            onValueChange(value, value)
+                        } else {
+                            onValueChange(minValue, value)
+                        }
+                    }
+                }
+            }
+        }
+        onMouseUp { dragging = null }
+        onMouseLeave { dragging = null }
+        onTouchMove { event ->
+            dragging?.let { handle ->
+                val touch = event.touches.item(0) as? Touch
+                touch?.let {
+                    val percent = getPercentFromPointer(it.clientX.toDouble())
+                    val value = getValueFromPercent(percent)
+                    
+                    when (handle) {
+                        Handle.MIN -> {
+                            if (value >= maxValue) {
+                                onValueChange(value, value)
+                            } else {
+                                onValueChange(value, maxValue)
+                            }
+                        }
+                        Handle.MAX -> {
+                            if (value <= minValue) {
+                                onValueChange(value, value)
+                            } else {
+                                onValueChange(minValue, value)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        onTouchEnd { dragging = null }
     }) {
         if (label != null) {
             Span({
                 style {
                     fontSize(14.px)
                     opacity(0.8)
-                    marginBottom(4.px)
                     color(if (darkMode) Color("white") else Color("black"))
+                    whiteSpace("nowrap")
+                    overflow("hidden")
+                    property("text-overflow", "ellipsis")
+                    position(Position.Absolute)
+                    top(0.px)
+                    left(0.5.cssRem)
+                    right(0.5.cssRem)
                 }
             }) {
-                Text("$label • ")
+                Text("$label   ")
                 B {
                     Text("$minValue - $maxValue")
                 }
@@ -46,91 +122,86 @@ fun RangeSlider(
         }
 
         Div({
+            ref {
+                containerRef.value = it
+                onDispose { containerRef.value = null }
+            }
             style {
                 position(Position.Relative)
                 height(24.px)
                 display(DisplayStyle.Flex)
                 alignItems(AlignItems.Center)
+                // Thick track background
+                property("touch-action", "none")
+                marginTop(24.px)
             }
         }) {
             // Track background
             Div({
                 style {
                     position(Position.Absolute)
-                    height(4.px)
+                    height(6.px)
                     width(100.percent)
-                    backgroundColor(if (darkMode) Color("#444") else Color("#e0e0e0"))
-                    borderRadius(2.px)
+                    backgroundColor(if (darkMode) Styles.colors.dark.surface else Styles.colors.lightgray)
+                    borderRadius(6.px)
                 }
             })
 
-            // Active track (the blue part between knobs)
+            // Active track
+            val range = maxLimit - minLimit
+            val leftPercent = ((minValue - minLimit).toDouble() / range * 100).coerceIn(0.0, 100.0)
+            val rightPercent = ((maxValue - minLimit).toDouble() / range * 100).coerceIn(0.0, 100.0)
+            val widthPercent = rightPercent - leftPercent
+            val heightValue = 18 - (widthPercent / 100 * 12)
+
             Div({
                 style {
                     position(Position.Absolute)
-                    height(6.px)
-                    val range = maxLimit - minLimit
-                    val leftPercent = ((minValue - minLimit).toDouble() / range * 100).coerceIn(0.0, 100.0)
-                    val rightPercent = ((maxValue - minLimit).toDouble() / range * 100).coerceIn(0.0, 100.0)
+                    height(heightValue.px)
                     left(leftPercent.percent)
-                    width((rightPercent - leftPercent).percent)
-                    backgroundColor(Color("#007bff"))
-                    borderRadius(3.px)
-                    property("z-index", "1")
+                    width(widthPercent.percent)
+                    backgroundColor(if (darkMode) Styles.colors.dark.outline else Styles.colors.outline)
+                    borderRadius(heightValue.px)
                 }
             })
 
-            // Hidden range inputs that act as knobs
-            Input(InputType.Range) {
+            // Min handle
+            Div({
                 style {
                     position(Position.Absolute)
-                    width(100.percent)
-                    height(0.px)
-                    property("-webkit-appearance", "none")
-                    property("appearance", "none")
-                    backgroundColor(Color("transparent"))
-                    property("z-index", "3")
-                    outline("none")
-                    property("touch-action", "none")
-                    
-                    // Style the thumb
-                    property("&::-webkit-slider-thumb", "pointer-events: auto; -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #007bff; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.3);")
-                    property("&::-moz-range-thumb", "pointer-events: auto; width: 24px; height: 24px; border-radius: 50%; background: #007bff; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.3);")
+                    height(24.px)
+                    width(24.px)
+                    borderRadius(50.percent)
+                    backgroundColor(if (darkMode) Styles.colors.white else Styles.colors.primary)
+                    left(leftPercent.percent)
+                    marginLeft((-12).px)
+                    cursor("pointer")
+                    property("z-index", "2")
                 }
-                min(minLimit.toString())
-                max(maxLimit.toString())
-                step(1)
-                value(minValue)
-                onInput {
-                    val newValue = it.value?.toInt() ?: minValue
-                    onValueChange(minOf(newValue, maxValue), maxOf(newValue, maxValue))
-                }
-            }
+                onMouseDown { dragging = Handle.MIN }
+                onTouchStart { dragging = Handle.MIN }
+            })
 
-            Input(InputType.Range) {
+            // Max handle
+            Div({
                 style {
                     position(Position.Absolute)
-                    width(100.percent)
-                    height(0.px)
-                    property("-webkit-appearance", "none")
-                    property("appearance", "none")
-                    backgroundColor(Color("transparent"))
-                    property("z-index", "4")
-                    outline("none")
-                    property("touch-action", "none")
-
-                    property("&::-webkit-slider-thumb", "pointer-events: auto; -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #007bff; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.3);")
-                    property("&::-moz-range-thumb", "pointer-events: auto; width: 24px; height: 24px; border-radius: 50%; background: #007bff; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.3);")
+                    height(24.px)
+                    width(24.px)
+                    borderRadius(50.percent)
+                    backgroundColor(if (darkMode) Styles.colors.white else Styles.colors.primary)
+                    left(rightPercent.percent)
+                    marginLeft((-12).px)
+                    cursor("pointer")
+                    property("z-index", "2")
                 }
-                min(minLimit.toString())
-                max(maxLimit.toString())
-                step(1)
-                value(maxValue)
-                onInput {
-                    val newValue = it.value?.toInt() ?: maxValue
-                    onValueChange(minOf(minValue, newValue), maxOf(minValue, newValue))
-                }
-            }
+                onMouseDown { dragging = Handle.MAX }
+                onTouchStart { dragging = Handle.MAX }
+            })
         }
     }
+}
+
+private enum class Handle {
+    MIN, MAX
 }

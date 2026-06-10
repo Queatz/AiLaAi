@@ -790,6 +790,10 @@ class AppStyleSheet : StyleSheet() {
         }
     }
 
+    val trayShadow by style {
+        property("box-shadow", "0 6px 12px rgba(0, 0, 0, 0.2)")
+    }
+
     val tray by style {
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.Column)
