@@ -280,9 +280,6 @@ fun Db.explore(
                 ) and (
                     count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::years)}) == 0
                     or year in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::years)} || [])
-                ) and (
-                    count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::hours)}) == 0
-                    or hour in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::hours)} || [])
                 ))
                 and (
                     @search == null 

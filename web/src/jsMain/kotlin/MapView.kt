@@ -37,7 +37,6 @@ import lib.mapboxgl
 import lib.mapboxgl.MarkerOptions
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.AlignSelf
-import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.FlexWrap
@@ -899,7 +898,7 @@ fun MapView(
                                     value = availableNowFilter,
                                     onValue = { availableNowFilter = it },
                                     onChange = { availableNowFilter = it },
-                                    title = appString { availableNow }
+                                    title = appString { availableToday }
                                 )
                                 components.LabeledSwitch(
                                     value = petsFilter,
@@ -978,7 +977,7 @@ fun MapView(
                             }
                         }) {
                             val summary = buildString {
-                                if (availableNowFilter) append(appString { availableNow } + ", ")
+                                if (availableNowFilter) append(appString { availableToday } + ", ")
                                 if (petsFilter) append(appString { pets } + ", ")
                                 if (outdoorsFilter) append(appString { outdoors } + ", ")
                                 if (selectedLanguages.isNotEmpty()) append(selectedLanguages.joinToString() + ", ")

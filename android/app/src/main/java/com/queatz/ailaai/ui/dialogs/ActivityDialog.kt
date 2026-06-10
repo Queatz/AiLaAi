@@ -24,6 +24,7 @@ import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Activity
 import com.queatz.db.Reminder
+import java.util.TimeZone
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
@@ -46,8 +47,11 @@ fun ActivityDialog(
     var languages by rememberStateOf(activity?.languages?.joinToString(", ") ?: "")
     var duration by rememberStateOf(activity?.duration ?: 0L)
     var schedule by rememberStateOf(activity?.schedule)
+    var timezone by rememberStateOf(activity?.timezone ?: TimeZone.getDefault().id)
+    var utcOffset by rememberStateOf(activity?.utcOffset ?: (TimeZone.getDefault().rawOffset.toDouble() / 3600000.0))
     var showScheduleDialog by rememberStateOf(false)
     var showDurationDialog by rememberStateOf(false)
+    var showTimezoneDialog by rememberStateOf(false)
     var showRemoveConfirmation by rememberStateOf(false)
 
     val scrollState = rememberScrollState()
@@ -74,6 +78,21 @@ fun ActivityDialog(
             onDuration = {
                 duration = it
                 showDurationDialog = false
+            }
+        )
+    }
+
+    if (showTimezoneDialog) {
+        ChooseTimezoneDialog(
+            onDismissRequest = { showTimezoneDialog = false },
+            preselect = timezone,
+            onTimezone = {
+                if (it != null) {
+                    timezone = it
+                    val tz = TimeZone.getTimeZone(it)
+                    utcOffset = tz.rawOffset.toDouble() / 3600000.0
+                }
+                showTimezoneDialog = false
             }
         )
     }
@@ -181,6 +200,13 @@ fun ActivityDialog(
                 }
 
                 OutlinedButton(
+                    onClick = { showTimezoneDialog = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(timezone)
+                }
+
+                OutlinedButton(
                     onClick = { showScheduleDialog = true },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -224,7 +250,9 @@ fun ActivityDialog(
                             duration = duration.takeIf { it > 0 },
                             pets = pets,
                             outdoors = outdoors,
-                            schedule = schedule
+                            schedule = schedule,
+                            timezone = timezone,
+                            utcOffset = utcOffset
                         ))
                         onDismissRequest()
                     }

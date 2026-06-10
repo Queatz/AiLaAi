@@ -133,10 +133,15 @@ object Strings {
         vn = "Thú cưng",
         ru = "Домашние животные"
     )
-    val availableNow = Translation(
-        en = "Available now",
-        vn = "Sẵn sàng ngay",
-        ru = "Доступно сейчас"
+    val availableToday = Translation(
+        en = "Available today",
+        vn = "Sẵn sàng hôm nay",
+        ru = "Доступно сегодня"
+    )
+    val notAvailableToday = Translation(
+        en = "Not available today",
+        vn = "Không có sẵn hôm nay",
+        ru = "Не доступно сегодня"
     )
     val deleteThisMessage = Translation(
         en = "Delete this message?",
