@@ -143,6 +143,11 @@ object Strings {
         vn = "Không có sẵn hôm nay",
         ru = "Не доступно сегодня"
     )
+    val todayInline = Translation(
+        en = "today",
+        vn = "hôm nay",
+        ru = "сегодня"
+    )
     val deleteThisMessage = Translation(
         en = "Delete this message?",
         vn = "Xóa tin nhắn này?",
@@ -2426,6 +2431,86 @@ object Strings {
         en = "Mark as not done",
         vn = "Đánh dấu là chưa xong",
         ru = "Отметить как невыполненное"
+    )
+    val durationMinutes = Translation(
+        en = "Duration: %1\$s minutes",
+        vn = "Thời lượng: %1\$s phút",
+        ru = "Продолжительность: %1\$s минут"
+    )
+    val ageRangeValue = Translation(
+        en = "Age: %1\$s - %2\$s",
+        vn = "Độ tuổi: %1\$s - %2\$s",
+        ru = "Возраст: %1\$s - %2\$s"
+    )
+    val ageMinValue = Translation(
+        en = "Age: %1\$s+",
+        vn = "Độ tuổi: %1\$s+",
+        ru = "Возраст: %1\$s+"
+    )
+    val ageMaxValue = Translation(
+        en = "Age: up to %1\$s",
+        vn = "Độ tuổi: tối đa %1\$s",
+        ru = "Возраст: до %1\$s"
+    )
+    val groupSizeRangeValue = Translation(
+        en = "Group size: %1\$s - %2\$s",
+        vn = "Kích thước nhóm: %1\$s - %2\$s",
+        ru = "Размер группы: %1\$s - %2\$s"
+    )
+    val groupSizeMinValue = Translation(
+        en = "Group size: %1\$s+",
+        vn = "Kích thước nhóm: %1\$s+",
+        ru = "Размер группы: %1\$s+"
+    )
+    val groupSizeMaxValue = Translation(
+        en = "Group size: up to %1\$s",
+        vn = "Kích thước nhóm: tối đa %1\$s",
+        ru = "Размер группы: до %1\$s"
+    )
+    val petsAllowed = Translation(
+        en = "Pets allowed",
+        vn = "Cho phép thú cưng",
+        ru = "Разрешены питомцы"
+    )
+    val noPets = Translation(
+        en = "No pets",
+        vn = "Không có thú cưng",
+        ru = "Без питомцев"
+    )
+    val languagesValue = Translation(
+        en = "Languages: %1\$s",
+        vn = "Ngôn ngữ: %1\$s",
+        ru = "Языки: %1\$s"
+    )
+    val activityOutdoors = Translation(
+        en = "Outdoors",
+        vn = "Ngoài trời",
+        ru = "На улице"
+    )
+    val activityIndoors = Translation(
+        en = "Indoors",
+        vn = "Trong nhà",
+        ru = "В помещении"
+    )
+    val availableTodayFallback = Translation(
+        en = "Available today",
+        vn = "Có sẵn hôm nay",
+        ru = "Доступно сегодня"
+    )
+    val amLabel = Translation(
+        en = "a.m.",
+        vn = "sáng",
+        ru = "утра"
+    )
+    val pmLabel = Translation(
+        en = "p.m.",
+        vn = "chiều",
+        ru = "вечера"
+    )
+    val timeToSeparator = Translation(
+        en = " to ",
+        vn = " đến ",
+        ru = " до "
     )
     
 }

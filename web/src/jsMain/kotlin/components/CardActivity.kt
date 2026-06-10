@@ -3,7 +3,9 @@ package components
 import Styles
 import androidx.compose.runtime.Composable
 import appString
+import application
 import com.queatz.db.Activity
+import format
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -19,21 +21,21 @@ fun CardActivity(activity: Activity) {
         if (schedule != null) {
             val isAvailable = isAvailableToday(activity)
             if (isAvailable) {
-                ActivityItem("calendar_today", formatSchedule(activity) + " " + appString { today })
+                ActivityItem("calendar_today", formatSchedule(activity) + " " + appString { todayInline })
             } else {
                 ActivityItem("calendar_today", appString { notAvailableToday }, Styles.colors.gray)
             }
         }
         activity.duration?.let {
-            ActivityItem("schedule", "Duration: ${it / 1000 / 60} minutes")
+            ActivityItem("schedule", appString { durationMinutes }.format((it / 1000 / 60).toString()))
         }
         val minAge = activity.minAge
         val maxAge = activity.maxAge
         if (minAge != null || maxAge != null) {
             val text = when {
-                minAge != null && maxAge != null -> "Age: $minAge - $maxAge"
-                minAge != null -> "Age: $minAge+"
-                else -> "Age: up to $maxAge"
+                minAge != null && maxAge != null -> appString { ageRangeValue }.format(minAge.toString(), maxAge.toString())
+                minAge != null -> appString { ageMinValue }.format(minAge.toString())
+                else -> appString { ageMaxValue }.format(maxAge.toString())
             }
             ActivityItem("face", text)
         }
@@ -41,17 +43,17 @@ fun CardActivity(activity: Activity) {
         val maxGroup = activity.maxGroupSize
         if (minGroup != null || maxGroup != null) {
             val text = when {
-                minGroup != null && maxGroup != null -> "Group size: $minGroup - $maxGroup"
-                minGroup != null -> "Group size: $minGroup+"
-                else -> "Group size: up to $maxGroup"
+                minGroup != null && maxGroup != null -> appString { groupSizeRangeValue }.format(minGroup.toString(), maxGroup.toString())
+                minGroup != null -> appString { groupSizeMinValue }.format(minGroup.toString())
+                else -> appString { groupSizeMaxValue }.format(maxGroup.toString())
             }
             ActivityItem("group", text)
         }
-        activity.pets?.let { ActivityItem("pets", if (it) "Pets allowed" else "No pets") }
+        activity.pets?.let { ActivityItem("pets", if (it) appString { petsAllowed } else appString { noPets }) }
         activity.languages?.takeIf { it.isNotEmpty() }?.let {
-            ActivityItem("language", "Languages: ${it.joinToString(", ")}")
+            ActivityItem("language", appString { languagesValue }.format(it.joinToString(", ")))
         }
-        activity.outdoors?.let { ActivityItem("nature", if (it) "Outdoors" else "Indoors") }
+        activity.outdoors?.let { ActivityItem("nature", if (it) appString { activityOutdoors } else appString { activityIndoors }) }
     }
 }
 
@@ -99,38 +101,42 @@ fun isAvailableToday(activity: Activity): Boolean {
 
 fun formatSchedule(activity: Activity): String {
     val hours = activity.schedule?.hours
-    if (hours.isNullOrEmpty()) return "Available today"
+    if (hours.isNullOrEmpty()) return application.appString { availableTodayFallback }
 
     val activityOffset = activity.utcOffset ?: 0.0
     val browserOffsetMinutes = kotlin.js.Date().getTimezoneOffset()
     val browserOffsetHours = -browserOffsetMinutes / 60.0
     val offsetDiff = browserOffsetHours - activityOffset
 
-    val startHour = hours.first()
-    val localStartHour = startHour + offsetDiff
-    val normalizedStartHour = ((localStartHour % 24) + 24) % 24
-
-    val startHourInt = normalizedStartHour.toInt()
-    val startMinutes = ((normalizedStartHour - startHourInt) * 60).toInt()
-
-    val displayStartHour = if (startHourInt == 0) 12 else if (startHourInt > 12) startHourInt - 12 else startHourInt
-    val startAmPm = if (startHourInt < 12) "a.m." else "p.m."
-    val startTime = "$displayStartHour:${startMinutes.toString().padStart(2, '0')} $startAmPm"
-
     val durationMs = activity.duration
-    if (durationMs == null) {
-        return startTime
-    } else {
-        val endLocalHour = localStartHour + (durationMs / 1000.0 / 60.0 / 60.0)
-        val normalizedEndHour = ((endLocalHour % 24) + 24) % 24
 
-        val endHourInt = normalizedEndHour.toInt()
-        val endMinutes = ((normalizedEndHour - endHourInt) * 60).toInt()
+    val formattedTimes = hours.map { startHour ->
+        val localStartHour = startHour + offsetDiff
+        val normalizedStartHour = ((localStartHour % 24) + 24) % 24
 
-        val displayEndHour = if (endHourInt == 0) 12 else if (endHourInt > 12) endHourInt - 12 else endHourInt
-        val endAmPm = if (endHourInt < 12) "a.m." else "p.m."
+        val startHourInt = normalizedStartHour.toInt()
+        val startMinutes = ((normalizedStartHour - startHourInt) * 60).toInt()
 
-        val endTime = "$displayEndHour:${endMinutes.toString().padStart(2, '0')} $endAmPm"
-        return "$startTime to $endTime"
+        val displayStartHour = if (startHourInt == 0) 12 else if (startHourInt > 12) startHourInt - 12 else startHourInt
+        val startAmPm = if (startHourInt < 12) application.appString { amLabel } else application.appString { pmLabel }
+        val startTime = "$displayStartHour:${startMinutes.toString().padStart(2, '0')} $startAmPm"
+
+        if (durationMs == null) {
+            startTime
+        } else {
+            val endLocalHour = localStartHour + (durationMs / 1000.0 / 60.0 / 60.0)
+            val normalizedEndHour = ((endLocalHour % 24) + 24) % 24
+
+            val endHourInt = normalizedEndHour.toInt()
+            val endMinutes = ((normalizedEndHour - endHourInt) * 60).toInt()
+
+            val displayEndHour = if (endHourInt == 0) 12 else if (endHourInt > 12) endHourInt - 12 else endHourInt
+            val endAmPm = if (endHourInt < 12) application.appString { amLabel } else application.appString { pmLabel }
+
+            val endTime = "$displayEndHour:${endMinutes.toString().padStart(2, '0')} $endAmPm"
+            "$startTime${application.appString { timeToSeparator }}$endTime"
+        }
     }
+
+    return formattedTimes.joinToString(", ")
 }

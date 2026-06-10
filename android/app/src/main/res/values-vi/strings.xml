@@ -1070,4 +1070,18 @@
     <string name="active_now">Đang hoạt động</string>
     <string name="no_signals">Không có tín hiệu.</string>
     <string name="send_a_signal">Gửi tín hiệu</string>
+    <string name="today_inline">hôm nay</string>
+    <string name="not_available_today">Không có sẵn hôm nay</string>
+    <string name="duration_minutes">%1$s phút</string>
+    <string name="age_range_value">Độ tuổi %1$s-%2$s</string>
+    <string name="age_min_value">Độ tuổi %1$s+</string>
+    <string name="age_max_value">Độ tuổi tối đa %1$s</string>
+    <string name="group_size_range_value">Kích cỡ nhóm %1$s-%2$s</string>
+    <string name="group_size_min_value">Kích cỡ nhóm %1$s+</string>
+    <string name="group_size_max_value">Kích cỡ nhóm tối đa %1$s</string>
+    <string name="pets_allowed">Cho phép thú cưng</string>
+    <string name="no_pets">Không có thú cưng</string>
+    <string name="languages_value">Ngôn ngữ: %1$s</string>
+    <string name="activity_outdoors">Ngoài trời</string>
+    <string name="activity_indoors">Trong nhà</string>
 </resources>

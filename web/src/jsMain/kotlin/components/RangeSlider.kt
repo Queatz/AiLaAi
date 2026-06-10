@@ -73,7 +73,7 @@ fun RangeSlider(
         onMouseLeave { dragging = null }
         onTouchMove { event ->
             dragging?.let { handle ->
-                val touch = event.touches.item(0) as? Touch
+                val touch = event.touches.item(0)
                 touch?.let {
                     val percent = getPercentFromPointer(it.clientX.toDouble())
                     val value = getValueFromPercent(percent)

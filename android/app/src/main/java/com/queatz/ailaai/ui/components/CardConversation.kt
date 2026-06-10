@@ -46,6 +46,7 @@ import com.queatz.ailaai.extensions.latLng
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.services.authors
 import com.queatz.ailaai.ui.theme.pad
+import com.queatz.db.Activity
 import com.queatz.db.Card
 import com.queatz.db.Person
 import kotlin.math.ceil
@@ -189,6 +190,10 @@ fun CardConversation(
                     interactable = interactable
                 )
             }
+        }
+
+        card.activity?.let {
+            CardActivity(it)
         }
 
         if (current.message.isNotBlank()) {
