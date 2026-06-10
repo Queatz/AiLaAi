@@ -52,6 +52,7 @@ import org.jetbrains.compose.web.css.backgroundSize
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.boxSizing
 import org.jetbrains.compose.web.css.color
+import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexShrink
@@ -87,6 +88,7 @@ import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
+import web.cssom.Cursor
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -672,7 +674,7 @@ fun MapView(
                                 justifyContent(JustifyContent.SpaceBetween)
                             }
                         }) {
-                            Text(appString { pages })
+                            Text(appString { explore })
                             IconButton(
                                 name = if (expanded) "expand_less" else "expand_more",
                                 title = if (expanded) appString { collapse } else appString { expand },
@@ -866,6 +868,10 @@ fun MapView(
                         boxSizing("border-box")
                         overflow("hidden")
                         borderRadius(1.5.r)
+
+                        if (!filtersExpanded) {
+                            cursor("pointer")
+                        }
                     }
                     if (!filtersExpanded) {
                         onClick {
@@ -948,6 +954,9 @@ fun MapView(
                                 minLimit = 0,
                                 maxLimit = 100,
                                 label = appString { ageRange },
+                                steps = remember {
+                                    (0..25).toList() + (30..50 step 5).toList() + (60..100 step 10).toList()
+                                },
                                 onValueChange = { min, max ->
                                     ageMin = min.takeIf { it > 0 }
                                     ageMax = max.takeIf { it < 100 }

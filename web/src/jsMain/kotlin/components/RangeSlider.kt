@@ -16,7 +16,8 @@ fun RangeSlider(
     minLimit: Int,
     maxLimit: Int,
     onValueChange: (Int, Int) -> Unit,
-    label: String? = null
+    label: String? = null,
+    steps: List<Int>? = null
 ) {
     val darkMode = rememberDarkMode()
     var dragging by remember { mutableStateOf<Handle?>(null) }
@@ -31,8 +32,23 @@ fun RangeSlider(
     }
 
     fun getValueFromPercent(percent: Double): Int {
+        if (steps != null && steps.isNotEmpty()) {
+            val index = (percent / 100 * (steps.size - 1)).toInt().coerceIn(0, steps.size - 1)
+            return steps[index]
+        }
         val range = maxLimit - minLimit
         return (minLimit + (percent / 100 * range)).toInt()
+    }
+
+    fun getPercentFromValue(value: Int): Double {
+        if (steps != null && steps.isNotEmpty()) {
+            val index = steps.indexOf(value).takeIf { it != -1 } ?: steps.mapIndexed { i, v -> i to v }
+                .minByOrNull { kotlin.math.abs(it.second - value) }?.first ?: 0
+            return (index.toDouble() / (steps.size - 1) * 100).coerceIn(0.0, 100.0)
+        }
+        val range = maxLimit - minLimit
+        if (range == 0) return 0.0
+        return ((value - minLimit).toDouble() / range * 100).coerceIn(0.0, 100.0)
     }
 
     Div({
@@ -148,9 +164,8 @@ fun RangeSlider(
             })
 
             // Active track
-            val range = maxLimit - minLimit
-            val leftPercent = ((minValue - minLimit).toDouble() / range * 100).coerceIn(0.0, 100.0)
-            val rightPercent = ((maxValue - minLimit).toDouble() / range * 100).coerceIn(0.0, 100.0)
+            val leftPercent = getPercentFromValue(minValue)
+            val rightPercent = getPercentFromValue(maxValue)
             val widthPercent = rightPercent - leftPercent
             val heightValue = 18.0 - (widthPercent / 100.0 * 12.0)
 
