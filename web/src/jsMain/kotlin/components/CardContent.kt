@@ -106,7 +106,7 @@ fun CardContent(
         card.activity?.let {
             CardActivity(it)
         }
-        // todo: card tools
+        CardToolbar(card)
         cardConversation?.message?.notBlank?.let { message ->
             Div({
                 style {

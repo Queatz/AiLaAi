@@ -165,7 +165,8 @@ class Card(
     var activity: Activity? = null,
 
     // Transient from db
-    var cardCount: Int? = null
+    var cardCount: Int? = null,
+    var saved: Boolean? = null
 ) : Model()
 
 @Serializable

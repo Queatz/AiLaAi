@@ -100,6 +100,7 @@
     <string name="max_age">Max age</string>
     <string name="min_group_size">Min group size</string>
     <string name="max_group_size">Max group size</string>
+    <string name="directions">Directions</string>
     <string name="pets">Pets</string>
     <string name="languages">Languages</string>
     <string name="outdoors">Outdoors</string>

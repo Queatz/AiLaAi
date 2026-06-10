@@ -45,6 +45,7 @@ fun IconButton(
     backgroundColor: CSSColorValue? = null,
     isLoading: Boolean = false,
     small: Boolean = false,
+    vertical: Boolean = false,
     circular: Boolean = false,
     enabled: Boolean = true,
     styles: (StyleScope.() -> Unit)? = null,
@@ -80,6 +81,10 @@ fun IconButton(
 
         focusable()
         style {
+            if (vertical) {
+                flexDirection(FlexDirection.Column)
+            }
+
             if (backgroundColor != null) {
                 backgroundColor(backgroundColor)
             }
@@ -131,10 +136,12 @@ fun IconButton(
         if (text != null) {
             Span({
                 style {
-                    if (isReversed) {
-                        marginRight(.5.r)
-                    } else {
-                        marginLeft(.5.r)
+                    if (!vertical) {
+                        if (isReversed) {
+                            marginRight(.5.r)
+                        } else {
+                            marginLeft(.5.r)
+                        }
                     }
                 }
             }) {

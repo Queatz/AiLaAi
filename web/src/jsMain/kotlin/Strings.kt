@@ -113,6 +113,16 @@ object Strings {
         vn = "Quy mô nhóm",
         ru = "Размер группы"
     )
+    val directions = Translation(
+        en = "Directions",
+        vn = "Chỉ đường",
+        ru = "Маршруты"
+    )
+    val share = Translation(
+        en = "Share",
+        vn = "Chia sẻ",
+        ru = "Поделиться"
+    )
     val ageRange = Translation(
         en = "Ages",
         vn = "Độ tuổi",

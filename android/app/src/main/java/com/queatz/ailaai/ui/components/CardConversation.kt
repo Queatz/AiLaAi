@@ -1,5 +1,7 @@
 package com.queatz.ailaai.ui.components
 
+import android.content.Intent
+import android.net.Uri
 import android.view.MotionEvent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
@@ -12,6 +14,10 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Message
+import androidx.compose.material.icons.outlined.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.Directions
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,12 +29,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
@@ -36,7 +44,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import at.bluesource.choicesdk.maps.common.LatLng
+import app.ailaai.api.saveCard
+import app.ailaai.api.unsaveCard
 import com.queatz.ailaai.R
+import com.queatz.ailaai.data.api
+import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.approximate
 import com.queatz.ailaai.extensions.distance
@@ -49,6 +61,7 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Activity
 import com.queatz.db.Card
 import com.queatz.db.Person
+import kotlinx.coroutines.launch
 import kotlin.math.ceil
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -194,6 +207,69 @@ fun CardConversation(
 
         card.activity?.let {
             CardActivity(it)
+        }
+
+        val context = LocalContext.current
+        val scope = rememberCoroutineScope()
+        var isSaving by remember { mutableStateOf(false) }
+        var isSaved by remember(card.saved) { mutableStateOf(card.saved == true) }
+
+        Toolbar(
+            singleLine = true,
+            modifier = Modifier.padding(top = 1.pad)
+        ) {
+            card.geo?.let { geo ->
+                if (geo.size >= 2) {
+                    item(
+                        icon = Icons.Outlined.Directions,
+                        name = stringResource(R.string.directions),
+                        onClick = {
+                            val lat = geo[0]
+                            val lng = geo[1]
+                            val name = card.name ?: ""
+                            val uri = Uri.parse("geo:0,0?q=$lat,$lng($name)")
+                            val intent = Intent(Intent.ACTION_VIEW, uri)
+                            context.startActivity(intent)
+                        }
+                    )
+                }
+            }
+            item(
+                icon = Icons.Outlined.Share,
+                name = stringResource(R.string.share),
+                onClick = {
+                    val url = "$appDomain/page/${card.id ?: card.url ?: ""}"
+                    val intent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, url)
+                    }
+                    context.startActivity(Intent.createChooser(intent, null))
+                }
+            )
+            item(
+                icon = if (isSaved) Icons.Outlined.Bookmark else Icons.Outlined.BookmarkBorder,
+                name = if (isSaved) stringResource(R.string.saved) else stringResource(R.string.save),
+                isLoading = isSaving,
+                onClick = {
+                    scope.launch {
+                        isSaving = true
+                        val success = if (isSaved) {
+                            var ok = false
+                            api.unsaveCard(card.id!!) { ok = true }
+                            ok
+                        } else {
+                            var ok = false
+                            api.saveCard(card.id!!) { ok = true }
+                            ok
+                        }
+                        if (success) {
+                            isSaved = !isSaved
+                            card.saved = isSaved
+                        }
+                        isSaving = false
+                    }
+                }
+            )
         }
 
         // todo: card tools
