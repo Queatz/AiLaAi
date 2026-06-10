@@ -39,3 +39,6 @@ This document outlines the core guidelines for development in the Junie project.
     - Always create new components in their own files
     - Always put function arguments on a new line
     - Always use named arguments
+
+3. Git
+    - Add newly created files to git
