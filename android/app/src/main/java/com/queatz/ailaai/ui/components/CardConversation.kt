@@ -196,6 +196,8 @@ fun CardConversation(
             CardActivity(it)
         }
 
+        // todo: card tools
+
         if (current.message.isNotBlank()) {
             SelectionContainer(
                 modifier = Modifier

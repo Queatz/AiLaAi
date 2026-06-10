@@ -104,26 +104,30 @@ fun CardListItem(
         }) {
             val collaborators = card.collaborators.orEmpty()
 
-            if (collaborators.isNotEmpty()) {
-                val items = buildList {
-                    collaborators.forEach { id ->
-                        val p = people?.find { it.id == id } ?: loadedPeople.find { it.id == id }
-                        add(GroupPhotoItem(p?.photo, p?.name))
+            if (!showPhoto) {
+                if (collaborators.isNotEmpty()) {
+                    val items = buildList {
+                        collaborators.forEach { id ->
+                            val p = people?.find { it.id == id } ?: loadedPeople.find { it.id == id }
+                            add(GroupPhotoItem(p?.photo, p?.name))
+                        }
                     }
+                    GroupPhoto(items = items, size = 54.px)
+                } else {
+                    ProfilePhoto(
+                        photo = card.photo,
+                        name = card.name ?: appString { newCard },
+                        size = 54.px,
+                        onBackground = onBackground,
+                    )
                 }
-                GroupPhoto(items = items, size = 54.px)
-            } else {
-                ProfilePhoto(
-                    photo = card.photo,
-                    name = card.name ?: appString { newCard },
-                    size = 54.px,
-                    onBackground = onBackground,
-                )
             }
 
             Div({
                 style {
-                    marginLeft(1.r)
+                    if (!showPhoto) {
+                        marginLeft(1.r)
+                    }
                     property("max-width", "calc(100% - 4rem)")
                 }
             }) {

@@ -59,32 +59,34 @@ suspend fun activityDialog(
             )
         },
         extraButtons = { resolve ->
-            val scope = rememberCoroutineScope()
-            IconButton(
-                name = "delete",
-                title = application.appString { delete },
-                onClick = {
-                    scope.launch {
-                        val result = dialog(
-                            title = application.appString { remove },
-                            confirmButton = application.appString { delete },
-                            cancelButton = application.appString { cancel }
-                        ) {
-                            Text(application.appString { youCannotUndoThis })
-                        }
-
-                        if (result == true) {
-                            api.updateCard(
-                                card.id!!,
-                                Card(activity = null)
+            if (card.activity != null) {
+                val scope = rememberCoroutineScope()
+                IconButton(
+                    name = "delete",
+                    title = appString { remove },
+                    onClick = {
+                        scope.launch {
+                            val result = dialog(
+                                title = application.appString { remove },
+                                confirmButton = application.appString { delete },
+                                cancelButton = application.appString { cancel }
                             ) {
-                                onUpdated(it)
-                                resolve(true)
+                                Text(application.appString { youCannotUndoThis })
+                            }
+
+                            if (result == true) {
+                                api.updateCard(
+                                    card.id!!,
+                                    Card(activity = null)
+                                ) {
+                                    onUpdated(it)
+                                    resolve(true)
+                                }
                             }
                         }
                     }
-                }
-            )
+                )
+            }
         }
     ) { _ ->
         val scope = rememberCoroutineScope()

@@ -1036,7 +1036,8 @@ fun MapView(
                                 cards = shownCards,
                                 styles = {
                                     padding(1.r)
-                                }
+                                },
+                                showPhoto = true
                             ) { card ->
                                 cardNavHistory = emptyList()
                                 selectedCard = if (selectedCard?.id == card.id) null else card
