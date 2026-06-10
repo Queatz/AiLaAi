@@ -366,10 +366,10 @@ fun ExplorePage(
 
             item(appString { if (card.pay == null) addPay else changePay }) {
                 scope.launch {
-                    var updatedPay = card.pay ?: Pay(pay = "")
+                    val updatedPay = card.pay ?: Pay(pay = "")
 
                     val result = dialog(
-                        application.appString { pay },
+                        application.appString { price },
                         confirmButton = application.appString { this.update }
                     ) { resolve ->
                         var pay by remember {

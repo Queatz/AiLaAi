@@ -2222,6 +2222,11 @@ object Strings {
         vn = "Lương",
         ru = "Оплата"
     )
+    val price = Translation(
+        en = "Price",
+        vn = "Giá",
+        ru = "Цена"
+    )
     val connect = Translation(
         en = "Connect",
         vn = "Kết nối",
