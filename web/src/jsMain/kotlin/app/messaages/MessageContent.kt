@@ -36,6 +36,7 @@ import profile.ProfileCard
 import r
 import stories.StoryStyles
 import stories.textContent
+import stories.firstPhoto
 import call
 import components.Loading
 import kotlin.js.Date
@@ -269,7 +270,7 @@ fun MessageContent(
                         mutableStateOf<Story?>(null)
                     }
 
-                    LaunchedEffect(Unit) {
+                    LaunchedEffect(story) {
                         api.story(attachment.story!!) {
                             story = it
                         }
@@ -283,31 +284,50 @@ fun MessageContent(
                                 window.open("/story/${story.url ?: story.id}", target = "_blank")
                             }
                         }) {
-                            Div({
-                                style {
-                                    marginBottom(.5.r)
-                                    fontSize(24.px)
+                            story.firstPhoto()?.let { photo ->
+                                Img(src = "$baseUrl$photo") {
+                                    style {
+                                        width(100.percent)
+                                    }
                                 }
-                            }) {
-                                Text(story.title ?: appString { createStory })
                             }
                             Div({
                                 style {
-                                    marginBottom(.5.r)
-                                    color(Styles.colors.secondary)
-                                    fontSize(16.px)
+                                    padding(1.r)
                                 }
                             }) {
-                                val someone = appString { someone }
-                                Text("${if (story.publishDate != null) appString { published } else appString { draft }} ${appString { inlineBy }} ${story.authors?.joinToString { it.name ?: someone }}")
-                            }
-                            Div({
-                                style {
-                                    marginBottom(.5.r)
-                                    ellipsize()
+                                Div({
+                                    style {
+                                        marginBottom(.5.r)
+                                        fontSize(24.px)
+                                    }
+                                }) {
+                                    Text(story.title ?: appString { createStory })
                                 }
-                            }) {
-                                Text(story.textContent())
+                                Div({
+                                    style {
+                                        marginBottom(.5.r)
+                                        color(Styles.colors.secondary)
+                                        fontSize(16.px)
+                                    }
+                                }) {
+                                    val someone = appString { someone }
+                                    Text(
+                                        "${if (story.publishDate != null) appString { published } else appString { draft }} ${appString { inlineBy }} ${
+                                            story.authors?.joinToString {
+                                                it.name ?: someone
+                                            }
+                                        }"
+                                    )
+                                }
+                                Div({
+                                    style {
+                                        marginBottom(.5.r)
+                                        ellipsize()
+                                    }
+                                }) {
+                                    Text(story.textContent())
+                                }
                             }
                         }
                     }

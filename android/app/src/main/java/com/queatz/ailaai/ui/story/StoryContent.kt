@@ -5,6 +5,7 @@ import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.wordCount
 import com.queatz.db.Story
 import com.queatz.db.StoryContent
+import com.queatz.db.firstPhoto
 import com.queatz.db.toJsonStoryPart
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
@@ -57,6 +58,8 @@ fun String.asStoryContents() = json
 fun Story.asTextContent(): String = asContents().asText()
 
 fun Story.textContent(): String = contents().asText()
+
+fun Story.firstPhoto(): String? = contents().firstPhoto()
 
 fun List<StoryContent>.asText() = mapNotNull {
     when (it) {

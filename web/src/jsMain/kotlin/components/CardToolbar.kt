@@ -23,20 +23,19 @@ import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.FlexWrap
 import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexWrap
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.justifyContent
-import org.jetbrains.compose.web.css.marginBottom
-import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
 
 @Composable
-fun CardToolbar(card: Card) {
+fun CardToolbar(card: Card, styles: (StyleScope.() -> Unit)? = null) {
     val scope = rememberCoroutineScope()
     val darkMode = rememberDarkMode()
     val me by application.me.collectAsState()
@@ -46,9 +45,10 @@ fun CardToolbar(card: Card) {
             display(DisplayStyle.Flex)
             flexDirection(FlexDirection.Row)
             alignItems(AlignItems.Center)
-            justifyContent(JustifyContent.Center)
+            justifyContent(JustifyContent.FlexStart)
             flexWrap(FlexWrap.Wrap)
             gap(.5.r)
+            styles?.invoke(this)
         }
     }) {
         // Directions

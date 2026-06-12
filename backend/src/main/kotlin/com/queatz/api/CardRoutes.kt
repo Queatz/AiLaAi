@@ -436,7 +436,11 @@ fun Route.cardRoutes() {
                     check(Card::size)
                     check(Card::collaborators)
                     check(Card::categories)
-                    check(Card::name)
+                    check(Card::name) {
+                        if (card.url.isNullOrBlank()) {
+                            card.url = it?.urlize()
+                        }
+                    }
                     check(Card::conversation)
                     check(Card::content)
                     check(Card::options)

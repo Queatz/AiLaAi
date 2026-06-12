@@ -155,6 +155,11 @@ fun CardListItem(
         card.activity?.let {
             CardActivity(it)
         }
+        if (showPhoto) {
+            CardToolbar(card) {
+                marginTop(.5.r)
+            }
+        }
         card.getConversation().message.notBlank?.let { message ->
             Div {
                 Text(message.stripMarkdown().ellipsize(120))

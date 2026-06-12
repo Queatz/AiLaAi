@@ -850,10 +850,9 @@ class AppStyleSheet : StyleSheet() {
         borderRadius(1.r)
         backgroundColor(Styles.colors.white)
         property("box-shadow", "1px 1px 4px rgba(0, 0, 0, 0.125)")
-        padding(1.r)
         cursor("pointer")
         overflow("hidden")
-        maxWidth(36.r)
+        property("max-width", "min(100%, 36rem)")
 
         dark(self) {
             backgroundColor(Styles.colors.dark.background)

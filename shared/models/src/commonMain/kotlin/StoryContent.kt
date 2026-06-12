@@ -101,6 +101,10 @@ enum class InputType {
 @Serializable
 data class StoryPart(val type: String, val content: JsonObject)
 
+fun List<StoryContent>.firstPhoto() = firstNotNullOfOrNull {
+    (it as? StoryContent.Photos)?.photos?.firstOrNull()
+}
+
 inline fun <reified T : @Serializable StoryContent> T.toJsonStoryPart(json: Json) = json.encodeToJsonElement(
     StoryPart(
         partType(),

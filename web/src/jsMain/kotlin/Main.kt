@@ -27,12 +27,15 @@ import components.AppFooter
 import components.AppHeader
 import components.CardPage
 import components.IconButton
+import components.ogDescription
 import components.InfoPage
 import components.MainPage
 import components.NotificationsLayout
 import components.ProfilePage
 import components.SigninPage
 import components.StoryPage
+import stories.textContent
+import stories.firstPhoto
 import event.EventPage
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.js.Js
@@ -103,12 +106,14 @@ fun main() {
 
         CompositionLocalProvider(LocalConfiguration provides Configuration(language) { language = it }) {
             var title by remember { mutableStateOf<String?>(null) }
+            var description by remember { mutableStateOf<String?>(null) }
+            var image by remember { mutableStateOf<String?>(null) }
             var parentCardId by remember { mutableStateOf<String?>(null) }
             var personId by remember { mutableStateOf<String?>(null) }
             val appName = appString { appName }
 
-            LaunchedEffect(title) {
-                document.title = title ?: appName
+            LaunchedEffect(title, description, image) {
+                updateOgTags(title, description, image)
             }
 
             LaunchedEffect(language) {
@@ -152,7 +157,9 @@ fun main() {
 
                 LaunchedEffect(router.currentPath) {
                     window.scrollTo(0.0, 0.0)
-                    document.title = appName
+                    title = null
+                    description = null
+                    image = null
                 }
 
                 route("signin") {
@@ -290,6 +297,8 @@ fun main() {
                                 onError = { parentCardId = null }
                             ) {
                                 title = it.name
+                                description = it.ogDescription()
+                                image = it.photo?.let { "$baseUrl$it" }
                                 parentCardId = it.parent
                                 personId = if (it.equipped == true) it.person else null
                             }
@@ -311,6 +320,8 @@ fun main() {
                             AppHeader(appString { stories })
                             StoryPage(storyUrl) {
                                 title = it.title
+                                description = it.textContent()
+                                image = it.firstPhoto()?.let { "$baseUrl$it" }
                             }
                             AppFooter()
                         }
@@ -430,4 +441,36 @@ fun main() {
             NotificationsLayout()
         }
     }
+}
+
+fun updateOgTags(title: String? = null, description: String? = null, image: String? = null) {
+    val appName = application.appString { appName }
+    val fullTitle = title?.let { "$appName • $it" } ?: appName
+
+    document.title = fullTitle
+    setMetaTag("og:title", fullTitle)
+    setMetaTag("og:site_name", appName)
+    setMetaTag("og:type", "website")
+    setMetaTag("og:url", window.location.href)
+
+    val finalDescription = description ?: application.appString { homeTagline }
+    setMetaTag("og:description", finalDescription)
+    setMetaTag("description", finalDescription)
+
+    if (image != null) {
+        setMetaTag("og:image", image)
+        setMetaTag("twitter:card", "summary_large_image")
+    } else {
+        document.querySelector("meta[property='og:image']")?.remove()
+        setMetaTag("twitter:card", "summary")
+    }
+}
+
+fun setMetaTag(property: String, content: String) {
+    val attributeName = if (property.startsWith("og:")) "property" else "name"
+    val meta = document.querySelector("meta[$attributeName='$property']") ?: document.createElement("meta").apply {
+        setAttribute(attributeName, property)
+        document.head?.appendChild(this)
+    }
+    meta.setAttribute("content", content)
 }

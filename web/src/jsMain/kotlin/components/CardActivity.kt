@@ -5,7 +5,10 @@ import androidx.compose.runtime.Composable
 import appString
 import application
 import com.queatz.db.Activity
+import com.queatz.db.Card
+import com.queatz.db.formatPay
 import format
+import appStringShort
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -142,4 +145,70 @@ fun formatSchedule(activity: Activity): String {
     }
 
     return formattedTimes.joinToString(", ")
+}
+
+fun Card.ogDescription(): String {
+    val activityDetails = activity?.let { activity ->
+        val details = mutableListOf<String>()
+        val schedule = activity.schedule
+        if (schedule != null) {
+            if (isAvailableToday(activity)) {
+                details.add(formatSchedule(activity) + " " + application.appString { todayInline })
+            } else {
+                details.add(application.appString { notAvailableToday })
+            }
+        }
+        activity.duration?.let {
+            details.add(application.appString { durationMinutes }.format((it / 1000 / 60).toString()))
+        }
+        val minAge = activity.minAge
+        val maxAge = activity.maxAge
+        if (minAge != null || maxAge != null) {
+            details.add(
+                when {
+                    minAge != null && maxAge != null -> application.appString { ageRangeValue }.format(
+                        minAge.toString(),
+                        maxAge.toString()
+                    )
+
+                    minAge != null -> application.appString { ageMinValue }.format(minAge.toString())
+                    else -> application.appString { ageMaxValue }.format(maxAge.toString())
+                }
+            )
+        }
+        val minGroup = activity.minGroupSize
+        val maxGroup = activity.maxGroupSize
+        if (minGroup != null || maxGroup != null) {
+            details.add(
+                when {
+                    minGroup != null && maxGroup != null -> application.appString { groupSizeRangeValue }.format(
+                        minGroup.toString(),
+                        maxGroup.toString()
+                    )
+
+                    minGroup != null -> application.appString { groupSizeMinValue }.format(minGroup.toString())
+                    else -> application.appString { groupSizeMaxValue }.format(maxGroup.toString())
+                }
+            )
+        }
+        activity.pets?.let {
+            details.add(if (it) application.appString { petsAllowed } else application.appString { noPets })
+        }
+        activity.languages?.takeIf { it.isNotEmpty() }?.let {
+            details.add(application.appString { languagesValue }.format(it.joinToString(", ")))
+        }
+        activity.outdoors?.let {
+            details.add(if (it) application.appString { activityOutdoors } else application.appString { activityIndoors })
+        }
+        details.joinToString(", ")
+    }
+
+    val price = formatPay { appStringShort }
+    val description = content
+
+    return listOfNotNull(
+        activityDetails?.takeIf { it.isNotBlank() },
+        price?.takeIf { it.isNotBlank() },
+        description?.takeIf { it.isNotBlank() }
+    ).joinToString(", ")
 }

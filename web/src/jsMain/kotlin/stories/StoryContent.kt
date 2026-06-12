@@ -2,6 +2,7 @@ package stories
 
 import com.queatz.db.Story
 import com.queatz.db.StoryContent
+import com.queatz.db.firstPhoto
 import json
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonElement
@@ -53,6 +54,8 @@ fun String.asStoryContents() = json
 fun Story.asTextContent(): String = asContents().asText()
 
 fun Story.textContent(): String = contents().asText()
+
+fun Story.firstPhoto(): String? = contents().firstPhoto()
 
 fun List<StoryContent>.asText() = mapNotNull {
     when (it) {
