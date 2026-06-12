@@ -114,10 +114,6 @@ fun SheetScreen(
     mapCardsControl: MapCardsControl,
     geo: LatLng?,
     myGeo: LatLng?,
-    title: String? = null,
-    hint: String? = null,
-    distance: String? = null,
-    onTitleClick: (() -> Unit)? = null,
     onExpandRequest: () -> Unit = {},
     sheetState: SheetScreenState = remember { SheetScreenState() },
     value: String,
@@ -150,7 +146,7 @@ fun SheetScreen(
     var peopleSearchText by rememberSaveable { mutableStateOf("") }
     val nav = nav
     var showShareAThought by rememberStateOf(true)
-    var sheetContent by rememberSavableStateOf(SheetContent.Posts)
+    var sheetContent by rememberSavableStateOf(SheetContent.Pages)
 
     LaunchedEffect(state) {
         sheetState.state = state

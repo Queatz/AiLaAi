@@ -161,18 +161,6 @@ fun ExploreScreen() {
                     mapCardsControl = mapCardsControl,
                     geo = mapGeo ?: geo,
                     myGeo = geo,
-                    title = mapCardsControl.areaCard?.name,
-                    hint = mapCardsControl.areaCard?.hint,
-                    distance = geo?.let { myGeo ->
-                        mapCardsControl.areaCard?.geo?.toLatLng()?.let {
-                            myGeo.distance(it).formatDistance()
-                        }
-                    },
-                    onTitleClick = {
-                        mapCardsControl.areaCard?.takeIf { !it.name.isNullOrBlank() }?.let { card ->
-                            nav.appNavigate(AppNav.Page(card.id!!))
-                        }
-                    },
                     onExpandRequest = {
                         scope.launch {
                             if (bottomSheetState.bottomSheetState.currentValue == SheetValue.PartiallyExpanded) {

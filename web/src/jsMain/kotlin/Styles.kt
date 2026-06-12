@@ -1233,7 +1233,7 @@ class MainStyleSheet : StyleSheet() {
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.Column)
         alignItems(AlignItems.Center)
-        gap(2.r)
+        gap(4.r)
         cursor("pointer")
         property("pointer-events", "auto")
         property("will-change", "transform")

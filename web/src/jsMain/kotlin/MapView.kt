@@ -262,7 +262,7 @@ fun MapView(
 
             val scale = 100.0 / sqrt(groundDistance.pow(2.0) + altitude.pow(2.0))
             val element = marker.marker.getElement().firstElementChild as HTMLElement
-            val totalScale = scale.coerceIn(0.125, 100.0) * nearScale
+            val totalScale = scale.coerceIn(0.125, 1.0) * nearScale
             element.style.transform = "scale($totalScale)"
             element.style.maxWidth = "calc(100vw / ${totalScale * 1.5f})"
             marker.marker.getElement().style.zIndex = (scale * 1000.0).toInt().toString()
