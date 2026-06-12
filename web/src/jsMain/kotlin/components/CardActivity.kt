@@ -1,5 +1,6 @@
 package components
 
+import Strings.card
 import Styles
 import androidx.compose.runtime.Composable
 import appString
@@ -30,7 +31,21 @@ fun CardActivity(activity: Activity) {
             }
         }
         activity.duration?.let {
-            ActivityItem("schedule", appString { durationMinutes }.format((it / 1000 / 60).toString()))
+            val minutes = (it / 1000 / 60).toInt()
+            val text = when {
+                minutes > 90 -> {
+                    val h = minutes / 60
+                    val m = minutes % 60
+                    if (m > 0) {
+                        appString { durationHoursMinutes }.format(h.toString(), m.toString())
+                    } else {
+                        appString { durationHours }.format(h.toString())
+                    }
+                }
+
+                else -> appString { durationMinutes }.format(minutes.toString())
+            }
+            ActivityItem("schedule", text)
         }
         val minAge = activity.minAge
         val maxAge = activity.maxAge
@@ -147,7 +162,7 @@ fun formatSchedule(activity: Activity): String {
     return formattedTimes.joinToString(", ")
 }
 
-fun Card.ogDescription(): String {
+fun Card.activityDescription(full: Boolean = true): String {
     val activityDetails = activity?.let { activity ->
         val details = mutableListOf<String>()
         val schedule = activity.schedule
@@ -159,7 +174,21 @@ fun Card.ogDescription(): String {
             }
         }
         activity.duration?.let {
-            details.add(application.appString { durationMinutes }.format((it / 1000 / 60).toString()))
+            val minutes = (it / 1000 / 60).toInt()
+            val text = when {
+                minutes > 90 -> {
+                    val h = minutes / 60
+                    val m = minutes % 60
+                    if (m > 0) {
+                        application.appString { durationHoursMinutes }.format(h.toString(), m.toString())
+                    } else {
+                        application.appString { durationHours }.format(h.toString())
+                    }
+                }
+
+                else -> application.appString { durationMinutes }.format(minutes.toString())
+            }
+            details.add(text)
         }
         val minAge = activity.minAge
         val maxAge = activity.maxAge
@@ -204,11 +233,12 @@ fun Card.ogDescription(): String {
     }
 
     val price = formatPay { appStringShort }
-    val description = content
+    val description = if (full) getConversation().message.takeIf { it.isNotBlank() } else null
 
     return listOfNotNull(
         activityDetails?.takeIf { it.isNotBlank() },
         price?.takeIf { it.isNotBlank() },
+        categories?.firstOrNull()?.takeIf { it.isNotBlank() },
         description?.takeIf { it.isNotBlank() }
     ).joinToString(", ")
 }

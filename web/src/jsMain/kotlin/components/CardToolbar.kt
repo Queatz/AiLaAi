@@ -18,6 +18,7 @@ import appString
 import com.queatz.db.Card
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
+import notBlank
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -84,7 +85,7 @@ fun CardToolbar(card: Card, styles: (StyleScope.() -> Unit)? = null) {
             backgroundColor = if (darkMode) Styles.colors.dark.surface else Styles.colors.secondary,
             onClick = {
                 scope.launch {
-                    val url = "${window.location.origin}/page/${card.id ?: card.url ?: ""}"
+                    val url = "${window.location.origin}/page/${card.url?.notBlank ?: card.id ?: ""}"
                     dialog(
                         title = shareString,
                         confirmButton = copyLinkString,

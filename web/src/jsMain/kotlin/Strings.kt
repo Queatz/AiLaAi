@@ -475,9 +475,9 @@ object Strings {
         ru = "Развернуть"
     )
     val searchForThings = Translation(
-        en = "Search for things to do",
-        vn = "Tìm kiếm hoạt động",
-        ru = "Поиск занятий"
+        en = "Find things to do today",
+        vn = "Tìm kiếm hoạt động hôm nay",
+        ru = "Поиск занятий сегодня"
     )
     val paid = Translation(
         en = "Paid",
@@ -2491,6 +2491,16 @@ object Strings {
         en = "%1\$s minutes",
         vn = "%1\$s phút",
         ru = "%1\$s минут"
+    )
+    val durationHours = Translation(
+        en = "%1\$s hours",
+        vn = "%1\$s giờ",
+        ru = "%1\$s часа"
+    )
+    val durationHoursMinutes = Translation(
+        en = "%1\$s hours %2\$s minutes",
+        vn = "%1\$s giờ %2\$s phút",
+        ru = "%1\$s часа %2\$s минут"
     )
     val ageRangeValue = Translation(
         en = "Ages %1\$s - %2\$s",

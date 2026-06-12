@@ -89,6 +89,7 @@ fun CardLayout(
             ) {
                 HorizontalPager(
                     state = pagerState,
+                    beyondViewportPageCount = 2,
                     modifier = Modifier.fillMaxSize()
                 ) { index ->
                     AsyncImage(

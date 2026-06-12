@@ -261,8 +261,8 @@ fun ActivityDialog(
                             maxGroupSize = maxGroupSize.toIntOrNull(),
                             languages = languages.split(",").map { it.trim() }.filter { it.isNotBlank() }.takeIf { it.isNotEmpty() },
                             duration = duration.takeIf { it > 0 },
-                            pets = pets,
-                            outdoors = outdoors,
+                            pets = pets.takeIf { it },
+                            outdoors = outdoors.takeIf { it },
                             schedule = schedule,
                             timezone = timezone,
                             utcOffset = utcOffset

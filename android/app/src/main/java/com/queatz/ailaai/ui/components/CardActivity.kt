@@ -39,9 +39,23 @@ fun CardActivity(activity: Activity) {
         }
     }
     activity.duration?.let {
+        val minutes = (it / 1000 / 60).toInt()
+        val text = when {
+            minutes > 90 -> {
+                val h = minutes / 60
+                val m = minutes % 60
+                if (m > 0) {
+                    stringResource(R.string.duration_hours_minutes).format(h.toString(), m.toString())
+                } else {
+                    stringResource(R.string.duration_hours).format(h.toString())
+                }
+            }
+
+            else -> stringResource(R.string.duration_minutes).format(minutes.toString())
+        }
         ActivityItem(
-            Icons.Outlined.Schedule,
-            stringResource(R.string.duration_minutes).format((it / 1000 / 60).toString())
+            icon = Icons.Outlined.Schedule,
+            text = text
         )
     }
     val minAge = activity.minAge

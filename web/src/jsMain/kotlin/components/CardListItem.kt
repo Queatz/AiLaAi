@@ -44,6 +44,7 @@ import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.cssRem
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.marginTop
 import r
 
@@ -136,6 +137,7 @@ fun CardListItem(
 
                     style {
                         fontWeight("bold")
+                        fontSize(22.px)
                     }
                 }) {
                     Text(card.name ?: appString { newCard })

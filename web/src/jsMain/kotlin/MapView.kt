@@ -25,6 +25,7 @@ import components.CardContent
 import components.IconButton
 import components.Markdown
 import components.Switch
+import components.activityDescription
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
@@ -89,6 +90,7 @@ import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import web.cssom.Cursor
+import web.cssom.Flex
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -330,29 +332,10 @@ fun MapView(
                             }
                         }) {
                             Div({
-                                style {
-                                    textAlign("center")
-                                    fontSize(128.px)
-                                    color(Styles.colors.black)
-                                    padding(4.r)
-                                    lineHeight(120.percent)
-                                    overflow("auto")
-                                    maxWidth(100.percent)
-                                    boxSizing("border-box")
-
-                                    if (isNpc) {
-                                        property("box-shadow", "rgba(0, 0, 0, 0.25) 0px 32px 64px")
-                                        borderRadius(6.r)
-                                        backgroundColor(Styles.colors.white)
-                                    }
-                                }
+                                classes(Styles.mapMarkerBox)
                             }) {
                                 if (isNpc) {
-                                    Div({
-                                        style {
-                                            textAlign("left")
-                                        }
-                                    }) {
+                                    Div {
                                         Div({
                                             style {
                                                 fontWeight("bold")
@@ -369,26 +352,22 @@ fun MapView(
                                         }) {
                                             Text(card.name ?: application.appString { newCard })
                                         }
-                                        card.npc?.text?.notBlank?.let {
-                                            Br()
-                                            Markdown(it)
-                                        }
+                                    }
+                                    card.npc?.text?.notBlank?.let {
+                                        Markdown(it)
                                     }
                                 } else {
                                     Div {
                                         Text(card.name ?: application.appString { newCard })
                                     }
-                                    listOf(
-                                        card.formatPay { appStringShort },
-                                        card.categories?.firstOrNull()
-                                    ).notEmpty?.let {
+                                    card.activityDescription(full = false).let {
                                         Div({
                                             style {
                                                 fontSize(85.percent)
                                                 opacity(.5f)
                                             }
                                         }) {
-                                            Text(bulletedString(*it.toTypedArray()))
+                                            Text(it)
                                         }
                                     }
                                 }
@@ -679,9 +658,7 @@ fun MapView(
                                 name = if (expanded) "expand_less" else "expand_more",
                                 title = if (expanded) appString { collapse } else appString { expand },
                                 styles = {
-                                    property("border", "1px solid ${if (isDarkMode) Styles.colors.dark.outline else Styles.colors.outline}")
                                     borderRadius(2.r)
-
                                 }
                             ) {
                                 expanded = !expanded
@@ -692,7 +669,7 @@ fun MapView(
                                 Empty { appText { noCardsNearby } }
                             } else {
                                 MapList(
-                                    shownCards,
+                                    cards = shownCards,
                                     styles = {
                                         padding(1.r)
                                     }

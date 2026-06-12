@@ -290,10 +290,6 @@ fun SheetScreen(
                         header = {
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 SheetHeader(
-                                    title = title,
-                                    distance = distance,
-                                    hint = hint,
-                                    onTitleClick = onTitleClick,
                                     selected = sheetContent,
                                     onSelected = { sheetContent = it },
                                     onExpandRequest = onExpandRequest
@@ -349,10 +345,6 @@ fun SheetScreen(
                         header = {
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 SheetHeader(
-                                    title = title,
-                                    distance = distance,
-                                    hint = hint,
-                                    onTitleClick = onTitleClick,
                                     selected = sheetContent,
                                     onSelected = { sheetContent = it },
                                     onExpandRequest = onExpandRequest
@@ -382,10 +374,6 @@ fun SheetScreen(
                         header = {
                             item {
                                 SheetHeader(
-                                    title = title,
-                                    distance = distance,
-                                    hint = hint,
-                                    onTitleClick = onTitleClick,
                                     selected = sheetContent,
                                     onSelected = { sheetContent = it },
                                     onExpandRequest = onExpandRequest
@@ -402,10 +390,6 @@ fun SheetScreen(
                         header = {
                             item {
                                 SheetHeader(
-                                    title = title,
-                                    distance = distance,
-                                    hint = hint,
-                                    onTitleClick = onTitleClick,
                                     selected = sheetContent,
                                     onSelected = { sheetContent = it },
                                     onExpandRequest = onExpandRequest
@@ -438,10 +422,6 @@ fun SheetScreen(
                         ) {
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 SheetHeader(
-                                    title = title,
-                                    distance = distance,
-                                    hint = hint,
-                                    onTitleClick = onTitleClick,
                                     selected = sheetContent,
                                     onSelected = { sheetContent = it },
                                     onExpandRequest = onExpandRequest

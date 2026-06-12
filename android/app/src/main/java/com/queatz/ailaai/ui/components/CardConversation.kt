@@ -55,6 +55,7 @@ import com.queatz.ailaai.extensions.distance
 import com.queatz.ailaai.extensions.format
 import com.queatz.ailaai.extensions.hint
 import com.queatz.ailaai.extensions.latLng
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.services.authors
 import com.queatz.ailaai.ui.theme.pad
@@ -238,7 +239,7 @@ fun CardConversation(
                 icon = Icons.Outlined.Share,
                 name = stringResource(R.string.share),
                 onClick = {
-                    val url = "$appDomain/page/${card.id ?: card.url ?: ""}"
+                    val url = "$appDomain/page/${card.url?.notBlank ?: card.id ?: ""}"
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
                         putExtra(Intent.EXTRA_TEXT, url)

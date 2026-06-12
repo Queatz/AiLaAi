@@ -30,58 +30,19 @@ import com.queatz.ailaai.ui.theme.pad
 
 @Composable
 fun SheetHeader(
-    title: String?,
-    distance: String?,
-    hint: String?,
     selected: SheetContent,
     onSelected: (SheetContent) -> Unit,
-    onTitleClick: (() -> Unit)? = null,
     onExpandRequest: () -> Unit
 ) {
     DisableSelection {
         Column {
-            Text(
-                text = buildAnnotatedString {
-                    append(title ?: stringResource(R.string.earth))
-                    if (!hint.isNullOrBlank() || !distance.isNullOrBlank()) {
-                        withStyle(
-                            MaterialTheme.typography.bodyLarge
-                                .copy(
-                                    fontWeight = FontWeight.Normal,
-                                    color = MaterialTheme.colorScheme.secondary
-                                ).toSpanStyle()
-                        ) {
-                            appendLine()
-                            append(
-                                bulletedString(
-                                    distance?.notBlank,
-                                    hint?.notBlank
-                                )
-                            )
-                        }
-                    }
-                },
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    lineHeight = MaterialTheme.typography.headlineMedium.fontSize
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 1.pad)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                    ) {
-                        onTitleClick?.invoke()
-                    }
-            )
             FlowRow(
                 verticalArrangement = Arrangement.spacedBy(.5f.pad),
                 horizontalArrangement = Arrangement.spacedBy(1.pad)
             ) {
                 listOf(
-                    SheetContent.Posts,
                     SheetContent.Pages,
+                    SheetContent.Posts,
                     SheetContent.Events,
                     SheetContent.Groups,
                     SheetContent.People
@@ -98,10 +59,10 @@ fun SheetHeader(
                     ) {
                         Text(
                             when (button) {
-                                SheetContent.Posts -> stringResource(R.string.sheet_content_posts)
-                                SheetContent.Groups -> stringResource(R.string.sheet_content_groups)
                                 SheetContent.Pages -> stringResource(R.string.sheet_content_things_to_do)
+                                SheetContent.Posts -> stringResource(R.string.sheet_content_posts)
                                 SheetContent.Events -> stringResource(R.string.sheet_content_events)
+                                SheetContent.Groups -> stringResource(R.string.sheet_content_communities)
                                 SheetContent.People -> stringResource(R.string.sheet_content_friends)
                             }
                         )

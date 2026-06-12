@@ -65,7 +65,7 @@
     </plurals>
     <string name="background_location">Vị trí chạy ngầm</string>
     <string name="configure_background_location">Cấu hình vị trí chạy ngầm</string>
-    <string name="search_map">Tìm kiếm hoạt động</string>
+    <string name="search_map">Tìm kiếm hoạt động hôm nay</string>
     <string name="open_settings">Mở cài đặt</string>
     <string name="location_disabled_description">Quyền vị trí bị tắt trong cài đặt.</string>
     <string name="camera_disabled_description">Quyền chụp ảnh bị tắt trong cài đặt.</string>
@@ -849,6 +849,7 @@
     <string name="sheet_content_events">Sự kiện</string>
     <string name="sheet_content_people">Con người</string>
     <string name="sheet_content_friends">Bạn bè</string>
+    <string name="sheet_content_communities">Cộng đồng</string>
     <string name="calls">Cuộc gọi</string>
     <string name="tap_to_answer">Nhấn để trả lời</string>
     <string name="subscriptions">Đăng ký</string>
@@ -1069,6 +1070,8 @@
     <string name="today_inline">hôm nay</string>
     <string name="not_available_today">Không có sẵn hôm nay</string>
     <string name="duration_minutes">%1$s phút</string>
+    <string name="duration_hours">%1$s giờ</string>
+    <string name="duration_hours_minutes">%1$s giờ %2$s phút</string>
     <string name="age_range_value">Độ tuổi %1$s - %2$s</string>
     <string name="age_min_value">Độ tuổi %1$s+</string>
     <string name="age_max_value">Độ tuổi tối đa %1$s</string>

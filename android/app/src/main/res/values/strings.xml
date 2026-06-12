@@ -80,7 +80,7 @@
     <string name="location_disabled_description">The location permission is disabled in settings.</string>
     <string name="camera_disabled_description">The camera permission is disabled in settings.</string>
     <string name="search">Search</string>
-    <string name="search_map">Search for things to do</string>
+    <string name="search_map">Find things to do today</string>
     <string name="explore">Explore</string>
     <string name="messages">Messages</string>
     <string name="me">Me</string>
@@ -648,6 +648,7 @@
     <string name="sheet_content_events">Events</string>
     <string name="sheet_content_people">People</string>
     <string name="sheet_content_friends">Friends</string>
+    <string name="sheet_content_communities">Communities</string>
     <string name="search_cards_of_x">Search %1$s\'s pages</string>
     <string name="pages_of_x">%1$s\'s pages</string>
     <string name="call">Call</string>
@@ -1141,6 +1142,8 @@
     <string name="today_inline">today</string>
     <string name="not_available_today">Not available today</string>
     <string name="duration_minutes">%1$s minutes</string>
+    <string name="duration_hours">%1$s hours</string>
+    <string name="duration_hours_minutes">%1$s hours %2$s minutes</string>
     <string name="age_range_value">Ages %1$s - %2$s</string>
     <string name="age_min_value">Ages %1$s+</string>
     <string name="age_max_value">Ages up to %1$s</string>

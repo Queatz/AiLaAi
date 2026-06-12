@@ -7,6 +7,7 @@ import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.ElementScope
+import org.jetbrains.compose.web.dom.Img
 import org.w3c.dom.HTMLDivElement
 import r
 
@@ -60,6 +61,17 @@ fun PhotoPager(
         }
     }) {
         content?.invoke(this)
+
+        (1..2).forEach { i ->
+            val preloadIndex = (photoIndex + i) % photos.size
+            if (preloadIndex != photoIndex) {
+                Img(src = "$baseUrl${photos[preloadIndex]}", attrs = {
+                    style {
+                        display(DisplayStyle.None)
+                    }
+                })
+            }
+        }
 
         if (photos.size > 1) {
             IconButton("chevron_left", appString { previous }, styles = {

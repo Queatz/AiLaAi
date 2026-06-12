@@ -27,7 +27,7 @@ import components.AppFooter
 import components.AppHeader
 import components.CardPage
 import components.IconButton
-import components.ogDescription
+import components.activityDescription
 import components.InfoPage
 import components.MainPage
 import components.NotificationsLayout
@@ -297,7 +297,7 @@ fun main() {
                                 onError = { parentCardId = null }
                             ) {
                                 title = it.name
-                                description = it.ogDescription()
+                                description = it.activityDescription()
                                 image = it.photo?.let { "$baseUrl$it" }
                                 parentCardId = it.parent
                                 personId = if (it.equipped == true) it.person else null

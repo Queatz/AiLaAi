@@ -54,6 +54,7 @@ import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.left
+import org.jetbrains.compose.web.css.lineHeight
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginLeft
@@ -1201,6 +1202,24 @@ class MainStyleSheet : StyleSheet() {
         mapCardMediaStyle()
     }
 
+    val mapMarkerBox by style {
+        fontFamily("Ysabeau Infant")
+        fontSize(128.px)
+        color(colors.black)
+        padding(4.r)
+        lineHeight(120.percent)
+        overflow("auto")
+        maxWidth(100.percent)
+        boxSizing("border-box")
+        maxWidth(120.r)
+        property("box-shadow", "rgba(0, 0, 0, 0.25) 0px 32px 64px")
+        borderRadius(6.r)
+        backgroundColor(colors.white)
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        gap(4.r)
+    }
+
     val mapMarker by style {
         position(Absolute)
         top(0.px)
@@ -1219,12 +1238,6 @@ class MainStyleSheet : StyleSheet() {
         property("pointer-events", "auto")
         property("will-change", "transform")
         property("transform-origin", "bottom center")
-
-        transitions {
-            "transform" {
-                duration = 200.ms
-            }
-        }
     }
 
     val personList by style {

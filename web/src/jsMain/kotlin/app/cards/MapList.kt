@@ -29,7 +29,7 @@ fun MapList(
 ) {
     LazyColumn({
         style {
-            gap(.5.r)
+            gap(1.r)
             alignItems(AlignItems.Stretch)
             styles?.invoke(this)
         }

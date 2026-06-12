@@ -67,6 +67,7 @@ fun BottomSheet(
             kotlinx.coroutines.delay(3.seconds)
             isHidden = false
             currentY = offsets[state] ?: collapsedY
+            onStateChange(BottomSheetState.Collapsed)
         }
     }
 
