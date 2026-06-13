@@ -1230,6 +1230,11 @@ class MainStyleSheet : StyleSheet() {
     }
 
     val mapMarkerContent by style {
+        property("will-change", "transform")
+        property("transform-origin", "bottom center")
+    }
+
+    val mapMarkerInner by style {
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.Column)
         alignItems(AlignItems.Center)
@@ -1238,6 +1243,11 @@ class MainStyleSheet : StyleSheet() {
         property("pointer-events", "auto")
         property("will-change", "transform")
         property("transform-origin", "bottom center")
+        transitions {
+            "transform" {
+                duration = 200.ms
+            }
+        }
     }
 
     val personList by style {

@@ -236,9 +236,27 @@ fun MapView(
             index to map!!.project(it.marker.getLngLat())
         }
 
+        val rawScales = markers.map { marker ->
+            val groundDistance = cameraLngLat.distanceTo(
+                marker.marker.getLngLat()
+            )
+            100.0 / sqrt(
+                groundDistance.pow(2.0) + altitude.pow(2.0)
+            )
+        }
+
+        val zIndices = rawScales
+            .mapIndexed { index, scale ->
+                index to scale
+            }
+            .sortedByDescending { it.second }
+            .mapIndexed { rank, pair ->
+                pair.first to (markers.size - rank)
+            }
+            .toMap()
+
         markers.forEachIndexed { index, marker ->
             val pos = cardPositions[index].second
-            val groundDistance = cameraLngLat.distanceTo(marker.marker.getLngLat())
 
             val nearScale = when {
                 cardPositions.any {
@@ -260,12 +278,18 @@ fun MapView(
                 }
             }
 
-            val scale = 100.0 / sqrt(groundDistance.pow(2.0) + altitude.pow(2.0))
-            val element = marker.marker.getElement().firstElementChild as HTMLElement
-            val totalScale = scale.coerceIn(0.125, 1.0) * nearScale
-            element.style.transform = "scale($totalScale)"
-            element.style.maxWidth = "calc(100vw / ${totalScale * 1.5f})"
-            marker.marker.getElement().style.zIndex = (scale * 1000.0).toInt().toString()
+            val rawScale = rawScales[index]
+            val scale = rawScale.coerceIn(0.125, 1.0)
+            val contentElement = marker.marker.getElement().firstElementChild as? HTMLElement ?: return@forEachIndexed
+            val innerElement = contentElement.firstElementChild as? HTMLElement ?: return@forEachIndexed
+            val totalScale = scale * nearScale
+            contentElement.style.transform = "scale($scale)"
+            innerElement.style.transform = "scale($nearScale)"
+
+            if (totalScale > 0) {
+                contentElement.style.maxWidth = "calc(100vw / ${totalScale * 1.5f})"
+            }
+            marker.marker.getElement().style.zIndex = zIndices.getValue(index).toString()
             val ele = marker.marker.getElement() // for the following line
             js("ele.style.pointerEvents = \"none\"")
         }
@@ -315,25 +339,28 @@ fun MapView(
 
                         Div({
                             classes(Styles.mapMarkerContent)
-
-                            onClick {
-                                it.stopPropagation()
-
-                                if (it.ctrlKey) {
-                                    window.open("$webBaseUrl/page/${card.id!!}", target = "_blank")
-                                } else {
-                                    cardNavHistory = emptyList()
-                                    selectedCard = if (selectedCard?.id == card.id) {
-                                        null
-                                    } else {
-                                        card
-                                    }
-                                }
-                            }
                         }) {
                             Div({
-                                classes(Styles.mapMarkerBox)
+                                classes(Styles.mapMarkerInner)
+
+                                onClick {
+                                    it.stopPropagation()
+
+                                    if (it.ctrlKey) {
+                                        window.open("$webBaseUrl/page/${card.id!!}", target = "_blank")
+                                    } else {
+                                        cardNavHistory = emptyList()
+                                        selectedCard = if (selectedCard?.id == card.id) {
+                                            null
+                                        } else {
+                                            card
+                                        }
+                                    }
+                                }
                             }) {
+                                Div({
+                                    classes(Styles.mapMarkerBox)
+                                }) {
                                 if (isNpc) {
                                     Div {
                                         Div({
@@ -400,6 +427,7 @@ fun MapView(
                                     }
                                 }
                             })
+                            }
                         }
                     }
                 }.let { marker ->
