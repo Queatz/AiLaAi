@@ -630,14 +630,14 @@ fun AppPage(tabId: String? = null) {
                     )
 
                     NavPage.Cards -> CardsNavPage(
-                        cardUpdates, 
-                        card, 
-                        { newCard ->
+                        cardUpdates = cardUpdates,
+                        nav = card,
+                        onSelected = { newCard ->
                             AppPageStateManager.updateState { currentState ->
                                 currentState.copy(cardNav = newCard)
                             }
-                        }, 
-                        {
+                        },
+                        onProfileClick = {
                             AppPageStateManager.updateState { currentState ->
                                 currentState.copy(nav = NavPage.Profile)
                             }
@@ -645,14 +645,14 @@ fun AppPage(tabId: String? = null) {
                     )
 
                     NavPage.Stories -> StoriesNavPage(
-                        storyUpdates, 
-                        story, 
-                        { newStory ->
+                        storyUpdates = storyUpdates,
+                        selected = story,
+                        onSelected = { newStory ->
                             AppPageStateManager.updateState { currentState ->
                                 currentState.copy(storyNav = newStory)
                             }
-                        }, 
-                        {
+                        },
+                        onProfileClick = {
                             AppPageStateManager.updateState { currentState ->
                                 currentState.copy(nav = NavPage.Profile)
                             }

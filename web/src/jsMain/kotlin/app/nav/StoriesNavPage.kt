@@ -23,6 +23,7 @@ import json
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import notBlank
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
@@ -33,18 +34,18 @@ import r
 import stories.storyStatus
 import stories.textContent
 
-@kotlinx.serialization.Serializable
+@Serializable
 sealed class StoryNav {
-    @kotlinx.serialization.Serializable
+    @Serializable
     data object Friends : StoryNav()
 
-    @kotlinx.serialization.Serializable
+    @Serializable
     data object Local : StoryNav()
 
-    @kotlinx.serialization.Serializable
+    @Serializable
     data object Saved : StoryNav()
 
-    @kotlinx.serialization.Serializable
+    @Serializable
     data class Selected(val story: Story) : StoryNav()
 }
 
@@ -210,11 +211,11 @@ fun StoriesNavPage(
             }
         }) {
             if (!showSearch) {
-                NavMenuItem("group", appString { friends }, selected = selected is StoryNav.Friends) {
-                    onSelected(StoryNav.Friends)
-                }
                 NavMenuItem("location_on", appString { explore }, selected = selected is StoryNav.Local) {
                     onSelected(StoryNav.Local)
+                }
+                NavMenuItem("group", appString { friends }, selected = selected is StoryNav.Friends) {
+                    onSelected(StoryNav.Friends)
                 }
 //                NavMenuItem("favorite", "Saved", selected = false) {
 //                    onSelected(null)

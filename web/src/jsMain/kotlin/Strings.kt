@@ -1401,6 +1401,11 @@ object Strings {
         vn = "Bạn bè",
         ru = "Друзья"
     )
+    val communities = Translation(
+        en = "Communities",
+        vn = "Cộng đồng",
+        ru = "Сообщества"
+    )
     val explore = Translation(
         en = "Explore",
         vn = "Khám phá",
@@ -1625,6 +1630,11 @@ object Strings {
         "No groups",
         "Không tìm được nhóm.",
         ru = "Нет групп"
+    )
+    val chats = Translation(
+        en = "Chats",
+        vn = "Trò chuyện",
+        ru = "Чаты"
     )
     val search = Translation(
         "Search",

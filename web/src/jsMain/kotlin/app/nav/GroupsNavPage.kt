@@ -288,7 +288,7 @@ fun GroupsNavPage(
 
     NavTopBar(
         me = me,
-        title = appString { this.groups },
+        title = appString { chats },
         onProfileClick = onProfileClick
     ) {
         IconButton(
@@ -362,7 +362,11 @@ fun GroupsNavPage(
 //                NavMenuItem("group", "Friends", selected = selected is GroupNav.Friends) {
 //                    onSelected(GroupNav.Friends)
 //                }
-                NavMenuItem("location_on", appString { explore }, selected = selected is GroupNav.Local) {
+                NavMenuItem(
+                    icon = "location_on",
+                    title = appString { communities },
+                    selected = selected is GroupNav.Local
+                ) {
                     onSelected(GroupNav.Local)
                 }
 
