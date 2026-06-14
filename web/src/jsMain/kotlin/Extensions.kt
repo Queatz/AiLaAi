@@ -196,6 +196,19 @@ fun pickAudio(block: (File) -> Unit) {
     element.click()
 }
 
+fun pickVideo(block: (File) -> Unit) {
+    val element = document.createElement("input") as HTMLInputElement
+    element.type = "file"
+    element.multiple = false
+    element.accept = "video/*"
+    element.addEventListener("change", {
+        if (element.files != null && element.files!!.length > 0) {
+            block(element.files!!.item(0)!!)
+        }
+    })
+    element.click()
+}
+
 // Returns null if scaling is not needed
 suspend fun HTMLImageElement.scaleToBlob(maxSize: Int): Blob? {
     val canvas = document.createElement("canvas") as HTMLCanvasElement

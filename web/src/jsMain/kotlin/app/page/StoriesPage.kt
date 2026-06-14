@@ -68,9 +68,20 @@ import webBaseUrl
 fun StoriesPage(
     selected: StoryNav,
     onStoryUpdated: (Story) -> Unit,
-    onGroupClick: (GroupExtended) -> Unit
+    onGroupClick: (GroupExtended) -> Unit,
+    onStoryDeleted: (() -> Unit)? = null
 ) {
     val me by application.me.collectAsState()
+
+    // Delegate to dedicated creator for owned stories
+    if (selected is StoryNav.Selected && selected.story.person == me?.id) {
+        StoryCreatorPage(
+            story = selected.story,
+            onStoryUpdated = onStoryUpdated,
+            onStoryDeleted = onStoryDeleted
+        )
+        return
+    }
     val scope = rememberCoroutineScope()
     var storyContent by remember { mutableStateOf<List<StoryContent>>(emptyList()) }
     var isLoading by remember {

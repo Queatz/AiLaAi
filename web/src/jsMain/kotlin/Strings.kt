@@ -2587,6 +2587,16 @@ object Strings {
         vn = " đến ",
         ru = " до "
     )
+    val audio = Translation(
+        en = "Audio",
+        vn = "Âm thanh",
+        ru = "Аудио"
+    )
+    val video = Translation(
+        en = "Video",
+        vn = "Video",
+        ru = "Видео"
+    )
     
 }
 

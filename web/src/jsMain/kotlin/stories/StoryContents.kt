@@ -39,6 +39,7 @@ import com.queatz.db.GroupExtended
 import com.queatz.db.InputType
 import com.queatz.db.StoryContent
 import com.queatz.db.isPart
+import com.queatz.db.partType
 import com.queatz.widgets.Widgets
 import components.CardItem
 import components.ContentAdder
@@ -278,7 +279,7 @@ fun StoryContents(
                                     value = it
                                     onEdited?.invoke(index, part.copy(text = it))
                                 },
-                                singleLine = true,
+                                singleLine = false,
                                 placeholder = appString { write },
                                 styles = {
                                     width(100.percent)

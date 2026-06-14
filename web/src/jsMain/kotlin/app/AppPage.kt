@@ -863,6 +863,13 @@ fun AppPage(tabId: String? = null) {
                                 nav = NavPage.Groups
                             )
                         }
+                    },
+                    onStoryDeleted = {
+                        scope.launch {
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(storyNav = app.nav.StoryNav.Friends)
+                            }
+                        }
                     }
                 )
                 NavPage.Apps -> {

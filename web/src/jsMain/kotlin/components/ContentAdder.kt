@@ -1,5 +1,6 @@
 package components
 
+import LocalConfiguration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -8,14 +9,19 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.newCard
+import app.ailaai.api.uploadAudio
+import app.ailaai.api.uploadVideo
 import app.dialog.dialog
 import app.dialog.editFormDialog
 import app.dialog.inputDialog
+import app.dialog.rememberChoosePhotoDialog
+import app.dialog.selectCardDialog
+import app.dialog.selectGroupDialog
+import app.dialog.selectPersonDialog
 import app.menu.InlineMenu
 import app.menu.Menu
 import appString
 import createWidget
-import com.queatz.db.Card
 import com.queatz.db.StoryContent
 import com.queatz.widgets.Widgets
 import app.dialog.selectScriptDialog
@@ -26,17 +32,25 @@ import com.queatz.widgets.widgets.PageTreeData
 import com.queatz.widgets.widgets.SpaceData
 import com.queatz.widgets.widgets.WebData
 import json
-import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import org.jetbrains.compose.web.css.AlignSelf
 import org.jetbrains.compose.web.css.alignSelf
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.DOMRect
+import pickAudio
+import pickVideo
+import toBytes
 
 enum class ContentType {
     Section,
     Text,
+    Photos,
+    Audio,
+    Video,
+    Cards,
+    Groups,
+    Profiles,
     Widget,
     Scene
 }
@@ -50,7 +64,9 @@ fun ContentAdder(
     cardId: String? = null // For card-specific widgets
 ) {
     val scope = rememberCoroutineScope()
+    val configuration = LocalConfiguration.current
     var menuTarget by remember { mutableStateOf<DOMRect?>(null) }
+    val choosePhoto = rememberChoosePhotoDialog(showUpload = true)
 
     // Suspend function to ensure we have a card ID - creates one if needed
     suspend fun ensureCardId(): String {
@@ -110,6 +126,88 @@ fun ContentAdder(
 
                         if (textContent != null) {
                             onContentAdded(StoryContent.Text(textContent))
+                        }
+                    }
+                }
+            }
+
+            if (ContentType.Photos in availableTypes) {
+                item(appString { photo }, icon = "photo") {
+                    choosePhoto.launch(multiple = true) { photoUrl, _, _ ->
+                        onContentAdded(StoryContent.Photos(photos = listOf(photoUrl)))
+                    }
+                }
+            }
+
+            if (ContentType.Audio in availableTypes) {
+                item(appString { audio }, icon = "audiotrack") {
+                    pickAudio { file ->
+                        scope.launch {
+                            api.uploadAudio(
+                                audio = file.toBytes(),
+                                contentType = file.type.ifBlank { "audio/mp4" },
+                                filename = file.name.ifBlank { "audio.m4a" }
+                            ) { response ->
+                                onContentAdded(StoryContent.Audio(audio = response.urls.first()))
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (ContentType.Video in availableTypes) {
+                item(appString { video }, icon = "videocam") {
+                    pickVideo { file ->
+                        scope.launch {
+                            api.uploadVideo(
+                                video = file.toBytes(),
+                                contentType = file.type.ifBlank { "video/mp4" },
+                                filename = file.name.ifBlank { "video.mp4" }
+                            ) { response ->
+                                onContentAdded(StoryContent.Video(video = response.urls.first()))
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (ContentType.Cards in availableTypes) {
+                item(appString { card }, icon = "style") {
+                    scope.launch {
+                        selectCardDialog(
+                            configuration = configuration,
+                            onSelected = { selected ->
+                                selected?.id?.let { cardId ->
+                                    onContentAdded(StoryContent.Cards(cards = listOf(cardId)))
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
+            if (ContentType.Groups in availableTypes) {
+                item(appString { group }, icon = "group") {
+                    scope.launch {
+                        val selected = selectGroupDialog(
+                            configuration = configuration
+                        )
+                        selected?.group?.id?.let { groupId ->
+                            onContentAdded(StoryContent.Groups(groups = listOf(groupId)))
+                        }
+                    }
+                }
+            }
+
+            if (ContentType.Profiles in availableTypes) {
+                item(appString { profile }, icon = "person") {
+                    scope.launch {
+                        selectPersonDialog(
+                            configuration = configuration
+                        ) { person ->
+                            person.id?.let { personId ->
+                                onContentAdded(StoryContent.Profiles(profiles = listOf(personId)))
+                            }
                         }
                     }
                 }
