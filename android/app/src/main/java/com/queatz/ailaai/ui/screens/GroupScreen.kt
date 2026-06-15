@@ -206,6 +206,7 @@ import com.queatz.ailaai.ui.components.MessageItem
 import com.queatz.ailaai.ui.components.ProfileImage
 import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
+import com.queatz.ailaai.ui.dialogs.PersonStatusDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialogState
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
@@ -327,6 +328,7 @@ fun GroupScreen(groupId: String) {
     var showNewReminderWithDialog by rememberStateOf(false)
     var showScheduleNewReminderDialog by rememberStateOf<List<Person>?>(null)
     var showTradeDialog by rememberStateOf<Trade?>(null)
+    var showPersonStatusDialog by rememberStateOf<Person?>(null)
     var showSendDialog by rememberStateOf(false)
     var searchMessages by rememberStateOf<String?>(null)
     var searchByReaction by rememberStateOf<String?>(null)
@@ -1094,7 +1096,7 @@ fun GroupScreen(groupId: String) {
                                         size = 18.dp
                                     ) {
                                         if (member.person != null) {
-                                            nav.appNavigate(AppNav.Profile(member.person!!.id!!))
+                                            showPersonStatusDialog = member.person
                                         }
                                     }
                                 }
@@ -2638,6 +2640,30 @@ fun GroupScreen(groupId: String) {
                         replyInNewGroup(title, message, it)
                     },
                     omit = { it.id == me?.id },
+                )
+            }
+
+            showPersonStatusDialog?.let { person ->
+                PersonStatusDialog(
+                    onDismissRequest = { showPersonStatusDialog = null },
+                    person = person,
+                    personStatus = null,
+                    onMessageClick = {
+                        showPersonStatusDialog = null
+                        scope.launch {
+                            api.createGroup(
+                                people = listOf(me!!.id!!, person.id!!),
+                                reuse = true
+                            ) {
+                                nav.appNavigate(AppNav.Group(it.id!!))
+                            }
+                        }
+                    },
+                    onProfileClick = {
+                        showPersonStatusDialog = null
+                        nav.appNavigate(AppNav.Profile(person.id!!))
+                    },
+                    onUseStatus = {}
                 )
             }
 

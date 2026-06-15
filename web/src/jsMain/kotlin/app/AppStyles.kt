@@ -804,7 +804,7 @@ class AppStyleSheet : StyleSheet() {
             "color-mix(in srgb, ${Styles.colors.surface}, transparent 50%)"
         )
         borderRadius(1.r)
-        border(1.px, LineStyle.Outset, rgba(0, 0, 0, 0.1))
+        border(1.px, LineStyle.Outset, rgba(0, 0, 0, 0.4))
         property("backdrop-filter", "blur(6px)")
 
         dark(self) {
