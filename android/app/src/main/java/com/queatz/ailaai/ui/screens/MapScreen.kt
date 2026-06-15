@@ -106,7 +106,7 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.Inventory
 import com.queatz.db.Story
-import com.queatz.db.formatPay
+import com.queatz.db.formatPrice
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -522,7 +522,7 @@ fun MapScreen(
                                             .widthIn(max = 120.dp)
                                     )
                                     listOfNotNull(
-                                        card.formatPay { appStringShort },
+                                        card.formatPrice { appStringShort },
                                         card.categories?.firstOrNull()
                                     ).notEmpty?.let { it ->
                                         OutlinedText(

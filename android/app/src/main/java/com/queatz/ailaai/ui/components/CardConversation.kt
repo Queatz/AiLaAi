@@ -207,7 +207,7 @@ fun CardConversation(
         }
 
         card.activity?.let {
-            CardActivity(it)
+            CardActivity(activity = it, card = card)
         }
 
         val context = LocalContext.current

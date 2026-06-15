@@ -104,7 +104,7 @@ fun CardContent(
             }
         }
         card.activity?.let {
-            CardActivity(it)
+            CardActivity(activity = it, card = card)
         }
         CardToolbar(card)
         cardConversation?.message?.notBlank?.let { message ->

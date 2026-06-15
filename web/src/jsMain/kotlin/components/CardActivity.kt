@@ -1,13 +1,12 @@
 package components
 
-import Strings.card
 import Styles
 import androidx.compose.runtime.Composable
 import appString
 import application
 import com.queatz.db.Activity
 import com.queatz.db.Card
-import com.queatz.db.formatPay
+import com.queatz.db.formatPrice
 import format
 import appStringShort
 import org.jetbrains.compose.web.css.*
@@ -17,7 +16,7 @@ import r
 import kotlin.js.Date
 
 @Composable
-fun CardActivity(activity: Activity) {
+fun CardActivity(activity: Activity, card: Card? = null) {
     Div({
         classes(Styles.cardActivity)
     }) {
@@ -56,6 +55,10 @@ fun CardActivity(activity: Activity) {
                 else -> appString { durationMinutes }.format(minutes.toString())
             }
             ActivityItem("schedule", text)
+        }
+        card?.let {
+            val price = it.formatPrice { appStringShort } ?: appString { free }
+            ActivityItem("payments", price)
         }
         val minAge = activity.minAge
         val maxAge = activity.maxAge
@@ -283,7 +286,7 @@ fun Card.activityDescription(full: Boolean = true): String {
         details.joinToString(", ")
     }
 
-    val price = formatPay { appStringShort }
+    val price = formatPrice { appStringShort }
     val description = if (full) getConversation().message.takeIf { it.isNotBlank() } else null
 
     return listOfNotNull(

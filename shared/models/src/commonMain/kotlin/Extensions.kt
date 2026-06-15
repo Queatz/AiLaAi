@@ -7,7 +7,7 @@ fun List<GroupExtended>.people(): List<Person> = mapNotNull { it.members?.mapNot
     .distinctBy { it.id!! }
     .sortedByDescending { it.seen ?: Instant.DISTANT_PAST }
 
-inline fun Card.formatPay(format: PayFrequency.() -> String) = pay?.pay?.let {
+inline fun Card.formatPrice(format: PayFrequency.() -> String) = pay?.pay?.let {
     pay?.frequency?.let { frequency ->
         "$it/${frequency.format()}"
     } ?: it

@@ -1157,4 +1157,5 @@
     <string name="languages_value">Languages: %1$s</string>
     <string name="activity_outdoors">Outdoors</string>
     <string name="activity_indoors">Indoors</string>
+    <string name="free">Free</string>
 </resources>

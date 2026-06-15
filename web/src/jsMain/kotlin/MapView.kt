@@ -20,7 +20,6 @@ import app.AppStyles
 import app.dialog.inputDialog
 import com.queatz.db.Card
 import com.queatz.db.Geo
-import com.queatz.db.formatPay
 import components.CardContent
 import components.IconButton
 import components.Markdown
@@ -63,8 +62,6 @@ import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
-import org.jetbrains.compose.web.css.lineHeight
-import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflow
@@ -80,9 +77,7 @@ import org.jetbrains.compose.web.css.paddingTop
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
-import org.jetbrains.compose.web.css.textAlign
 import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.dom.Br
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
@@ -92,8 +87,6 @@ import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
 import org.w3c.dom.set
-import web.cssom.Cursor
-import web.cssom.Flex
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt

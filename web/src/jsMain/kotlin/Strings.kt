@@ -2602,6 +2602,11 @@ object Strings {
         vn = "Video",
         ru = "Видео"
     )
+    val free = Translation(
+        en = "Free",
+        vn = "Miễn phí",
+        ru = "Бесплатно"
+    )
     
 }
 

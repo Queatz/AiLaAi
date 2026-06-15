@@ -812,7 +812,7 @@ class AppStyleSheet : StyleSheet() {
                 "background-color",
                 "color-mix(in srgb, ${Styles.colors.dark.surface}, transparent 50%)"
             )
-            border(1.px, LineStyle.Outset, rgba(255, 255, 255, 0.2))
+            border(1.px, LineStyle.Outset, rgba(255, 255, 255, 0.4))
             color(Color.white)
         }
     }

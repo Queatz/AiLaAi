@@ -155,7 +155,7 @@ fun CardListItem(
             }
         }
         card.activity?.let {
-            CardActivity(it)
+            CardActivity(activity = it, card = card)
         }
         if (showPhoto) {
             CardToolbar(card) {

@@ -15,15 +15,18 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.appStringShort
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Activity
+import com.queatz.db.Card
+import com.queatz.db.formatPrice
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
-fun CardActivity(activity: Activity) {
+fun CardActivity(activity: Activity, card: Card? = null) {
     val schedule = activity.schedule
     if (schedule != null) {
         val isAvailable = isAvailableToday(activity)
@@ -64,6 +67,13 @@ fun CardActivity(activity: Activity) {
         ActivityItem(
             icon = Icons.Outlined.Schedule,
             text = text
+        )
+    }
+    card?.let {
+        val price = it.formatPrice { appStringShort } ?: stringResource(R.string.free)
+        ActivityItem(
+            icon = Icons.Outlined.Payments,
+            text = price
         )
     }
     val minAge = activity.minAge
