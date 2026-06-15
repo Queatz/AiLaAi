@@ -290,7 +290,10 @@ fun MapView(
             .mapIndexed { index, scale ->
                 index to scale
             }
-            .sortedByDescending { it.second }
+            .sortedWith(
+                compareByDescending<Pair<Int, Double>> { cardPositions[it.first].second.y }
+                    .thenByDescending { it.second }
+            )
             .mapIndexed { rank, pair ->
                 pair.first to (markers.size - rank)
             }
