@@ -74,6 +74,7 @@ import org.jetbrains.compose.web.css.flexWrap
 import org.jetbrains.compose.web.css.paddingBottom
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.paddingRight
+import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.paddingTop
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.position
@@ -600,11 +601,13 @@ fun MapView(
                         val click = event.lngLat
                         scope.launch {
                             var active = false
+                            var configuredActivity by mutableStateOf<com.queatz.db.Activity?>(null)
                             val cardName = inputDialog(
                                 title = application.appString { newCard },
                                 placeholder = application.appString { name },
                                 confirmButton = application.appString { createCard },
                                 content = { _, _, _ ->
+                                    val contentScope = rememberCoroutineScope()
                                     var value by remember { mutableStateOf(false) }
 
                                     LaunchedEffect(value) {
@@ -636,6 +639,30 @@ fun MapView(
                                             appString { this.draft }
                                         }
                                     )
+
+                                    Button({
+                                        classes(Styles.outlineButton)
+                                        style {
+                                            width(100.percent)
+                                            marginTop(1.r)
+                                        }
+                                        onClick {
+                                            contentScope.launch {
+                                                configuredActivity = app.dialog.configureActivityDialog(
+                                                    initial = configuredActivity
+                                                )
+                                            }
+                                        }
+                                    }) {
+                                        Text(
+                                            if (configuredActivity != null) {
+                                                Card(activity = configuredActivity).activityDescription(full = false).takeIf { it.isNotBlank() }
+                                                    ?: appString { editActivity }
+                                            } else {
+                                                appString { addActivity }
+                                            }
+                                        )
+                                    }
                                 }
                             ) ?: return@launch
 
@@ -643,7 +670,8 @@ fun MapView(
                                 Card(
                                     name = cardName,
                                     geo = listOf(click.lat, click.lng),
-                                    active = active
+                                    active = active,
+                                    activity = configuredActivity
                                 )
                             ) {
                                 // todo: just reload everything

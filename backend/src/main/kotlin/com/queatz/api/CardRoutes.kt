@@ -158,6 +158,7 @@ fun Route.cardRoutes() {
                             person = person.id!!,
                             name = card.name,
                             location = card.location,
+                            activity = card.activity,
                             photo = card.photo,
                             photos = card.photos,
                             video = card.video,

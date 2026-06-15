@@ -1741,6 +1741,16 @@ object Strings {
         vn = "Hoạt động",
         ru = "Действия"
     )
+    val addActivity = Translation(
+        en = "Add activity",
+        vn = "Thêm hoạt động",
+        ru = "Добавить действие"
+    )
+    val editActivity = Translation(
+        en = "Edit activity",
+        vn = "Chỉnh sửa hoạt động",
+        ru = "Изменить действие"
+    )
     val languagesPlaceholder = Translation(
         en = "Languages e.g. English, Vietnamese",
         vn = "Ngôn ngữ ví dụ: Tiếng Anh, Tiếng Việt",
