@@ -153,6 +153,11 @@ object Strings {
         vn = "Không có sẵn hôm nay",
         ru = "Не доступно сегодня"
     )
+    val nextAvailableDate = Translation(
+        en = "Next available %1\$s",
+        vn = "Có sẵn tiếp theo %1\$s",
+        ru = "Следующий доступный %1\$s"
+    )
     val todayInline = Translation(
         en = "today",
         vn = "hôm nay",

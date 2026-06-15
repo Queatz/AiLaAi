@@ -1067,8 +1067,10 @@
     <string name="active_now">Đang hoạt động</string>
     <string name="no_signals">Không có tín hiệu.</string>
     <string name="send_a_signal">Gửi tín hiệu</string>
+    <string name="available_today">Có sẵn hôm nay</string>
     <string name="today_inline">hôm nay</string>
     <string name="not_available_today">Không có sẵn hôm nay</string>
+    <string name="next_available_date">Có sẵn tiếp theo %1$s</string>
     <string name="duration_minutes">%1$s phút</string>
     <string name="duration_hours">%1$s giờ</string>
     <string name="duration_hours_minutes">%1$s giờ %2$s phút</string>

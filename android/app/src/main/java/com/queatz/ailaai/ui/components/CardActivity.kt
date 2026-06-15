@@ -19,6 +19,8 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Activity
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun CardActivity(activity: Activity) {
@@ -26,14 +28,20 @@ fun CardActivity(activity: Activity) {
     if (schedule != null) {
         val isAvailable = isAvailableToday(activity)
         if (isAvailable) {
+            val timesStr = formatSchedule(activity)
             ActivityItem(
                 Icons.Outlined.CalendarToday,
-                formatSchedule(activity) + " " + stringResource(R.string.today_inline)
+                if (timesStr.isNotBlank()) "$timesStr " + stringResource(R.string.today_inline) else stringResource(R.string.available_today)
             )
         } else {
+            val nextDate = nextAvailableDate(activity)
             ActivityItem(
                 Icons.Outlined.CalendarToday,
-                stringResource(R.string.not_available_today),
+                if (nextDate != null) {
+                    stringResource(R.string.next_available_date).format(nextDate)
+                } else {
+                    stringResource(R.string.not_available_today)
+                },
                 color = MaterialTheme.colorScheme.secondary
             )
         }
@@ -119,6 +127,37 @@ fun ActivityItem(icon: ImageVector, text: String, color: Color? = null) {
     }
 }
 
+fun nextAvailableDate(activity: Activity): String? {
+    val activityOffset = activity.utcOffset ?: 0.0
+    val activityZone = ZoneOffset.ofTotalSeconds((activityOffset * 3600).toInt())
+    var candidate = ZonedDateTime.now().withZoneSameInstant(activityZone).plusDays(1)
+    val formatter = DateTimeFormatter.ofPattern("MMM d", Locale.getDefault())
+    repeat(365) {
+        val dayOfWeek = candidate.dayOfWeek.value
+        val jsDayOfWeek = if (dayOfWeek == 7) 1 else dayOfWeek + 1
+        val dayOfMonth = candidate.dayOfMonth
+        val month = candidate.monthValue
+        val year = candidate.year
+        val daysInMonth = candidate.month.length(candidate.toLocalDate().isLeapYear)
+        val week = ((dayOfMonth - 1) / 7) + 1
+        val schedule = activity.schedule ?: return null
+        val daysMatch = schedule.days.isNullOrEmpty() && schedule.weekdays.isNullOrEmpty() ||
+                (schedule.days?.contains(dayOfMonth) == true ||
+                        (dayOfMonth == daysInMonth && schedule.days?.contains(-1) == true) ||
+                        schedule.weekdays?.contains(jsDayOfWeek) == true)
+        val weeksMatch = schedule.weeks.isNullOrEmpty() || schedule.weeks?.contains(week) == true
+        val monthsMatch = schedule.months.isNullOrEmpty() || schedule.months?.contains(month) == true
+        val yearsMatch = schedule.years.isNullOrEmpty() || schedule.years?.contains(year) == true
+        if (daysMatch && weeksMatch && monthsMatch && yearsMatch) {
+            val dateStr = candidate.format(formatter)
+            val timesStr = formatSchedule(activity)
+            return if (timesStr.isNotBlank()) "$dateStr, $timesStr" else dateStr
+        }
+        candidate = candidate.plusDays(1)
+    }
+    return null
+}
+
 fun isAvailableToday(activity: Activity): Boolean {
     val schedule = activity.schedule ?: return true
 
@@ -150,7 +189,7 @@ fun isAvailableToday(activity: Activity): Boolean {
 
 fun formatSchedule(activity: Activity): String {
     val hours = activity.schedule?.hours
-    if (hours.isNullOrEmpty()) return "Available today"
+    if (hours.isNullOrEmpty()) return ""
 
     val activityOffset = activity.utcOffset ?: 0.0
     val browserOffsetHours = ZoneOffset.systemDefault().rules.getOffset(java.time.Instant.now()).totalSeconds / 3600.0

@@ -25,9 +25,19 @@ fun CardActivity(activity: Activity) {
         if (schedule != null) {
             val isAvailable = isAvailableToday(activity)
             if (isAvailable) {
-                ActivityItem("calendar_today", formatSchedule(activity) + " " + appString { todayInline })
+                val timesStr = formatSchedule(activity)
+                ActivityItem("calendar_today", if (timesStr.isNotBlank()) "$timesStr " + appString { todayInline } else appString { availableTodayFallback })
             } else {
-                ActivityItem("calendar_today", appString { notAvailableToday }, Styles.colors.gray)
+                val nextDate = nextAvailableDate(activity)
+                ActivityItem(
+                    iconName = "calendar_today",
+                    text = if (nextDate != null) {
+                        appString { nextAvailableDate }.format(nextDate)
+                    } else {
+                        appString { notAvailableToday }
+                    },
+                    color = Styles.colors.gray
+                )
             }
         }
         activity.duration?.let {
@@ -93,6 +103,39 @@ fun ActivityItem(iconName: String, text: String, color: CSSColorValue? = null) {
     }
 }
 
+fun nextAvailableDate(activity: Activity): String? {
+    val activityOffset = activity.utcOffset ?: 0.0
+    val activityOffsetMs = activityOffset * 60 * 60 * 1000
+    val now = Date()
+    val utcTime = now.getTime() + (now.getTimezoneOffset() * 60 * 1000)
+    var candidateTime = utcTime + activityOffsetMs + (24 * 60 * 60 * 1000)
+    repeat(365) {
+        val candidate = Date(candidateTime)
+        val dayOfWeek = candidate.getDay() + 1
+        val dayOfMonth = candidate.getDate()
+        val month = candidate.getMonth() + 1
+        val year = candidate.getFullYear()
+        val daysInMonth = Date(year, month, 0).getDate()
+        val week = ((dayOfMonth - 1) / 7) + 1
+        val schedule = activity.schedule ?: return null
+        val daysMatch = schedule.days.isNullOrEmpty() && schedule.weekdays.isNullOrEmpty() ||
+                (schedule.days?.contains(dayOfMonth) == true ||
+                (dayOfMonth == daysInMonth && schedule.days?.contains(-1) == true) ||
+                schedule.weekdays?.contains(dayOfWeek) == true)
+        val weeksMatch = schedule.weeks.isNullOrEmpty() || schedule.weeks?.contains(week) == true
+        val monthsMatch = schedule.months.isNullOrEmpty() || schedule.months?.contains(month) == true
+        val yearsMatch = schedule.years.isNullOrEmpty() || schedule.years?.contains(year) == true
+        if (daysMatch && weeksMatch && monthsMatch && yearsMatch) {
+            val monthNames = arrayOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+            val dateStr = "${monthNames[candidate.getMonth()]} ${candidate.getDate()}"
+            val timesStr = formatSchedule(activity)
+            return if (timesStr.isNotBlank()) "$dateStr, $timesStr" else dateStr
+        }
+        candidateTime += 24 * 60 * 60 * 1000
+    }
+    return null
+}
+
 fun isAvailableToday(activity: Activity): Boolean {
     val schedule = activity.schedule ?: return true
     
@@ -122,7 +165,7 @@ fun isAvailableToday(activity: Activity): Boolean {
 
 fun formatSchedule(activity: Activity): String {
     val hours = activity.schedule?.hours
-    if (hours.isNullOrEmpty()) return application.appString { availableTodayFallback }
+    if (hours.isNullOrEmpty()) return ""
 
     val activityOffset = activity.utcOffset ?: 0.0
     val browserOffsetMinutes = kotlin.js.Date().getTimezoneOffset()
@@ -168,9 +211,17 @@ fun Card.activityDescription(full: Boolean = true): String {
         val schedule = activity.schedule
         if (schedule != null) {
             if (isAvailableToday(activity)) {
-                details.add(formatSchedule(activity) + " " + application.appString { todayInline })
+                val timesStr = formatSchedule(activity)
+                details.add(if (timesStr.isNotBlank()) "$timesStr " + application.appString { todayInline } else application.appString { availableTodayFallback })
             } else {
-                details.add(application.appString { notAvailableToday })
+                val nextDate = nextAvailableDate(activity)
+                details.add(
+                    if (nextDate != null) {
+                        application.appString { nextAvailableDate }.format(nextDate)
+                    } else {
+                        application.appString { notAvailableToday }
+                    }
+                )
             }
         }
         activity.duration?.let {
