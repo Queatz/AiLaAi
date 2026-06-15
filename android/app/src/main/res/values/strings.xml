@@ -1159,8 +1159,8 @@
     <string name="activity_indoors">Indoors</string>
     <string name="parking">Parking</string>
     <string name="parking_none">No parking</string>
-    <string name="parking_bike">Bike parking</string>
-    <string name="parking_motorbike">Motorbike parking</string>
-    <string name="parking_car">Car parking</string>
+    <string name="parking_bike">Bike</string>
+    <string name="parking_motorbike">Motorbike</string>
+    <string name="parking_car">Car</string>
     <string name="free">Free</string>
 </resources>

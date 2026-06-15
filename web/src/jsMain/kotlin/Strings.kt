@@ -2593,18 +2593,18 @@ object Strings {
         ru = "Без парковки"
     )
     val parkingBike = Translation(
-        en = "Bike parking",
-        vn = "Bãi đỗ xe đạp",
+        en = "Bike",
+        vn = "Xe đạp",
         ru = "Велопарковка"
     )
     val parkingMotorbike = Translation(
-        en = "Motorbike parking",
-        vn = "Bãi đỗ xe máy",
+        en = "Motorbike",
+        vn = "Xe máy",
         ru = "Мотопарковка"
     )
     val parkingCar = Translation(
-        en = "Car parking",
-        vn = "Bãi đỗ xe ô tô",
+        en = "Car",
+        vn = "Xe ô tô",
         ru = "Автопарковка"
     )
     val availableTodayFallback = Translation(

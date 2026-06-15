@@ -1087,9 +1087,9 @@
     <string name="activity_indoors">Trong nhà</string>
     <string name="parking">Bãi đỗ xe</string>
     <string name="parking_none">Không có</string>
-    <string name="parking_bike">Bãi đỗ xe đạp</string>
-    <string name="parking_motorbike">Bãi đỗ xe máy</string>
-    <string name="parking_car">Bãi đỗ xe ô tô</string>
+    <string name="parking_bike">Xe đạp</string>
+    <string name="parking_motorbike">Xe máy</string>
+    <string name="parking_car">Xe ô tô</string>
     <string name="directions">Chỉ đường</string>
     <string name="free">Miễn phí</string>
 </resources>
