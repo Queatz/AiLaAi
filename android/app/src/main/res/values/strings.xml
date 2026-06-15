@@ -1163,4 +1163,5 @@
     <string name="parking_motorbike">Motorbike</string>
     <string name="parking_car">Car</string>
     <string name="free">Free</string>
+    <string name="timezone">Timezone</string>
 </resources>

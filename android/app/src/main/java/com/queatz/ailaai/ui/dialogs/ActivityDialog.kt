@@ -253,7 +253,7 @@ fun ActivityDialog(
                     onClick = { showTimezoneDialog = true },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(timezone)
+                    Text(timezone.replace("_", " "))
                 }
 
                 OutlinedButton(

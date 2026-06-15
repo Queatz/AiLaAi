@@ -28,12 +28,12 @@ fun ChooseTimezoneDialog(
     ChooseDialog(
         onDismissRequest = onDismissRequest,
         isLoading = false,
-        title = "Timezone",
+        title = stringResource(R.string.timezone),
         allowNone = false,
         photoFormatter = null,
-        nameFormatter = { it },
+        nameFormatter = { it.replace("_", " ") },
         confirmFormatter = {
-            if (it.isEmpty()) "" else stringResource(R.string.choose_x, it.first())
+            if (it.isEmpty()) "" else stringResource(R.string.choose_x, it.first().replace("_", " "))
         },
         textWhenEmpty = { "" },
         searchText = searchText,

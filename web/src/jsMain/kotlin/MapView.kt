@@ -432,7 +432,7 @@ fun MapView(
                                     Div {
                                         Text(card.name ?: application.appString { newCard })
                                     }
-                                    card.activityDescription(full = false).let {
+                                    card.activityDescription(full = false).notBlank?.let {
                                         Div({
                                             style {
                                                 fontSize(85.percent)
@@ -1036,6 +1036,10 @@ fun MapView(
                                         allLanguages.forEach { lang ->
                                             option(lang, lang)
                                         }
+                                    }
+                                } else if (selectedLanguages.isNotEmpty()) {
+                                    LaunchedEffect(Unit) {
+                                        selectedLanguages = emptyList()
                                     }
                                 }
                             }
