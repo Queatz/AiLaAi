@@ -1092,4 +1092,14 @@
     <string name="parking_car">Xe ô tô</string>
     <string name="directions">Chỉ đường</string>
     <string name="free">Miễn phí</string>
+    <string name="activity">Hoạt động</string>
+    <string name="add_activity">Thêm hoạt động</string>
+    <string name="remove_activity">Xóa hoạt động</string>
+    <string name="min_age">Độ tuổi tối thiểu</string>
+    <string name="max_age">Độ tuổi tối đa</string>
+    <string name="min_group_size">Kích thước nhóm tối thiểu</string>
+    <string name="max_group_size">Kích thước nhóm tối đa</string>
+    <string name="pets">Thú cưng</string>
+    <string name="languages">Ngôn ngữ</string>
+    <string name="outdoors">Ngoài trời</string>
 </resources>

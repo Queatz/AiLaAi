@@ -2,6 +2,7 @@ package com.queatz.ailaai.ui.dialogs
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -204,8 +205,9 @@ fun ActivityDialog(
                     stringResource(R.string.parking),
                     style = MaterialTheme.typography.labelLarge
                 )
-                Row(
+                FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(1.pad),
+                    verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterVertically),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     listOf(

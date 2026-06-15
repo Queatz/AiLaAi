@@ -2,36 +2,64 @@ package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
 import android.widget.Toast
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -42,12 +70,28 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import app.ailaai.api.*
+import app.ailaai.api.activeSignals
+import app.ailaai.api.cancelSignal
+import app.ailaai.api.createSignal
+import app.ailaai.api.createSignalGroup
+import app.ailaai.api.me
+import app.ailaai.api.mySignals
+import app.ailaai.api.replySignal
+import app.ailaai.api.sendSignal
+import app.ailaai.api.signals
+import app.ailaai.api.toggleSignal
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.appNavigate
+import com.queatz.ailaai.extensions.greetingRes
+import com.queatz.ailaai.extensions.inDp
+import com.queatz.ailaai.extensions.px
+import com.queatz.ailaai.extensions.rememberAnimatedGradientBrush
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.push
@@ -56,10 +100,20 @@ import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.SignalAttachments
-import com.queatz.ailaai.ui.dialogs.*
+import com.queatz.ailaai.ui.dialogs.CreateSignalDialog
+import com.queatz.ailaai.ui.dialogs.Media
+import com.queatz.ailaai.ui.dialogs.PhotoDialog
+import com.queatz.ailaai.ui.dialogs.ReplySignalDialog
+import com.queatz.ailaai.ui.dialogs.SendSignalDialog
+import com.queatz.ailaai.ui.dialogs.SignalRepliesDialog
+import com.queatz.ailaai.ui.dialogs.SignalSettingsDialog
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.pad
-import com.queatz.db.*
+import com.queatz.db.ActiveSignalsResponse
+import com.queatz.db.Group
+import com.queatz.db.PersonSignal
+import com.queatz.db.Signal
+import com.queatz.db.SignalSendExtended
 import com.queatz.push.SignalPushData
 import com.queatz.push.SignalReplyPushData
 import kotlinx.coroutines.flow.filter
@@ -195,7 +249,7 @@ fun SignalsScreen(id: String? = null) {
             }
         )
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().weight(1f)) {
             LazyVerticalGrid(
                 state = gridState,
                 columns = GridCells.Adaptive(100.dp),
@@ -532,11 +586,15 @@ fun SignalsGreeting() {
         style = MaterialTheme.typography.displaySmall.copy(
             fontWeight = FontWeight.Light,
             textAlign = TextAlign.Center,
-            brush = brush
         ),
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 1.pad, vertical = 2.pad)
+            .graphicsLayer(alpha = 0.99f)
+            .drawWithContent {
+                drawContent()
+                drawRect(brush = brush, blendMode = BlendMode.SrcIn)
+            }
     )
 }
 
