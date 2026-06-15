@@ -21,6 +21,7 @@ suspend fun Api.cards(
     minGroupSize: Int? = null,
     maxGroupSize: Int? = null,
     activityActive: Boolean? = null,
+    parking: Parking? = null,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Card>>,
 ) =
@@ -40,6 +41,7 @@ suspend fun Api.cards(
         "minGroupSize" to minGroupSize?.toString(),
         "maxGroupSize" to maxGroupSize?.toString(),
         "activityActive" to activityActive?.toString(),
+        "parking" to parking?.name,
     ),
         onError = onError,
         onSuccess = onSuccess

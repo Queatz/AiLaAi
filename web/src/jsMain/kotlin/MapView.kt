@@ -20,6 +20,7 @@ import app.AppStyles
 import app.dialog.inputDialog
 import com.queatz.db.Card
 import com.queatz.db.Geo
+import com.queatz.db.Parking
 import components.CardContent
 import components.IconButton
 import components.Markdown
@@ -128,6 +129,7 @@ fun MapView(
     var ageMax by remember { mutableStateOf<Int?>(localStorage["map.ageMax"]?.toIntOrNull()) }
     var groupSizeMin by remember { mutableStateOf<Int?>(localStorage["map.groupSizeMin"]?.toIntOrNull()) }
     var groupSizeMax by remember { mutableStateOf<Int?>(localStorage["map.groupSizeMax"]?.toIntOrNull()) }
+    var parkingFilter by remember { mutableStateOf<Parking?>(localStorage["map.parkingFilter"]?.let { runCatching { Parking.valueOf(it) }.getOrNull() }) }
     var filtersExpanded by remember { mutableStateOf(true) }
 
     val allLanguages = remember(searchResults) {
@@ -213,6 +215,11 @@ fun MapView(
         else localStorage.removeItem("map.groupSizeMax")
     }
 
+    LaunchedEffect(parkingFilter) {
+        if (parkingFilter != null) localStorage["map.parkingFilter"] = parkingFilter!!.name
+        else localStorage.removeItem("map.parkingFilter")
+    }
+
     LaunchedEffect(
         geo,
         searchText,
@@ -224,7 +231,8 @@ fun MapView(
         ageMin,
         ageMax,
         groupSizeMin,
-        groupSizeMax
+        groupSizeMax,
+        parkingFilter
     ) {
         geo ?: return@LaunchedEffect
         isLoading = true
@@ -245,7 +253,8 @@ fun MapView(
             maxAge = ageMax,
             minGroupSize = groupSizeMin,
             maxGroupSize = groupSizeMax,
-            activityActive = true
+            activityActive = true,
+            parking = parkingFilter
         ) {
             // todo: filter geo != null on backend
             searchResults = it.filter { it.geo != null }
@@ -954,6 +963,39 @@ fun MapView(
                                     title = appString { outdoors }
                                 )
 
+                                Div({
+                                    style {
+                                        display(DisplayStyle.Flex)
+                                        flexDirection(FlexDirection.Row)
+                                        gap(.5.r)
+                                        alignItems(AlignItems.Center)
+                                        flexWrap(FlexWrap.Wrap)
+                                    }
+                                }) {
+                                    Span {
+                                        appText { parking }
+                                    }
+                                    listOf(
+                                        Parking.Bike to appString { parkingBike },
+                                        Parking.Motorbike to appString { parkingMotorbike },
+                                        Parking.Car to appString { parkingCar }
+                                    ).forEach { (option, label) ->
+                                        Button({
+                                            classes(
+                                                listOfNotNull(
+                                                    if (parkingFilter == option) Styles.floatingButtonSelected else null,
+                                                    Styles.floatingButton,
+                                                    Styles.floatingButtonSmall,
+                                                )
+                                            )
+                                            style { flexShrink(0) }
+                                            onClick { parkingFilter = if (parkingFilter == option) null else option }
+                                        }) {
+                                            Text(label)
+                                        }
+                                    }
+                                }
+
                                 if (allLanguages.isNotEmpty()) {
                                     app.components.MultiSelect(
                                         selected = selectedLanguages,
@@ -1024,6 +1066,13 @@ fun MapView(
                                 if (availableNowFilter) append(appString { availableToday } + ", ")
                                 if (petsFilter) append(appString { pets } + ", ")
                                 if (outdoorsFilter) append(appString { outdoors } + ", ")
+                                if (parkingFilter != null) append(when (parkingFilter) {
+                                    Parking.None -> appString { parkingNone }
+                                    Parking.Bike -> appString { parkingBike }
+                                    Parking.Motorbike -> appString { parkingMotorbike }
+                                    Parking.Car -> appString { parkingCar }
+                                    null -> ""
+                                } + ", ")
                                 if (selectedLanguages.isNotEmpty()) append(selectedLanguages.joinToString() + ", ")
                                 if (ageMin != null || ageMax != null) {
                                     val min = ageMin ?: 0

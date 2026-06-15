@@ -6,6 +6,7 @@ import appString
 import application
 import com.queatz.db.Activity
 import com.queatz.db.Card
+import com.queatz.db.Parking
 import com.queatz.db.formatPrice
 import format
 import appStringShort
@@ -85,6 +86,15 @@ fun CardActivity(activity: Activity, card: Card? = null) {
             ActivityItem("language", appString { languagesValue }.format(it.joinToString(", ")))
         }
         activity.outdoors?.let { ActivityItem("nature", if (it) appString { activityOutdoors } else appString { activityIndoors }) }
+        activity.parking?.let {
+            val text = when (it) {
+                Parking.None -> appString { parkingNone }
+                Parking.Bike -> appString { parkingBike }
+                Parking.Motorbike -> appString { parkingMotorbike }
+                Parking.Car -> appString { parkingCar }
+            }
+            ActivityItem("local_parking", text)
+        }
     }
 }
 
@@ -282,6 +292,16 @@ fun Card.activityDescription(full: Boolean = true): String {
         }
         activity.outdoors?.let {
             details.add(if (it) application.appString { activityOutdoors } else application.appString { activityIndoors })
+        }
+        activity.parking?.let {
+            details.add(
+                when (it) {
+                    Parking.None -> application.appString { parkingNone }
+                    Parking.Bike -> application.appString { parkingBike }
+                    Parking.Motorbike -> application.appString { parkingMotorbike }
+                    Parking.Car -> application.appString { parkingCar }
+                }
+            )
         }
         details.joinToString(", ")
     }

@@ -17,6 +17,7 @@ import appString
 import application
 import com.queatz.db.Activity
 import com.queatz.db.Card
+import com.queatz.db.Parking
 import com.queatz.db.Reminder
 import components.IconButton
 import components.Switch
@@ -98,6 +99,7 @@ suspend fun activityDialog(
         var maxGroupSize by remember { mutableStateOf(card.activity?.maxGroupSize?.toString() ?: "") }
         var hasPets by remember { mutableStateOf(card.activity?.pets ?: false) }
         var isOutdoors by remember { mutableStateOf(card.activity?.outdoors ?: false) }
+        var parking by remember { mutableStateOf(card.activity?.parking) }
         var languages by remember { mutableStateOf(card.activity?.languages?.joinToString(", ") ?: "") }
         var duration by remember { mutableStateOf(card.activity?.duration ?: 0L) }
         val initialStart = card.activity?.start?.toEpochMilliseconds()?.let { Date(it) }
@@ -125,6 +127,7 @@ suspend fun activityDialog(
             maxGroupSize,
             hasPets,
             isOutdoors,
+            parking,
             languages,
             duration,
             timezone,
@@ -141,6 +144,7 @@ suspend fun activityDialog(
                 maxGroupSize != (card.activity?.maxGroupSize?.toString() ?: "") ||
                 hasPets != (card.activity?.pets ?: false) ||
                 isOutdoors != (card.activity?.outdoors ?: false) ||
+                parking != card.activity?.parking ||
                 languages != (card.activity?.languages?.joinToString(", ") ?: "") ||
                 duration != (card.activity?.duration ?: 0L) ||
                 timezone != initialTimezone ||
@@ -157,6 +161,7 @@ suspend fun activityDialog(
                     maxGroupSize = maxGroupSize.toIntOrNull(),
                     pets = hasPets.takeIf { it },
                     outdoors = isOutdoors.takeIf { it },
+                    parking = parking,
                     languages = languages.split(",").map { it.trim() }.filter { it.isNotBlank() }.notEmpty,
                     duration = duration.takeIf { it > 0 },
                     start = activityStart?.toKotlinInstant(),
@@ -166,8 +171,8 @@ suspend fun activityDialog(
                     schedule = schedule
                 )
                 api.updateCard(
-                    card.id!!,
-                    Card(activity = updatedActivity)
+                    id = card.id!!,
+                    card = Card(activity = updatedActivity)
                 ) {
                     onUpdated(it)
                 }
@@ -291,6 +296,46 @@ suspend fun activityDialog(
                     }
                 )
                 Text(application.appString { Strings.outdoors })
+            }
+
+            Div(
+                attrs = {
+                    style {
+                        display(DisplayStyle.Flex)
+                        flexDirection(FlexDirection.Column)
+                        gap(0.5.r)
+                    }
+                }
+            ) {
+                Text(application.appString { Strings.parking })
+                Div(
+                    attrs = {
+                        style {
+                            display(DisplayStyle.Flex)
+                            flexDirection(FlexDirection.Row)
+                            gap(0.5.r)
+                            flexWrap(FlexWrap.Wrap)
+                        }
+                    }
+                ) {
+                    listOf(
+                        Parking.None to application.appString { Strings.parkingNone },
+                        Parking.Bike to application.appString { Strings.parkingBike },
+                        Parking.Motorbike to application.appString { Strings.parkingMotorbike },
+                        Parking.Car to application.appString { Strings.parkingCar }
+                    ).forEach { (option, label) ->
+                        Button(
+                            attrs = {
+                                classes(
+                                    if (parking == option) Styles.button else Styles.outlineButton
+                                )
+                                onClick { parking = if (parking == option) null else option }
+                            }
+                        ) {
+                            Text(label)
+                        }
+                    }
+                }
             }
 
             Div(

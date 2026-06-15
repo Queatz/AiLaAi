@@ -37,6 +37,7 @@ import com.queatz.ailaai.ui.components.Check
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Activity
+import com.queatz.db.Parking
 import com.queatz.db.Reminder
 import kotlinx.coroutines.launch
 import java.util.TimeZone
@@ -57,6 +58,7 @@ fun ActivityDialog(
     var maxGroupSize by rememberStateOf(activity?.maxGroupSize?.toString() ?: "")
     var pets by rememberStateOf(activity?.pets ?: false)
     var outdoors by rememberStateOf(activity?.outdoors ?: false)
+    var parking by rememberStateOf(activity?.parking)
     var languages by rememberStateOf(activity?.languages?.joinToString(", ") ?: "")
     var duration by rememberStateOf(activity?.duration ?: 0L)
     var schedule by rememberStateOf(activity?.schedule)
@@ -198,6 +200,39 @@ fun ActivityDialog(
                     Text(stringResource(R.string.outdoors))
                 }
 
+                Text(
+                    stringResource(R.string.parking),
+                    style = MaterialTheme.typography.labelLarge
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(1.pad),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    listOf(
+                        Parking.None to stringResource(R.string.parking_none),
+                        Parking.Bike to stringResource(R.string.parking_bike),
+                        Parking.Motorbike to stringResource(R.string.parking_motorbike),
+                        Parking.Car to stringResource(R.string.parking_car)
+                    ).forEach { (option, label) ->
+                        if (parking == option) {
+                            OutlinedButton(
+                                onClick = { parking = null },
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                )
+                            ) {
+                                Text(label)
+                            }
+                        } else {
+                            OutlinedButton(
+                                onClick = { parking = option }
+                            ) {
+                                Text(label)
+                            }
+                        }
+                    }
+                }
+
                 OutlinedButton(
                     onClick = { showDurationDialog = true },
                     modifier = Modifier.fillMaxWidth()
@@ -263,6 +298,7 @@ fun ActivityDialog(
                             duration = duration.takeIf { it > 0 },
                             pets = pets.takeIf { it },
                             outdoors = outdoors.takeIf { it },
+                            parking = parking,
                             schedule = schedule,
                             timezone = timezone,
                             utcOffset = utcOffset

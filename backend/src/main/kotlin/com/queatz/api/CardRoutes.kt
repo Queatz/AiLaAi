@@ -9,6 +9,7 @@ import com.queatz.db.CardUpgradeBody
 import com.queatz.db.CardUpgradeDetails
 import com.queatz.db.CardVisit
 import com.queatz.db.ConversationItem
+import com.queatz.db.Parking
 import com.queatz.db.Person
 import com.queatz.db.allCardsOfCard
 import com.queatz.db.asKey
@@ -124,6 +125,7 @@ fun Route.cardRoutes() {
                     minGroupSize = call.parameters["minGroupSize"]?.toIntOrNull(),
                     maxGroupSize = call.parameters["maxGroupSize"]?.toIntOrNull(),
                     activityActive = call.parameters["activityActive"]?.toBooleanStrictOrNull(),
+                    parking = call.parameters["parking"]?.let { runCatching { Parking.valueOf(it) }.getOrNull() },
                     nearbyMaxDistance = defaultNearbyMaxDistanceInMeters,
                     offset = call.parameters["offset"]?.toInt() ?: 0,
                     limit = call.parameters["limit"]?.toInt() ?: 20,

@@ -19,6 +19,7 @@ import com.queatz.ailaai.extensions.appStringShort
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Activity
 import com.queatz.db.Card
+import com.queatz.db.Parking
 import com.queatz.db.formatPrice
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
@@ -117,6 +118,18 @@ fun CardActivity(activity: Activity, card: Card? = null) {
         ActivityItem(
             Icons.Outlined.NaturePeople,
             if (it) stringResource(R.string.activity_outdoors) else stringResource(R.string.activity_indoors)
+        )
+    }
+    activity.parking?.let {
+        val text = when (it) {
+            Parking.None -> stringResource(R.string.parking_none)
+            Parking.Bike -> stringResource(R.string.parking_bike)
+            Parking.Motorbike -> stringResource(R.string.parking_motorbike)
+            Parking.Car -> stringResource(R.string.parking_car)
+        }
+        ActivityItem(
+            icon = Icons.Outlined.LocalParking,
+            text = text
         )
     }
 }

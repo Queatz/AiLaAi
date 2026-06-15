@@ -912,7 +912,15 @@ class MainStyleSheet : StyleSheet() {
         }
     }
 
-    val floatingButtonSelected by style {}
+    val floatingButtonSmall by style {}
+
+    val floatingButtonSelected by style {
+        outline(colors.secondary, LineStyle.Solid.toString(), 2.px)
+
+        dark(self) {
+            outlineColor(colors.white)
+        }
+    }
 
     val floatingButton by style {
         buttonBaseStyle()
@@ -925,6 +933,13 @@ class MainStyleSheet : StyleSheet() {
         self + className(floatingButtonSelected) style {
             backgroundColor(colors.primary)
             color(colors.white)
+            backgroundImage("linear-gradient(to bottom, #ffffff36, #ffffff00)")
+            property("box-shadow", "0 0 4px 2px #ffffff36 inset")
+        }
+
+        self + className(floatingButtonSmall) style {
+            padding(0.r, 1.r)
+            minHeight(2.r)
         }
 
         dark(self) {
