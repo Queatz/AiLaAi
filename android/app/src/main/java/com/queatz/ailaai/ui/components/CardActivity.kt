@@ -127,8 +127,14 @@ fun CardActivity(activity: Activity, card: Card? = null) {
             Parking.Motorbike -> stringResource(R.string.parking_motorbike)
             Parking.Car -> stringResource(R.string.parking_car)
         }
+        val icon = when (it) {
+            Parking.None -> Icons.Outlined.LocalParking
+            Parking.Bike -> Icons.Outlined.PedalBike
+            Parking.Motorbike -> Icons.Outlined.Moped
+            Parking.Car -> Icons.Outlined.DirectionsCar
+        }
         ActivityItem(
-            icon = Icons.Outlined.LocalParking,
+            icon = icon,
             text = text
         )
     }

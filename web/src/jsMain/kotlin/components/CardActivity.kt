@@ -93,7 +93,13 @@ fun CardActivity(activity: Activity, card: Card? = null) {
                 Parking.Motorbike -> appString { parkingMotorbike }
                 Parking.Car -> appString { parkingCar }
             }
-            ActivityItem("local_parking", text)
+            val icon = when (it) {
+                Parking.None -> "local_parking"
+                Parking.Bike -> "pedal_bike"
+                Parking.Motorbike -> "moped"
+                Parking.Car -> "directions_car"
+            }
+            ActivityItem(icon, text)
         }
     }
 }

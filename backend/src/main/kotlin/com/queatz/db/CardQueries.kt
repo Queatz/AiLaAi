@@ -2,6 +2,13 @@ package com.queatz.db
 
 import kotlin.time.Instant
 
+private fun Parking.inclusiveParking(): List<String> = when (this) {
+    Parking.None -> listOf(Parking.None.name)
+    Parking.Bike -> listOf(Parking.Bike.name, Parking.Motorbike.name, Parking.Car.name)
+    Parking.Motorbike -> listOf(Parking.Motorbike.name, Parking.Car.name)
+    Parking.Car -> listOf(Parking.Car.name)
+}
+
 /**
  * @person The current user
  */
@@ -266,7 +273,7 @@ fun Db.explore(
                 and (@minGroupSize == null or x.${f(Card::activity)}.${f(Activity::maxGroupSize)} == null or x.${f(Card::activity)}.${f(Activity::maxGroupSize)} >= @minGroupSize)
                 and (@maxGroupSize == null or x.${f(Card::activity)}.${f(Activity::minGroupSize)} == null or x.${f(Card::activity)}.${f(Activity::minGroupSize)} <= @maxGroupSize)
                 and (@languages == null or (is_array(x.${f(Card::activity)}.${f(Activity::languages)}) and first(for l in x.${f(Card::activity)}.${f(Activity::languages)} filter l in @languages return true) == true))
-                and (@parking == null or x.${f(Card::activity)}.${f(Activity::parking)} == @parking)
+                and (@parking == null or x.${f(Card::activity)}.${f(Activity::parking)} in @parking)
                 and (@availableNow == null or @availableNow == false or (
                     (x.${f(Card::activity)}.${f(Activity::start)} == null or x.${f(Card::activity)}.${f(Activity::start)} <= now)
                     and (x.${f(Card::activity)}.${f(Activity::end)} == null or x.${f(Card::activity)}.${f(Activity::end)} >= now)
@@ -338,7 +345,7 @@ fun Db.explore(
         put("minGroupSize", minGroupSize)
         put("maxGroupSize", maxGroupSize)
         put("activityActive", activityActive)
-        put("parking", parking?.name)
+        put("parking", parking?.inclusiveParking())
         put("nearbyMaxDistance", nearbyMaxDistance)
         put("offset", offset)
         put("limit", limit)
