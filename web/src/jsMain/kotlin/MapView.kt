@@ -27,6 +27,7 @@ import components.Markdown
 import components.Switch
 import components.activityDescription
 import kotlinx.browser.document
+import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -89,6 +90,8 @@ import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.get
+import org.w3c.dom.set
 import web.cssom.Cursor
 import web.cssom.Flex
 import kotlin.math.abs
@@ -124,14 +127,14 @@ fun MapView(
     val isMobile = rememberMobileMode()
     var bottomSheetState by remember { mutableStateOf(BottomSheetState.Collapsed) }
     var currentStyleIndex by remember { mutableStateOf(0) }
-    var availableNowFilter by remember { mutableStateOf(true) }
-    var petsFilter by remember { mutableStateOf(false) }
-    var outdoorsFilter by remember { mutableStateOf(false) }
-    var selectedLanguages by remember { mutableStateOf<List<String>>(emptyList()) }
-    var ageMin by remember { mutableStateOf<Int?>(null) }
-    var ageMax by remember { mutableStateOf<Int?>(null) }
-    var groupSizeMin by remember { mutableStateOf<Int?>(null) }
-    var groupSizeMax by remember { mutableStateOf<Int?>(null) }
+    var availableNowFilter by remember { mutableStateOf(localStorage["map.availableNowFilter"]?.toBoolean() ?: true) }
+    var petsFilter by remember { mutableStateOf(localStorage["map.petsFilter"]?.toBoolean() ?: false) }
+    var outdoorsFilter by remember { mutableStateOf(localStorage["map.outdoorsFilter"]?.toBoolean() ?: false) }
+    var selectedLanguages by remember { mutableStateOf<List<String>>(localStorage["map.selectedLanguages"]?.split(",")?.filter { it.isNotEmpty() } ?: emptyList()) }
+    var ageMin by remember { mutableStateOf<Int?>(localStorage["map.ageMin"]?.toIntOrNull()) }
+    var ageMax by remember { mutableStateOf<Int?>(localStorage["map.ageMax"]?.toIntOrNull()) }
+    var groupSizeMin by remember { mutableStateOf<Int?>(localStorage["map.groupSizeMin"]?.toIntOrNull()) }
+    var groupSizeMax by remember { mutableStateOf<Int?>(localStorage["map.groupSizeMax"]?.toIntOrNull()) }
     var filtersExpanded by remember { mutableStateOf(true) }
 
     val allLanguages = remember(searchResults) {
@@ -179,6 +182,42 @@ fun MapView(
         if (selectedCategory !in categories) {
             selectedCategory = null
         }
+    }
+
+    LaunchedEffect(availableNowFilter) {
+        localStorage["map.availableNowFilter"] = availableNowFilter.toString()
+    }
+
+    LaunchedEffect(petsFilter) {
+        localStorage["map.petsFilter"] = petsFilter.toString()
+    }
+
+    LaunchedEffect(outdoorsFilter) {
+        localStorage["map.outdoorsFilter"] = outdoorsFilter.toString()
+    }
+
+    LaunchedEffect(selectedLanguages) {
+        localStorage["map.selectedLanguages"] = selectedLanguages.joinToString(",")
+    }
+
+    LaunchedEffect(ageMin) {
+        if (ageMin != null) localStorage["map.ageMin"] = ageMin.toString()
+        else localStorage.removeItem("map.ageMin")
+    }
+
+    LaunchedEffect(ageMax) {
+        if (ageMax != null) localStorage["map.ageMax"] = ageMax.toString()
+        else localStorage.removeItem("map.ageMax")
+    }
+
+    LaunchedEffect(groupSizeMin) {
+        if (groupSizeMin != null) localStorage["map.groupSizeMin"] = groupSizeMin.toString()
+        else localStorage.removeItem("map.groupSizeMin")
+    }
+
+    LaunchedEffect(groupSizeMax) {
+        if (groupSizeMax != null) localStorage["map.groupSizeMax"] = groupSizeMax.toString()
+        else localStorage.removeItem("map.groupSizeMax")
     }
 
     LaunchedEffect(
