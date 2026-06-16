@@ -1162,6 +1162,10 @@
     <string name="parking_bike">Bike</string>
     <string name="parking_motorbike">Motorbike</string>
     <string name="parking_car">Car</string>
+    <string name="parking_area_none">No parking</string>
+    <string name="parking_area_bike">Bike parking</string>
+    <string name="parking_area_motorbike">Motorbike parking</string>
+    <string name="parking_area_car">Car parking</string>
     <string name="free">Free</string>
     <string name="timezone">Timezone</string>
 </resources>

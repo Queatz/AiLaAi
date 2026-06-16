@@ -2607,6 +2607,26 @@ object Strings {
         vn = "Xe ô tô",
         ru = "Автопарковка"
     )
+    val parkingAreaNone = Translation(
+        en = "No parking",
+        vn = "Không có bãi đỗ xe",
+        ru = "Без парковки"
+    )
+    val parkingAreaBike = Translation(
+        en = "Bike parking",
+        vn = "Bãi đỗ xe đạp",
+        ru = "Велопарковка"
+    )
+    val parkingAreaMotorbike = Translation(
+        en = "Motorbike parking",
+        vn = "Bãi đỗ xe máy",
+        ru = "Мотопарковка"
+    )
+    val parkingAreaCar = Translation(
+        en = "Car parking",
+        vn = "Bãi đỗ xe ô tô",
+        ru = "Автопарковка"
+    )
     val availableTodayFallback = Translation(
         en = "Available today",
         vn = "Có sẵn hôm nay",

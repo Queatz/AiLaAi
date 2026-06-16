@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import app.AppStyles
 import app.ailaai.api.card
 import app.ailaai.api.cards
 import app.ailaai.api.newCard
@@ -14,9 +15,7 @@ import app.components.BottomSheetState
 import app.components.Empty
 import app.components.FlexInput
 import app.components.Spacer
-import app.compose.rememberDarkMode
 import app.compose.rememberMobileMode
-import app.AppStyles
 import app.dialog.inputDialog
 import com.queatz.db.Card
 import com.queatz.db.Geo
@@ -26,6 +25,7 @@ import components.IconButton
 import components.Markdown
 import components.Switch
 import components.activityDescription
+import components.activityTime
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
@@ -56,29 +56,29 @@ import org.jetbrains.compose.web.css.boxSizing
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexShrink
+import org.jetbrains.compose.web.css.flexWrap
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
-import org.jetbrains.compose.web.css.whiteSpace
-import org.jetbrains.compose.web.css.flex
-import org.jetbrains.compose.web.css.flexWrap
 import org.jetbrains.compose.web.css.paddingBottom
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.paddingRight
-import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.paddingTop
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
@@ -118,7 +118,6 @@ fun MapView(
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var categoriesCache by remember { mutableStateOf(emptyList<String>()) }
     var cardNavHistory by remember { mutableStateOf(listOf<Card>()) }
-    val isDarkMode = rememberDarkMode()
     val isMobile = rememberMobileMode()
     var bottomSheetState by remember { mutableStateOf(BottomSheetState.Collapsed) }
     var currentStyleIndex by remember { mutableStateOf(0) }
@@ -429,17 +428,31 @@ fun MapView(
                                         Markdown(it)
                                     }
                                 } else {
-                                    Div {
+                                    Div({
+                                        style {
+                                            fontWeight("bold")
+                                        }
+                                    }) {
                                         Text(card.name ?: application.appString { newCard })
                                     }
-                                    card.activityDescription(full = false).notBlank?.let {
+                                    card.activity?.let { activity ->
+                                        Div({
+                                            style {
+                                                color(Styles.colors.primary)
+                                                fontWeight("bold")
+                                                fontSize(85.percent)
+                                            }
+                                        }) {
+                                            Text(activityTime(activity))
+                                        }
+                                    }
+                                    card.activityDescription(includeTime = false, full = false).notBlank?.let { desc ->
                                         Div({
                                             style {
                                                 fontSize(85.percent)
-                                                opacity(.5f)
                                             }
                                         }) {
-                                            Text(it)
+                                            Text(desc)
                                         }
                                     }
                                 }

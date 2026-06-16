@@ -116,11 +116,13 @@ import com.queatz.db.Signal
 import com.queatz.db.SignalSendExtended
 import com.queatz.push.SignalPushData
 import com.queatz.push.SignalReplyPushData
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
+import kotlin.random.Random
 import kotlin.time.Clock
 
 @Composable
@@ -685,13 +687,28 @@ fun SignalBubble(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(if (isPressed) 0.95f else 1f, label = "scale")
+    val scale by animateFloatAsState(if (isPressed || !isOn) 0.95f else 1f, label = "scale")
+    val jiggleRotation = remember { Animatable(0f) }
+
+    LaunchedEffect(Unit) {
+        delay(Random.nextLong(from = 7_000L, until = 14_000L))
+        while (true) {
+            jiggleRotation.animateTo(targetValue = 5f, animationSpec = tween(durationMillis = 240))
+            jiggleRotation.animateTo(targetValue = -5f, animationSpec = tween(durationMillis = 160))
+            jiggleRotation.animateTo(targetValue = 2.5f, animationSpec = tween(durationMillis = 120))
+            jiggleRotation.animateTo(targetValue = 0f, animationSpec = tween(durationMillis = 80))
+            delay(Random.nextLong(from = 7_000L, until = 14_000L))
+        }
+    }
 
     Surface(
         shape = CircleShape,
         color = if (isOn) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer,
         border = if (isOn) BorderStroke(3.dp, MaterialTheme.colorScheme.primary) else null,
-        modifier = Modifier.aspectRatio(1f).scale(scale)
+        modifier = Modifier
+            .aspectRatio(1f)
+            .scale(scale)
+            .graphicsLayer(rotationZ = jiggleRotation.value)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

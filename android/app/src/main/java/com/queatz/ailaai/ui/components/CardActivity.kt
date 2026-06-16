@@ -122,10 +122,10 @@ fun CardActivity(activity: Activity, card: Card? = null) {
     }
     activity.parking?.let {
         val text = when (it) {
-            Parking.None -> stringResource(R.string.parking_none)
-            Parking.Bike -> stringResource(R.string.parking_bike)
-            Parking.Motorbike -> stringResource(R.string.parking_motorbike)
-            Parking.Car -> stringResource(R.string.parking_car)
+            Parking.None -> stringResource(R.string.parking_area_none)
+            Parking.Bike -> stringResource(R.string.parking_area_bike)
+            Parking.Motorbike -> stringResource(R.string.parking_area_motorbike)
+            Parking.Car -> stringResource(R.string.parking_area_car)
         }
         val icon = when (it) {
             Parking.None -> Icons.Outlined.LocalParking

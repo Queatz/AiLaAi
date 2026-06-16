@@ -1090,6 +1090,10 @@
     <string name="parking_bike">Xe đạp</string>
     <string name="parking_motorbike">Xe máy</string>
     <string name="parking_car">Xe ô tô</string>
+    <string name="parking_area_none">Không có bãi đỗ xe</string>
+    <string name="parking_area_bike">Bãi đỗ xe đạp</string>
+    <string name="parking_area_motorbike">Bãi đỗ xe máy</string>
+    <string name="parking_area_car">Bãi đỗ xe ô tô</string>
     <string name="directions">Chỉ đường</string>
     <string name="free">Miễn phí</string>
     <string name="activity">Hoạt động</string>

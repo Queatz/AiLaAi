@@ -3,14 +3,22 @@ package components
 import Styles
 import androidx.compose.runtime.Composable
 import appString
+import appStringShort
 import application
 import com.queatz.db.Activity
 import com.queatz.db.Card
 import com.queatz.db.Parking
 import com.queatz.db.formatPrice
 import format
-import appStringShort
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.CSSColorValue
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.color
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.fontWeight
+import org.jetbrains.compose.web.css.gap
+import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
@@ -26,7 +34,9 @@ fun CardActivity(activity: Activity, card: Card? = null) {
             val isAvailable = isAvailableToday(activity)
             if (isAvailable) {
                 val timesStr = formatSchedule(activity)
-                ActivityItem("calendar_today", if (timesStr.isNotBlank()) "$timesStr " + appString { todayInline } else appString { availableTodayFallback })
+                ActivityItem(
+                    "calendar_today",
+                    if (timesStr.isNotBlank()) "$timesStr " + appString { todayInline } else appString { availableTodayFallback })
             } else {
                 val nextDate = nextAvailableDate(activity)
                 ActivityItem(
@@ -65,7 +75,11 @@ fun CardActivity(activity: Activity, card: Card? = null) {
         val maxAge = activity.maxAge
         if (minAge != null || maxAge != null) {
             val text = when {
-                minAge != null && maxAge != null -> appString { ageRangeValue }.format(minAge.toString(), maxAge.toString())
+                minAge != null && maxAge != null -> appString { ageRangeValue }.format(
+                    minAge.toString(),
+                    maxAge.toString()
+                )
+
                 minAge != null -> appString { ageMinValue }.format(minAge.toString())
                 else -> appString { ageMaxValue }.format(maxAge.toString())
             }
@@ -75,7 +89,11 @@ fun CardActivity(activity: Activity, card: Card? = null) {
         val maxGroup = activity.maxGroupSize
         if (minGroup != null || maxGroup != null) {
             val text = when {
-                minGroup != null && maxGroup != null -> appString { groupSizeRangeValue }.format(minGroup.toString(), maxGroup.toString())
+                minGroup != null && maxGroup != null -> appString { groupSizeRangeValue }.format(
+                    minGroup.toString(),
+                    maxGroup.toString()
+                )
+
                 minGroup != null -> appString { groupSizeMinValue }.format(minGroup.toString())
                 else -> appString { groupSizeMaxValue }.format(maxGroup.toString())
             }
@@ -85,13 +103,17 @@ fun CardActivity(activity: Activity, card: Card? = null) {
         activity.languages?.takeIf { it.isNotEmpty() }?.let {
             ActivityItem("language", appString { languagesValue }.format(it.joinToString(", ")))
         }
-        activity.outdoors?.let { ActivityItem("nature", if (it) appString { activityOutdoors } else appString { activityIndoors }) }
+        activity.outdoors?.let {
+            ActivityItem(
+                "nature",
+                if (it) appString { activityOutdoors } else appString { activityIndoors })
+        }
         activity.parking?.let {
             val text = when (it) {
-                Parking.None -> appString { parkingNone }
-                Parking.Bike -> appString { parkingBike }
-                Parking.Motorbike -> appString { parkingMotorbike }
-                Parking.Car -> appString { parkingCar }
+                Parking.None -> appString { parkingAreaNone }
+                Parking.Bike -> appString { parkingAreaBike }
+                Parking.Motorbike -> appString { parkingAreaMotorbike }
+                Parking.Car -> appString { parkingAreaCar }
             }
             val icon = when (it) {
                 Parking.None -> "local_parking"
@@ -139,8 +161,8 @@ fun nextAvailableDate(activity: Activity): String? {
         val schedule = activity.schedule ?: return null
         val daysMatch = schedule.days.isNullOrEmpty() && schedule.weekdays.isNullOrEmpty() ||
                 (schedule.days?.contains(dayOfMonth) == true ||
-                (dayOfMonth == daysInMonth && schedule.days?.contains(-1) == true) ||
-                schedule.weekdays?.contains(dayOfWeek) == true)
+                        (dayOfMonth == daysInMonth && schedule.days?.contains(-1) == true) ||
+                        schedule.weekdays?.contains(dayOfWeek) == true)
         val weeksMatch = schedule.weeks.isNullOrEmpty() || schedule.weeks?.contains(week) == true
         val monthsMatch = schedule.months.isNullOrEmpty() || schedule.months?.contains(month) == true
         val yearsMatch = schedule.years.isNullOrEmpty() || schedule.years?.contains(year) == true
@@ -157,12 +179,12 @@ fun nextAvailableDate(activity: Activity): String? {
 
 fun isAvailableToday(activity: Activity): Boolean {
     val schedule = activity.schedule ?: return true
-    
+
     val now = Date()
     val utcTime = now.getTime() + (now.getTimezoneOffset() * 60 * 1000)
     val activityOffsetMs = (activity.utcOffset ?: 0.0) * 60 * 60 * 1000
     val activityLocalTime = Date(utcTime + activityOffsetMs)
-    
+
     val dayOfWeek = activityLocalTime.getDay() + 1 // 1=Sun...7=Sat
     val dayOfMonth = activityLocalTime.getDate() // 1..31
     val month = activityLocalTime.getMonth() + 1 // 1..12
@@ -172,9 +194,9 @@ fun isAvailableToday(activity: Activity): Boolean {
 
     val daysMatch = schedule.days.isNullOrEmpty() && schedule.weekdays.isNullOrEmpty() ||
             (schedule.days?.contains(dayOfMonth) == true ||
-            (dayOfMonth == daysInMonth && schedule.days?.contains(-1) == true) ||
-            schedule.weekdays?.contains(dayOfWeek) == true)
-            
+                    (dayOfMonth == daysInMonth && schedule.days?.contains(-1) == true) ||
+                    schedule.weekdays?.contains(dayOfWeek) == true)
+
     val weeksMatch = schedule.weeks.isNullOrEmpty() || schedule.weeks?.contains(week) == true
     val monthsMatch = schedule.months.isNullOrEmpty() || schedule.months?.contains(month) == true
     val yearsMatch = schedule.years.isNullOrEmpty() || schedule.years?.contains(year) == true
@@ -224,24 +246,30 @@ fun formatSchedule(activity: Activity): String {
     return formattedTimes.joinToString(", ")
 }
 
-fun Card.activityDescription(full: Boolean = true): String {
+fun activityTime(activity: Activity): String {
+    return if (isAvailableToday(activity)) {
+        val timesStr = formatSchedule(activity)
+        if (timesStr.isNotBlank()) "$timesStr " + application.appString { todayInline } else application.appString { availableTodayFallback }
+    } else {
+        val nextDate = nextAvailableDate(activity)
+        if (nextDate != null) {
+            application.appString { nextAvailableDate }.format(nextDate)
+        } else {
+            application.appString { notAvailableToday }
+        }
+
+    }
+}
+
+fun Card.activityDescription(
+    includeTime: Boolean = true,
+    full: Boolean = true,
+): String {
     val activityDetails = activity?.let { activity ->
         val details = mutableListOf<String>()
         val schedule = activity.schedule
-        if (schedule != null) {
-            if (isAvailableToday(activity)) {
-                val timesStr = formatSchedule(activity)
-                details.add(if (timesStr.isNotBlank()) "$timesStr " + application.appString { todayInline } else application.appString { availableTodayFallback })
-            } else {
-                val nextDate = nextAvailableDate(activity)
-                details.add(
-                    if (nextDate != null) {
-                        application.appString { nextAvailableDate }.format(nextDate)
-                    } else {
-                        application.appString { notAvailableToday }
-                    }
-                )
-            }
+        if (schedule != null && includeTime) {
+            details.add(activityTime(activity))
         }
         activity.duration?.let {
             val minutes = (it / 1000 / 60).toInt()
@@ -302,10 +330,10 @@ fun Card.activityDescription(full: Boolean = true): String {
         activity.parking?.let {
             details.add(
                 when (it) {
-                    Parking.None -> application.appString { parkingNone }
-                    Parking.Bike -> application.appString { parkingBike }
-                    Parking.Motorbike -> application.appString { parkingMotorbike }
-                    Parking.Car -> application.appString { parkingCar }
+                    Parking.None -> application.appString { parkingAreaNone }
+                    Parking.Bike -> application.appString { parkingAreaBike }
+                    Parking.Motorbike -> application.appString { parkingAreaMotorbike }
+                    Parking.Car -> application.appString { parkingAreaCar }
                 }
             )
         }
