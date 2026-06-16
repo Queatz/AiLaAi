@@ -271,8 +271,8 @@ fun MapView(
 
         val cameraLngLat = map!!.getCameraLngLat()
         val altitude = map!!.getFreeCameraOptions().position.toAltitude() as Double
-        val nearDistance = 64
-        val nearDistanceMax = 128
+        val nearDistance = 128
+        val nearDistanceMax = 256
         val cardPositions = markers.mapIndexed { index, it ->
             index to map!!.project(it.marker.getLngLat())
         }
@@ -430,10 +430,41 @@ fun MapView(
                                 } else {
                                     Div({
                                         style {
-                                            fontWeight("bold")
+                                            display(DisplayStyle.Flex)
+                                            alignItems(AlignItems.Center)
+                                            gap(4.r)
                                         }
                                     }) {
-                                        Text(card.name ?: application.appString { newCard })
+                                        Div({
+                                            style {
+                                                fontWeight("bold")
+                                                flexShrink(1)
+                                            }
+                                        }) {
+                                            Text(card.name ?: application.appString { newCard })
+                                        }
+                                        card.geo?.takeIf { it.size >= 2 }?.let { geo ->
+                                            val lat = geo[0]
+                                            val lng = geo[1]
+                                            val directionsString = application.appString { directions }
+                                            IconButton(
+                                                name = "directions",
+                                                title = directionsString,
+                                                styles = {
+                                                    flexShrink(0)
+                                                    property("min-width", "fit-content")
+                                                },
+                                                iconStyles = {
+                                                    color(Styles.colors.primary)
+                                                    fontSize(192.px)
+                                                },
+                                                onClick = {
+                                                    val name = card.name ?: ""
+                                                    val url = "https://www.google.com/maps?q=$lat,$lng($name)"
+                                                    window.open(url, "_blank")
+                                                }
+                                            )
+                                        }
                                     }
                                     card.activity?.let { activity ->
                                         Div({
