@@ -374,7 +374,7 @@ fun <T> List<T>.sortedDistinct(): List<T> = groupingBy { it }.eachCount().let { 
 
 fun bulletedString(vararg items: String?) = items.filterNotNull().joinToString(" • ")
 
-fun String.ellipsize(maxLength: Int = 128) = if (length <= maxLength) this else this.take(maxLength - 1) + "…"
+fun String.ellipsize(maxLength: Int = 128) = if (length <= maxLength) this else this.take(maxLength - 1).trimEnd() + "…"
 
 /**
  * Formats a number to 1 decimal place

@@ -654,6 +654,7 @@ class MainStyleSheet : StyleSheet() {
         whiteSpace("nowrap")
         overflowX("auto")
         width(100.vw)
+        borderRadius(1.r, 1.r, 0.r, 0.r)
 
         dark(self) {
             backgroundColor(colors.dark.background)

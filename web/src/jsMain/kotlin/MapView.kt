@@ -28,6 +28,8 @@ import components.Markdown
 import components.Switch
 import components.activityDescription
 import components.activityTime
+import components.getConversation
+import components.stripMarkdown
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
@@ -85,6 +87,7 @@ import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Hr
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
@@ -92,13 +95,14 @@ import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
 import org.w3c.dom.set
+import web.cssom.AtRules.Companion.property
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
 data class CardMarker(
     val card: Card,
-    val marker: mapboxgl.Marker
+    val marker: mapboxgl.Marker,
 )
 
 
@@ -126,16 +130,35 @@ fun MapView(
     val isMobile = rememberMobileMode()
     var bottomSheetState by remember { mutableStateOf(BottomSheetState.Collapsed) }
     var currentStyleIndex by remember { mutableStateOf(0) }
-    var availableTodayFilter by remember { mutableStateOf(localStorage["map.availableTodayFilter"]?.toBoolean() ?: true) }
-    var availableTomorrowFilter by remember { mutableStateOf(localStorage["map.availableTomorrowFilter"]?.toBoolean() ?: false) }
+    var availableTodayFilter by remember {
+        mutableStateOf(
+            localStorage["map.availableTodayFilter"]?.toBoolean() ?: true
+        )
+    }
+    var availableTomorrowFilter by remember {
+        mutableStateOf(
+            localStorage["map.availableTomorrowFilter"]?.toBoolean() ?: false
+        )
+    }
     var petsFilter by remember { mutableStateOf(localStorage["map.petsFilter"]?.toBoolean() ?: false) }
     var outdoorsFilter by remember { mutableStateOf(localStorage["map.outdoorsFilter"]?.toBoolean() ?: false) }
-    var selectedLanguages by remember { mutableStateOf<List<String>>(localStorage["map.selectedLanguages"]?.split(",")?.filter { it.isNotEmpty() } ?: emptyList()) }
+    var selectedLanguages by remember {
+        mutableStateOf<List<String>>(
+            localStorage["map.selectedLanguages"]?.split(",")?.filter { it.isNotEmpty() } ?: emptyList())
+    }
     var ageMin by remember { mutableStateOf<Int?>(localStorage["map.ageMin"]?.toIntOrNull()) }
     var ageMax by remember { mutableStateOf<Int?>(localStorage["map.ageMax"]?.toIntOrNull()) }
     var groupSizeMin by remember { mutableStateOf<Int?>(localStorage["map.groupSizeMin"]?.toIntOrNull()) }
     var groupSizeMax by remember { mutableStateOf<Int?>(localStorage["map.groupSizeMax"]?.toIntOrNull()) }
-    var parkingFilter by remember { mutableStateOf<Parking?>(localStorage["map.parkingFilter"]?.let { runCatching { Parking.valueOf(it) }.getOrNull() }) }
+    var parkingFilter by remember {
+        mutableStateOf<Parking?>(localStorage["map.parkingFilter"]?.let {
+            runCatching {
+                Parking.valueOf(
+                    it
+                )
+            }.getOrNull()
+        })
+    }
     var filtersExpanded by remember { mutableStateOf(false) }
 
     val allLanguages = remember(searchResults) {
@@ -209,9 +232,12 @@ fun MapView(
         localStorage["map.selectedLanguages"] = selectedLanguages.joinToString(",")
         if (ageMin != null) localStorage["map.ageMin"] = ageMin.toString() else localStorage.removeItem("map.ageMin")
         if (ageMax != null) localStorage["map.ageMax"] = ageMax.toString() else localStorage.removeItem("map.ageMax")
-        if (groupSizeMin != null) localStorage["map.groupSizeMin"] = groupSizeMin.toString() else localStorage.removeItem("map.groupSizeMin")
-        if (groupSizeMax != null) localStorage["map.groupSizeMax"] = groupSizeMax.toString() else localStorage.removeItem("map.groupSizeMax")
-        if (parkingFilter != null) localStorage["map.parkingFilter"] = parkingFilter!!.name else localStorage.removeItem("map.parkingFilter")
+        if (groupSizeMin != null) localStorage["map.groupSizeMin"] =
+            groupSizeMin.toString() else localStorage.removeItem("map.groupSizeMin")
+        if (groupSizeMax != null) localStorage["map.groupSizeMax"] =
+            groupSizeMax.toString() else localStorage.removeItem("map.groupSizeMax")
+        if (parkingFilter != null) localStorage["map.parkingFilter"] =
+            parkingFilter!!.name else localStorage.removeItem("map.parkingFilter")
     }
 
     LaunchedEffect(
@@ -244,7 +270,7 @@ fun MapView(
             availableTomorrow = availableTomorrowFilter.takeIf { it }, // null means both
             pets = petsFilter.takeIf { it }, // null means both
             outdoors = outdoorsFilter.takeIf { it }, // null means both
-            languages = selectedLanguages.takeIf { it.isNotEmpty() },
+            languages = selectedLanguages.filter { it.isNotBlank() }.takeIf { it.isNotEmpty() },
             minAge = ageMin,
             maxAge = ageMax,
             minGroupSize = groupSizeMin,
@@ -312,9 +338,9 @@ fun MapView(
 
         fun Card.effectiveScore(): Float {
             val normLevel = if (maxLevel == minLevel) 0.5f
-                else ((level ?: 0) - minLevel).toFloat() / (maxLevel - minLevel)
+            else ((level ?: 0) - minLevel).toFloat() / (maxLevel - minLevel)
             val normSize = if (maxSize == minSize) 0.5f
-                else ((size ?: 0.0) - minSize).toFloat() / (maxSize - minSize).toFloat()
+            else ((size ?: 0.0) - minSize).toFloat() / (maxSize - minSize).toFloat()
             // Level completely overrides size (size only matters when levels are equal)
             val score = normLevel + normSize / (maxLevel - minLevel + 2).toFloat()
             return score * (1f - 2f * zoomFactor) + zoomFactor
@@ -326,33 +352,37 @@ fun MapView(
             val nearScale = when {
                 cardPositions.any {
                     it.first != index &&
-                    markers[index].card.effectiveScore() < markers[it.first].card.effectiveScore() &&
-                    markers[it.first].card.collides(markers[index].card) &&
-                    it.second.near(pos, nearDistanceMax)
+                            markers[index].card.effectiveScore() < markers[it.first].card.effectiveScore() &&
+                            markers[it.first].card.collides(markers[index].card) &&
+                            it.second.near(pos, nearDistanceMax)
                 } -> {
                     0f
                 }
+
                 cardPositions.any {
                     it.first != index &&
-                    markers[index].card.effectiveScore() < markers[it.first].card.effectiveScore() &&
-                    it.second.near(pos, nearDistance)
+                            markers[index].card.effectiveScore() < markers[it.first].card.effectiveScore() &&
+                            it.second.near(pos, nearDistance)
                 } -> {
                     0f
                 }
+
                 cardPositions.any {
                     it.first != index &&
-                    markers[index].card.effectiveScore() <= markers[it.first].card.effectiveScore() &&
-                    it.second.near(pos, nearDistance / 4)
+                            markers[index].card.effectiveScore() <= markers[it.first].card.effectiveScore() &&
+                            it.second.near(pos, nearDistance / 4)
                 } -> {
                     .25f
                 }
+
                 cardPositions.any {
                     it.first != index &&
-                    markers[index].card.effectiveScore() <= markers[it.first].card.effectiveScore() &&
-                    it.second.near(pos, nearDistance)
+                            markers[index].card.effectiveScore() <= markers[it.first].card.effectiveScore() &&
+                            it.second.near(pos, nearDistance)
                 } -> {
                     .5f
                 }
+
                 else -> {
                     1f
                 }
@@ -446,118 +476,132 @@ fun MapView(
                                 Div({
                                     classes(Styles.mapMarkerBox)
                                 }) {
-                                if (isNpc) {
-                                    Div {
-                                        Div({
-                                            style {
-                                                fontWeight("bold")
-                                            }
-                                        }) {
-                                            Text(card.npc?.name.orEmpty())
-                                        }
-                                        Div({
-                                            style {
-                                                opacity(.5)
-                                                paddingLeft(1.r)
-                                                fontSize(85.percent)
-                                            }
-                                        }) {
-                                            Text(card.name ?: application.appString { newCard })
-                                        }
-                                    }
-                                    card.npc?.text?.notBlank?.let {
-                                        Markdown(it)
-                                    }
-                                } else {
-                                    Div({
-                                        style {
-                                            display(DisplayStyle.Flex)
-                                            alignItems(AlignItems.Center)
-                                            justifyContent(JustifyContent.SpaceBetween)
-                                            gap(4.r)
-                                        }
-                                    }) {
-                                        Div({
-                                            style {
-                                                fontWeight("bold")
-                                                flexShrink(1)
-                                            }
-                                        }) {
-                                            Text(card.name ?: application.appString { newCard })
-                                        }
-                                        card.geo?.takeIf { it.size >= 2 }?.let { geo ->
-                                            val lat = geo[0]
-                                            val lng = geo[1]
-                                            val directionsString = application.appString { directions }
-                                            IconButton(
-                                                name = "directions",
-                                                title = directionsString,
-                                                styles = {
-                                                    flexShrink(0)
-                                                    property("min-width", "fit-content")
-                                                },
-                                                iconStyles = {
-                                                    color(Styles.colors.primary)
-                                                    fontSize(192.px)
-                                                },
-                                                onClick = {
-                                                    val name = card.name ?: ""
-                                                    val url = "https://www.google.com/maps?q=$lat,$lng($name)"
-                                                    window.open(url, "_blank")
-                                                }
-                                            )
-                                        }
-                                    }
-                                    card.activity?.let { activity ->
-                                        Div({
-                                            style {
-                                                color(Styles.colors.primary)
-                                                fontWeight("bold")
-                                                fontSize(85.percent)
-                                            }
-                                        }) {
-                                            Text(activityTime(activity))
-                                        }
-                                    }
-                                    card.activityDescription(includeTime = false, full = false).notBlank?.let { desc ->
-                                        Div({
-                                            style {
-                                                fontSize(85.percent)
-                                            }
-                                        }) {
-                                            Text(desc)
-                                        }
-                                    }
-                                }
-                            }
-
-                            Div({
-                                style {
-                                    backgroundRepeat("no-repeat")
                                     if (isNpc) {
-                                        width(32.r)
-                                        height(32.r)
-                                        backgroundImage("url(\"$baseUrl${card.npc!!.photo}\")")
-                                        backgroundPosition("center")
-                                        backgroundSize("contain")
-                                    } else if (!card.photo.isNullOrBlank()) {
-                                        width(16.r)
-                                        height(16.r)
-                                        borderRadius(16.r)
-                                        backgroundColor(Styles.colors.background)
-                                        property("border", "${2.px} solid ${Styles.colors.white}")
-                                        backgroundImage("url($baseUrl${card.photo!!})")
-                                        backgroundPosition("center")
-                                        backgroundSize("cover")
+                                        Div {
+                                            Div({
+                                                style {
+                                                    fontWeight("bold")
+                                                }
+                                            }) {
+                                                Text(card.npc?.name.orEmpty())
+                                            }
+                                            Div({
+                                                style {
+                                                    opacity(.5)
+                                                    paddingLeft(1.r)
+                                                    fontSize(85.percent)
+                                                }
+                                            }) {
+                                                Text(card.name ?: application.appString { newCard })
+                                            }
+                                        }
+                                        card.npc?.text?.notBlank?.let {
+                                            Markdown(it)
+                                        }
                                     } else {
-                                        width(16.r)
-                                        height(16.r)
-                                        borderRadius(16.r)
-                                        backgroundColor(Styles.colors.background)
-                                        property("border", "${2.px} solid ${Styles.colors.white}")
+                                        Div({
+                                            style {
+                                                display(DisplayStyle.Flex)
+                                                alignItems(AlignItems.Center)
+                                                justifyContent(JustifyContent.SpaceBetween)
+                                                gap(4.r)
+                                            }
+                                        }) {
+                                            Div({
+                                                style {
+                                                    fontWeight("bold")
+                                                    flexShrink(1)
+                                                }
+                                            }) {
+                                                Text(card.name ?: application.appString { newCard })
+                                            }
+                                            card.geo?.takeIf { it.size >= 2 }?.let { geo ->
+                                                val lat = geo[0]
+                                                val lng = geo[1]
+                                                val directionsString = application.appString { directions }
+                                                IconButton(
+                                                    name = "directions",
+                                                    title = directionsString,
+                                                    styles = {
+                                                        flexShrink(0)
+                                                        property("min-width", "fit-content")
+                                                    },
+                                                    iconStyles = {
+                                                        color(Styles.colors.primary)
+                                                        fontSize(192.px)
+                                                    },
+                                                    onClick = {
+                                                        val name = card.name ?: ""
+                                                        val url = "https://www.google.com/maps?q=$lat,$lng($name)"
+                                                        window.open(url, "_blank")
+                                                    }
+                                                )
+                                            }
+                                        }
+                                        card.activity?.let { activity ->
+                                            Div({
+                                                style {
+                                                    color(Styles.colors.primary)
+                                                    fontWeight("bold")
+                                                    fontSize(85.percent)
+                                                }
+                                            }) {
+                                                Text(activityTime(activity))
+                                            }
+                                        }
+
+                                        card.getConversation().message.notBlank?.let { message ->
+                                            Div({
+                                                style {
+                                                    fontSize(85.percent)
+                                                }
+                                            }) {
+                                                Text(message.stripMarkdown().ellipsize(120))
+                                            }
+                                        }
+                                        card.activityDescription(
+                                            includeTime = false,
+                                            full = false
+                                        ).notBlank?.let { desc ->
+                                            Div({
+                                                style {
+                                                    fontSize(85.percent)
+                                                    opacity(.5)
+                                                }
+                                            }) {
+                                                Text(desc)
+                                            }
+                                        }
                                     }
                                 }
-                            })
+
+                                Div({
+                                    style {
+                                        backgroundRepeat("no-repeat")
+                                        if (isNpc) {
+                                            width(32.r)
+                                            height(32.r)
+                                            backgroundImage("url(\"$baseUrl${card.npc!!.photo}\")")
+                                            backgroundPosition("center")
+                                            backgroundSize("contain")
+                                        } else if (!card.photo.isNullOrBlank()) {
+                                            width(16.r)
+                                            height(16.r)
+                                            borderRadius(16.r)
+                                            backgroundColor(Styles.colors.background)
+                                            property("border", "${2.px} solid ${Styles.colors.white}")
+                                            backgroundImage("url($baseUrl${card.photo!!})")
+                                            backgroundPosition("center")
+                                            backgroundSize("cover")
+                                        } else {
+                                            width(16.r)
+                                            height(16.r)
+                                            borderRadius(16.r)
+                                            backgroundColor(Styles.colors.background)
+                                            property("border", "${2.px} solid ${Styles.colors.white}")
+                                        }
+                                    }
+                                })
                             }
                         }
                     }
@@ -595,7 +639,9 @@ fun MapView(
             )
 
             // Saigon
-            val (initialZoom, initialLat, initialLng, initialBearing, initialPitch) = "13.27/10.77564/106.72394/-39.9/50".split("/")
+            val (initialZoom, initialLat, initialLng, initialBearing, initialPitch) = "13.27/10.77564/106.72394/-39.9/50".split(
+                "/"
+            )
             val options: mapboxgl.MapOptions = js("{}")
             val initialLngLat: mapboxgl.LngLat = js("{}")
             initialLngLat.lng = initialLng.toDouble()
@@ -744,7 +790,8 @@ fun MapView(
                                     }) {
                                         Text(
                                             if (configuredActivity != null) {
-                                                Card(activity = configuredActivity).activityDescription(full = false).takeIf { it.isNotBlank() }
+                                                Card(activity = configuredActivity).activityDescription(full = false)
+                                                    .takeIf { it.isNotBlank() }
                                                     ?: appString { editActivity }
                                             } else {
                                                 appString { addActivity }
@@ -992,6 +1039,10 @@ fun MapView(
                         }
                     },
                     singleLine = true,
+                    styles = {
+                        property("border", "none")
+                        property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.125)")
+                    },
                     rounded = true,
                     onChange = {
                         searchText = it
@@ -999,7 +1050,8 @@ fun MapView(
                 )
                 Div({
                     classes(AppStyles.tray, AppStyles.trayShadow)
-                    style { alignSelf(AlignSelf.Center)
+                    style {
+                        alignSelf(AlignSelf.Center)
                         if (filtersExpanded) {
                             width(100.percent)
                         }
@@ -1053,7 +1105,8 @@ fun MapView(
                                         true to appString { today },
                                         false to appString { tomorrow }
                                     ).forEach { (isToday, label) ->
-                                        val isSelected = if (isToday) availableTodayFilter else availableTomorrowFilter
+                                        val isSelected =
+                                            if (isToday) availableTodayFilter else availableTomorrowFilter
                                         Button({
                                             classes(
                                                 listOfNotNull(
@@ -1104,7 +1157,9 @@ fun MapView(
                                                 )
                                             )
                                             style { flexShrink(0) }
-                                            onClick { parkingFilter = if (parkingFilter == option) null else option }
+                                            onClick {
+                                                parkingFilter = if (parkingFilter == option) null else option
+                                            }
                                         }) {
                                             Text(label)
                                         }
@@ -1200,13 +1255,14 @@ fun MapView(
                                 if (availableTomorrowFilter) append(appString { available } + " " + appString { tomorrow } + ", ")
                                 if (petsFilter) append(appString { pets } + ", ")
                                 if (outdoorsFilter) append(appString { outdoors } + ", ")
-                                if (parkingFilter != null) append(when (parkingFilter) {
-                                    Parking.None -> appString { parkingNone }
-                                    Parking.Bike -> appString { parkingBike }
-                                    Parking.Motorbike -> appString { parkingMotorbike }
-                                    Parking.Car -> appString { parkingCar }
-                                    null -> ""
-                                } + ", ")
+                                if (parkingFilter != null) append(
+                                    when (parkingFilter) {
+                                        Parking.None -> appString { parkingNone }
+                                        Parking.Bike -> appString { parkingBike }
+                                        Parking.Motorbike -> appString { parkingMotorbike }
+                                        Parking.Car -> appString { parkingCar }
+                                        null -> ""
+                                    } + ", ")
                                 if (selectedLanguages.isNotEmpty()) append(selectedLanguages.joinToString() + ", ")
                                 if (ageMin != null || ageMax != null) {
                                     val min = ageMin ?: 0
