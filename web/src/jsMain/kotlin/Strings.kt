@@ -168,6 +168,25 @@ object Strings {
         vn = "hôm nay",
         ru = "сегодня"
     )
+    val weekdaySunday = Translation(en = "Sun", vn = "CN", ru = "Вс")
+    val weekdayMonday = Translation(en = "Mon", vn = "T2", ru = "Пн")
+    val weekdayTuesday = Translation(en = "Tue", vn = "T3", ru = "Вт")
+    val weekdayWednesday = Translation(en = "Wed", vn = "T4", ru = "Ср")
+    val weekdayThursday = Translation(en = "Thu", vn = "T5", ru = "Чт")
+    val weekdayFriday = Translation(en = "Fri", vn = "T6", ru = "Пт")
+    val weekdaySaturday = Translation(en = "Sat", vn = "T7", ru = "Сб")
+    val monthJanuary = Translation(en = "Jan", vn = "Th1", ru = "Янв")
+    val monthFebruary = Translation(en = "Feb", vn = "Th2", ru = "Фев")
+    val monthMarch = Translation(en = "Mar", vn = "Th3", ru = "Мар")
+    val monthApril = Translation(en = "Apr", vn = "Th4", ru = "Апр")
+    val monthMay = Translation(en = "May", vn = "Th5", ru = "Май")
+    val monthJune = Translation(en = "Jun", vn = "Th6", ru = "Июн")
+    val monthJuly = Translation(en = "Jul", vn = "Th7", ru = "Июл")
+    val monthAugust = Translation(en = "Aug", vn = "Th8", ru = "Авг")
+    val monthSeptember = Translation(en = "Sep", vn = "Th9", ru = "Сен")
+    val monthOctober = Translation(en = "Oct", vn = "Th10", ru = "Окт")
+    val monthNovember = Translation(en = "Nov", vn = "Th11", ru = "Ноя")
+    val monthDecember = Translation(en = "Dec", vn = "Th12", ru = "Дек")
     val deleteThisMessage = Translation(
         en = "Delete this message?",
         vn = "Xóa tin nhắn này?",
@@ -485,9 +504,19 @@ object Strings {
         ru = "Развернуть"
     )
     val searchForThings = Translation(
+        en = "Find things to do",
+        vn = "Tìm kiếm hoạt động",
+        ru = "Поиск занятий"
+    )
+    val searchForThingsToday = Translation(
         en = "Find things to do today",
         vn = "Tìm kiếm hoạt động hôm nay",
         ru = "Поиск занятий сегодня"
+    )
+    val searchForThingsTomorrow = Translation(
+        en = "Find things to do tomorrow",
+        vn = "Tìm kiếm hoạt động ngày mai",
+        ru = "Поиск занятий завтра"
     )
     val paid = Translation(
         en = "Paid",
@@ -1480,6 +1509,11 @@ object Strings {
         "Message",
         "Nhắn tin",
         "Cообщение"
+    )
+    val sendAMessage = Translation(
+        en = "Send a message",
+        vn = "Gửi tin nhắn",
+        ru = "Отправить сообщение"
     )
     val sending = Translation(
         en = "Sending...",
@@ -2587,6 +2621,11 @@ object Strings {
         vn = "Ngôn ngữ: %1\$s",
         ru = "Языки: %1\$s"
     )
+    val anyLanguage = Translation(
+        en = "Any language",
+        vn = "Bất kỳ ngôn ngữ nào",
+        ru = "Любой язык"
+    )
     val activityOutdoors = Translation(
         en = "Outdoors",
         vn = "Ngoài trời",
@@ -2687,7 +2726,51 @@ object Strings {
         vn = "Chọn vị trí",
         ru = "Выбрать место"
     )
-    
+    val upgrade = Translation(
+        en = "Upgrade",
+        vn = "Nâng cấp",
+        ru = "Повысить"
+    )
+    val downgrade = Translation(
+        en = "Downgrade",
+        vn = "Hạ cấp",
+        ru = "Понизить"
+    )
+    val level = Translation(
+        en = "Level",
+        vn = "Cấp độ",
+        ru = "Уровень"
+    )
+    val xPoints = Translation(
+        en = "%1${'$'}s points",
+        vn = "%1${'$'}s điểm",
+        ru = "%1${'$'}s баллов"
+    )
+    val levelX = Translation(
+        en = "Level %1${'$'}s",
+        vn = "Cấp độ %1${'$'}s",
+        ru = "Уровень %1${'$'}s"
+    )
+    val upgradingPageToLevelRequiresPoints = Translation(
+        en = "Upgrading page to %1${'$'}s requires %2${'$'}s",
+        vn = "Nâng cấp trang lên %1${'$'}s yêu cầu %2${'$'}s",
+        ru = "Повышение страницы до %1${'$'}s требует %2${'$'}s"
+    )
+    val upgradePageToLevelForPoints = Translation(
+        en = "Upgrade page to %1${'$'}s for %2${'$'}s",
+        vn = "Nâng cấp trang lên %1${'$'}s với %2${'$'}s",
+        ru = "Повысить страницу до %1${'$'}s за %2${'$'}s"
+    )
+    val downgradingPageToLevelRefundsPoints = Translation(
+        en = "Downgrading page to %1${'$'}s refunds %2${'$'}s",
+        vn = "Hạ cấp trang xuống %1${'$'}s hoàn lại %2${'$'}s",
+        ru = "Понижение страницы до %1${'$'}s вернёт %2${'$'}s"
+    )
+    val pageSize = Translation(
+        en = "Size (km)",
+        vn = "Kích thước (km)",
+        ru = "Размер (км)"
+    )
 }
 
 /**

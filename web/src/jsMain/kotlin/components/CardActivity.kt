@@ -167,8 +167,31 @@ fun nextAvailableDate(activity: Activity): String? {
         val monthsMatch = schedule.months.isNullOrEmpty() || schedule.months?.contains(month) == true
         val yearsMatch = schedule.years.isNullOrEmpty() || schedule.years?.contains(year) == true
         if (daysMatch && weeksMatch && monthsMatch && yearsMatch) {
-            val monthNames = arrayOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-            val dateStr = "${monthNames[candidate.getMonth()]} ${candidate.getDate()}"
+            val monthNames = arrayOf(
+                application.appString { monthJanuary },
+                application.appString { monthFebruary },
+                application.appString { monthMarch },
+                application.appString { monthApril },
+                application.appString { monthMay },
+                application.appString { monthJune },
+                application.appString { monthJuly },
+                application.appString { monthAugust },
+                application.appString { monthSeptember },
+                application.appString { monthOctober },
+                application.appString { monthNovember },
+                application.appString { monthDecember }
+            )
+            val weekdayNames = arrayOf(
+                application.appString { weekdaySunday },
+                application.appString { weekdayMonday },
+                application.appString { weekdayTuesday },
+                application.appString { weekdayWednesday },
+                application.appString { weekdayThursday },
+                application.appString { weekdayFriday },
+                application.appString { weekdaySaturday }
+            )
+            val dayName = weekdayNames[candidate.getDay()]
+            val dateStr = "$dayName, ${monthNames[candidate.getMonth()]} ${candidate.getDate()}"
             val timesStr = formatSchedule(activity)
             return if (timesStr.isNotBlank()) "$dateStr, $timesStr" else dateStr
         }

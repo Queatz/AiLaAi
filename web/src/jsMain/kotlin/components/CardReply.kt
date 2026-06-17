@@ -233,7 +233,7 @@ fun CardReply(
                 }) {
                     Text("message")
                 }
-                Text(" ${appString { message }}")
+                Text(" ${appString { sendAMessage }}")
             }
         }
         if (stack.isNotEmpty()) {

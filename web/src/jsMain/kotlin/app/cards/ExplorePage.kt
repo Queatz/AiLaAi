@@ -1,6 +1,5 @@
 package app.cards
 
-import LocalConfiguration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -10,37 +9,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
-import app.AppStyles
 import app.PageTopBar
 import app.ailaai.api.card
 import app.ailaai.api.cardsCards
-import app.ailaai.api.categories
-import app.ailaai.api.deleteCard
 import app.ailaai.api.newCard
 import app.ailaai.api.updateCard
 import app.components.FlexInput
-import app.dialog.activityDialog
-import app.dialog.additionalPhotosDialog
-import app.dialog.categoryDialog
-import app.dialog.dialog
 import app.dialog.editFormDialog
 import app.dialog.inputDialog
 import app.dialog.rememberChoosePhotoDialog
-import app.dialog.selectCardDialog
-import app.dialog.selectGroupDialog
-import app.dialog.setLocationDialog
-import app.menu.InlineMenu
-import app.menu.Menu
-import app.messaages.inList
 import appString
-import appText
 import application
 import com.queatz.db.Card
-import com.queatz.db.Pay
-import com.queatz.db.PayFrequency
 import com.queatz.db.StoryContent
 import com.queatz.db.Widget
-import com.queatz.db.asGeo
 import com.queatz.db.isPart
 import com.queatz.db.toJsonStoryPart
 import com.queatz.widgets.Widgets
@@ -54,16 +36,14 @@ import components.IconButton
 import components.Loading
 import components.Switch
 import components.getConversation
-import focusable
 import hint
 import json
-import kotlinx.browser.window
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.buildJsonArray
 import notBlank
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
+import kotlinx.browser.window
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flex
@@ -71,29 +51,19 @@ import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexShrink
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.margin
-import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.paddingBottom
-import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.vh
-import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Img
-import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
-import qr
 import r
-import saves
 import stories.asStoryContents
 import updateWidget
-import web.cssom.PropertyName.Companion.marginBottom
-import webBaseUrl
 import widget
-import kotlin.time.Duration.Companion.seconds
 
 fun serializeStoryContent(content: List<StoryContent>): String {
     return json.encodeToString(buildJsonArray {
@@ -147,49 +117,10 @@ fun ExplorePage(
         }
     }
 
-    fun moveToPage(cardId: String) {
-        scope.launch {
-            api.updateCard(
-                card.id!!,
-                Card(
-                    offline = false,
-                    parent = cardId,
-                    group = null,
-                    equipped = false,
-                    geo = null
-                )
-            ) {
-                onCardUpdated(it)
-            }
-        }
-    }
-
-    fun moveToGroup(groupId: String) {
-        scope.launch {
-            api.updateCard(
-                card.id!!,
-                Card(
-                    offline = false,
-                    parent = null,
-                    group = groupId,
-                    equipped = false,
-                    geo = null
-                )
-            ) {
-                onCardUpdated(it)
-            }
-        }
-    }
-
-    val configuration = LocalConfiguration.current
-    val inAPage = appString { inAPage }
-    val cancel = appString { cancel }
     val titleString = appString { title }
     val rename = appString { rename }
-    val category = appString { category }
     val hint = appString { hint }
     val update = appString { update }
-    val activity = appString { activity }
 
     fun rename() {
         scope.launch {
@@ -229,305 +160,17 @@ fun ExplorePage(
         }
     }
 
-    fun moveToGroup() {
-        scope.launch {
-            val group = selectGroupDialog(configuration)
-            if (group != null) {
-                moveToGroup(group.group!!.id!!)
-            }
-        }
-    }
-
-    fun moveToPage() {
-        scope.launch {
-            selectCardDialog(configuration, title = inAPage) {
-                it?.id?.let { id -> moveToPage(id) }
-            }
-        }
-    }
-
-    fun setCategory() {
-        scope.launch {
-            api.categories(
-                // todo: might need to not require geo
-                geo = application.me.value?.geo?.asGeo() ?: return@launch
-            ) { categories ->
-                val category = categoryDialog(
-                    categories = categories,
-                    category = card.categories?.firstOrNull(),
-                )
-
-                if (category != null) {
-                    api.updateCard(
-                        id = card.id!!,
-                        card = Card(categories = category.inList())
-                    ) {
-                        onCardUpdated(it)
-                    }
-                }
-            }
-        }
-    }
-
     if (menuTarget != null) {
-        Menu({ menuTarget = null }, menuTarget!!) {
-            val isSaved = saves.cards.value.any { it.id == card.id }
-            item(appString { openInNewTab }, icon = "open_in_new") {
-                window.open("/page/${card.id}", target = "_blank")
-            }
-            item(if (isSaved) appString { unsave } else appString { save }) {
-                scope.launch {
-                    if (isSaved) {
-                        saves.unsave(card.id!!)
-                    } else {
-                        saves.save(card.id!!)
-                    }
-                }
-            }
-
-            item(rename) {
-                rename()
-            }
-
-            item(category) {
-                setCategory()
-            }
-
-            item(activity) {
-                scope.launch {
-                    activityDialog(card) { updated ->
-                        onCardUpdated(updated)
-                    }
-                }
-            }
-
-            item(hint) {
-                rehint()
-            }
-
-            val location = appString { location }
-            val close = appString { close }
-
-            item(location) {
-                scope.launch {
-                    val name = dialog(
-                        location,
-                        close,
-                        null
-                    ) {
-                        InlineMenu({
-                            it(true)
-                        }) {
-                            item(appString { onProfile }, selected = card.equipped == true, icon = "account_circle") {
-                                scope.launch {
-                                    api.updateCard(
-                                        card.id!!,
-                                        Card(offline = false, parent = null, equipped = true, geo = null)
-                                    ) {
-                                        onCardUpdated(it)
-                                    }
-                                }
-                            }
-                            item(
-                                appString { inAGroup },
-                                selected = card.parent == null && card.offline != true && card.equipped != true && card.group != null,
-                                icon = "group"
-                            ) {
-                                moveToGroup()
-                            }
-                            item(
-                                appString { atALocation },
-                                selected = card.parent == null && card.offline != true && card.equipped != true && card.geo != null,
-                                icon = "location_on"
-                            ) {
-                                scope.launch {
-                                    val initialGeo = card.geo?.asGeo()
-                                    val geo = setLocationDialog(
-                                        initialGeo = initialGeo,
-                                        onRemoveLocation = {
-                                            scope.launch {
-                                                api.updateCard(
-                                                    id = card.id!!,
-                                                    card = Card(offline = false, parent = null, equipped = false, geo = null)
-                                                ) {
-                                                    onCardUpdated(it)
-                                                }
-                                            }
-                                        }
-                                    )
-                                    if (geo != null) {
-                                        api.updateCard(
-                                            id = card.id!!,
-                                            card = Card(offline = false, parent = null, equipped = false, geo = listOf(geo.latitude, geo.longitude))
-                                        ) {
-                                            onCardUpdated(it)
-                                        }
-                                    }
-                                }
-                            }
-                            item(inAPage, selected = card.parent != null, icon = "description") {
-                                moveToPage()
-                            }
-                            item(appString { offline }, selected = card.offline == true) {
-                                scope.launch {
-                                    api.updateCard(
-                                        card.id!!,
-                                        Card(offline = true, parent = null, equipped = false, geo = null)
-                                    ) {
-                                        onCardUpdated(it)
-                                    }
-                                }
-                            }
-                            item(
-                                appString { none },
-                                selected = card.parent == null && card.group == null && card.offline != true && card.equipped != true && card.geo == null
-                            ) {
-                                scope.launch {
-                                    api.updateCard(
-                                        card.id!!,
-                                        Card(offline = false, parent = null, equipped = false, geo = null)
-                                    ) {
-                                        onCardUpdated(it)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (name == null) {
-                        return@launch
-                    }
-                }
-            }
-
-            item(appString { if (card.pay == null) addPay else changePay }) {
-                scope.launch {
-                    val updatedPay = card.pay ?: Pay(pay = "")
-
-                    val result = dialog(
-                        application.appString { price },
-                        confirmButton = application.appString { this.update }
-                    ) { resolve ->
-                        var pay by remember {
-                            mutableStateOf(updatedPay.pay ?: "")
-                        }
-
-                        var payFrequency by remember {
-                            mutableStateOf(updatedPay.frequency)
-                        }
-
-                        LaunchedEffect(pay, payFrequency) {
-                            updatedPay.pay = pay
-                            updatedPay.frequency = payFrequency
-                        }
-
-                        FlexInput(
-                            value = pay,
-                            onChange = { pay = it },
-                            singleLine = true,
-                            autoFocus = true,
-                            selectAll = true,
-                            styles = {
-                                width(100.percent)
-                                marginBottom(1.r)
-                            },
-                            onSubmit = {
-                                resolve(true)
-                                true
-                            }
-                        )
-
-                        PayFrequency.entries.forEach { frequency ->
-                            Div({
-                                classes(
-                                    listOf(AppStyles.groupItem, AppStyles.groupItemOnSurface)
-                                )
-
-                                if (payFrequency == frequency) {
-                                    classes(AppStyles.groupItemSelected)
-                                }
-
-                                onClick {
-                                    payFrequency = if (payFrequency == frequency) null else frequency
-                                }
-
-                                focusable()
-                            }) {
-                                Div {
-                                    Div({
-                                        classes(AppStyles.groupItemName)
-                                    }) {
-                                        Text(frequency.appString)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (result == true) {
-                        api.updateCard(card.id!!, Card(pay = updatedPay)) {
-                            onCardUpdated(it)
-                        }
-                    }
-                }
-            }
-
-            item(appString { choosePhoto }) {
-                choosePhotoDialog.launch { photo, _, _ ->
-                    api.updateCard(card.id!!, Card(photo = photo)) {
-                        onCardUpdated(it)
-                    }
-                }
-            }
-
-            item(appString { additionalPhotos }) {
-                scope.launch {
-                    additionalPhotosDialog(card, onCardUpdated)
-                }
-            }
-
-            if (card.parent != null) {
-                item(appString { openEnclosingCard }) {
-                    scope.launch {
-                        api.card(card.parent!!) {
-                            onCard(it)
-                        }
-                    }
-                }
-            }
-
-            item(appString { qrCode }) {
-                scope.launch {
-                    dialog("", cancelButton = null) {
-                        val qrCode = remember {
-                            "$webBaseUrl/page/${card.id!!}".qr
-                        }
-                        Img(src = qrCode) {
-                            style {
-                                borderRadius(1.r)
-                            }
-                        }
-                    }
-                }
-            }
-
-            item(appString { delete }) {
-                scope.launch {
-                    val result = dialog(
-                        title = application.appString { deleteThisPage },
-                        confirmButton = application.appString { yesDelete }
-                    ) {
-                        appText { youCannotUndoThis }
-                    }
-
-                    if (result == true) {
-                        api.deleteCard(card.id!!) {
-                            onCardDeleted(card)
-                        }
-                    }
-                }
-            }
-        }
+        ExplorePageMenu(
+            card = card,
+            menuTarget = menuTarget!!,
+            choosePhotoDialog = choosePhotoDialog,
+            onCard = onCard,
+            onCardUpdated = onCardUpdated,
+            onCardDeleted = onCardDeleted,
+            onDismiss = { menuTarget = null },
+            scope = scope
+        )
     }
 
     var published by remember(card) {

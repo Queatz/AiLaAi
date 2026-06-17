@@ -30,7 +30,6 @@ import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.marginLeft
-import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
@@ -38,8 +37,8 @@ import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
+import people
 import r
-import web.svg.SvgTagName.view
 
 @Composable
 fun CardListItem(
@@ -49,6 +48,7 @@ fun CardListItem(
     people: List<Person>? = null,
     isOnSurface: Boolean = false,
     onBackground: Boolean = false,
+    includeCardPerson: Boolean = false,
     onClick: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -103,9 +103,9 @@ fun CardListItem(
                 onClick()
             }
         }) {
-            val collaborators = card.collaborators.orEmpty()
-
             if (!showPhoto) {
+                val collaborators = if (!includeCardPerson) card.collaborators.orEmpty() else card.people()
+
                 if (collaborators.isNotEmpty()) {
                     val items = buildList {
                         collaborators.forEach { id ->

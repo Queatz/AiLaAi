@@ -32,6 +32,7 @@ suspend fun inputDialog(
     onPhotoFiles: (suspend (resolve: (Boolean?) -> Unit, List<File>) -> Unit)? = null,
     maxLength: Int? = null,
     type: InputType<*>? = null,
+    decimal: Boolean = false,
     inputStyles: StyleScope.() -> Unit = {},
     inputEndPadding: CSSSizeValue<CSSUnit.rem> = 3.r,
     extraButtons: (@Composable (resolve: (Boolean?) -> Unit) -> Unit)? = null,
@@ -74,6 +75,7 @@ suspend fun inputDialog(
                 singleLine = singleLine,
                 selectAll = singleLine, // Only select all for single line inputs
                 inputType = type,
+                decimal = decimal,
                 inputEndPadding = inputEndPadding,
                 enablePhotoPasting = enablePhotoPasting,
                 onPhotoFiles = {

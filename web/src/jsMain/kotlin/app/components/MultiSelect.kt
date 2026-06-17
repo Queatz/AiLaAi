@@ -56,6 +56,10 @@ fun MultiSelect(
         attrs = {
             classes(Styles.dateTimeInput)
 
+            if (!multiple) {
+                classes(Styles.floatingButton, Styles.floatingButtonSmall)
+            }
+
             onSelectedOptionsChange {
                 onSelected(it)
             }

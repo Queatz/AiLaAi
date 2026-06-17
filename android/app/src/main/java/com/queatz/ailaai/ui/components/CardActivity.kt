@@ -160,7 +160,7 @@ fun nextAvailableDate(activity: Activity): String? {
     val activityOffset = activity.utcOffset ?: 0.0
     val activityZone = ZoneOffset.ofTotalSeconds((activityOffset * 3600).toInt())
     var candidate = ZonedDateTime.now().withZoneSameInstant(activityZone).plusDays(1)
-    val formatter = DateTimeFormatter.ofPattern("MMM d", Locale.getDefault())
+    val formatter = DateTimeFormatter.ofPattern("EEE, MMM d", Locale.getDefault())
     repeat(365) {
         val dayOfWeek = candidate.dayOfWeek.value
         val jsDayOfWeek = if (dayOfWeek == 7) 1 else dayOfWeek + 1

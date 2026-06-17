@@ -28,3 +28,5 @@ val PayFrequency.appString get() = when (this) {
 }
 
 fun Card.isMine(me: String?) = person == me || collaborators?.any { it == me } == true
+
+fun Card.people() = (collaborators ?: emptyList()).toSet() + person!!

@@ -24,6 +24,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.autoFocus
+import org.jetbrains.compose.web.attributes.step
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.attributes.placeholder
 import org.jetbrains.compose.web.attributes.type
@@ -91,6 +92,7 @@ fun FlexInput(
     // Input configuration
     singleLine: Boolean = false,
     inputType: InputType<*>? = null,
+    decimal: Boolean = false,
     autoFocus: Boolean = false,
     selectAll: Boolean = false,
     enabled: Boolean = true,
@@ -252,6 +254,9 @@ fun FlexInput(
 
                 inputType?.let {
                     type(it)
+                    if (it == InputType.Number && decimal) {
+                        step(0.001)
+                    }
                 }
 
                 style {

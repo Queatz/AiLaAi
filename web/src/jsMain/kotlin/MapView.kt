@@ -473,6 +473,7 @@ fun MapView(
                                         style {
                                             display(DisplayStyle.Flex)
                                             alignItems(AlignItems.Center)
+                                            justifyContent(JustifyContent.SpaceBetween)
                                             gap(4.r)
                                         }
                                     }) {
@@ -983,7 +984,13 @@ fun MapView(
             }) {
                 FlexInput(
                     value = searchText,
-                    placeholder = appString { searchForThings },
+                    placeholder = appString {
+                        when {
+                            availableTodayFilter -> searchForThingsToday
+                            availableTomorrowFilter -> searchForThingsTomorrow
+                            else -> searchForThings
+                        }
+                    },
                     singleLine = true,
                     rounded = true,
                     onChange = {
@@ -1119,10 +1126,11 @@ fun MapView(
 
                                 if (allLanguages.isNotEmpty()) {
                                     MultiSelect(
-                                        selected = selectedLanguages,
-                                        onSelected = { selectedLanguages = it },
-                                        multiple = true
+                                        selected = if (selectedLanguages.isEmpty()) listOf("") else selectedLanguages,
+                                        onSelected = { selectedLanguages = it.filter { it.isNotEmpty() } },
+                                        multiple = false
                                     ) {
+                                        option("", appString { anyLanguage })
                                         allLanguages.forEach { lang ->
                                             option(lang, lang)
                                         }
