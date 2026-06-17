@@ -397,39 +397,58 @@ fun MapScreen(
                     val scale = remember { Animatable(if (shown) 0f else 1f) }
                     val zoom = cameraPosition?.zoom ?: 0f
 
+                    // Zoom 10 and lower: high-level/large cards are prioritized
+                    // Zoom 20 and higher: low-level/small cards are prioritized
+                    // Smooth linear transition in between
+                    val zoomFactor = ((zoom - 10f) / (20f - 10f)).coerceIn(0f, 1f)
+
+                    val allLevels = cardPositions.map { it.card.level ?: 0 }
+                    val allSizes = cardPositions.map { it.card.size ?: 0.0 }
+                    val minLevel = allLevels.minOrNull() ?: 0
+                    val maxLevel = allLevels.maxOrNull() ?: 0
+                    val minSize = allSizes.minOrNull() ?: 0.0
+                    val maxSize = allSizes.maxOrNull() ?: 0.0
+
+                    fun Card.effectiveScore(): Float {
+                        val normLevel = if (maxLevel == minLevel) 0.5f
+                            else ((level ?: 0) - minLevel).toFloat() / (maxLevel - minLevel)
+                        val normSize = if (maxSize == minSize) 0.5f
+                            else ((this.size ?: 0.0) - minSize).toFloat() / (maxSize - minSize).toFloat()
+                        // Level completely overrides size (size only matters when levels are equal)
+                        val score = normLevel + normSize / (maxLevel - minLevel + 2).toFloat()
+                        return score * (1f - 2f * zoomFactor) + zoomFactor
+                    }
+
                     val nearScale = when {
                         cardPositions.any {
-                            it.card != card && card < it.card && it.card.collides(card) && it.position.near(
-                                pos,
-                                nearDistanceMax
-                            )
+                            it.card != card &&
+                            card.effectiveScore() < it.card.effectiveScore() &&
+                            it.card.collides(card) &&
+                            it.position.near(pos, nearDistanceMax)
                         } -> {
                             0f
                         }
 
                         cardPositions.any {
-                            it.card != card && card < it.card && it.position.near(
-                                pos,
-                                nearDistance
-                            )
+                            it.card != card &&
+                            card.effectiveScore() < it.card.effectiveScore() &&
+                            it.position.near(pos, nearDistance)
                         } -> {
                             0f
                         }
 
                         cardPositions.any {
-                            it.card != card && card <= it.card && it.position.near(
-                                pos,
-                                nearDistance / 4
-                            )
+                            it.card != card &&
+                            card.effectiveScore() <= it.card.effectiveScore() &&
+                            it.position.near(pos, nearDistance / 4)
                         } -> {
                             .25f
                         }
 
                         cardPositions.any {
-                            it.card != card && card <= it.card && it.position.near(
-                                pos,
-                                nearDistance
-                            )
+                            it.card != card &&
+                            card.effectiveScore() <= it.card.effectiveScore() &&
+                            it.position.near(pos, nearDistance)
                         } -> {
                             .5f
                         }

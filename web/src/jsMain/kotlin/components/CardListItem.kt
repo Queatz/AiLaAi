@@ -9,6 +9,7 @@ import com.queatz.db.Card
 import com.queatz.db.Person
 import components.GroupPhoto
 import components.GroupPhotoItem
+import app.dialog.photoDialog
 import focusable
 import hint
 import notBlank
@@ -46,6 +47,7 @@ import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.marginTop
+import kotlinx.coroutines.launch
 import r
 
 @Composable
@@ -58,6 +60,7 @@ fun CardListItem(
     onBackground: Boolean = false,
     onClick: () -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
     var loadedPeople by remember { mutableStateOf(emptyList<Person>()) }
     val allPhotos = remember(card.photo, card.photos) {
         listOfNotNull(card.photo) + (card.photos ?: emptyList())
@@ -80,8 +83,14 @@ fun CardListItem(
         }
     }) {
         if (showPhoto && allPhotos.isNotEmpty()) {
-            PhotoPager(allPhotos, onPhotoClick = {
-                onClick()
+            PhotoPager(allPhotos, onPhotoClick = { url ->
+                val initialIndex = allPhotos.indexOf(url.removePrefix(baseUrl)).coerceAtLeast(0)
+                scope.launch {
+                    photoDialog(
+                        photos = allPhotos,
+                        initialIndex = initialIndex
+                    )
+                }
             }, attrs = {
                 classes(AppStyles.groupItemMainPhoto)
             })

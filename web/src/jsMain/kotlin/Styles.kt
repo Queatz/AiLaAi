@@ -709,6 +709,17 @@ class MainStyleSheet : StyleSheet() {
         boxSizing("border-box")
     }
 
+    val cardPhoto by style {
+        backgroundColor(colors.background)
+        maxHeight(50.vh)
+        property("aspect-ratio", "2")
+        cursor("pointer")
+
+        dark(self) {
+            backgroundColor(colors.dark.background)
+        }
+    }
+
     val cardContent by style {
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.Column)

@@ -92,7 +92,6 @@ import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
 import org.w3c.dom.set
-import web.html.HtmlTagName.option
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -298,22 +297,60 @@ fun MapView(
             }
             .toMap()
 
+        // Zoom 10 and lower: high-level/large cards are prioritized
+        // Zoom 20 and higher: low-level/small cards are prioritized
+        // Smooth linear transition in between
+        val zoom = kotlin.math.log2(591657550.5 / altitude).toFloat()
+        val zoomFactor = ((zoom - 10f) / (20f - 10f)).coerceIn(0f, 1f)
+
+        val allLevels = markers.map { it.card.level ?: 0 }
+        val allSizes = markers.map { it.card.size ?: 0.0 }
+        val minLevel = allLevels.minOrNull() ?: 0
+        val maxLevel = allLevels.maxOrNull() ?: 0
+        val minSize = allSizes.minOrNull() ?: 0.0
+        val maxSize = allSizes.maxOrNull() ?: 0.0
+
+        fun Card.effectiveScore(): Float {
+            val normLevel = if (maxLevel == minLevel) 0.5f
+                else ((level ?: 0) - minLevel).toFloat() / (maxLevel - minLevel)
+            val normSize = if (maxSize == minSize) 0.5f
+                else ((size ?: 0.0) - minSize).toFloat() / (maxSize - minSize).toFloat()
+            // Level completely overrides size (size only matters when levels are equal)
+            val score = normLevel + normSize / (maxLevel - minLevel + 2).toFloat()
+            return score * (1f - 2f * zoomFactor) + zoomFactor
+        }
+
         markers.forEachIndexed { index, marker ->
             val pos = cardPositions[index].second
 
             val nearScale = when {
                 cardPositions.any {
-                    it.first != index && markers[index].card < markers[it.first].card && markers[it.first].card.collides(markers[index].card) && it.second.near(pos, nearDistanceMax)
+                    it.first != index &&
+                    markers[index].card.effectiveScore() < markers[it.first].card.effectiveScore() &&
+                    markers[it.first].card.collides(markers[index].card) &&
+                    it.second.near(pos, nearDistanceMax)
                 } -> {
                     0f
                 }
-                cardPositions.any { it.first != index && markers[index].card < markers[it.first].card && it.second.near(pos, nearDistance) } -> {
+                cardPositions.any {
+                    it.first != index &&
+                    markers[index].card.effectiveScore() < markers[it.first].card.effectiveScore() &&
+                    it.second.near(pos, nearDistance)
+                } -> {
                     0f
                 }
-                cardPositions.any { it.first != index && markers[index].card <= markers[it.first].card && it.second.near(pos, nearDistance / 4) } -> {
+                cardPositions.any {
+                    it.first != index &&
+                    markers[index].card.effectiveScore() <= markers[it.first].card.effectiveScore() &&
+                    it.second.near(pos, nearDistance / 4)
+                } -> {
                     .25f
                 }
-                cardPositions.any { it.first != index && markers[index].card <= markers[it.first].card && it.second.near(pos, nearDistance) } -> {
+                cardPositions.any {
+                    it.first != index &&
+                    markers[index].card.effectiveScore() <= markers[it.first].card.effectiveScore() &&
+                    it.second.near(pos, nearDistance)
+                } -> {
                     .5f
                 }
                 else -> {

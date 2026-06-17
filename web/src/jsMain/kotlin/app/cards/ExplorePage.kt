@@ -28,6 +28,7 @@ import app.dialog.inputDialog
 import app.dialog.rememberChoosePhotoDialog
 import app.dialog.selectCardDialog
 import app.dialog.selectGroupDialog
+import app.dialog.setLocationDialog
 import app.menu.InlineMenu
 import app.menu.Menu
 import app.messaages.inList
@@ -338,7 +339,30 @@ fun ExplorePage(
                                 selected = card.parent == null && card.offline != true && card.equipped != true && card.geo != null,
                                 icon = "location_on"
                             ) {
-                                // todo: needs map
+                                scope.launch {
+                                    val initialGeo = card.geo?.asGeo()
+                                    val geo = setLocationDialog(
+                                        initialGeo = initialGeo,
+                                        onRemoveLocation = {
+                                            scope.launch {
+                                                api.updateCard(
+                                                    id = card.id!!,
+                                                    card = Card(offline = false, parent = null, equipped = false, geo = null)
+                                                ) {
+                                                    onCardUpdated(it)
+                                                }
+                                            }
+                                        }
+                                    )
+                                    if (geo != null) {
+                                        api.updateCard(
+                                            id = card.id!!,
+                                            card = Card(offline = false, parent = null, equipped = false, geo = listOf(geo.latitude, geo.longitude))
+                                        ) {
+                                            onCardUpdated(it)
+                                        }
+                                    }
+                                }
                             }
                             item(inAPage, selected = card.parent != null, icon = "description") {
                                 moveToPage()

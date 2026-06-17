@@ -27,18 +27,19 @@ fun CardPhotoOrVideo(
 
     if (allPhotos.isNotEmpty()) {
         PhotoPager(allPhotos, onPhotoClick = { url ->
+            val initialIndex = allPhotos.indexOf(url.removePrefix(baseUrl)).coerceAtLeast(0)
             scope.launch {
-                photoDialog(url)
+                photoDialog(
+                    photos = allPhotos,
+                    initialIndex = initialIndex
+                )
             }
         }, attrs = {
+            classes(Styles.cardPhoto)
             style {
                 if (defaultWidth) {
                     width(100.percent)
                 }
-                backgroundColor(Styles.colors.background)
-                maxHeight(50.vh)
-                property("aspect-ratio", "2")
-                cursor("pointer")
                 styles()
             }
         })

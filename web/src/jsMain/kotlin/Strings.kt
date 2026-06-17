@@ -2677,6 +2677,11 @@ object Strings {
         vn = "Miễn phí",
         ru = "Бесплатно"
     )
+    val chooseLocation = Translation(
+        en = "Choose location",
+        vn = "Chọn vị trí",
+        ru = "Выбрать место"
+    )
     
 }
 
