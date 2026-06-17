@@ -1196,9 +1196,16 @@ fun MapView(
             }
         }
         if (isMobile) {
+            var scrollBottomSheetToTop by remember { mutableStateOf<(() -> Unit)?>(null) }
+
+            LaunchedEffect(selectedCard) {
+                scrollBottomSheetToTop?.invoke()
+            }
+
             BottomSheet(
                 state = bottomSheetState,
-                onStateChange = { bottomSheetState = it }
+                onStateChange = { bottomSheetState = it },
+                onScrollToTop = { scrollBottomSheetToTop = it }
             ) {
                 Div({
                     classes(Styles.navContent)
@@ -1209,6 +1216,11 @@ fun MapView(
                                 fontSize(28.px)
                                 fontWeight("bold")
                                 padding(.5.r, 1.r)
+                                cursor("pointer")
+                            }
+
+                            onClick {
+                                bottomSheetState = BottomSheetState.Half
                             }
                         }) {
                             Text(appString { nearbyRecommendations })

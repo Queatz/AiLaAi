@@ -3,6 +3,9 @@ package components
 import androidx.compose.runtime.*
 import appString
 import baseUrl
+import kotlinx.browser.window
+import org.w3c.dom.events.Event
+import org.w3c.dom.events.KeyboardEvent
 import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
@@ -14,13 +17,32 @@ import r
 @Composable
 fun PhotoPager(
     photos: List<String>,
+    initialIndex: Int = 0,
     onPhotoClick: ((url: String) -> Unit)? = null,
     attrs: (AttrsScope<HTMLDivElement>.() -> Unit)? = null,
     content: (@Composable ElementScope<HTMLDivElement>.() -> Unit)? = null,
 ) {
-    var photoIndex by remember(photos) { mutableStateOf(0) }
+    var photoIndex by remember(photos) { mutableStateOf(initialIndex.coerceIn(0, (photos.size - 1).coerceAtLeast(0))) }
 
     if (photos.isEmpty()) return
+
+    val photoIndexRef = remember { mutableStateOf(photoIndex) }
+    photoIndexRef.value = photoIndex
+
+    DisposableEffect(photos) {
+        val listener = { event: Event ->
+            val keyEvent = event as KeyboardEvent
+            when (keyEvent.key) {
+                "ArrowLeft" -> photoIndex = (photoIndexRef.value - 1 + photos.size) % photos.size
+                "ArrowRight" -> photoIndex = (photoIndexRef.value + 1) % photos.size
+            }
+            Unit
+        }
+        window.addEventListener("keydown", listener)
+        onDispose {
+            window.removeEventListener("keydown", listener)
+        }
+    }
 
     val currentPhoto = photos[photoIndex]
     val url = "$baseUrl$currentPhoto"

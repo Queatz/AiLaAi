@@ -309,10 +309,7 @@ class MainActivity : AppCompatActivity() {
                 val userIsInactive by slideshow.userIsInactive.collectAsState()
                 val fullscreen by slideshow.fullscreen.collectAsState()
 
-                val windowSize = LocalWindowInfo.current.containerDpSize
-                val isLandscape = remember(LocalConfiguration.current.orientation) {
-                    windowSize.width > windowSize.height
-                }
+                val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
                 val showNavigation = !fullscreen && (navController.currentBackStackEntryAsState()
                     .value
                     ?.destination

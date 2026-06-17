@@ -39,7 +39,6 @@ import com.queatz.db.GroupExtended
 import com.queatz.db.InputType
 import com.queatz.db.StoryContent
 import com.queatz.db.isPart
-import com.queatz.db.partType
 import com.queatz.widgets.Widgets
 import components.CardItem
 import components.ContentAdder
@@ -48,6 +47,7 @@ import components.Icon
 import components.IconButton
 import components.LinkifyText
 import components.LoadingText
+import components.PhotoTiledGrid
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import kotlin.time.Instant
@@ -60,7 +60,6 @@ import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.backgroundColor
-import org.jetbrains.compose.web.css.backgroundImage
 import org.jetbrains.compose.web.css.border
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.color
@@ -351,43 +350,18 @@ fun StoryContents(
                     }
 
                     is StoryContent.Photos -> {
-                        Div({
-                            classes(StoryStyles.contentPhotos)
-
-                            if (part.photos.size > 1) {
-                                classes(StoryStyles.contentPhotosMulti)
-                            }
-                        }) {
-                            part.photos.forEach { photo ->
-                                val url = "$baseUrl$photo"
-                                if (part.aspect == null) {
-                                    Img(url) {
-                                        classes(StoryStyles.contentPhotosPhotoNoAspect)
-
-                                        onClick {
-                                            scope.launch {
-                                                photoDialog(url)
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    Div({
-                                        classes(StoryStyles.contentPhotosPhoto)
-
-                                        style {
-                                            backgroundImage("url($url)")
-                                            property("aspect-ratio", "${part.aspect}")
-                                        }
-
-                                        onClick {
-                                            scope.launch {
-                                                photoDialog(url)
-                                            }
-                                        }
-                                    })
+                        PhotoTiledGrid(
+                            photos = part.photos,
+                            aspect = part.aspect,
+                            onPhotoClick = { clickedIndex: Int ->
+                                scope.launch {
+                                    photoDialog(
+                                        photos = part.photos,
+                                        initialIndex = clickedIndex
+                                    )
                                 }
                             }
-                        }
+                        )
                     }
 
                     is StoryContent.Audio -> {

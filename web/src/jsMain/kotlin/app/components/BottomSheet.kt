@@ -21,6 +21,7 @@ enum class BottomSheetState {
 fun BottomSheet(
     state: BottomSheetState = BottomSheetState.Collapsed,
     onStateChange: (BottomSheetState) -> Unit = {},
+    onScrollToTop: (() -> Unit) -> Unit = {},
     content: @Composable () -> Unit
 ) {
     var currentY by remember { mutableStateOf(0.0) }
@@ -153,6 +154,10 @@ fun BottomSheet(
         // Content
         Div({
             classes(Styles.bottomSheetContent)
+            ref { element ->
+                onScrollToTop { element.scrollTop = 0.0 }
+                onDispose {}
+            }
         }) {
             content()
         }
