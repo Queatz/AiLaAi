@@ -45,6 +45,7 @@ import com.queatz.db.isPart
 import com.queatz.db.toJsonStoryPart
 import com.queatz.widgets.Widgets
 import com.queatz.widgets.widgets.FormData
+import components.CardActivity
 import components.CardItem
 import components.CardPhotoOrVideo
 import components.Content
@@ -632,6 +633,9 @@ fun ExplorePage(
                 gap(1.r)
             }
         }) {
+            card.activity?.let {
+                CardActivity(it, card)
+            }
             Content(
                 content = card.content,
                 cardId = card.id,

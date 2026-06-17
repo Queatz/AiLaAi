@@ -2207,6 +2207,11 @@ object Strings {
         vn = "Chi tiết",
         ru = "Детали"
     )
+    val viewDetails = Translation(
+        en = "View details",
+        vn = "Xem chi tiết",
+        ru = "Посмотреть детали"
+    )
     val members = Translation(
         en = "Members",
         vn = "Thành viên",
