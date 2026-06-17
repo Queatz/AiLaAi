@@ -31,6 +31,7 @@ import components.activityTime
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.dom.addClass
@@ -115,12 +116,14 @@ fun MapView(
     var geo by remember { mutableStateOf<Geo?>(null) }
     var map by remember { mutableStateOf<mapboxgl.Map?>(null) }
     var markers by remember { mutableStateOf(emptyList<CardMarker>()) }
-    var selectedCard by remember { mutableStateOf<Card?>(null) }
+    val selectedCardState = remember { mutableStateOf<Card?>(null) }
+    var selectedCard by selectedCardState
     val scope = rememberCoroutineScope()
     val hasHash = remember { window.location.hash.isBlank() }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var categoriesCache by remember { mutableStateOf(emptyList<String>()) }
-    var cardNavHistory by remember { mutableStateOf(listOf<Card>()) }
+    val cardNavHistoryState = remember { mutableStateOf(listOf<Card>()) }
+    var cardNavHistory by cardNavHistoryState
     val isMobile = rememberMobileMode()
     var bottomSheetState by remember { mutableStateOf(BottomSheetState.Collapsed) }
     var currentStyleIndex by remember { mutableStateOf(0) }
@@ -144,27 +147,32 @@ fun MapView(
     }
 
     // Define map styles
-    val mapStyles = listOf(
-        "mapbox://styles/mapbox/standard",
-        "mapbox://styles/mapbox/satellite-streets-v12",
-        "mapbox://styles/mapbox/navigation-day-v1",
-        "mapbox://styles/mapbox/navigation-night-v1"
-    )
+    val mapStyles = remember {
+        listOf(
+            "mapbox://styles/mapbox/standard",
+            "mapbox://styles/mapbox/satellite-streets-v12",
+            "mapbox://styles/mapbox/navigation-day-v1",
+            "mapbox://styles/mapbox/navigation-night-v1"
+        )
+    }
 
     var expanded by remember { mutableStateOf(true) }
 
-    val categories = remember(searchResults) {
+    val categories = remember(searchResults, selectedCategory) {
         if (selectedCategory == null) {
             searchResults
                 .mapNotNull { it.categories }
                 .flatten()
-                .sortedDistinct().also {
-                    categoriesCache = it
-                }
+                .sortedDistinct()
         } else {
             categoriesCache
         }
+    }
 
+    LaunchedEffect(searchResults) {
+        if (selectedCategory == null) {
+            categoriesCache = searchResults.mapNotNull { it.categories }.flatten().sortedDistinct()
+        }
     }
 
     LaunchedEffect(selectedCard) {
@@ -183,49 +191,28 @@ fun MapView(
         }
     }
 
-    LaunchedEffect(availableTodayFilter) {
+    LaunchedEffect(
+        availableTodayFilter,
+        availableTomorrowFilter,
+        petsFilter,
+        outdoorsFilter,
+        selectedLanguages,
+        ageMin,
+        ageMax,
+        groupSizeMin,
+        groupSizeMax,
+        parkingFilter
+    ) {
         localStorage["map.availableTodayFilter"] = availableTodayFilter.toString()
-    }
-
-    LaunchedEffect(availableTomorrowFilter) {
         localStorage["map.availableTomorrowFilter"] = availableTomorrowFilter.toString()
-    }
-
-    LaunchedEffect(petsFilter) {
         localStorage["map.petsFilter"] = petsFilter.toString()
-    }
-
-    LaunchedEffect(outdoorsFilter) {
         localStorage["map.outdoorsFilter"] = outdoorsFilter.toString()
-    }
-
-    LaunchedEffect(selectedLanguages) {
         localStorage["map.selectedLanguages"] = selectedLanguages.joinToString(",")
-    }
-
-    LaunchedEffect(ageMin) {
-        if (ageMin != null) localStorage["map.ageMin"] = ageMin.toString()
-        else localStorage.removeItem("map.ageMin")
-    }
-
-    LaunchedEffect(ageMax) {
-        if (ageMax != null) localStorage["map.ageMax"] = ageMax.toString()
-        else localStorage.removeItem("map.ageMax")
-    }
-
-    LaunchedEffect(groupSizeMin) {
-        if (groupSizeMin != null) localStorage["map.groupSizeMin"] = groupSizeMin.toString()
-        else localStorage.removeItem("map.groupSizeMin")
-    }
-
-    LaunchedEffect(groupSizeMax) {
-        if (groupSizeMax != null) localStorage["map.groupSizeMax"] = groupSizeMax.toString()
-        else localStorage.removeItem("map.groupSizeMax")
-    }
-
-    LaunchedEffect(parkingFilter) {
-        if (parkingFilter != null) localStorage["map.parkingFilter"] = parkingFilter!!.name
-        else localStorage.removeItem("map.parkingFilter")
+        if (ageMin != null) localStorage["map.ageMin"] = ageMin.toString() else localStorage.removeItem("map.ageMin")
+        if (ageMax != null) localStorage["map.ageMax"] = ageMax.toString() else localStorage.removeItem("map.ageMax")
+        if (groupSizeMin != null) localStorage["map.groupSizeMin"] = groupSizeMin.toString() else localStorage.removeItem("map.groupSizeMin")
+        if (groupSizeMax != null) localStorage["map.groupSizeMax"] = groupSizeMax.toString() else localStorage.removeItem("map.groupSizeMax")
+        if (parkingFilter != null) localStorage["map.parkingFilter"] = parkingFilter!!.name else localStorage.removeItem("map.parkingFilter")
     }
 
     LaunchedEffect(
@@ -272,6 +259,8 @@ fun MapView(
 
         isLoading = false
     }
+
+    var pointerEventsJob by remember { mutableStateOf<Job?>(null) }
 
     fun update() {
         map ?: return
@@ -349,7 +338,8 @@ fun MapView(
         }
 
         // prevent mapbox from overriding pointer-events
-        scope.launch {
+        pointerEventsJob?.cancel()
+        pointerEventsJob = scope.launch {
             delay(100)
             markers.forEach {
                 val ele = it.marker.getElement() // for the following line
@@ -369,11 +359,14 @@ fun MapView(
     LaunchedEffect(shownCards, map) {
         map ?: return@LaunchedEffect
 
-        markers.forEach {
-            it.marker.remove()
-        }
+        val shownIds = shownCards.mapNotNull { it.id }.toSet()
+        val existingIds = markers.map { it.card.id }.toSet()
 
-        markers = shownCards.map { card ->
+        val toRemove = markers.filter { it.card.id !in shownIds }
+        toRemove.forEach { it.marker.remove() }
+        val toKeep = markers.filter { it.card.id in shownIds }
+
+        val newMarkers = shownCards.filter { it.id !in existingIds }.map { card ->
             val element = document.createElement("div") as HTMLDivElement
             element.addClass(Styles.mapMarker)
 
@@ -390,6 +383,7 @@ fun MapView(
                 .addTo(map!!).also {
                     renderComposable(root = element) {
                         val isNpc = !card.npc?.photo.isNullOrBlank()
+                        val currentSelectedCard by selectedCardState
 
                         Div({
                             classes(Styles.mapMarkerContent)
@@ -403,8 +397,8 @@ fun MapView(
                                     if (it.ctrlKey) {
                                         window.open("$webBaseUrl/page/${card.id!!}", target = "_blank")
                                     } else {
-                                        cardNavHistory = emptyList()
-                                        selectedCard = if (selectedCard?.id == card.id) {
+                                        cardNavHistoryState.value = emptyList()
+                                        selectedCardState.value = if (currentSelectedCard?.id == card.id) {
                                             null
                                         } else {
                                             card
@@ -537,6 +531,8 @@ fun MapView(
                 }
         }
 
+        markers = toKeep + newMarkers
+
         update()
     }
 
@@ -655,7 +651,7 @@ fun MapView(
                         val click = event.lngLat
                         scope.launch {
                             var active = false
-                            var configuredActivity by mutableStateOf<com.queatz.db.Activity?>(null)
+                            var configuredActivity: com.queatz.db.Activity? = null
                             val cardName = inputDialog(
                                 title = application.appString { newCard },
                                 placeholder = application.appString { name },
