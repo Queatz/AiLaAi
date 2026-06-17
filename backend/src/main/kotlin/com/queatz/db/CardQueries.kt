@@ -236,7 +236,8 @@ fun Db.explore(
     geo: List<Double>,
     altitude: Double? = null,
     search: String? = null,
-    availableNow: Boolean? = null,
+    availableToday: Boolean? = null,
+    availableTomorrow: Boolean? = null,
     pets: Boolean? = null,
     outdoors: Boolean? = null,
     languages: List<String>? = null,
@@ -256,6 +257,7 @@ fun Db.explore(
             let now = date_iso8601(date_now())
             let utcOffset = x.${f(Card::activity)}.${f(Activity::utcOffset)} || 0.0
             let localNow = date_add(date_now(), utcOffset, 'h')
+            let localTomorrow = date_add(localNow, 1, 'd')
             let dayOfWeek = date_dayofweek(localNow) + 1
             let dayOfMonth = date_day(localNow)
             let daysInMonth = date_days_in_month(localNow)
@@ -263,6 +265,12 @@ fun Db.explore(
             let month = date_month(localNow)
             let year = date_year(localNow)
             let hour = date_hour(localNow)
+            let tomorrowDayOfWeek = date_dayofweek(localTomorrow) + 1
+            let tomorrowDayOfMonth = date_day(localTomorrow)
+            let tomorrowDaysInMonth = date_days_in_month(localTomorrow)
+            let tomorrowWeek = floor((tomorrowDayOfMonth - 1) / 7) + 1
+            let tomorrowMonth = date_month(localTomorrow)
+            let tomorrowYear = date_year(localTomorrow)
             filter x.${f(Card::active)} == true
                 and x.${f(Card::offline)} != true
                 and (@activityActive == null or x.${f(Card::activity)}.${f(Activity::active)} == @activityActive)
@@ -274,7 +282,7 @@ fun Db.explore(
                 and (@maxGroupSize == null or x.${f(Card::activity)}.${f(Activity::minGroupSize)} == null or x.${f(Card::activity)}.${f(Activity::minGroupSize)} <= @maxGroupSize)
                 and (@languages == null or (is_array(x.${f(Card::activity)}.${f(Activity::languages)}) and first(for l in x.${f(Card::activity)}.${f(Activity::languages)} filter l in @languages return true) == true))
                 and (@parking == null or x.${f(Card::activity)}.${f(Activity::parking)} in @parking)
-                and (@availableNow == null or @availableNow == false or (
+                and (@availableToday == null or @availableToday == false or (
                     (x.${f(Card::activity)}.${f(Activity::start)} == null or x.${f(Card::activity)}.${f(Activity::start)} <= now)
                     and (x.${f(Card::activity)}.${f(Activity::end)} == null or x.${f(Card::activity)}.${f(Activity::end)} >= now)
                     and (
@@ -301,6 +309,36 @@ fun Db.explore(
                         and (
                             count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::years)}) == 0
                             or year in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::years)} || [])
+                        )
+                    )
+                ))
+                and (@availableTomorrow == null or @availableTomorrow == false or (
+                    (x.${f(Card::activity)}.${f(Activity::start)} == null or x.${f(Card::activity)}.${f(Activity::start)} <= now)
+                    and (x.${f(Card::activity)}.${f(Activity::end)} == null or x.${f(Card::activity)}.${f(Activity::end)} >= now)
+                    and (
+                        x.${f(Card::activity)}.${f(Activity::schedule)} == null
+                        or (
+                            (
+                                count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::days)}) == 0
+                                and count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::weekdays)}) == 0
+                            )
+                            or (
+                                tomorrowDayOfMonth in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::days)} || [])
+                                or (tomorrowDayOfMonth == tomorrowDaysInMonth and -1 in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::days)} || []))
+                                or tomorrowDayOfWeek in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::weekdays)} || [])
+                            )
+                        )
+                        and (
+                            count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::weeks)}) == 0
+                            or tomorrowWeek in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::weeks)} || [])
+                        )
+                        and (
+                            count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::months)}) == 0
+                            or tomorrowMonth in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::months)} || [])
+                        )
+                        and (
+                            count(x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::years)}) == 0
+                            or tomorrowYear in (x.${f(Card::activity)}.${f(Activity::schedule)}.${f(ReminderSchedule::years)} || [])
                         )
                     )
                 ))
@@ -336,7 +374,8 @@ fun Db.explore(
             put("altitude", altitude)
         }
         put("search", search?.trim()?.lowercase())
-        put("availableNow", availableNow)
+        put("availableToday", availableToday)
+        put("availableTomorrow", availableTomorrow)
         put("pets", pets)
         put("outdoors", outdoors)
         put("languages", languages)

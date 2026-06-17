@@ -14,6 +14,7 @@ import app.components.BottomSheet
 import app.components.BottomSheetState
 import app.components.Empty
 import app.components.FlexInput
+import app.components.MultiSelect
 import app.components.Spacer
 import app.compose.rememberMobileMode
 import app.dialog.inputDialog
@@ -22,6 +23,7 @@ import com.queatz.db.Geo
 import com.queatz.db.Parking
 import components.CardContent
 import components.IconButton
+import components.LabeledSwitch
 import components.Markdown
 import components.Switch
 import components.activityDescription
@@ -89,6 +91,7 @@ import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
 import org.w3c.dom.set
+import web.html.HtmlTagName.option
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -121,7 +124,8 @@ fun MapView(
     val isMobile = rememberMobileMode()
     var bottomSheetState by remember { mutableStateOf(BottomSheetState.Collapsed) }
     var currentStyleIndex by remember { mutableStateOf(0) }
-    var availableNowFilter by remember { mutableStateOf(localStorage["map.availableNowFilter"]?.toBoolean() ?: true) }
+    var availableTodayFilter by remember { mutableStateOf(localStorage["map.availableTodayFilter"]?.toBoolean() ?: true) }
+    var availableTomorrowFilter by remember { mutableStateOf(localStorage["map.availableTomorrowFilter"]?.toBoolean() ?: false) }
     var petsFilter by remember { mutableStateOf(localStorage["map.petsFilter"]?.toBoolean() ?: false) }
     var outdoorsFilter by remember { mutableStateOf(localStorage["map.outdoorsFilter"]?.toBoolean() ?: false) }
     var selectedLanguages by remember { mutableStateOf<List<String>>(localStorage["map.selectedLanguages"]?.split(",")?.filter { it.isNotEmpty() } ?: emptyList()) }
@@ -130,7 +134,7 @@ fun MapView(
     var groupSizeMin by remember { mutableStateOf<Int?>(localStorage["map.groupSizeMin"]?.toIntOrNull()) }
     var groupSizeMax by remember { mutableStateOf<Int?>(localStorage["map.groupSizeMax"]?.toIntOrNull()) }
     var parkingFilter by remember { mutableStateOf<Parking?>(localStorage["map.parkingFilter"]?.let { runCatching { Parking.valueOf(it) }.getOrNull() }) }
-    var filtersExpanded by remember { mutableStateOf(true) }
+    var filtersExpanded by remember { mutableStateOf(false) }
 
     val allLanguages = remember(searchResults) {
         searchResults
@@ -179,8 +183,12 @@ fun MapView(
         }
     }
 
-    LaunchedEffect(availableNowFilter) {
-        localStorage["map.availableNowFilter"] = availableNowFilter.toString()
+    LaunchedEffect(availableTodayFilter) {
+        localStorage["map.availableTodayFilter"] = availableTodayFilter.toString()
+    }
+
+    LaunchedEffect(availableTomorrowFilter) {
+        localStorage["map.availableTomorrowFilter"] = availableTomorrowFilter.toString()
     }
 
     LaunchedEffect(petsFilter) {
@@ -224,7 +232,8 @@ fun MapView(
         geo,
         searchText,
         selectedCategory,
-        availableNowFilter,
+        availableTodayFilter,
+        availableTomorrowFilter,
         petsFilter,
         outdoorsFilter,
         selectedLanguages,
@@ -245,7 +254,8 @@ fun MapView(
             altitude = altitude / 1000,
             search = searchText.notBlank ?: selectedCategory?.notBlank,
             public = true,
-            availableNow = availableNowFilter.takeIf { it }, // null means both
+            availableToday = availableTodayFilter.takeIf { it }, // null means both
+            availableTomorrow = availableTomorrowFilter.takeIf { it }, // null means both
             pets = petsFilter.takeIf { it }, // null means both
             outdoors = outdoorsFilter.takeIf { it }, // null means both
             languages = selectedLanguages.takeIf { it.isNotEmpty() },
@@ -935,50 +945,18 @@ fun MapView(
                     paddingLeft(1.r)
                     paddingRight(1.r)
                     boxSizing("border-box")
+                    gap(1.r)
                 }
             }) {
                 FlexInput(
                     value = searchText,
                     placeholder = appString { searchForThings },
                     singleLine = true,
-                    styles = {
-                        property("border", "none")
-                        property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.125)")
-                    },
+                    rounded = true,
                     onChange = {
                         searchText = it
                     }
                 )
-                Div({
-                    style {
-                        display(DisplayStyle.Flex)
-                        gap(.5.r)
-                        overflowY("auto")
-                        paddingTop(.5.r)
-                        paddingBottom(.5.r)
-                        position(Position.Relative)
-                    }
-                }) {
-                    categories.forEach { category ->
-                        Button({
-                            classes(Styles.floatingButton)
-
-                            if (selectedCategory == category) {
-                                classes(Styles.floatingButtonSelected)
-                            }
-
-                            style {
-                                flexShrink(0)
-                            }
-
-                            onClick {
-                                selectedCategory = if (selectedCategory == category) null else category
-                            }
-                        }) {
-                            Text(category)
-                        }
-                    }
-                }
                 Div({
                     classes(AppStyles.tray, AppStyles.trayShadow)
                     style { alignSelf(AlignSelf.Center)
@@ -1019,24 +997,46 @@ fun MapView(
                                     property("flex", "1")
                                 }
                             }) {
-                                components.LabeledSwitch(
-                                    value = availableNowFilter,
-                                    onValue = { availableNowFilter = it },
-                                    onChange = { availableNowFilter = it },
-                                    title = appString { availableToday }
-                                )
-                                components.LabeledSwitch(
-                                    value = petsFilter,
-                                    onValue = { petsFilter = it },
-                                    onChange = { petsFilter = it },
-                                    title = appString { pets }
-                                )
-                                components.LabeledSwitch(
-                                    value = outdoorsFilter,
-                                    onValue = { outdoorsFilter = it },
-                                    onChange = { outdoorsFilter = it },
-                                    title = appString { outdoors }
-                                )
+                                Div({
+                                    style {
+                                        display(DisplayStyle.Flex)
+                                        flexDirection(FlexDirection.Row)
+                                        gap(.5.r)
+                                        alignItems(AlignItems.Center)
+                                        flexWrap(FlexWrap.Wrap)
+                                    }
+                                }) {
+                                    Span {
+                                        appText { available }
+                                    }
+                                    listOf(
+                                        true to appString { today },
+                                        false to appString { tomorrow }
+                                    ).forEach { (isToday, label) ->
+                                        val isSelected = if (isToday) availableTodayFilter else availableTomorrowFilter
+                                        Button({
+                                            classes(
+                                                listOfNotNull(
+                                                    if (isSelected) Styles.floatingButtonSelected else null,
+                                                    Styles.floatingButton,
+                                                    Styles.floatingButtonSmall,
+                                                )
+                                            )
+                                            style { flexShrink(0) }
+                                            onClick {
+                                                if (isToday) {
+                                                    availableTodayFilter = !availableTodayFilter
+                                                    if (availableTodayFilter) availableTomorrowFilter = false
+                                                } else {
+                                                    availableTomorrowFilter = !availableTomorrowFilter
+                                                    if (availableTomorrowFilter) availableTodayFilter = false
+                                                }
+                                            }
+                                        }) {
+                                            Text(label)
+                                        }
+                                    }
+                                }
 
                                 Div({
                                     style {
@@ -1071,8 +1071,21 @@ fun MapView(
                                     }
                                 }
 
+                                LabeledSwitch(
+                                    value = petsFilter,
+                                    onValue = { petsFilter = it },
+                                    onChange = { petsFilter = it },
+                                    title = appString { pets }
+                                )
+                                LabeledSwitch(
+                                    value = outdoorsFilter,
+                                    onValue = { outdoorsFilter = it },
+                                    onChange = { outdoorsFilter = it },
+                                    title = appString { outdoors }
+                                )
+
                                 if (allLanguages.isNotEmpty()) {
-                                    app.components.MultiSelect(
+                                    MultiSelect(
                                         selected = selectedLanguages,
                                         onSelected = { selectedLanguages = it },
                                         multiple = true
@@ -1142,7 +1155,8 @@ fun MapView(
                             }
                         }) {
                             val summary = buildString {
-                                if (availableNowFilter) append(appString { availableToday } + ", ")
+                                if (availableTodayFilter) append(appString { available } + " " + appString { today } + ", ")
+                                if (availableTomorrowFilter) append(appString { available } + " " + appString { tomorrow } + ", ")
                                 if (petsFilter) append(appString { pets } + ", ")
                                 if (outdoorsFilter) append(appString { outdoors } + ", ")
                                 if (parkingFilter != null) append(when (parkingFilter) {
@@ -1194,6 +1208,47 @@ fun MapView(
                     classes(Styles.navContent)
                 }) {
                     if (selectedCard == null) {
+                        Div({
+                            style {
+                                fontSize(28.px)
+                                fontWeight("bold")
+                                padding(.5.r, 1.r)
+                            }
+                        }) {
+                            Text(appString { nearbyRecommendations })
+                        }
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                gap(.5.r)
+                                overflowY("auto")
+                                paddingTop(.5.r)
+                                paddingBottom(.5.r)
+                                paddingLeft(1.r)
+                                paddingRight(1.r)
+                                position(Position.Relative)
+                            }
+                        }) {
+                            categories.forEach { category ->
+                                Button({
+                                    if (selectedCategory == category) {
+                                        classes(Styles.button, Styles.buttonSelectedThin)
+                                    } else {
+                                        classes(Styles.outlineButton, Styles.outlineButtonTonal)
+                                    }
+
+                                    style {
+                                        flexShrink(0)
+                                    }
+
+                                    onClick {
+                                        selectedCategory = if (selectedCategory == category) null else category
+                                    }
+                                }) {
+                                    Text(category)
+                                }
+                            }
+                        }
                         if (shownCards.isEmpty()) {
                             Empty { appText { noCardsNearby } }
                         } else {

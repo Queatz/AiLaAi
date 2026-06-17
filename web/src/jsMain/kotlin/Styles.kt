@@ -974,6 +974,14 @@ class MainStyleSheet : StyleSheet() {
         }
     }
 
+    val buttonSelectedThin by style {
+        outline(colors.secondary, LineStyle.Solid.toString(), 1.px)
+
+        dark(self) {
+            outlineColor(colors.white)
+        }
+    }
+
     val textareaInline by style { }
 
     val textarea by style {

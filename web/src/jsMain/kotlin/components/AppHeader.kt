@@ -21,6 +21,8 @@ fun AppHeader(
     showMe: Boolean = true,
     background: Boolean = true,
     showDownloadApp: Boolean = false,
+    titleIsDesktopOnly: Boolean = true,
+    altStyle: Boolean = false,
     onBack: () -> Unit = {},
     customContent: @Composable (() -> Unit)? = null,
 ) {
@@ -42,12 +44,18 @@ fun AppHeader(
     Div({
         classes(Styles.appHeader)
 
-        if (!background) {
             style {
+                if (!background) {
                 margin(0.r)
                 backgroundColor(Color.transparent)
                 property("box-shadow", "none")
             }
+
+                if (altStyle) {
+                    margin(0.r, 0.r, 1.r, 0.r)
+                    borderRadius(0.r, 0.r, 1.r, 1.r)
+                    padding(.5.r)
+                }
         }
     }) {
         if (showBack) {
@@ -80,7 +88,9 @@ fun AppHeader(
             }
             title.notBlank?.let { title ->
                 Span({
-                    classes(Styles.desktopOnly)
+                    if (titleIsDesktopOnly) {
+                        classes(Styles.desktopOnly)
+                    }
 
                     style {
                         paddingLeft(1.r)

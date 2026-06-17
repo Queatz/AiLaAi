@@ -34,6 +34,7 @@ import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.bottom
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flex
@@ -96,6 +97,7 @@ fun FlexInput(
     autoSize: Boolean = true,
     use100Width: Boolean = false,
     monospace: Boolean = false,
+    rounded: Boolean = false,
     // Style configuration
     styles: StyleScope.() -> Unit = {},
     defaultMargins: Boolean = false,
@@ -258,6 +260,9 @@ fun FlexInput(
                     maxWidth(100.percent)
                     if (!useDefaultWidth) {
                         width(0.r)
+                    }
+                    if (rounded) {
+                        borderRadius(4.r)
                     }
                 }
 

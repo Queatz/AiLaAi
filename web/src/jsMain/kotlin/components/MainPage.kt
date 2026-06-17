@@ -17,9 +17,10 @@ fun MainPage(tabId: String? = null) {
             MapView {
                 AppHeader(
                     title = appString { appName },
-                    background = false,
+                    altStyle = true,
                     showDownloadApp = false,
-                    showMe = false
+                    showMe = false,
+                    titleIsDesktopOnly = false
                 )
             }
             AppFooter()

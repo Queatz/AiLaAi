@@ -148,6 +148,11 @@ object Strings {
         vn = "Có sẵn hôm nay",
         ru = "Доступно сегодня"
     )
+    val availableTomorrow = Translation(
+        en = "Available tomorrow",
+        vn = "Có sẵn ngày mai",
+        ru = "Доступно завтра"
+    )
     val notAvailableToday = Translation(
         en = "Not available today",
         vn = "Không có sẵn hôm nay",
@@ -1621,6 +1626,11 @@ object Strings {
         "Bạn chưa lưu trang",
         ru = "Нет сохраненных страниц"
     )
+    val nearbyRecommendations = Translation(
+        en = "Recommended for you",
+        vn = "Được gọi ý cho bạn",
+        ru = "Рекомендации для вас"
+    )
     val noCardsNearby = Translation(
         "No pages nearby.",
         "Không tìm được trang gần đây.",
@@ -2581,6 +2591,11 @@ object Strings {
         en = "Indoors",
         vn = "Trong nhà",
         ru = "В помещении"
+    )
+    val available = Translation(
+        en = "Available",
+        vn = "Có sẵn",
+        ru = "Доступно"
     )
     val parking = Translation(
         en = "Parking",
