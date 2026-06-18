@@ -48,7 +48,7 @@ data class OpenAiCompletionsMessage(
 
 @Serializable
 data class OpenAiResponsesBody(
-    val model: String = "o4-mini",
+    val model: String = "gpt-5-mini",
     val input: List<OpenAiCompletionsMessage>,
     val text: JsonObject,
 )
