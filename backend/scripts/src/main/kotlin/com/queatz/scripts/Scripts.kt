@@ -1,11 +1,15 @@
 package com.queatz.scripts
 
+import com.queatz.db.InventoryItemExtended
+import com.queatz.db.Person
 import com.queatz.db.Script
 import com.queatz.scripts.ScriptWithMavenDepsConfiguration.scriptLoader
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlin.reflect.KTypeProjection.Companion.invariant
+import kotlin.reflect.full.createType
 import kotlin.script.experimental.annotations.KotlinScript
 import kotlin.script.experimental.api.ResultWithDiagnostics
 import kotlin.script.experimental.api.ScriptCollectedData
@@ -18,6 +22,7 @@ import kotlin.script.experimental.api.defaultImports
 import kotlin.script.experimental.api.dependencies
 import kotlin.script.experimental.api.importScripts
 import kotlin.script.experimental.api.onSuccess
+import kotlin.script.experimental.api.providedProperties
 import kotlin.script.experimental.api.refineConfiguration
 import kotlin.script.experimental.api.with
 import kotlin.script.experimental.dependencies.CompoundDependenciesResolver
@@ -54,12 +59,42 @@ object ScriptWithMavenDepsConfiguration : ScriptCompilationConfiguration(
             Json::class
         )
 
+        // Declared on the script definition (not only at runtime in RunScript) so that scripts
+        // pulled in via @file:DependsOnScript inherit the same provided properties and can
+        // reference them (e.g. `secret`, `render`). Values are supplied by RunScript at evaluation.
+        providedProperties(
+            "me" to Person::class.createType(nullable = true),
+            "self" to String::class.createType(),
+            "render" to ScriptRender::class.createType(),
+            "app" to ScriptApp::class.createType(),
+            "storage" to ScriptStorage::class.createType(),
+            "http" to ScriptHttp::class.createType(),
+            "data" to String::class.createType(nullable = true),
+            "input" to Map::class.createType(
+                arguments = listOf(
+                    invariant(String::class.createType()),
+                    invariant(String::class.createType(nullable = true))
+                ),
+                nullable = true,
+            ),
+            "secret" to String::class.createType(nullable = true),
+            "equipment" to Function0::class.createType(
+                arguments = listOf(
+                    invariant(
+                        List::class.createType(
+                            arguments = listOf(
+                                invariant(InventoryItemExtended::class.createType())
+                            ),
+                            nullable = true
+                        )
+                    )
+                )
+            )
+        )
+
         jvm {
             jvmTarget("21")
             dependenciesFromCurrentContext(
-                "scripts", // :scripts (this library)
-                "models", // :models
-                "kotlin-scripting-dependencies", // DependsOn and Repository annotation
                 wholeClasspath = true,
                 unpackJarCollections = true
             )
@@ -115,56 +150,31 @@ private fun configureScriptDepsOnAnnotations(
         ?.takeIf { it.isNotEmpty() }
         ?: return context.compilationConfiguration.asSuccess()
 
-    val scripts = scriptIds.mapNotNull { scriptId ->
-        parseScript(
-            scriptLoader(scriptId) ?: return@mapNotNull null
-        ).toScriptSource("script_$scriptId")
-    }
+    // The current script's source is named "script_<id>" (see RunScript and below). Skip importing
+    // a script into itself, which would otherwise be reported as a recursive dependency cycle.
+    val currentScriptId = context.script.name
+        ?.removeSuffix(".kts")
+        ?.removePrefix("script_")
+
+    val scripts = scriptIds
+        .filterNot { it == currentScriptId }
+        .mapNotNull { scriptId ->
+            parseScript(
+                scriptLoader(scriptId) ?: return@mapNotNull null
+            ).toScriptSource("script_$scriptId.kts")
+        }
 
     return context.compilationConfiguration.with {
         importScripts.append(scripts)
     }.asSuccess()
 }
 
-fun parseScript(script: Script): String = ensurePackageDeclaration(
-    source = script.source!!,
-    packageName = "script_${script.id!!}"
-)
-
 /**
- * Inserts a package declaration after @file: annotations if none exists
+ * Returns the script source to compile.
  *
- * @param source The original script source code
- * @param packageName The package name to insert (defaults to "generated")
- * @return The modified source with package declaration
+ * Note: a per-script `package` declaration must NOT be added here. Scripts referenced via
+ * @file:DependsOnScript are compiled as imported sources in the same module, and the K2 compiler
+ * only makes their declarations (and applies default imports / provided properties) visible to the
+ * importing script when they share the (default) package.
  */
-fun ensurePackageDeclaration(
-    source: String,
-    packageName: String,
-): String {
-    val lines = source.lines()
-
-    // Check if package already exists
-    if (lines.any { it.trimStart().startsWith("package ") }) {
-        return source
-    }
-
-    // Find the last @file: line
-    val lastFileAnnotation = lines.indexOfLast { it.trimStart().startsWith("@file:") }
-
-    return buildString {
-        // Write all lines up to insertion point
-        lines.take(lastFileAnnotation + 1).forEach { appendLine(it) }
-
-        // Insert package declaration
-        appendLine("package $packageName")
-
-        // Add blank line if needed
-        if (lastFileAnnotation >= 0 && lines[lastFileAnnotation].isNotBlank()) {
-            appendLine()
-        }
-
-        // Write remaining lines
-        lines.drop(lastFileAnnotation + 1).forEach { appendLine(it) }
-    }
-}
+fun parseScript(script: Script): String = script.source!!

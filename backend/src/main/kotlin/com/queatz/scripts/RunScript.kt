@@ -1,6 +1,5 @@
 package com.queatz.scripts
 
-import com.queatz.db.InventoryItemExtended
 import com.queatz.db.Person
 import com.queatz.db.Script
 import com.queatz.db.ScriptResult
@@ -13,8 +12,6 @@ import com.queatz.plugins.db
 import com.queatz.scripts.ScriptWithMavenDepsConfiguration.scriptLoader
 import com.queatz.scripts.app.MainScriptApp
 import com.queatz.scripts.store.ArangoScriptStorage
-import kotlin.reflect.KTypeProjection.Companion.invariant
-import kotlin.reflect.full.createType
 import kotlin.script.experimental.api.CompiledScript
 import kotlin.script.experimental.api.ResultValue
 import kotlin.script.experimental.api.ResultWithDiagnostics
@@ -49,37 +46,10 @@ class RunScript(
 
         val scriptSource = parseScript(script)
 
-        val scriptCompilationConfiguration = createJvmCompilationConfigurationFromTemplate<ScriptWithMavenDeps> {
-            providedProperties(
-                "me" to Person::class.createType(nullable = true),
-                "self" to String::class.createType(),
-                "render" to ScriptRender::class.createType(),
-                "app" to ScriptApp::class.createType(),
-                "storage" to ScriptStorage::class.createType(),
-                "http" to ScriptHttp::class.createType(),
-                "data" to String::class.createType(nullable = true),
-                "input" to Map::class.createType(
-                    arguments = listOf(
-                        invariant(String::class.createType()),
-                        invariant(String::class.createType(nullable = true))
-                    ),
-                    nullable = true,
-                ),
-                "secret" to String::class.createType(nullable = true),
-                "equipment" to Function0::class.createType(
-                    arguments = listOf(
-                        invariant(
-                            List::class.createType(
-                                arguments = listOf(
-                                    invariant(InventoryItemExtended::class.createType())
-                                ),
-                                nullable = true
-                            )
-                        )
-                    )
-                )
-            )
-        }
+        // Provided property types are declared in the script definition
+        // (ScriptWithMavenDepsConfiguration) so that scripts imported via @file:DependsOnScript
+        // inherit them as well. The values are supplied in the evaluation configuration below.
+        val scriptCompilationConfiguration = createJvmCompilationConfigurationFromTemplate<ScriptWithMavenDeps>()
 
         val scriptEvaluationConfiguration = createJvmEvaluationConfigurationFromTemplate<ScriptWithMavenDeps> {
             providedProperties(

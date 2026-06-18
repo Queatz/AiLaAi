@@ -1,13 +1,18 @@
-
+package app.cards
+import Styles
 import androidx.compose.runtime.Composable
-import app.cards.MapList
 import app.components.Empty
+import appString
+import appText
 import components.CardContent
 import components.IconButton
 import kotlinx.browser.window
 import com.queatz.db.Card
+import hint
+import notBlank
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
+import r
 
 @Composable
 fun MapCardPanel(
@@ -99,9 +104,9 @@ fun MapCardPanel(
                         fontWeight("bold")
                     }
                 }) {
-                    Text(selectedCard?.name ?: appString { newCard })
+                    Text(selectedCard.name ?: appString { newCard })
                 }
-                selectedCard?.hint?.notBlank?.let { hint ->
+                selectedCard.hint.notBlank?.let { hint ->
                     Span({
                         style {
                             fontSize(14.px)
@@ -113,7 +118,7 @@ fun MapCardPanel(
                 }
             }
             CardContent(
-                card = selectedCard!!,
+                card = selectedCard,
                 showTitle = false
             )
         }

@@ -27,7 +27,8 @@ class ScriptVerificationTest {
         }
         loadedScripts["123"] = scriptA
 
-        val runner = RunScript(scriptA, null, null)
+        val runner = RunScript(scriptA, null, null, useCache = false)
+        ScriptWithMavenDepsConfiguration.scriptLoader = { id -> loadedScripts[id] }
         val result = runner.run(null)
 
         val output = result.content?.filterIsInstance<StoryContent.Text>()?.joinToString("") { it.text } ?: ""
@@ -56,7 +57,8 @@ class ScriptVerificationTest {
         }
         loadedScripts["123"] = scriptA
 
-        val runner = RunScript(scriptA, null, null)
+        val runner = RunScript(scriptA, null, null, useCache = false)
+        ScriptWithMavenDepsConfiguration.scriptLoader = { id -> loadedScripts[id] }
         val result = runner.run(null)
 
         val output = result.content?.filterIsInstance<StoryContent.Text>()?.joinToString("") { it.text } ?: ""
@@ -76,7 +78,7 @@ class ScriptVerificationTest {
             person = "person1"
             source = """
                 class CommonType {
-                    val value = "Common"
+                    val value = "CrossScriptMarker"
                 }
                 fun getCommon() = CommonType()
             """.trimIndent()
@@ -96,13 +98,98 @@ class ScriptVerificationTest {
         }
         loadedScripts["scriptA"] = scriptA
 
-        val runner = RunScript(scriptA, null, null)
+        val runner = RunScript(scriptA, null, null, useCache = false)
+        ScriptWithMavenDepsConfiguration.scriptLoader = { id -> loadedScripts[id] }
         val result = runner.run(null)
 
         val output = result.content?.filterIsInstance<StoryContent.Text>()?.joinToString("") { it.text } ?: ""
         println("[DEBUG_LOG] CrossScriptDependency Result: $output")
         
-        assertTrue(output.contains("Common"), "Output should contain 'Common', but was: $output")
+        assertTrue(output.contains("CrossScriptMarker"), "Output should contain 'CrossScriptMarker', but was: $output")
+    }
+
+    @Test
+    fun testSerialization() = runBlocking {
+        val loadedScripts = mutableMapOf<String, Script>()
+        ScriptWithMavenDepsConfiguration.scriptLoader = { id -> loadedScripts[id] }
+
+        val scriptA = Script().apply {
+            id = "serial1"
+            person = "person1"
+            source = """
+                import com.queatz.db.Axis
+
+                render {
+                    text(Json.encodeToString(Axis.serializer(), Axis.X))
+                }
+            """.trimIndent()
+        }
+        loadedScripts["serial1"] = scriptA
+
+        val runner = RunScript(scriptA, null, null)
+        val result = runner.run(null)
+
+        val output = result.content?.filterIsInstance<StoryContent.Text>()?.joinToString("") { it.text } ?: ""
+        println("[DEBUG_LOG] Serialization Result: $output")
+
+        assertTrue(
+            output.contains("\"X\""),
+            "Output should contain the serialized value, but was: $output"
+        )
+    }
+
+    @Test
+    fun testImportedScriptUsesConfig() = runBlocking {
+        val loadedScripts = mutableMapOf<String, Script>()
+        ScriptWithMavenDepsConfiguration.scriptLoader = { id -> loadedScripts[id] }
+
+        // Leaf dependency imported transitively by scriptB
+        val scriptC = Script().apply {
+            id = "leafC1"
+            person = "person1"
+            source = """
+                fun helperC() = "C-helper"
+            """.trimIndent()
+        }
+        loadedScripts["leafC1"] = scriptC
+
+        // Imported script that itself uses DependsOnScript, Json and the `secret` provided property
+        val scriptB = Script().apply {
+            id = "depB1"
+            person = "person1"
+            source = """
+                @file:DependsOnScript("leafC1")
+                import com.queatz.db.Axis
+                fun renderB(): String {
+                    val s: String? = secret
+                    return Json.encodeToString(Axis.serializer(), Axis.X) + helperC() + (s ?: "no-secret")
+                }
+            """.trimIndent()
+        }
+        loadedScripts["depB1"] = scriptB
+
+        val scriptA = Script().apply {
+            id = "mainA1"
+            person = "person1"
+            source = """
+                @file:DependsOnScript("depB1")
+                render {
+                    text(renderB())
+                }
+            """.trimIndent()
+        }
+        loadedScripts["mainA1"] = scriptA
+
+        val runner = RunScript(scriptA, null, null, useCache = false)
+        // RunScript.init() overrides scriptLoader with the db-backed loader; restore the mock.
+        ScriptWithMavenDepsConfiguration.scriptLoader = { id -> loadedScripts[id] }
+        val result = runner.run(null)
+
+        val output = result.content?.filterIsInstance<StoryContent.Text>()?.joinToString("") { it.text } ?: ""
+        println("[DEBUG_LOG] ImportedScriptUsesConfig Result: $output")
+
+        assertTrue(output.contains("\"X\""), "Output should contain serialized value, but was: $output")
+        assertTrue(output.contains("C-helper"), "Output should contain transitive helper, but was: $output")
     }
 
     @Test
@@ -131,7 +218,8 @@ class ScriptVerificationTest {
         }
         loadedScripts["1585825704"] = scriptA
 
-        val runner = RunScript(scriptA, null, null)
+        val runner = RunScript(scriptA, null, null, useCache = false)
+        ScriptWithMavenDepsConfiguration.scriptLoader = { id -> loadedScripts[id] }
         val result = runner.run(null)
 
         val output = result.content?.filterIsInstance<StoryContent.Text>()?.joinToString("") { it.text } ?: ""

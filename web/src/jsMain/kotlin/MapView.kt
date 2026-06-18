@@ -9,6 +9,7 @@ import app.AppStyles
 import app.ailaai.api.card
 import app.ailaai.api.cards
 import app.ailaai.api.newCard
+import app.cards.MapCardPanel
 import app.cards.MapList
 import app.components.BottomSheet
 import app.components.BottomSheetState
@@ -87,7 +88,6 @@ import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Hr
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
@@ -95,8 +95,6 @@ import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
 import org.w3c.dom.set
-import web.cssom.AtRules.Companion.property
-import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
