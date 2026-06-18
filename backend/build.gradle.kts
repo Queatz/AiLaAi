@@ -1,7 +1,10 @@
+import org.gradle.kotlin.dsl.application
+import org.gradle.kotlin.dsl.kotlin
+
 plugins {
     application
-    kotlin("jvm") version "2.3.21"
-    kotlin("plugin.serialization") version "2.3.21"
+    kotlin("jvm") version "2.4.0"
+    kotlin("plugin.serialization") version "2.4.0"
     id("io.ktor.plugin") version "3.5.0"
     id("com.ailaai.shared.config")
 }
@@ -59,6 +62,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-scripting-common:${versions.kotlin}")
     implementation("org.jetbrains.kotlin:kotlin-scripting-jvm:${versions.kotlin}")
     implementation("org.jetbrains.kotlin:kotlin-scripting-jvm-host:${versions.kotlin}")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:${versions.kotlin}")
     implementation("com.fasterxml.jackson.core:jackson-core:${versions.jackson}")
     implementation("com.fasterxml.jackson.core:jackson-databind:${versions.jackson}")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${versions.jackson}")
