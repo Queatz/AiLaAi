@@ -792,6 +792,20 @@ class SignalReply(
 ) : Model()
 
 @Serializable
+data class AiSpeechWord(
+    var word: String? = null,
+    var start: Double? = null,
+    var end: Double? = null
+)
+
+@Serializable
+class AiSpeech(
+    var text: String? = null,
+    var audio: String? = null,
+    var words: List<AiSpeechWord>? = null
+) : Model()
+
+@Serializable
 expect open class Model() {
     var id: String?
     var createdAt: Instant?

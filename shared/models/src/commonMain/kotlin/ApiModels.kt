@@ -133,6 +133,12 @@ class AiTranscribeResponse(
 )
 
 @Serializable
+class AiSpeakResponse(
+    val audio: String,
+    val words: List<AiSpeechWord> = emptyList()
+)
+
+@Serializable
 class AiPhotoResponse(
     val photo: String,
     val width: Int? = null,

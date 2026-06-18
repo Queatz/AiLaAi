@@ -8,6 +8,7 @@ import com.queatz.db.AiPhotoResponse
 import com.queatz.db.AiScriptRequest
 import com.queatz.db.AiScriptResponse
 import com.queatz.db.AiSpeakRequest
+import com.queatz.db.AiSpeakResponse
 import com.queatz.db.AiTranscribeResponse
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
@@ -37,7 +38,7 @@ suspend fun Api.aiPhoto(
 suspend fun Api.aiSpeak(
     request: AiSpeakRequest,
     onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<ByteArray>,
+    onSuccess: SuccessBlock<AiSpeakResponse>,
 ) = post(
     url = "ai/speak",
     body = request,

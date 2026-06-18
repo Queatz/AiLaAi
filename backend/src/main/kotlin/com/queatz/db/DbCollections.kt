@@ -306,5 +306,8 @@ fun collections() = listOf(
         ensurePersistentIndex(listOf(SignalReply::person.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(SignalReply::released.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(SignalReply::releaseAt.name), PersistentIndexOptions())
+    },
+    AiSpeech::class.db {
+        ensurePersistentIndex(listOf(AiSpeech::text.name), PersistentIndexOptions())
     }
 )

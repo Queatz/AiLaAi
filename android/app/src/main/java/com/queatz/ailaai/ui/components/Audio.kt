@@ -60,13 +60,26 @@ private sealed class AudioSource {
     data class Data(val data: ByteArray, val contentType: String?) : AudioSource()
 }
 
+/**
+ * Allows external control of an [Audio] player, e.g. seeking to a specific position.
+ */
+class AudioController {
+    internal var onSeek: ((Long) -> Unit)? = null
+
+    fun seekTo(positionMs: Long) {
+        onSeek?.invoke(positionMs)
+    }
+}
+
 @Composable
 fun Audio(
     url: String,
     modifier: Modifier = Modifier,
-    autoPlay: Boolean = false
+    autoPlay: Boolean = false,
+    controller: AudioController? = null,
+    onPosition: ((Long) -> Unit)? = null
 ) {
-    Audio(AudioSource.Url(url), modifier, autoPlay)
+    Audio(AudioSource.Url(url), modifier, autoPlay, controller, onPosition)
 }
 
 @Composable
@@ -75,8 +88,10 @@ fun Audio(
     contentType: String?,
     modifier: Modifier = Modifier,
     autoPlay: Boolean = false,
+    controller: AudioController? = null,
+    onPosition: ((Long) -> Unit)? = null
 ) {
-    Audio(AudioSource.Data(data, contentType), modifier, autoPlay)
+    Audio(AudioSource.Data(data, contentType), modifier, autoPlay, controller, onPosition)
 }
 
 @OptIn(UnstableApi::class)
@@ -84,7 +99,9 @@ fun Audio(
 private fun Audio(
     source: AudioSource,
     modifier: Modifier = Modifier,
-    autoPlay: Boolean = false
+    autoPlay: Boolean = false,
+    controller: AudioController? = null,
+    onPosition: ((Long) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val exoPlayer = remember {
@@ -93,6 +110,13 @@ private fun Audio(
             playWhenReady = autoPlay
             setWakeMode(C.WAKE_MODE_LOCAL)
             prepare()
+        }
+    }
+
+    if (controller != null) {
+        controller.onSeek = { positionMs ->
+            exoPlayer.seekTo(positionMs)
+            exoPlayer.play()
         }
     }
 
@@ -147,6 +171,7 @@ private fun Audio(
             seekAmount =
                 if (exoPlayer.duration == C.TIME_UNSET) 0f else exoPlayer.contentPosition.toFloat() / exoPlayer.duration.toFloat()
             timeRemaining = exoPlayer.duration - exoPlayer.contentPosition
+            onPosition?.invoke(exoPlayer.contentPosition)
             if (dragFactor != null) {
                 dragFactor = null
             }

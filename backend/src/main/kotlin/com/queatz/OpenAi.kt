@@ -3,6 +3,7 @@ package com.queatz
 import app.ailaai.shared.resources.ScriptsResources
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.queatz.db.AiScriptResponse
+import com.queatz.db.AiSpeechWord
 import com.queatz.plugins.json
 import com.queatz.plugins.secrets
 import io.ktor.client.HttpClient
@@ -84,6 +85,19 @@ data class OpenAiStructuredCodeOutput(
 @Serializable
 data class OpenAiTranscriptionResponse(
     val text: String
+)
+
+@Serializable
+data class OpenAiVerboseTranscriptionResponse(
+    val text: String,
+    val words: List<OpenAiTranscriptionWord> = emptyList()
+)
+
+@Serializable
+data class OpenAiTranscriptionWord(
+    val word: String,
+    val start: Double,
+    val end: Double
 )
 
 @Serializable
@@ -272,6 +286,46 @@ class OpenAi {
     }.onFailure {
         it.printStackTrace()
     }.getOrNull()
+
+    suspend fun transcribeWords(audioBytes: ByteArray): List<AiSpeechWord> = runCatching {
+        http.post("https://api.openai.com/v1/audio/transcriptions") {
+            bearerAuth(secrets.openAi.key)
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append(
+                            key = "file",
+                            value = audioBytes,
+                            headers = Headers.build {
+                                append(HttpHeaders.ContentType, "audio/ogg")
+                                append(HttpHeaders.ContentDisposition, "form-data; name=\"file\"; filename=\"audio.ogg\"")
+                            }
+                        )
+                        append(
+                            key = "model",
+                            value = "whisper-1"
+                        )
+                        append(
+                            key = "response_format",
+                            value = "verbose_json"
+                        )
+                        append(
+                            key = "timestamp_granularities[]",
+                            value = "word"
+                        )
+                    }
+                )
+            )
+        }.body<OpenAiVerboseTranscriptionResponse>().words.map { word ->
+            AiSpeechWord(
+                word = word.word,
+                start = word.start,
+                end = word.end
+            )
+        }
+    }.onFailure {
+        it.printStackTrace()
+    }.getOrDefault(emptyList())
 
     suspend fun json(
         prompt: String,

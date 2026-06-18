@@ -8,10 +8,14 @@ import com.queatz.db.AiPhotoRequest
 import com.queatz.db.AiPhotoResponse
 import com.queatz.db.AiScriptRequest
 import com.queatz.db.AiSpeakRequest
+import com.queatz.db.AiSpeakResponse
+import com.queatz.db.AiSpeech
 import com.queatz.db.AiTranscribeResponse
+import com.queatz.db.aiSpeechByText
 import com.queatz.db.PromptContext
 import com.queatz.db.addPrompt
 import com.queatz.notBlank
+import com.queatz.save
 import com.queatz.plugins.ai
 import com.queatz.plugins.db
 import com.queatz.plugins.me
@@ -19,11 +23,9 @@ import com.queatz.plugins.openAi
 import com.queatz.plugins.respond
 import com.queatz.receiveBytes
 import io.ktor.client.call.body
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
-import io.ktor.server.response.respondBytes
 import io.ktor.server.routing.*
 
 fun Route.aiRoutes() {
@@ -60,14 +62,41 @@ fun Route.aiRoutes() {
         }
 
         post("/ai/speak") {
-            val request = call.receive<AiSpeakRequest>()
-            val response = openAi.speak(request.text)
+            respond {
+                val request = call.receive<AiSpeakRequest>()
+                val text = request.text.notBlank ?: return@respond HttpStatusCode.BadRequest
 
-            if (response == null) {
-                respond { HttpStatusCode.InternalServerError }
-                return@post
-            } else {
-                call.respondBytes(response.body<ByteArray>(), ContentType.Audio.OGG)
+                val existing = db.aiSpeechByText(text)
+
+                if (existing?.audio != null) {
+                    AiSpeakResponse(
+                        audio = existing.audio!!,
+                        words = existing.words ?: emptyList()
+                    )
+                } else {
+                    val response = openAi.speak(text)
+
+                    if (response == null) {
+                        HttpStatusCode.InternalServerError
+                    } else {
+                        val bytes = response.body<ByteArray>()
+                        val audioPath = bytes.save("ai", "speech.ogg")
+                        val words = openAi.transcribeWords(bytes)
+
+                        val speech = db.insert(
+                            AiSpeech(
+                                text = text,
+                                audio = audioPath,
+                                words = words
+                            )
+                        )
+
+                        AiSpeakResponse(
+                            audio = speech.audio!!,
+                            words = speech.words ?: emptyList()
+                        )
+                    }
+                }
             }
         }
 
