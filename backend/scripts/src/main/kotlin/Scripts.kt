@@ -62,8 +62,7 @@ object ScriptWithMavenDepsConfiguration : ScriptCompilationConfiguration(
                 unpackJarCollections = true
             )
             compilerOptions(
-                "-Xadd-modules=ALL-MODULE-PATH",
-                "-Xplugin=kotlin-serialization-compiler-plugin-embeddable-2.1.20.jar"
+                "-Xadd-modules=ALL-MODULE-PATH"
             )
         }
 

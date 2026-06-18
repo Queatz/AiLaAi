@@ -29,7 +29,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${versions.serialization}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.serialization}")
-    runtimeOnly("org.jetbrains.kotlin:kotlin-serialization-compiler-plugin-embeddable:${versions.kotlin}")
+    implementation("org.jetbrains.kotlin:kotlin-serialization-compiler-plugin-embeddable:${versions.kotlin}")
     implementation("io.ktor:ktor-server-core-jvm:${versions.ktor}")
     implementation("io.ktor:ktor-server-compression-jvm:${versions.ktor}")
     implementation("io.ktor:ktor-server-content-negotiation-jvm:${versions.ktor}")
