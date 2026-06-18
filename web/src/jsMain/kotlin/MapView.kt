@@ -100,12 +100,6 @@ import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-data class CardMarker(
-    val card: Card,
-    val marker: mapboxgl.Marker,
-)
-
-
 @Composable
 fun MapView(
     showList: Boolean = true,
@@ -290,9 +284,6 @@ fun MapView(
     fun update() {
         map ?: return
 
-        fun mapboxgl.Point.near(other: mapboxgl.Point, distance: Int) =
-            abs(x - other.x) <= distance && abs(y - other.y) <= distance
-
         val cameraLngLat = map!!.getCameraLngLat()
         val altitude = map!!.getFreeCameraOptions().position.toAltitude() as Double
         val nearDistance = 128
@@ -336,23 +327,25 @@ fun MapView(
         val minSize = allSizes.minOrNull() ?: 0.0
         val maxSize = allSizes.maxOrNull() ?: 0.0
 
-        fun Card.effectiveScore(): Float {
-            val normLevel = if (maxLevel == minLevel) 0.5f
-            else ((level ?: 0) - minLevel).toFloat() / (maxLevel - minLevel)
-            val normSize = if (maxSize == minSize) 0.5f
-            else ((size ?: 0.0) - minSize).toFloat() / (maxSize - minSize).toFloat()
-            // Level completely overrides size (size only matters when levels are equal)
-            val score = normLevel + normSize / (maxLevel - minLevel + 2).toFloat()
-            return score * (1f - 2f * zoomFactor) + zoomFactor
-        }
-
         markers.forEachIndexed { index, marker ->
             val pos = cardPositions[index].second
 
             val nearScale = when {
                 cardPositions.any {
                     it.first != index &&
-                            markers[index].card.effectiveScore() < markers[it.first].card.effectiveScore() &&
+                            markers[index].card.effectiveScore(
+                                minLevel = minLevel,
+                                maxLevel = maxLevel,
+                                minSize = minSize,
+                                maxSize = maxSize,
+                                zoomFactor = zoomFactor,
+                            ) < markers[it.first].card.effectiveScore(
+                                minLevel = minLevel,
+                                maxLevel = maxLevel,
+                                minSize = minSize,
+                                maxSize = maxSize,
+                                zoomFactor = zoomFactor,
+                            ) &&
                             markers[it.first].card.collides(markers[index].card) &&
                             it.second.near(pos, nearDistanceMax)
                 } -> {
@@ -361,7 +354,19 @@ fun MapView(
 
                 cardPositions.any {
                     it.first != index &&
-                            markers[index].card.effectiveScore() < markers[it.first].card.effectiveScore() &&
+                            markers[index].card.effectiveScore(
+                                minLevel = minLevel,
+                                maxLevel = maxLevel,
+                                minSize = minSize,
+                                maxSize = maxSize,
+                                zoomFactor = zoomFactor,
+                            ) < markers[it.first].card.effectiveScore(
+                                minLevel = minLevel,
+                                maxLevel = maxLevel,
+                                minSize = minSize,
+                                maxSize = maxSize,
+                                zoomFactor = zoomFactor,
+                            ) &&
                             it.second.near(pos, nearDistance)
                 } -> {
                     0f
@@ -369,7 +374,19 @@ fun MapView(
 
                 cardPositions.any {
                     it.first != index &&
-                            markers[index].card.effectiveScore() <= markers[it.first].card.effectiveScore() &&
+                            markers[index].card.effectiveScore(
+                                minLevel = minLevel,
+                                maxLevel = maxLevel,
+                                minSize = minSize,
+                                maxSize = maxSize,
+                                zoomFactor = zoomFactor,
+                            ) <= markers[it.first].card.effectiveScore(
+                                minLevel = minLevel,
+                                maxLevel = maxLevel,
+                                minSize = minSize,
+                                maxSize = maxSize,
+                                zoomFactor = zoomFactor,
+                            ) &&
                             it.second.near(pos, nearDistance / 4)
                 } -> {
                     .25f
@@ -377,7 +394,19 @@ fun MapView(
 
                 cardPositions.any {
                     it.first != index &&
-                            markers[index].card.effectiveScore() <= markers[it.first].card.effectiveScore() &&
+                            markers[index].card.effectiveScore(
+                                minLevel = minLevel,
+                                maxLevel = maxLevel,
+                                minSize = minSize,
+                                maxSize = maxSize,
+                                zoomFactor = zoomFactor,
+                            ) <= markers[it.first].card.effectiveScore(
+                                minLevel = minLevel,
+                                maxLevel = maxLevel,
+                                minSize = minSize,
+                                maxSize = maxSize,
+                                zoomFactor = zoomFactor,
+                            ) &&
                             it.second.near(pos, nearDistance)
                 } -> {
                     .5f
@@ -873,142 +902,27 @@ fun MapView(
                     }
                 }
             }) {
-                Div({
-                    classes(Styles.navContent)
-                }) {
-                    if (selectedCard == null) {
-                        Div({
-                            classes(Styles.stickyHeader)
-                            style {
-                                fontWeight("bold")
-                                padding(1.r)
-                                fontSize(24.px)
-                                display(DisplayStyle.Flex)
-                                alignItems(AlignItems.Center)
-                                justifyContent(JustifyContent.SpaceBetween)
-                            }
-                        }) {
-                            Text(appString { explore })
-                            IconButton(
-                                name = if (expanded) "expand_less" else "expand_more",
-                                title = if (expanded) appString { collapse } else appString { expand },
-                                styles = {
-                                    borderRadius(2.r)
-                                }
-                            ) {
-                                expanded = !expanded
-                            }
-                        }
-                        if (expanded) {
-                            if (shownCards.isEmpty()) {
-                                Empty { appText { noCardsNearby } }
-                            } else {
-                                MapList(
-                                    cards = shownCards,
-                                    styles = {
-                                        padding(1.r)
-                                    }
-                                ) { card ->
-                                    cardNavHistory = emptyList()
-                                    selectedCard = if (selectedCard?.id == card.id) null else card
-                                    centerMapOnCard(selectedCard)
-                                }
-                            }
-                        }
-                    } else {
-                        Div({
-                            classes(Styles.stickyHeader)
-                            style {
-                                display(DisplayStyle.Flex)
-                                alignItems(AlignItems.Center)
-                                justifyContent(JustifyContent.SpaceBetween)
-                                padding(1.r)
-                            }
-                        }) {
-                            IconButton(
-                                name = "arrow_back",
-                                title = appString { goBack },
-                                background = true
-                            ) {
-                                if (cardNavHistory.isNotEmpty()) {
-                                    selectedCard = cardNavHistory.last()
-                                    cardNavHistory = cardNavHistory.dropLast(1)
-                                    centerMapOnCard(selectedCard)
-                                } else {
-                                    selectedCard = null
-                                }
-                            }
-
-                            Div({
-                                style {
-                                    display(DisplayStyle.Flex)
-                                    flexDirection(FlexDirection.Column)
-                                    justifyContent(JustifyContent.Center)
-                                    property("flex", "1")
-                                    paddingLeft(1.r)
-                                    paddingRight(1.r)
-                                }
-                            }) {
-                                Span({
-                                    style {
-                                        fontWeight("bold")
-                                    }
-                                }) {
-                                    Text(selectedCard?.name ?: application.appString { newCard })
-                                }
-                                selectedCard?.hint?.notBlank?.let { hint ->
-                                    Span({
-                                        style {
-                                            fontSize(14.px)
-                                            opacity(.75f)
-                                        }
-                                    }) {
-                                        Text(hint)
-                                    }
-                                }
-                            }
-
-                            IconButton(
-                                name = "open_in_new",
-                                title = appString { openPage },
-                                background = true
-                            ) {
-                                window.open("/page/${selectedCard!!.id!!}", target = "_blank")
-                            }
-                        }
-
-                        Div({
-                            classes(Styles.mapCardContent)
-                        }) {
-                            selectedCard?.let {
-                                CardContent(
-                                    card = it,
-                                    showTitle = false,
-                                    mediaStyles = {
-                                        with(Styles) {
-                                            mapCardMediaStyle()
-                                        }
-                                    },
-                                    onCardClick = { cardId, openInNewWindow ->
-                                        if (openInNewWindow) {
-                                            window.open("/page/$cardId", target = "_blank")
-                                        } else {
-                                            scope.launch {
-                                                api.card(cardId) {
-                                                    selectedCard?.let {
-                                                        cardNavHistory += it
-                                                    }
-                                                    selectedCard = it
-                                                    centerMapOnCard(it)
-                                                }
-                                            }
-                                        }
-                                    }
-                                )
-                            }
+                MapCardPanel(
+                    selectedCard = selectedCard,
+                    expanded = expanded,
+                    onExpandChange = { expanded = it },
+                    shownCards = shownCards,
+                    onCardClick = { card ->
+                        cardNavHistory = emptyList()
+                        selectedCard = if (selectedCard?.id == card.id) null else card
+                        centerMapOnCard(selectedCard)
+                    },
+                    cardNavHistory = cardNavHistory,
+                    onBack = {
+                        if (cardNavHistory.isNotEmpty()) {
+                            selectedCard = cardNavHistory.last()
+                            cardNavHistory = cardNavHistory.dropLast(1)
+                            centerMapOnCard(selectedCard)
+                        } else {
+                            selectedCard = null
                         }
                     }
-                }
+                )
             }
         }
         Div(
@@ -1469,28 +1383,5 @@ fun MapView(
                 }
             }
         }
-    }
-}
-
-private fun List<Double>.toLatLng(): mapboxgl.LngLat? {
-    return takeIf { size == 2 }?.let { array ->
-        mapboxgl.LngLat.convert(array.asReversed().toTypedArray())
-    }
-}
-
-private fun Card.collides(other: Card): Boolean {
-    val geo = geo?.toLatLng() ?: return false
-    val otherGeo = other.geo?.toLatLng() ?: return false
-
-    return geo.distanceTo(otherGeo) < ((size ?: 0.0) + (other.size ?: 0.0)).kmToMeters
-}
-
-private val Double.kmToMeters get() = this * 1_000.0
-
-private operator fun Card.compareTo(other: Card) = (level ?: 0).compareTo(other.level ?: 0).let { compareLevel ->
-    if (compareLevel != 0) {
-        compareLevel
-    } else {
-        (size ?: 0.0).compareTo(other.size ?: 0.0)
     }
 }
