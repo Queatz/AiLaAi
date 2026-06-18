@@ -1,3 +1,5 @@
+package com.queatz.scripts
+
 import com.queatz.db.ButtonStyle
 import com.queatz.db.InputType
 import com.queatz.db.StoryContent

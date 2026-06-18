@@ -1,3 +1,4 @@
+package com.queatz.scripts
 
 interface ScriptApp {
 

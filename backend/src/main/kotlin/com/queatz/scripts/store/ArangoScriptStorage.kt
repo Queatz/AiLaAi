@@ -1,7 +1,5 @@
 package com.queatz.scripts.store
 
-import ScriptStorage
-import ScriptStorageScope
 import com.arangodb.ArangoCollection
 import com.arangodb.ArangoDB
 import com.arangodb.ContentType
@@ -18,12 +16,14 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.queatz.db.Db
 import com.queatz.db.InstantModule
-import kotlin.time.Clock
-import kotlin.time.Instant
+import com.queatz.scripts.ScriptStorage
+import com.queatz.scripts.ScriptStorageScope
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonNames
 import kotlin.reflect.KClass
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 private const val DEFAULT_COLLECTION = "default"
 

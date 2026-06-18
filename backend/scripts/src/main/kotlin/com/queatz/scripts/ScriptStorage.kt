@@ -1,3 +1,5 @@
+package com.queatz.scripts
+
 import kotlin.reflect.KClass
 
 enum class ScriptStorageScope {

@@ -1,7 +1,7 @@
 package com.queatz.scripts.app
 
-import ScriptApp
 import com.queatz.save
+import com.queatz.scripts.ScriptApp
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.java.Java
 import io.ktor.client.request.get

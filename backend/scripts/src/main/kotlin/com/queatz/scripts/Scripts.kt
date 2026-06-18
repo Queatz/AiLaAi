@@ -1,5 +1,7 @@
-import ScriptWithMavenDepsConfiguration.scriptLoader
+package com.queatz.scripts
+
 import com.queatz.db.Script
+import com.queatz.scripts.ScriptWithMavenDepsConfiguration.scriptLoader
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

@@ -1,10 +1,5 @@
 package com.queatz.scripts
 
-import ScriptApp
-import ScriptRender
-import ScriptStorage
-import ScriptWithMavenDeps
-import ScriptWithMavenDepsConfiguration.scriptLoader
 import com.queatz.db.InventoryItemExtended
 import com.queatz.db.Person
 import com.queatz.db.Script
@@ -15,9 +10,9 @@ import com.queatz.db.incrementScriptRunCount
 import com.queatz.db.inventoryOfPerson
 import com.queatz.db.scriptData
 import com.queatz.plugins.db
+import com.queatz.scripts.ScriptWithMavenDepsConfiguration.scriptLoader
 import com.queatz.scripts.app.MainScriptApp
 import com.queatz.scripts.store.ArangoScriptStorage
-import parseScript
 import kotlin.reflect.KTypeProjection.Companion.invariant
 import kotlin.reflect.full.createType
 import kotlin.script.experimental.api.CompiledScript
