@@ -138,6 +138,22 @@ private fun configureMavenDepsOnAnnotations(
     }
 }
 
+/**
+ * Resolves the scripts referenced via @file:DependsOnScript and makes their declarations available
+ * to the importing script through the compiler's `importScripts` mechanism (rather than inlining
+ * the sources). Dependencies are resolved transitively and recursively, so a deep / branching
+ * (diamond) dependency tree is fully imported; the compiler de-duplicates repeated imports.
+ *
+ * Keeping each script as its own compilation unit (instead of merging all sources into one) is the
+ * proper, scalable approach for large dependency trees.
+ *
+ * Known limitation (KT-86352, https://youtrack.jetbrains.com/issue/KT-86352): under K2 in Kotlin
+ * 2.4.0, referencing a type declared in an imported script from an *explicit type position* in the
+ * importing script (e.g. `val d: List<WordPracticeData> = ...`) crashes FIR analysis with
+ * "Expected FirResolvedTypeRef with ConeKotlinType but was FirUserTypeRefImpl". Using the imported
+ * type via inference (`val d = ...`) or only calling imported functions works fine. The compiler
+ * fix is planned for Kotlin 2.4.10; once that version is adopted no change is needed here.
+ */
 private fun configureScriptDepsOnAnnotations(
     context: ScriptConfigurationRefinementContext,
 ): ResultWithDiagnostics<ScriptCompilationConfiguration> {
@@ -173,8 +189,8 @@ private fun configureScriptDepsOnAnnotations(
  * Returns the script source to compile.
  *
  * Note: a per-script `package` declaration must NOT be added here. Scripts referenced via
- * @file:DependsOnScript are compiled as imported sources in the same module, and the K2 compiler
- * only makes their declarations (and applies default imports / provided properties) visible to the
+ * @file:DependsOnScript are compiled as imported sources in the same module, and the compiler only
+ * makes their declarations (and applies default imports / provided properties) visible to the
  * importing script when they share the (default) package.
  */
 fun parseScript(script: Script): String = script.source!!

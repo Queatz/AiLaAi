@@ -5,6 +5,7 @@ import com.queatz.db.StoryContent
 import com.queatz.scripts.RunScript
 import com.queatz.scripts.ScriptWithMavenDepsConfiguration
 import kotlinx.coroutines.runBlocking
+import org.junit.Ignore
 import org.junit.Test
 import kotlin.test.assertTrue
 import kotlin.test.assertEquals
@@ -192,6 +193,64 @@ class ScriptVerificationTest {
         assertTrue(output.contains("C-helper"), "Output should contain transitive helper, but was: $output")
     }
 
+    // Known limitation: KT-86352 (https://youtrack.jetbrains.com/issue/KT-86352).
+    // Under K2 in Kotlin 2.4.0 the compiler crashes ("Expected FirResolvedTypeRef with ConeKotlinType
+    // but was FirUserTypeRefImpl") when the importing script references a type declared in an
+    // imported (@file:DependsOnScript) script from an *explicit type position* (here
+    // `val d: List<WordPracticeData>`). The fix is planned for Kotlin 2.4.10. This test asserts the
+    // desired (post-fix) behavior and is @Ignore'd until that version is adopted; remove @Ignore
+    // once the project is on Kotlin 2.4.10+. The same script using inference
+    // (see testImportedTypeViaInference) works today.
+    @Ignore("KT-86352: explicit imported-script type position crashes K2 FIR until Kotlin 2.4.10")
+    @Test
+    fun testImportedScriptTypeInExplicitType() = runBlocking {
+        val loadedScripts = mutableMapOf<String, Script>()
+        ScriptWithMavenDepsConfiguration.scriptLoader = { id -> loadedScripts[id] }
+
+        val scriptB = Script().apply {
+            id = "firDep1"
+            person = "person1"
+            source = """
+                @Serializable
+                data class WordPracticeData(
+                    val word: String,
+                    val translation: String,
+                    val sentences: List<String>
+                )
+
+                fun makeData(): List<WordPracticeData> = listOf(
+                    WordPracticeData("FirMarker", "b", listOf("c"))
+                )
+
+                fun renderData(items: List<WordPracticeData>): String =
+                    items.joinToString { it.word }
+            """.trimIndent()
+        }
+        loadedScripts["firDep1"] = scriptB
+
+        val scriptA = Script().apply {
+            id = "firMain1"
+            person = "person1"
+            source = """
+                @file:DependsOnScript("firDep1")
+                render {
+                    val d: List<WordPracticeData> = makeData()
+                    text(renderData(d))
+                }
+            """.trimIndent()
+        }
+        loadedScripts["firMain1"] = scriptA
+
+        val runner = RunScript(scriptA, null, null, useCache = false)
+        ScriptWithMavenDepsConfiguration.scriptLoader = { id -> loadedScripts[id] }
+        val result = runner.run(null)
+
+        val output = result.content?.filterIsInstance<StoryContent.Text>()?.joinToString("") { it.text } ?: ""
+        println("[DEBUG_LOG] ImportedScriptTypeInExplicitType Result: $output")
+
+        assertTrue(output.contains("FirMarker"), "Output should contain 'FirMarker', but was: $output")
+    }
+
     @Test
     fun testFirCrashSelfImport() = runBlocking {
         val loadedScripts = mutableMapOf<String, Script>()
@@ -226,5 +285,152 @@ class ScriptVerificationTest {
         println("[DEBUG_LOG] FirCrashSelfImport Result: $output")
 
         assertTrue(output.contains("Hello from StructuredDeepSeek"), "Output should contain expected text, but was: $output")
+    }
+
+    @Test
+    fun testImportedTypeViaInference() = runBlocking {
+        // The supported counterpart of testImportedScriptTypeInExplicitType: using a type declared
+        // in an imported script via inference (no explicit type annotation) works under K2 today.
+        val loadedScripts = mutableMapOf<String, Script>()
+        ScriptWithMavenDepsConfiguration.scriptLoader = { id -> loadedScripts[id] }
+
+        val scriptB = Script().apply {
+            id = "infDep1"
+            person = "person1"
+            source = """
+                data class Thing(val value: String)
+
+                fun makeThing() = Thing("InferMarker")
+            """.trimIndent()
+        }
+        loadedScripts["infDep1"] = scriptB
+
+        val scriptA = Script().apply {
+            id = "infMain1"
+            person = "person1"
+            source = """
+                @file:DependsOnScript("infDep1")
+                render {
+                    val t = makeThing()
+                    text(t.value)
+                }
+            """.trimIndent()
+        }
+        loadedScripts["infMain1"] = scriptA
+
+        val runner = RunScript(scriptA, null, null, useCache = false)
+        ScriptWithMavenDepsConfiguration.scriptLoader = { id -> loadedScripts[id] }
+        val result = runner.run(null)
+
+        val output = result.content?.filterIsInstance<StoryContent.Text>()?.joinToString("") { it.text } ?: ""
+        println("[DEBUG_LOG] ImportedTypeViaInference Result: $output")
+
+        assertTrue(output.contains("InferMarker"), "Output should contain 'InferMarker', but was: $output")
+    }
+
+    @Test
+    fun testDeepTransitiveChain() = runBlocking {
+        // A -> B -> C -> D, each contributing a helper, exercised via function calls. Verifies that
+        // a deep transitive @file:DependsOnScript chain is fully imported without inlining sources.
+        val loadedScripts = mutableMapOf<String, Script>()
+        ScriptWithMavenDepsConfiguration.scriptLoader = { id -> loadedScripts[id] }
+
+        loadedScripts["chainD"] = Script().apply {
+            id = "chainD"
+            person = "person1"
+            source = """
+                fun helperD() = "D"
+            """.trimIndent()
+        }
+        loadedScripts["chainC"] = Script().apply {
+            id = "chainC"
+            person = "person1"
+            source = """
+                @file:DependsOnScript("chainD")
+                fun helperC() = helperD() + "C"
+            """.trimIndent()
+        }
+        loadedScripts["chainB"] = Script().apply {
+            id = "chainB"
+            person = "person1"
+            source = """
+                @file:DependsOnScript("chainC")
+                fun helperB() = helperC() + "B"
+            """.trimIndent()
+        }
+        val scriptA = Script().apply {
+            id = "chainA"
+            person = "person1"
+            source = """
+                @file:DependsOnScript("chainB")
+                render {
+                    text(helperB() + "A")
+                }
+            """.trimIndent()
+        }
+        loadedScripts["chainA"] = scriptA
+
+        val runner = RunScript(scriptA, null, null, useCache = false)
+        ScriptWithMavenDepsConfiguration.scriptLoader = { id -> loadedScripts[id] }
+        val result = runner.run(null)
+
+        val output = result.content?.filterIsInstance<StoryContent.Text>()?.joinToString("") { it.text } ?: ""
+        println("[DEBUG_LOG] DeepTransitiveChain Result: $output")
+
+        assertTrue(output.contains("DCBA"), "Output should contain 'DCBA', but was: $output")
+    }
+
+    @Test
+    fun testDiamondDependency() = runBlocking {
+        // Diamond: A -> B and A -> C, with both B and C -> D. D must be imported exactly once
+        // (no duplicate-declaration error) and usable through both branches.
+        val loadedScripts = mutableMapOf<String, Script>()
+        ScriptWithMavenDepsConfiguration.scriptLoader = { id -> loadedScripts[id] }
+
+        loadedScripts["diaD"] = Script().apply {
+            id = "diaD"
+            person = "person1"
+            source = """
+                fun helperD() = "Diamond"
+            """.trimIndent()
+        }
+        loadedScripts["diaB"] = Script().apply {
+            id = "diaB"
+            person = "person1"
+            source = """
+                @file:DependsOnScript("diaD")
+                fun helperB() = helperD() + "-B"
+            """.trimIndent()
+        }
+        loadedScripts["diaC"] = Script().apply {
+            id = "diaC"
+            person = "person1"
+            source = """
+                @file:DependsOnScript("diaD")
+                fun helperC() = helperD() + "-C"
+            """.trimIndent()
+        }
+        val scriptA = Script().apply {
+            id = "diaA"
+            person = "person1"
+            source = """
+                @file:DependsOnScript("diaB")
+                @file:DependsOnScript("diaC")
+                render {
+                    text(helperB() + helperC())
+                }
+            """.trimIndent()
+        }
+        loadedScripts["diaA"] = scriptA
+
+        val runner = RunScript(scriptA, null, null, useCache = false)
+        ScriptWithMavenDepsConfiguration.scriptLoader = { id -> loadedScripts[id] }
+        val result = runner.run(null)
+
+        val output = result.content?.filterIsInstance<StoryContent.Text>()?.joinToString("") { it.text } ?: ""
+        println("[DEBUG_LOG] DiamondDependency Result: $output")
+
+        assertTrue(output.contains("Diamond-B"), "Output should contain 'Diamond-B', but was: $output")
+        assertTrue(output.contains("Diamond-C"), "Output should contain 'Diamond-C', but was: $output")
     }
 }
