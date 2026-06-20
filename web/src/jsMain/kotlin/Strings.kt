@@ -2771,6 +2771,66 @@ object Strings {
         vn = "Kích thước (km)",
         ru = "Размер (км)"
     )
+    val allCardsArePosted = Translation(
+        en = "All pages are posted",
+        vn = "Tất cả trang đã đăng",
+        ru = "Все страницы опубликованы"
+    )
+    val storyContainsUnpostedCards = Translation(
+        en = "Post contains unposted pages",
+        vn = "Bài viết chứa trang chưa đăng",
+        ru = "Запись содержит неопубликованные страницы"
+    )
+    val sharedWithYour = Translation(
+        en = "Shared with your",
+        vn = "Chia sẻ với",
+        ru = "Доступно вашим"
+    )
+    val xFriend = Translation(
+        en = "%1${'$'}s friend",
+        vn = "%1${'$'}s người bạn",
+        ru = "%1${'$'}s друг"
+    )
+    val xFriends = Translation(
+        en = "%1${'$'}s friends",
+        vn = "%1${'$'}s người bạn",
+        ru = "%1${'$'}s друзей"
+    )
+    val sharedWith = Translation(
+        en = "Shared with",
+        vn = "Chia sẻ với",
+        ru = "Доступно"
+    )
+    val peopleNearby = Translation(
+        en = "people nearby",
+        vn = "những người ở gần",
+        ru = "людям поблизости"
+    )
+    val sharedIn = Translation(
+        en = "Shared in",
+        vn = "Chia sẻ trong",
+        ru = "Доступно в"
+    )
+    val addALocation = Translation(
+        en = "Add a location",
+        vn = "Thêm vị trí",
+        ru = "Добавить место"
+    )
+    val addALocationDescription = Translation(
+        en = "Add a location to share your post with people nearby (optional)",
+        vn = "Thêm vị trí để chia sẻ bài viết của bạn với những người ở gần (tùy chọn)",
+        ru = "Добавьте место, чтобы поделиться записью с людьми поблизости (необязательно)"
+    )
+    val shareToGroups = Translation(
+        en = "Share to groups",
+        vn = "Chia sẻ với nhóm",
+        ru = "Поделиться в группах"
+    )
+    val shareToGroupsDescription = Translation(
+        en = "Share your post at time of publishing (optional)",
+        vn = "Chia sẻ bài viết của bạn tại thời điểm đăng (tùy chọn)",
+        ru = "Поделитесь записью при публикации (необязательно)"
+    )
 }
 
 /**

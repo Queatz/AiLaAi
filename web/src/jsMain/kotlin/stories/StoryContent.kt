@@ -67,6 +67,17 @@ fun List<StoryContent>.asText() = mapNotNull {
 }.joinToString("\n")
 
 
+fun StoryContent.isNotBlank() = when (this) {
+    is StoryContent.Title -> title.isNotBlank()
+    is StoryContent.Section -> section.isNotBlank()
+    is StoryContent.Text -> text.isNotBlank()
+    is StoryContent.Photos -> photos.isNotEmpty()
+    is StoryContent.Video -> video.isNotEmpty()
+    is StoryContent.Groups -> groups.isNotEmpty()
+    is StoryContent.Cards -> cards.isNotEmpty()
+    else -> true
+}
+
 fun Story.full(): List<StoryContent> = contents().let { parts ->
     listOf(
         StoryContent.Title(title ?: "", id!!),

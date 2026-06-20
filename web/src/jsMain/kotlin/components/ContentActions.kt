@@ -1,55 +1,24 @@
 package components
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
-import app.dialog.inputDialog
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.web.events.SyntheticDragEvent
+import app.AppStyles
+import app.menu.Menu
 import appString
-import application
 import com.queatz.db.StoryContent
 import com.queatz.db.isPart
-import kotlinx.coroutines.launch
+import org.jetbrains.compose.web.attributes.Draggable
 import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.dom.Div
-
-
-suspend fun editSection(
-    currentContent: List<StoryContent>,
-    index: Int,
-    sectionContent: StoryContent.Section,
-    onUpdate: (List<StoryContent>) -> Unit
-) {
-    val result = inputDialog(
-        title = application.appString { section },
-        placeholder = "",
-        confirmButton = application.appString { save },
-        defaultValue = sectionContent.section
-    )
-    if (result != null) {
-        val newContent = currentContent.toMutableList()
-        newContent[index] = sectionContent.copy(section = result)
-        onUpdate(newContent)
-    }
-}
-
-suspend fun editText(
-    currentContent: List<StoryContent>,
-    index: Int,
-    textContent: StoryContent.Text,
-    onUpdate: (List<StoryContent>) -> Unit
-) {
-    val result = inputDialog(
-        title = application.appString { text },
-        placeholder = "",
-        confirmButton = application.appString { save },
-        defaultValue = textContent.text
-    )
-    if (result != null) {
-        val newContent = currentContent.toMutableList()
-        newContent[index] = textContent.copy(text = result)
-        onUpdate(newContent)
-    }
-}
+import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.Text
+import org.w3c.dom.DOMRect
 
 fun deleteContent(
     currentContent: List<StoryContent>,
@@ -62,7 +31,7 @@ fun deleteContent(
 }
 
 /**
- * A reusable component for content actions (edit/delete) that can be used in both StoriesPage and ExplorePage.
+ * A reusable component for content actions (drag/edit/delete) that can be used in both StoriesPage and ExplorePage.
  *
  * @param index The index of the content part in the list
  * @param part The content part to provide actions for
@@ -80,41 +49,84 @@ fun ContentActions(
     onContentUpdated: (List<StoryContent>) -> Unit,
     additionalActions: @Composable () -> Unit = {}
 ) {
-    val scope = rememberCoroutineScope()
+    var aspectMenuTarget by remember { mutableStateOf<DOMRect?>(null) }
 
     if (isEditable && part.isPart()) {
+        aspectMenuTarget?.let { target ->
+            Menu(
+                onDismissRequest = { aspectMenuTarget = null },
+                target = target
+            ) {
+                val photos = part as StoryContent.Photos
+                item("None") {
+                    val newContent = currentContent.toMutableList()
+                    newContent[index] = photos.copy(aspect = null)
+                    onContentUpdated(newContent)
+                }
+                item("Portrait") {
+                    val newContent = currentContent.toMutableList()
+                    newContent[index] = photos.copy(aspect = .75f)
+                    onContentUpdated(newContent)
+                }
+                item("Landscape") {
+                    val newContent = currentContent.toMutableList()
+                    newContent[index] = photos.copy(aspect = 1.5f)
+                    onContentUpdated(newContent)
+                }
+                item("Square") {
+                    val newContent = currentContent.toMutableList()
+                    newContent[index] = photos.copy(aspect = 1f)
+                    onContentUpdated(newContent)
+                }
+            }
+        }
+
         Div({
             style {
                 display(DisplayStyle.Flex)
             }
         }) {
-            // Edit section
+            // Drag handle
+            Span({
+                classes(AppStyles.iconButton)
+
+                style {
+                    cursor("grab")
+                }
+
+                title("Reorder")
+
+                draggable(Draggable.True)
+
+                onDragStart { event: SyntheticDragEvent ->
+                    event.dataTransfer?.setData("text/plain", index.toString())
+                }
+            }) {
+                Span({
+                    classes("material-symbols-outlined")
+                }) {
+                    Text("drag_indicator")
+                }
+            }
+
+            // Type-specific edit actions
             when (part) {
-                is StoryContent.Section -> {
-                    IconButton("edit", appString { edit }) {
-                        scope.launch {
-                            editSection(currentContent, index, part) { newContent ->
-                                onContentUpdated(newContent)
-                            }
+                is StoryContent.Photos -> {
+                    IconButton("aspect_ratio", appString { edit }) { event ->
+                        aspectMenuTarget = if (aspectMenuTarget == null) {
+                            (event.target as? org.w3c.dom.HTMLElement)?.getBoundingClientRect()
+                        } else {
+                            null
                         }
                     }
                 }
-                // Edit text
-                is StoryContent.Text -> {
-                    IconButton("edit", appString { edit }) {
-                        scope.launch {
-                            editText(currentContent, index, part) { newContent ->
-                                onContentUpdated(newContent)
-                            }
-                        }
-                    }
-                }
+
                 else -> Unit
             }
-            
+
             // Allow for additional custom actions
             additionalActions()
-            
+
             // Delete part
             IconButton("delete", appString { remove }) {
                 deleteContent(currentContent, index) { newContent ->

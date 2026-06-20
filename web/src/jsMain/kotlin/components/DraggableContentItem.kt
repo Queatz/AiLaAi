@@ -7,14 +7,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.web.events.SyntheticDragEvent
-import org.jetbrains.compose.web.attributes.Draggable
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.border
 import org.jetbrains.compose.web.css.borderRadius
-import org.jetbrains.compose.web.css.cursor
-import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
@@ -37,9 +34,6 @@ fun DraggableContentItem(
     onDragStateChange: (Boolean) -> Unit = {},
     itemRenderer: @Composable () -> Unit
 ) {
-    var isDragging by remember { mutableStateOf(false) }
-
-
     var dragOverPosition by remember { mutableStateOf<DragOverPosition?>(null) }
 
     Div({
@@ -53,19 +47,12 @@ fun DraggableContentItem(
 
         if (editable) {
             style {
-                cursor("grab")
-
-                if (isDragging) {
-                    opacity(0.25)
-                }
-
                 if (dragOverPosition == DragOverPosition.Above) {
                     property(borderTopColor.toString(), Styles.colors.primary.toString())
                 } else if (dragOverPosition == DragOverPosition.Below) {
                     property(borderBottomColor.toString(), Styles.colors.primary.toString())
                 }
             }
-            draggable(Draggable.True)
 
             // Drag over - allow dropping on the container
             onDragOver { event: SyntheticDragEvent ->
@@ -104,25 +91,13 @@ fun DraggableContentItem(
                     }
 
                     dragOverPosition = null
-                    isDragging = false
                 } catch (e: Exception) {
                     console.error("Drop error:", e)
                 }
             }
 
-            onDragStart { event: SyntheticDragEvent ->
-                try {
-                    event.dataTransfer?.setData("text/plain", index.toString())
-                    isDragging = true
-                    onDragStateChange(true)
-                } catch (e: Exception) {
-                    console.error("Drag start error:", e)
-                }
-            }
-
             onDragEnd { event: SyntheticDragEvent ->
                 try {
-                    isDragging = false
                     dragOverPosition = null
                     onDragStateChange(false)
                 } catch (e: Exception) {

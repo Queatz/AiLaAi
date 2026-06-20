@@ -22,6 +22,7 @@ import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Text
 import r
 import stories.StoryStyles
@@ -40,6 +41,15 @@ fun PhotoTiledGrid(
     //   3 photos → 2 equal columns; last photo spans full width; always square
     //   4+ photos → 2 equal columns; show up to 4, last visible tile spans
     //               full width when the displayed count is odd; "+N" overlay on last tile; always square
+
+    // A single photo with no explicit aspect ratio renders at its natural aspect
+    if (photos.size == 1 && aspect == null) {
+        NaturalPhotoTile(
+            photo = photos.first(),
+            onClick = { onPhotoClick(0) }
+        )
+        return
+    }
 
     val displayPhotos = if (photos.size > 4) photos.take(4) else photos
     val remaining = photos.size - displayPhotos.size
@@ -79,6 +89,18 @@ fun PhotoTiledGrid(
             }
         }
     }
+}
+
+@Composable
+private fun NaturalPhotoTile(
+    photo: String,
+    onClick: () -> Unit,
+) {
+    val url = "$baseUrl$photo"
+    Img(src = url, attrs = {
+        classes(StoryStyles.contentPhotosPhotoNoAspect)
+        onClick { onClick() }
+    })
 }
 
 @Composable

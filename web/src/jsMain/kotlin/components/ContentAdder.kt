@@ -99,35 +99,13 @@ fun ContentAdder(
         Menu({ menuTarget = null }, menuTarget!!) {
             if (ContentType.Section in availableTypes) {
                 item(appString { section }, icon = "title") {
-                    scope.launch {
-                        val sectionText = inputDialog(
-                            title = "Section",
-                            placeholder = "",
-                            confirmButton = "Add",
-                            defaultValue = ""
-                        )
-
-                        if (sectionText != null) {
-                            onContentAdded(StoryContent.Section(sectionText))
-                        }
-                    }
+                    onContentAdded(StoryContent.Section(""))
                 }
             }
 
             if (ContentType.Text in availableTypes) {
                 item(appString { text }, icon = "notes") {
-                    scope.launch {
-                        val textContent = inputDialog(
-                            title = "Text",
-                            placeholder = "",
-                            confirmButton = "Add",
-                            defaultValue = ""
-                        )
-
-                        if (textContent != null) {
-                            onContentAdded(StoryContent.Text(textContent))
-                        }
-                    }
+                    onContentAdded(StoryContent.Text(""))
                 }
             }
 

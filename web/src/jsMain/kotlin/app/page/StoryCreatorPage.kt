@@ -1,5 +1,6 @@
 package app.page
 
+import LocalConfiguration
 import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -13,6 +14,7 @@ import app.FullPageLayout
 import app.PageTopBar
 import app.dialog.dialog
 import app.dialog.inputDialog
+import app.dialog.publishStoryDialog
 import app.menu.Menu
 import appString
 import com.queatz.ailaai.api.deleteStory
@@ -37,7 +39,7 @@ import org.w3c.dom.HTMLElement
 import qr
 import r
 import stories.StoryContents
-import stories.full
+import stories.asContents
 import webBaseUrl
 import org.jetbrains.compose.web.css.borderRadius
 
@@ -48,6 +50,7 @@ fun StoryCreatorPage(
     onStoryDeleted: (() -> Unit)? = null
 ) {
     val scope = rememberCoroutineScope()
+    val configuration = LocalConfiguration.current
     var storyContent by remember { mutableStateOf<List<StoryContent>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var edited by remember(story) { mutableStateOf(false) }
@@ -58,7 +61,7 @@ fun StoryCreatorPage(
             api.story(
                 id = story.id!!
             ) { fullStory ->
-                storyContent = fullStory.full()
+                storyContent = fullStory.asContents()
                 isLoading = false
             }
         } else {
@@ -80,6 +83,29 @@ fun StoryCreatorPage(
         }
     }
 
+    val titleString = appString { title }
+    val updateString = appString { update }
+
+    fun rename() {
+        scope.launch {
+            val newTitle = inputDialog(
+                title = titleString,
+                placeholder = "",
+                confirmButton = updateString,
+                defaultValue = story.title ?: ""
+            )
+
+            if (newTitle == null) return@launch
+
+            api.updateStory(
+                id = story.id!!,
+                story = Story(title = newTitle)
+            ) {
+                onStoryUpdated(it)
+            }
+        }
+    }
+
     menuTarget?.let { target ->
         Menu(
             onDismissRequest = { menuTarget = null },
@@ -89,27 +115,8 @@ fun StoryCreatorPage(
                 window.open("/story/${story.id!!}", target = "_blank")
             }
 
-            val titleString = appString { title }
-            val update = appString { update }
-
             item(appString { rename }) {
-                scope.launch {
-                    val newTitle = inputDialog(
-                        title = titleString,
-                        placeholder = "",
-                        confirmButton = update,
-                        defaultValue = story.title ?: ""
-                    )
-
-                    if (newTitle == null) return@launch
-
-                    api.updateStory(
-                        id = story.id!!,
-                        story = Story(title = newTitle)
-                    ) {
-                        onStoryUpdated(it)
-                    }
-                }
+                rename()
             }
 
             item(appString { qrCode }) {
@@ -130,6 +137,15 @@ fun StoryCreatorPage(
             if (story.published != true) {
                 item(appString { publish }) {
                     scope.launch {
+                        val confirmed = publishStoryDialog(
+                            configuration = configuration,
+                            story = story,
+                            storyContents = storyContent,
+                            onStoryUpdated = onStoryUpdated
+                        )
+
+                        if (!confirmed) return@launch
+
                         if (edited) {
                             api.updateStory(
                                 id = story.id!!,
@@ -148,17 +164,6 @@ fun StoryCreatorPage(
                             ) {
                                 onStoryUpdated(it)
                             }
-                        }
-                    }
-                }
-            } else {
-                item(appString { notPublished }) {
-                    scope.launch {
-                        api.updateStory(
-                            id = story.id!!,
-                            story = Story(published = false)
-                        ) {
-                            onStoryUpdated(it)
                         }
                     }
                 }
@@ -237,6 +242,7 @@ fun StoryCreatorPage(
 
     PageTopBar(
         title = story.title?.notBlank ?: appString { newStory },
+        onTitleClick = { rename() },
         actions = {
             if (edited) {
                 Button(

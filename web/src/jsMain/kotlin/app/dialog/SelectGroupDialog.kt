@@ -10,7 +10,7 @@ import com.queatz.db.GroupExtended
 
 suspend fun selectGroupDialog(
     configuration: Configuration,
-    title: String = application.appString { inAGroup },
+    title: String = application.appString { selectAGroup },
     cancelButton: String? = null
 ): GroupExtended? {
     var selectedGroup: GroupExtended? = null

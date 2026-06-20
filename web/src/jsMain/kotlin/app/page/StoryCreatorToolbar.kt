@@ -10,17 +10,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.web.events.SyntheticMouseEvent
 import api
 import createWidget
+import app.ailaai.api.newCard
+import app.dialog.editFormDialog
 import app.dialog.inputDialog
 import app.dialog.rememberChoosePhotoDialog
 import app.dialog.selectCardDialog
 import app.dialog.selectGroupDialog
 import app.dialog.selectPersonDialog
+import app.dialog.selectSceneDialog
+import app.dialog.selectScriptDialog
 import app.ailaai.api.uploadAudio
 import app.ailaai.api.uploadVideo
 import app.menu.Menu
 import appString
 import com.queatz.db.StoryContent
 import com.queatz.widgets.Widgets
+import com.queatz.widgets.widgets.FormData
+import com.queatz.widgets.widgets.FormOptions
 import com.queatz.widgets.widgets.ImpactEffortTableData
 import com.queatz.widgets.widgets.PageTreeData
 import com.queatz.widgets.widgets.SpaceData
@@ -33,6 +39,7 @@ import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexWrap
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexShrink
 import org.jetbrains.compose.web.css.flexWrap
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.padding
@@ -53,6 +60,15 @@ fun StoryCreatorToolbar(
     val choosePhoto = rememberChoosePhotoDialog(showUpload = true)
     var widgetMenuTarget by remember { mutableStateOf<DOMRect?>(null) }
 
+    // Some widgets (Space, Page Tree, Form) need a backing card - create one if needed
+    suspend fun ensureCardId(): String {
+        var newId = ""
+        api.newCard { newCard ->
+            newId = newCard.id!!
+        }
+        return newId
+    }
+
     widgetMenuTarget?.let { target ->
         Menu(
             onDismissRequest = { widgetMenuTarget = null },
@@ -63,8 +79,32 @@ fun StoryCreatorToolbar(
                 icon = "code"
             ) {
                 scope.launch {
+                    selectScriptDialog(scope) { scriptId, scriptData ->
+                        scope.launch {
+                            api.createWidget(
+                                widget = Widgets.Script,
+                                data = scriptData
+                            ) { widget ->
+                                onContentAdded(
+                                    StoryContent.Widget(
+                                        widget = widget.widget!!,
+                                        id = widget.id!!
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            item(
+                title = "Space",
+                icon = "space_dashboard"
+            ) {
+                scope.launch {
+                    val cid = ensureCardId()
                     api.createWidget(
-                        widget = Widgets.Script
+                        widget = Widgets.Space,
+                        data = json.encodeToString(SpaceData(card = cid))
                     ) { widget ->
                         onContentAdded(
                             StoryContent.Widget(
@@ -76,20 +116,30 @@ fun StoryCreatorToolbar(
                 }
             }
             item(
-                title = "Space",
-                icon = "space_dashboard"
+                title = "Form",
+                icon = "list_alt"
             ) {
                 scope.launch {
-                    api.createWidget(
-                        widget = Widgets.Space,
-                        data = json.encodeToString(SpaceData())
-                    ) { widget ->
-                        onContentAdded(
-                            StoryContent.Widget(
-                                widget = widget.widget!!,
-                                id = widget.id!!
-                            )
+                    val cid = ensureCardId()
+                    editFormDialog(
+                        initialFormData = FormData(
+                            page = cid,
+                            options = FormOptions(enableAnonymousReplies = true)
                         )
+                    ) { formData ->
+                        scope.launch {
+                            api.createWidget(
+                                widget = Widgets.Form,
+                                data = json.encodeToString(formData)
+                            ) { widget ->
+                                onContentAdded(
+                                    StoryContent.Widget(
+                                        widget = widget.widget!!,
+                                        id = widget.id!!
+                                    )
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -165,6 +215,8 @@ fun StoryCreatorToolbar(
             alignItems(AlignItems.Center)
             gap(.5.r)
             padding(.5.r, 1.r)
+            // Keep the toolbar visible and never squished by the story contents
+            flexShrink(0)
         }
     }) {
         IconButton(
@@ -269,6 +321,18 @@ fun StoryCreatorToolbar(
                     person.id?.let { personId ->
                         onContentAdded(StoryContent.Profiles(profiles = listOf(personId)))
                     }
+                }
+            }
+        }
+
+        IconButton(
+            name = "landscape",
+            title = "Scene",
+            text = "Scene"
+        ) {
+            scope.launch {
+                selectSceneDialog(scope) { sceneId ->
+                    onContentAdded(StoryContent.Scene(sceneId))
                 }
             }
         }

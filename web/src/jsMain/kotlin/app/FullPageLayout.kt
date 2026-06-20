@@ -18,6 +18,8 @@ fun FullPageLayout(
             display(DisplayStyle.Flex)
             flexDirection(FlexDirection.Column)
             width(100.percent)
+            // Allow shrinking within a flex parent so sibling bars (e.g. top bar / toolbar) are never squished
+            property("min-height", "0")
             if (useVh) {
                 height(100.vh)
             } else {
