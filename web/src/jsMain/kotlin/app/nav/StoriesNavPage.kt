@@ -18,6 +18,7 @@ import com.queatz.db.toJsonStoryContent
 import components.IconButton
 import components.LazyColumn
 import components.Loading
+import components.ProfilePhoto
 import focusable
 import json
 import kotlinx.coroutines.flow.Flow
@@ -31,6 +32,7 @@ import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
+import stories.firstPhoto
 import stories.storyStatus
 import stories.textContent
 
@@ -262,10 +264,16 @@ fun StoryItem(
             onSelected()
         }
     }) {
+        ProfilePhoto(
+            photo = story.firstPhoto(),
+            name = story.title?.notBlank,
+            size = 54.px
+        )
         Div({
             style {
                 width(0.px)
                 flexGrow(1)
+                marginLeft(1.r)
             }
         }) {
             Div({

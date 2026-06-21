@@ -73,8 +73,8 @@ fun StoriesPage(
 ) {
     val me by application.me.collectAsState()
 
-    // Delegate to dedicated creator for owned stories
-    if (selected is StoryNav.Selected && selected.story.person == me?.id) {
+    // Delegate to dedicated creator for owned stories that are not yet published
+    if (selected is StoryNav.Selected && selected.story.person == me?.id && selected.story.published != true) {
         StoryCreatorPage(
             story = selected.story,
             onStoryUpdated = onStoryUpdated,
@@ -195,10 +195,12 @@ fun StoriesPage(
         Loading()
     } else {
         FullPageLayout {
-            TopBarSearch(
-                value = search,
-                onValue = { search = it }
-            )
+            if (selected !is StoryNav.Selected) {
+                TopBarSearch(
+                    value = search,
+                    onValue = { search = it }
+                )
+            }
             Div({
                 classes(Styles.cardContent)
                 style {
