@@ -449,9 +449,9 @@ object Strings {
         ru = "В этой группе пока нет страниц."
     )
     val createOpenGroupAbout = Translation(
-        en = "Create an open group about \"%1\$s\".",
-        vn = "Tạo một nhóm mở về \"%1\$s\".",
-        ru = "Создать открытую группу о \"%1\$s\"."
+        en = "Create a community about \"%1\$s\".",
+        vn = "Tạo một cộng đồng về \"%1\$s\".",
+        ru = "Создать сообщество о \"%1\$s\"."
     )
     val setStatus = Translation(
         en = "Set status",
@@ -1266,29 +1266,29 @@ object Strings {
         ru = "Корневые страницы"
     )
     val actionOpenGroup = Translation(
-        en = "Open group",
-        vn = "Mở nhóm",
-        ru = "Открыть группу"
+        en = "Community",
+        vn = "Cộng đồng",
+        ru = "Сообщество"
     )
     val actionCloseGroup = Translation(
-        en = "Close group",
-        vn = "Đóng nhóm",
-        ru = "Закрыть группу"
+        en = "Make private",
+        vn = "Chuyển sang riêng tư",
+        ru = "Сделать приватной"
     )
     val makeOpenGroup = Translation(
-        en = "Make group open",
-        vn = "Chuyển sang nhóm mở",
-        ru = "Сделать группу открытой"
+        en = "Make community",
+        vn = "Chuyển sang cộng đồng",
+        ru = "Сделать сообществом"
     )
     val makeCloseGroup = Translation(
-        en = "Make group closed",
-        vn = "Chuyển sang nhóm đóng",
-        ru = "Сделать группу закрытой"
+        en = "Make private",
+        vn = "Chuyển sang riêng tư",
+        ru = "Сделать приватной"
     )
     val actionOpenGroupDescription = Translation(
-        en = "Anyone will be able to discover this group, see all members, messages, and request to become a member.",
-        vn = "Bất kì ai cũng có thể khám phá nhóm này, xem tất cả thành viên, tin nhắn và yêu cầu trở thành thành viên.",
-        ru = "Любой сможет найти эту группу, увидеть всех участников, сообщения и запросить членство."
+        en = "Anyone will be able to discover this community, see all members, messages, and request to become a member.",
+        vn = "Bất kì ai cũng có thể khám phá cộng đồng này, xem tất cả thành viên, tin nhắn và yêu cầu trở thành thành viên.",
+        ru = "Любой сможет найти это сообщество, увидеть всех участников, сообщения и запросить членство."
     )
     val actionCloseGroupDescription = Translation(
         en = "This group will only be accessible to members.",
@@ -1326,9 +1326,9 @@ object Strings {
         ru = "Используйте телефон для сканирования QR-кода."
     )
     val openGroup = Translation(
-        en = "Open group",
-        vn = "Nhóm mở",
-        ru = "Открытая группа"
+        en = "Community",
+        vn = "Cộng đồng",
+        ru = "Сообщество"
     )
     val accept = Translation(
         en = "Accept",
@@ -1861,9 +1861,9 @@ object Strings {
         ru = "Создать группу"
     )
     val createOpenGroup = Translation(
-        en = "Create open group",
-        vn = "Tạo nhóm mở",
-        ru = "Создать открытую группу"
+        en = "Create community",
+        vn = "Tạo cộng đồng",
+        ru = "Создать сообщество"
     )
     val saved = Translation(
         en = "Saved",
