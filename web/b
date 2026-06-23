@@ -5,5 +5,6 @@ if ! grep -q '//const val baseUrl = "http://0.0.0.0:8080"$' src/jsMain/kotlin/Ma
     exit 1
 fi
 
-# Run webpack production build
+# Run webpack production build and update yarn lock
+./gradlew :kotlinUpgradeYarnLock
 ./gradlew :jsBrowserProductionWebpack
