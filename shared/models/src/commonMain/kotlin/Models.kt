@@ -446,6 +446,7 @@ class Message(
     var attachments: List<String>? = null,
     var bot: String? = null,
     var bots: List<BotMessageStatus>? = null,
+    var script: String? = null,
 
     // Transient from db
     var reactions: ReactionSummary? = null
