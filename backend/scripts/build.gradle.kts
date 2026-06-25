@@ -18,8 +18,8 @@ java {
 
 dependencies {
     implementation("app.ailaai.shared:models")
-    implementation("org.apache.maven.resolver:maven-resolver-connector-basic:2.0.17")
-    implementation("org.apache.maven.resolver:maven-resolver-transport-apache:2.0.17")
+    implementation("org.apache.maven.resolver:maven-resolver-connector-basic:2.0.18")
+    implementation("org.apache.maven.resolver:maven-resolver-transport-apache:2.0.18")
     implementation("org.jetbrains.kotlin:kotlin-scripting-common:${versions.kotlin}")
     implementation("org.jetbrains.kotlin:kotlin-scripting-jvm:${versions.kotlin}")
     implementation("org.jetbrains.kotlin:kotlin-scripting-jvm-host:${versions.kotlin}")

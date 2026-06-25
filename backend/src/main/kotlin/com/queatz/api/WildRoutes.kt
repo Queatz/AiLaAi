@@ -35,11 +35,14 @@ fun Route.wildRoutes() {
                 }
 
                 val people = listOf(wildPerson.id!!, card.person!!).distinct()
-                val group = app.createGroup(people).let {
+                val group = app.createGroup(
+                    people = people,
+                    name = "Reply from ${card.name ?: "New page"}"
+                ).let {
                     if (meOrNull == null) {
                         // todo: translate
                         it.description =
-                            "This is a message from the web. The other person may not see your replies, but you can jot down notes here."
+                            "This is a message from the web. The other person may not see your replies, but you can take notes here."
                     }
                     db.update(it)
                 }
