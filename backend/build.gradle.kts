@@ -3,8 +3,8 @@ import org.gradle.kotlin.dsl.kotlin
 
 plugins {
     application
-    kotlin("jvm") version "2.4.0"
-    kotlin("plugin.serialization") version "2.4.0"
+    kotlin("jvm") version "2.4.10-RC"
+    kotlin("plugin.serialization") version "2.4.10-RC"
     id("io.ktor.plugin") version "3.5.0"
     id("com.ailaai.shared.config")
 }
