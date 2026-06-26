@@ -58,7 +58,8 @@ fun MapCardPanel(
                         cards = shownCards,
                         styles = {
                             padding(1.r)
-                        }
+                        },
+                        showToolbar = true
                     ) { card ->
                         onCardClick(card)
                     }

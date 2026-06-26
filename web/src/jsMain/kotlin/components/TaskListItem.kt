@@ -29,6 +29,7 @@ fun TaskListItem(
     card: Card,
     allCards: List<Card>? = null,
     showPhoto: Boolean = false,
+    showToolbar: Boolean = false,
     people: List<Person>? = null,
     isOnSurface: Boolean = false,
     onBackground: Boolean = false,
@@ -91,9 +92,11 @@ fun TaskListItem(
                         ).notBlank
                     },
                     showPhoto = showPhoto,
+                    showToolbar = showToolbar,
                     people = people,
                     isOnSurface = isOnSurface,
                     onBackground = onBackground,
+                    largeFont = showToolbar,
                 ) {
                     onClick(card)
                 }

@@ -44,11 +44,13 @@ import r
 fun CardListItem(
     card: Card,
     showPhoto: Boolean = true,
+    showToolbar: Boolean = false,
     description: String? = null,
     people: List<Person>? = null,
     isOnSurface: Boolean = false,
     onBackground: Boolean = false,
     includeCardPerson: Boolean = false,
+    largeFont: Boolean = false,
     onClick: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -137,7 +139,9 @@ fun CardListItem(
 
                     style {
                         fontWeight("bold")
-                        fontSize(22.px)
+                        if (largeFont) {
+                            fontSize(22.px)
+                        }
                     }
                 }) {
                     Text(card.name ?: appString { newCard })
@@ -157,7 +161,7 @@ fun CardListItem(
         card.activity?.let {
             CardActivity(activity = it, card = card)
         }
-        if (showPhoto) {
+        if (showToolbar) {
             CardToolbar(card)
         }
         card.getConversation().message.notBlank?.let { message ->
