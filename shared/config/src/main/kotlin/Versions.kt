@@ -1,15 +1,25 @@
 package com.ailaai.shared.config
 
-open class Versions {
-    val kotlin = "2.4.10-RC"
-    val coroutines = "1.11.0"
-    val ktor = "3.5.0"
-    val choiceSdk = "0.3.0"
-    val compose = "1.11.2"
-    val serialization = "1.11.0"
-    val datetime = "0.8.0"
-    val logback = "1.5.32"
-    val arango = "7.24.2"
-    val jackson = "2.21.3"
-    val markdownRenderer = "0.41.0"
+import org.gradle.api.artifacts.VersionCatalog
+
+open class Versions(
+    private val catalog: VersionCatalog,
+) {
+    private fun version(
+        name: String,
+    ) = catalog.findVersion(name).orElseThrow {
+        IllegalStateException("Missing version '$name' in the 'libs' version catalog")
+    }.requiredVersion
+
+    val kotlin = version("kotlin")
+    val coroutines = version("coroutines")
+    val ktor = version("ktor")
+    val choiceSdk = version("choiceSdk")
+    val compose = version("compose")
+    val serialization = version("serialization")
+    val datetime = version("datetime")
+    val logback = version("logback")
+    val arango = version("arango")
+    val jackson = version("jackson")
+    val markdownRenderer = version("markdownRenderer")
 }

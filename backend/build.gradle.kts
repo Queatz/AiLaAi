@@ -3,9 +3,9 @@ import org.gradle.kotlin.dsl.kotlin
 
 plugins {
     application
-    kotlin("jvm") version "2.4.10-RC"
-    kotlin("plugin.serialization") version "2.4.10-RC"
-    id("io.ktor.plugin") version "3.5.0"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ktor)
     id("com.ailaai.shared.config")
 }
 
@@ -26,6 +26,35 @@ repositories {
 kotlin {
     compilerOptions {
         optIn.add("kotlin.time.ExperimentalTime")
+    }
+}
+
+// The ktor fat jar (shadowJar / buildFatJar) must MERGE META-INF/services files so that the
+// kotlinx.serialization compiler plugin's registration files (org.jetbrains.kotlin.compiler.plugin.
+// CommandLineProcessor and CompilerPluginRegistrar) are preserved. Several compiler plugins on the
+// classpath (e.g. the scripting compiler and the serialization plugin) ship service files with the
+// same names; the default shadow behaviour keeps only one, dropping the serialization plugin's
+// registration. The scripting compiler then can no longer discover the serialization plugin when
+// compiling user scripts at runtime, so @Serializable classes in scripts get no generated serializer
+// and fail with "Serializer for class '...' is not found." (this only surfaces in the packaged fat
+// jar, not in installDist or tests, where the plugin jar is a separate classpath entry).
+afterEvaluate {
+    tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
+        // mergeServiceFiles only takes effect when duplicates are INCLUDEd; the EXCLUDE strategy
+        // (set by the ktor plugin) drops the extra service files before they reach the transformer.
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        mergeServiceFiles()
+        // The serialization compiler plugin reads the kotlinx-serialization-core runtime version from
+        // the MANIFEST.MF (Implementation-Title/Version) of the jar that provides the core classes.
+        // A fat jar collapses every dependency into one jar with a single manifest, so that
+        // per-library version is lost and the plugin reports "kotlinx.serialization core version is
+        // unknown". Re-declare it on the fat jar manifest so the plugin can detect it.
+        manifest {
+            attributes(
+                "Implementation-Title" to "kotlinx-serialization-core",
+                "Implementation-Version" to versions.serialization
+            )
+        }
     }
 }
 

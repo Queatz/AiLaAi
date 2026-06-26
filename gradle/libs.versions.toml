@@ -1,0 +1,22 @@
+[versions]
+kotlin = "2.4.10-RC"
+coroutines = "1.11.0"
+ktor = "3.5.0"
+choiceSdk = "0.3.0"
+compose = "1.11.2"
+serialization = "1.11.0"
+datetime = "0.8.0"
+logback = "1.5.32"
+arango = "7.24.2"
+jackson = "2.21.3"
+markdownRenderer = "0.41.0"
+
+[libraries]
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }

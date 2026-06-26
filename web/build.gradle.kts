@@ -1,9 +1,9 @@
 import org.codehaus.groovy.ast.tools.GeneralUtils.args
 
 plugins {
-    kotlin("multiplatform") version "2.4.10-RC"
-    kotlin("plugin.serialization") version "2.4.10-RC"
-    kotlin("plugin.compose") version "2.4.10-RC"
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.compose)
     id("com.ailaai.shared.config")
 }
 

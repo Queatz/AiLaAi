@@ -7,6 +7,11 @@ dependencyResolutionManagement {
         mavenCentral()
         maven(url = "https://maven.aliyun.com/repository/jcenter")
     }
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
+    }
 }
 
 include(":app")

@@ -7,8 +7,8 @@ import org.jetbrains.kotlin.konan.properties.Properties
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    kotlin("plugin.serialization") version "2.4.10-RC"
-    kotlin("plugin.compose") version "2.4.10-RC"
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.compose)
     id("com.huawei.agconnect")
     id("com.google.gms.google-services")
     id("com.google.devtools.ksp")

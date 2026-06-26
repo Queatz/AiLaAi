@@ -7,8 +7,15 @@ pluginManagement {
     }
 
     plugins {
-        kotlin("multiplatform") version "2.4.10-RC"
-            id("org.jetbrains.compose") version "1.11.0"
+        id("org.jetbrains.compose") version "1.11.0"
+    }
+}
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
     }
 }
 
