@@ -35,9 +35,9 @@ class SignalService {
     fun start(coroutineScope: CoroutineScope) {
         this.scope = coroutineScope
 
-        // Staggered release: check frequently
+        // Staggered release: check every 30 seconds
         scope.launch {
-            val checkInterval = if (isDev) 1.seconds else 10.seconds
+            val checkInterval = 30.seconds
             Logger.getAnonymousLogger().info("[SIGNALS] Starting releaseReplies loop (interval: $checkInterval)")
             while (true) {
                 runCatching {
