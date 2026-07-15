@@ -27,6 +27,31 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
+import io.ktor.server.websocket.webSocket
+import io.ktor.websocket.Frame
+import io.ktor.websocket.CloseReason
+import io.ktor.websocket.close
+import io.ktor.websocket.readText
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.websocket.WebSockets as ClientWebSockets
+import io.ktor.client.plugins.websocket.webSocket as clientWebSocket
+import io.ktor.http.HttpMethod
+import io.ktor.client.request.header
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.channels.consumeEach
+import com.queatz.plugins.secrets
+import com.queatz.plugins.json
+import com.queatz.db.Person
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+
+private val qwenClient = HttpClient(CIO) {
+    install(ClientWebSockets)
+}
 
 fun Route.aiRoutes() {
     authenticate {
@@ -151,6 +176,101 @@ fun Route.aiRoutes() {
                 )
 
                 response?.let { AiJsonResponse(it) } ?: HttpStatusCode.InternalServerError
+            }
+        }
+
+        webSocket("/ai/assistant") {
+            val serverSession = this
+            val person = call.principal<JWTPrincipal>()
+                ?.getClaim("id", String::class)
+                ?.let { db.document(Person::class, it) }
+                ?: return@webSocket close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Unauthorized"))
+
+            val language = call.parameters["language"] ?: "en"
+            val qwenApiKey = secrets.qwen?.apiKey ?: ""
+            if (qwenApiKey.isBlank()) {
+                close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "Missing Qwen API key"))
+                return@webSocket
+            }
+
+            try {
+                qwenClient.clientWebSocket(
+                    method = HttpMethod.Get,
+                    host = "dashscope.aliyuncs.com",
+                    path = "/api-ws/v1/inference/",
+                    request = {
+                        header("Authorization", "Bearer $qwenApiKey")
+                    }
+                ) {
+                    val qwenSession = this
+                    val taskId = java.util.UUID.randomUUID().toString().replace("-", "")
+                    val startMessage = """
+                        {
+                          "header": {
+                            "action": "run-task",
+                            "task_id": "$taskId",
+                            "streaming": "duplex"
+                          },
+                          "parameters": {
+                            "model": "qwen3-asr-flash-realtime",
+                            "format": "pcm",
+                            "sample_rate": 16000,
+                            "language": "$language"
+                          }
+                        }
+                    """.trimIndent()
+                    qwenSession.send(Frame.Text(startMessage))
+
+                    val receiveJob = launch {
+                        try {
+                            serverSession.incoming.consumeEach { frame ->
+                                if (frame is Frame.Binary) {
+                                    qwenSession.send(Frame.Binary(fin = true, data = frame.data))
+                                }
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        } finally {
+                            val finishMessage = """
+                                {
+                                  "header": {
+                                    "action": "finish-task",
+                                    "task_id": "$taskId"
+                                  }
+                                }
+                            """.trimIndent()
+                            runCatching {
+                                qwenSession.send(Frame.Text(finishMessage))
+                            }
+                        }
+                    }
+
+                    val sendJob = launch {
+                        try {
+                            qwenSession.incoming.consumeEach { frame ->
+                                if (frame is Frame.Text) {
+                                    val text = frame.readText()
+                                    val jsonElement = runCatching { json.parseToJsonElement(text) }.getOrNull()
+                                    val transcript = jsonElement?.jsonObject?.get("payload")
+                                        ?.jsonObject?.get("output")
+                                        ?.jsonObject?.get("sentence")
+                                        ?.jsonObject?.get("text")
+                                        ?.jsonPrimitive?.content
+                                    if (transcript != null) {
+                                        serverSession.send(Frame.Text(transcript))
+                                    }
+                                }
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+
+                    joinAll(receiveJob, sendJob)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                close(CloseReason(CloseReason.Codes.INTERNAL_ERROR, e.localizedMessage ?: "Unknown error"))
             }
         }
     }

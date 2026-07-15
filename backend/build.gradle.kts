@@ -100,6 +100,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${versions.jackson}")
     implementation("com.arangodb:arangodb-java-driver:${versions.arango}")
     implementation("io.ktor:ktor-server-core-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-server-websockets-jvm:${versions.ktor}")
     implementation("io.ktor:ktor-server-compression-jvm:${versions.ktor}")
     implementation("io.ktor:ktor-server-content-negotiation-jvm:${versions.ktor}")
     implementation("io.ktor:ktor-server-cors-jvm:${versions.ktor}")

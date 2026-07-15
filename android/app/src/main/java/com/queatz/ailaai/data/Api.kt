@@ -93,6 +93,8 @@ class Api : app.ailaai.api.Api() {
 
     override var authToken: String? = null
 
+    fun token(): String? = authToken
+
     fun init(context: Context) {
         this.context = context
 

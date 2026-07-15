@@ -4,6 +4,7 @@ import com.queatz.plugins.configureHTTP
 import com.queatz.plugins.configureRouting
 import com.queatz.plugins.configureSecurity
 import com.queatz.plugins.configureSerialization
+import com.queatz.plugins.configureWebSockets
 import io.ktor.server.application.Application
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
@@ -34,5 +35,6 @@ fun Application.module() {
     configureHTTP()
     configureSerialization()
     configureSecurity()
+    configureWebSockets()
     configureRouting()
 }

@@ -87,7 +87,7 @@ fun MapCardPanel(
                     title = appString { openPage },
                     background = true
                 ) {
-                    window.open("/page/${selectedCard!!.id!!}", target = "_blank")
+                    window.open("/page/${selectedCard.id!!}", target = "_blank")
                 }
             }
             Div({

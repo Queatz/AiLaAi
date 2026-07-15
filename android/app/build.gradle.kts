@@ -134,6 +134,7 @@ dependencies {
     // Ktor
     implementation("io.ktor:ktor-client-core-jvm:${versions.ktor}")
     implementation("io.ktor:ktor-client-okhttp-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-client-websockets-jvm:${versions.ktor}")
     implementation("io.ktor:ktor-client-content-negotiation:${versions.ktor}")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:${versions.ktor}")
 

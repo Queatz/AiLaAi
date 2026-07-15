@@ -13,6 +13,12 @@ data class Secrets(
     val openAi: SecretsOpenAi,
     val videoSdk: SecretsVideoSdk,
     val google: SecretsGoogle,
+    val qwen: SecretsQwen? = null,
+)
+
+@Serializable
+data class SecretsQwen(
+    val apiKey: String
 )
 
 @Serializable

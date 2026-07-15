@@ -174,6 +174,32 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 import java.util.logging.Logger
 import kotlin.time.Duration.Companion.seconds
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.websocket.WebSockets as ClientWebSockets
+import io.ktor.client.plugins.websocket.webSocket
+import io.ktor.websocket.Frame
+import io.ktor.websocket.readText
+import io.ktor.http.HttpHeaders
+import io.ktor.client.request.header
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.Job
+import com.queatz.db.Reminder
+import com.queatz.ailaai.ui.permission.permissionRequester
+import kotlin.time.Duration.Companion.hours
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.changedToUp
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.filled.Mic
+import app.ailaai.api.newReminder
 
 private val appTabKey = stringPreferencesKey("app.tab")
 private val appVersionCodeKey = intPreferencesKey("app.versionCode")
@@ -349,6 +375,160 @@ class MainActivity : AppCompatActivity() {
                     val seeWhatsNewString = stringResource(R.string.see_whats_new)
                     var appUi by rememberStateOf(AppUi())
                     var apiIsReachable by rememberStateOf(true)
+
+                    var isListening by remember { mutableStateOf(false) }
+                    var speechText by remember { mutableStateOf("Listening...") }
+                    var assistantJob by remember { mutableStateOf<Job?>(null) }
+                    val micPermissionRequester = permissionRequester(android.Manifest.permission.RECORD_AUDIO)
+
+                    fun stopAssistant() {
+                        isListening = false
+                        assistantJob?.cancel()
+                        assistantJob = null
+                    }
+
+                    fun startAssistant() {
+                        if (isListening) return
+                        isListening = true
+                        speechText = "Listening..."
+
+                        assistantJob = scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                            val languageCode = if (appLanguage?.startsWith("vi") == true) "vi" else "en"
+                            val wsUrl = api.baseUrl.replace("http://", "ws://").replace("https://", "wss://") + "/ai/assistant"
+                            val token = api.token()
+
+                            var audioRecord: android.media.AudioRecord? = null
+                            var finalTranscript = ""
+
+                            try {
+                                voiceAssistantClient.webSocket(
+                                    urlString = "$wsUrl?language=$languageCode",
+                                    request = {
+                                        if (token != null) {
+                                            header(io.ktor.http.HttpHeaders.Authorization, "Bearer $token")
+                                        }
+                                    }
+                                ) {
+                                    val sampleRate = 16000
+                                    val channelConfig = android.media.AudioFormat.CHANNEL_IN_MONO
+                                    val audioFormat = android.media.AudioFormat.ENCODING_PCM_16BIT
+                                    val minBufferSize = android.media.AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
+
+                                    audioRecord = android.media.AudioRecord(
+                                        android.media.MediaRecorder.AudioSource.MIC,
+                                        sampleRate,
+                                        channelConfig,
+                                        audioFormat,
+                                        minBufferSize
+                                    )
+
+                                    audioRecord?.startRecording()
+
+                                    val sendJob = launch {
+                                        val buffer = ByteArray(2048)
+                                        try {
+                                            while (isActive && isListening) {
+                                                val read = audioRecord?.read(buffer, 0, buffer.size) ?: -1
+                                                if (read > 0) {
+                                                    val data = buffer.copyOf(read)
+                                                    send(io.ktor.websocket.Frame.Binary(fin = true, data = data))
+                                                }
+                                                delay(20)
+                                            }
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                        }
+                                    }
+
+                                    val receiveJob = launch {
+                                        try {
+                                            incoming.consumeEach { frame ->
+                                                if (frame is io.ktor.websocket.Frame.Text) {
+                                                    val text = frame.readText()
+                                                    if (text.isNotBlank()) {
+                                                        finalTranscript = text
+                                                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                                                            speechText = text
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                        }
+                                    }
+
+                                    joinAll(sendJob, receiveJob)
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                                    context.toast("Connection error: ${e.localizedMessage}")
+                                }
+                            } finally {
+                                try {
+                                    audioRecord?.stop()
+                                    audioRecord?.release()
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+
+                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                                    isListening = false
+                                    if (finalTranscript.isNotBlank()) {
+                                        val startInstant = Clock.System.now().plus(1.hours)
+                                        val reminder = com.queatz.db.Reminder(
+                                            title = finalTranscript,
+                                            start = startInstant,
+                                            timezone = TimeZone.currentSystemDefault().id,
+                                            utcOffset = TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds / (60.0 * 60.0)
+                                        )
+                                        api.newReminder(reminder, onError = {
+                                            it.printStackTrace()
+                                        }) {
+                                            context.toast(context.getString(R.string.reminder_created))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    fun toggleAssistant(forceStart: Boolean = false, forceStop: Boolean = false) {
+                        if (forceStart) {
+                            if (!isListening) {
+                                micPermissionRequester.use(
+                                    onPermanentlyDenied = {
+                                        context.toast("Microphone permission permanently denied")
+                                    },
+                                    onDenied = {
+                                        context.toast("Microphone permission denied")
+                                    }
+                                ) {
+                                    startAssistant()
+                                }
+                            }
+                        } else if (forceStop) {
+                            if (isListening) {
+                                stopAssistant()
+                            }
+                        } else {
+                            if (isListening) {
+                                stopAssistant()
+                            } else {
+                                micPermissionRequester.use(
+                                    onPermanentlyDenied = {
+                                        context.toast("Microphone permission permanently denied")
+                                    },
+                                    onDenied = {
+                                        context.toast("Microphone permission denied")
+                                    }
+                                ) {
+                                    startAssistant()
+                                }
+                            }
+                        }
+                    }
 
                     LaunchedEffect(Unit) {
                         appUi = context.dataStore.data.first()[appUiKey]?.let {
@@ -553,26 +733,69 @@ class MainActivity : AppCompatActivity() {
 
                     Scaffold(
                         bottomBar = {
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Bottom
-                            ) {
-                                if (showNavigation && !isLandscape) {
+                            if (showNavigation && !isLandscape) {
+                                val bottomBarHeight by animateDpAsState(
+                                    targetValue = if (isListening) 110.dp else 53.dp,
+                                    animationSpec = tween(durationMillis = 300),
+                                    label = "bottomBarHeight"
+                                )
+
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(bottomBarHeight)
+                                        .background(MaterialTheme.colorScheme.background),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Bottom
+                                ) {
+                                    // Glow / border along the top
                                     Box(
                                         modifier = Modifier
-                                            .height(1.dp)
                                             .fillMaxWidth()
-                                            .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = .5f))
+                                            .height(if (isListening) 4.dp else 1.dp)
+                                            .background(
+                                                if (isListening) {
+                                                    verticalGradient(
+                                                        listOf(
+                                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.0f)
+                                                        )
+                                                    )
+                                                } else {
+                                                    verticalGradient(
+                                                        listOf(
+                                                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = .5f),
+                                                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = .5f)
+                                                        )
+                                                    )
+                                                }
+                                            )
                                     )
-                                }
 
-                                AnimatedVisibility(showNavigation && !isLandscape) {
+                                    if (isListening) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .weight(1f)
+                                                .padding(horizontal = 16.dp, vertical = 4.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = speechText,
+                                                color = MaterialTheme.colorScheme.onBackground,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Medium,
+                                                maxLines = 1,
+                                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                            )
+                                        }
+                                    }
+
                                     NavigationBar(
-                                        containerColor = MaterialTheme.colorScheme.background,
-                                        modifier = Modifier.height(53.dp) // 54 - 1 border
+                                        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                                        modifier = Modifier.height(53.dp)
                                     ) {
-                                        menuItems.forEach { item ->
+                                        menuItems.take(2).forEach { item ->
                                             val selected = navController.currentDestination?.route?.substringBefore("/") == item.route.route.substringBefore("/")
                                             NavigationBarItem(
                                                 icon = {
@@ -581,7 +804,110 @@ class MainActivity : AppCompatActivity() {
                                                             if (selected) item.selectedIcon ?: item.icon else item.icon,
                                                             contentDescription = null
                                                         )
-                                                        // todo reusable icon IconAndCount
+                                                        if (item.route == AppNav.Messages && newMessages > 0) {
+                                                            Text(
+                                                                newMessages.toString(),
+                                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                                style = MaterialTheme.typography.labelSmall,
+                                                                fontWeight = FontWeight.Bold,
+                                                                modifier = Modifier
+                                                                    .offset(2.pad, -.5f.pad)
+                                                                    .align(Alignment.TopEnd)
+                                                                    .clip(CircleShape)
+                                                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                                                    .padding(1.pad, .25f.pad)
+                                                            )
+                                                        }
+                                                    }
+                                                },
+                                                alwaysShowLabel = appUi.showNavLabels,
+                                                label = if (appUi.showNavLabels) {
+                                                    { Text(item.text) }
+                                                } else {
+                                                    null
+                                                },
+                                                selected = selected,
+                                                onClick = {
+                                                    if (startDestinationLoaded) {
+                                                        navController.popBackStack()
+                                                        navController.appNavigate(item.route)
+                                                    }
+                                                }
+                                            )
+                                        }
+
+                                        // Centered large middle button
+                                        val buttonSize by animateDpAsState(
+                                            targetValue = if (isListening) 46.dp else 38.dp,
+                                            animationSpec = tween(durationMillis = 300),
+                                            label = "buttonSize"
+                                        )
+
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(buttonSize)
+                                                    .shadow(if (isListening) 6.elevation else 2.elevation, CircleShape)
+                                                    .clip(CircleShape)
+                                                    .background(
+                                                        if (isListening) MaterialTheme.colorScheme.primary
+                                                        else MaterialTheme.colorScheme.primaryContainer
+                                                    )
+                                                    .pointerInput(Unit) {
+                                                        awaitEachGesture {
+                                                            val down = awaitFirstDown()
+                                                            var isLongPress = false
+                                                            val longPressJob = scope.launch {
+                                                                delay(400)
+                                                                isLongPress = true
+                                                                toggleAssistant(forceStart = true)
+                                                            }
+
+                                                            while (true) {
+                                                                val event = awaitPointerEvent()
+                                                                val anyUp = event.changes.any { it.changedToUp() }
+                                                                if (anyUp) {
+                                                                    longPressJob.cancel()
+                                                                    if (isLongPress) {
+                                                                        toggleAssistant(forceStop = true)
+                                                                    } else {
+                                                                        toggleAssistant()
+                                                                    }
+                                                                    break
+                                                                }
+                                                                if (event.changes.any { it.isConsumed }) {
+                                                                    longPressJob.cancel()
+                                                                    break
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = androidx.compose.material.icons.Icons.Default.Mic,
+                                                    contentDescription = "Voice Assistant",
+                                                    tint = if (isListening) MaterialTheme.colorScheme.onPrimary
+                                                           else MaterialTheme.colorScheme.onPrimaryContainer,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                            }
+                                        }
+
+                                        menuItems.drop(2).forEach { item ->
+                                            val selected = navController.currentDestination?.route?.substringBefore("/") == item.route.route.substringBefore("/")
+                                            NavigationBarItem(
+                                                icon = {
+                                                    Box {
+                                                        Icon(
+                                                            if (selected) item.selectedIcon ?: item.icon else item.icon,
+                                                            contentDescription = null
+                                                        )
                                                         if (item.route == AppNav.Messages && newMessages > 0) {
                                                             Text(
                                                                 newMessages.toString(),
@@ -728,7 +1054,7 @@ class MainActivity : AppCompatActivity() {
                                 modifier = Modifier.fillMaxSize()
                                     .let {
                                         if (showNavigation) {
-                                            it.consumeWindowInsets(PaddingValues(bottom = 54.dp))
+                                            it.consumeWindowInsets(PaddingValues(bottom = if (isListening) 110.dp else 54.dp))
                                         } else {
                                             it
                                         }
@@ -1034,3 +1360,7 @@ data class NavButton(
     val icon: ImageVector,
     val selectedIcon: ImageVector? = null
 )
+
+private val voiceAssistantClient = HttpClient(OkHttp) {
+    install(ClientWebSockets)
+}
