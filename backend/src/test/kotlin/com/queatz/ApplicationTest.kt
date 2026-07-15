@@ -1,6 +1,5 @@
 package com.queatz
 
-import com.queatz.plugins.configureRouting
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -12,7 +11,7 @@ class ApplicationTest {
     @Test
     fun testRoot() = testApplication {
         application {
-            configureRouting()
+            module()
         }
         client.get("/").apply {
             assertEquals(HttpStatusCode.OK, status)

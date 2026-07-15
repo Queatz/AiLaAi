@@ -782,14 +782,47 @@ fun GroupTopBar(
                         }
                     }
                 }
-                item(appString { if (group.pin == true) unpin else pin }) {
-                    scope.launch {
-                        if (group.pin == true) {
-                            api.unpinGroup(group.group!!.id!!) {
+                if (group.pin == true) {
+                    if (group.pinLevel == 1) {
+                        item(appString { superDuperPin }) {
+                            scope.launch {
+                                api.pinGroup(
+                                    id = group.group!!.id!!,
+                                    level = 2
+                                ) {
+                                    onGroupUpdated()
+                                }
+                            }
+                        }
+                    } else if (group.pinLevel == 2) {
+                        // Level 2 has no higher option
+                    } else {
+                        item(appString { superPin }) {
+                            scope.launch {
+                                api.pinGroup(
+                                    id = group.group!!.id!!,
+                                    level = 1
+                                ) {
+                                    onGroupUpdated()
+                                }
+                            }
+                        }
+                    }
+                    item(appString { unpin }) {
+                        scope.launch {
+                            api.unpinGroup(
+                                id = group.group!!.id!!
+                            ) {
                                 onGroupUpdated()
                             }
-                        } else {
-                            api.pinGroup(group.group!!.id!!) {
+                        }
+                    }
+                } else {
+                    item(appString { pin }) {
+                        scope.launch {
+                            api.pinGroup(
+                                id = group.group!!.id!!
+                            ) {
                                 onGroupUpdated()
                             }
                         }

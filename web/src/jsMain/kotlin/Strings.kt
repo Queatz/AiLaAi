@@ -77,7 +77,7 @@ object Strings {
     )
     val people = Translation(
         en = "People",
-        vn = "Con người",
+        vn = "Người",
         ru = "Люди"
     )
     val noScripts = Translation(
@@ -2265,6 +2265,16 @@ object Strings {
         en = "Pin",
         vn = "Ghim",
         ru = "Закрепить"
+    )
+    val superPin = Translation(
+        en = "Super pin",
+        vn = "Ghim siêu cấp",
+        ru = "Супер закреп"
+    )
+    val superDuperPin = Translation(
+        en = "Super duper pin",
+        vn = "Ghim siêu siêu cấp",
+        ru = "Супер-пупер закреп"
     )
     val unpin = Translation(
         en = "Unpin",

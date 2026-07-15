@@ -115,9 +115,10 @@ suspend fun Api.updateGroup(
 
 suspend fun Api.pinGroup(
     id: String,
+    level: Int? = null,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {},
-) = post("groups/$id/pin", onError = onError, onSuccess = onSuccess)
+) = post("groups/$id/pin${if (level != null) "?level=$level" else ""}", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.unpinGroup(
     id: String,

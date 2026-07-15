@@ -469,7 +469,8 @@ fun Route.groupRoutes() {
 
         post("/groups/{id}/pin") {
             respond {
-                db.pinGroup(me.id!!, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+                val level = call.parameters["level"]?.toIntOrNull() ?: 0
+                db.pinGroup(me.id!!, parameter("id"), level) ?: return@respond HttpStatusCode.NotFound
                 HttpStatusCode.OK
             }
         }

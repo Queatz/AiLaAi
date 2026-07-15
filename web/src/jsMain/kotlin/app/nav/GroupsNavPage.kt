@@ -185,7 +185,7 @@ fun GroupsNavPage(
                 it.filter { it.group?.categories?.contains(selectedCategory) == true }
             }
         }.sortedByDescending {
-            it.pin == true
+            it.pinLevel ?: if (it.pin == true) 0 else -1
         }
     }
 

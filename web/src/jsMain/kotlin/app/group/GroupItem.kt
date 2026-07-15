@@ -276,7 +276,11 @@ fun GroupItem(
                 Icon("keep") {
                     marginLeft(.5.r)
                     fontSize(16.px)
-                    opacity(.25f)
+                    when (group.pinLevel) {
+                        1 -> color(Color("red"))
+                        2 -> color(Color("orange"))
+                        else -> opacity(.25f)
+                    }
                 }
             }
         }

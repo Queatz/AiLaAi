@@ -885,6 +885,8 @@
     <string name="run">Run</string>
     <string name="delete_this_status">Delete this status?</string>
     <string name="pin">Pin</string>
+    <string name="super_pin">Super pin</string>
+    <string name="super_duper_pin">Super duper pin</string>
     <string name="unpin">Unpin</string>
     <string name="x_local_time">%1$s local time</string>
     <string name="in_2_days">In 2 days</string>

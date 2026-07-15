@@ -100,7 +100,8 @@ class Save(
 @Serializable
 class GroupPin(
     var person: String? = null,
-    var group: String? = null
+    var group: String? = null,
+    var level: Int? = null
 ) : Model()
 
 @Serializable

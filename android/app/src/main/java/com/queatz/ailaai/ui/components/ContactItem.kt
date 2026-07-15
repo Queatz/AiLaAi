@@ -99,15 +99,52 @@ fun ContactItem(
             val groupExtended = (item as? SearchResult.Group)?.groupExtended
             val myMember = groupExtended?.members?.first { it.person?.id == me?.id } != null
             if (myMember) {
-                menuItem(stringResource(if (groupExtended.pin == true) R.string.unpin else R.string.pin)) {
-                    showMenu = false
-                    scope.launch {
-                        if (groupExtended.pin == true) {
-                            api.unpinGroup(groupExtended.group!!.id!!) {
+                if (groupExtended.pin == true) {
+                    if (groupExtended.pinLevel == 1) {
+                        menuItem(stringResource(R.string.super_duper_pin)) {
+                            showMenu = false
+                            scope.launch {
+                                api.pinGroup(
+                                    id = groupExtended.group!!.id!!,
+                                    level = 2
+                                ) {
+                                    onChange()
+                                }
+                            }
+                        }
+                    } else if (groupExtended.pinLevel == 2) {
+                        // Level 2 has no higher option, so do nothing here
+                    } else {
+                        // Standard pin (level 0 or null)
+                        menuItem(stringResource(R.string.super_pin)) {
+                            showMenu = false
+                            scope.launch {
+                                api.pinGroup(
+                                    id = groupExtended.group!!.id!!,
+                                    level = 1
+                                ) {
+                                    onChange()
+                                }
+                            }
+                        }
+                    }
+                    menuItem(stringResource(R.string.unpin)) {
+                        showMenu = false
+                        scope.launch {
+                            api.unpinGroup(
+                                id = groupExtended.group!!.id!!
+                            ) {
                                 onChange()
                             }
-                        } else {
-                            api.pinGroup(groupExtended.group!!.id!!) {
+                        }
+                    }
+                } else {
+                    menuItem(stringResource(R.string.pin)) {
+                        showMenu = false
+                        scope.launch {
+                            api.pinGroup(
+                                id = groupExtended.group!!.id!!
+                            ) {
                                 onChange()
                             }
                         }
@@ -242,6 +279,7 @@ fun ContactItem(
                 joinRequestCount = joinRequestCount,
                 joined = myMember != null,
                 pinned = groupExtended.pin == true,
+                pinLevel = groupExtended.pinLevel,
                 info = info,
                 coverPhoto = if (coverPhoto) groupExtended.group?.photo?.let(api::url) else null,
                 background = coverPhoto
@@ -264,6 +302,7 @@ fun ContactResult(
     joinRequestCount: Int = 0,
     joined: Boolean = false,
     pinned: Boolean = false,
+    pinLevel: Int? = null,
     info: GroupInfo = GroupInfo.LatestMessage,
     coverPhoto: String? = null,
     background: Boolean = false
@@ -377,12 +416,18 @@ fun ContactResult(
                 )
             }
             if (pinned && info == GroupInfo.LatestMessage) {
+                val tint = when (pinLevel) {
+                    1 -> androidx.compose.ui.graphics.Color.Red
+                    2 -> androidx.compose.ui.graphics.Color(0xFFFF9800)
+                    else -> MaterialTheme.colorScheme.secondary
+                }
+                val alpha = if (pinLevel == 1 || pinLevel == 2) 1f else .5f
                 Icon(
                     imageVector = Icons.Outlined.PushPin,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary,
+                    tint = tint,
                     modifier = Modifier
-                        .alpha(.5f)
+                        .alpha(alpha)
                         .size(16.dp)
                 )
             }

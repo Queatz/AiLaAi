@@ -330,13 +330,20 @@ fun Db.groupExtended(personKey: String? = null, groupVar: String = "group") = ""
     ),
     ${f(GroupExtended::cardCount)}: count(for groupCard in `${Card::class.collection()}` filter groupCard.${f(Card::active)} == true and groupCard.${f(Card::group)} == $groupVar._key return true),
     ${f(GroupExtended::botCount)}: count(for groupBot in `${GroupBot::class.collection()}` filter groupBot.${f(GroupBot::active)} == true and groupBot.${f(GroupBot::group)} == $groupVar._key return true),
-    ${f(GroupExtended::pin)}: ${pinned(personKey, groupVar)}
+    ${f(GroupExtended::pin)}: ${pinned(personKey, groupVar)},
+    ${f(GroupExtended::pinLevel)}: ${pinLevel(personKey, groupVar)}
 }"""
 
 fun Db.pinned(personKey: String?, groupVar: String) = if (personKey == null) {
     false.toString()
 } else {
     """count(for groupPin in `${GroupPin::class.collection()}` filter groupPin.${f(GroupPin::person)} == "$personKey" and groupPin.${f(GroupPin::group)} == $groupVar._key return true) != 0"""
+}
+
+fun Db.pinLevel(personKey: String?, groupVar: String) = if (personKey == null) {
+    "null"
+} else {
+    """first(for groupPin in `${GroupPin::class.collection()}` filter groupPin.${f(GroupPin::person)} == "$personKey" and groupPin.${f(GroupPin::group)} == $groupVar._key return groupPin.${f(GroupPin::level)})"""
 }
 
 const val maxPeopleDistanceKm = 10.0

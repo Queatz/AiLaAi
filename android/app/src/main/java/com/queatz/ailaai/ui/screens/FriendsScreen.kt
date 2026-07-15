@@ -190,7 +190,9 @@ fun FriendsScreen() {
                     if (selectedCategory == null) it else it.filter {
                         it.groupExtended.group?.categories?.contains(selectedCategory) == true
                     }
-                }.sortedByDescending { it.groupExtended.pin == true }
+                }.sortedByDescending {
+                    it.groupExtended.pinLevel ?: if (it.groupExtended.pin == true) 0 else -1
+                }
     }
 
     suspend fun reload(passive: Boolean = false) {

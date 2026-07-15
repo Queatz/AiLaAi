@@ -932,6 +932,8 @@
     <string name="run">Chạy</string>
     <string name="delete_this_status">Xóa trạng thái này?</string>
     <string name="pin">Ghim</string>
+    <string name="super_pin">Ghim siêu cấp</string>
+    <string name="super_duper_pin">Ghim siêu siêu cấp</string>
     <string name="unpin">Bỏ ghim</string>
     <string name="x_local_time">%1$s giờ địa phương</string>
     <string name="in_2_hours">Trong 2 giờ</string>

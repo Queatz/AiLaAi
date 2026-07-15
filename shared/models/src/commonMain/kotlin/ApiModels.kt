@@ -30,7 +30,8 @@ class GroupExtended(
     var cardCount: Int? = null,
     var botCount: Int? = null,
     var latestMessage: Message? = null,
-    var pin: Boolean? = null
+    var pin: Boolean? = null,
+    var pinLevel: Int? = null
 )
 
 @Serializable

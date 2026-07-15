@@ -7,18 +7,19 @@ import kotlin.time.Instant
  * @person The current user
  * @group The group to pin
  */
-fun Db.pinGroup(person: String, group: String) = one(
+fun Db.pinGroup(person: String, group: String, level: Int = 0) = one(
     GroupPin::class,
     """
             upsert { ${f(GroupPin::person)}: @person, ${f(GroupPin::group)}: @group }
-                insert { ${f(GroupPin::person)}: @person, ${f(GroupPin::group)}: @group, ${f(GroupPin::createdAt)}: DATE_ISO8601(DATE_NOW()) }
-                update { ${f(GroupPin::person)}: @person, ${f(GroupPin::group)}: @group}
+                insert { ${f(GroupPin::person)}: @person, ${f(GroupPin::group)}: @group, ${f(GroupPin::createdAt)}: DATE_ISO8601(DATE_NOW()), ${f(GroupPin::level)}: @level }
+                update { ${f(GroupPin::person)}: @person, ${f(GroupPin::group)}: @group, ${f(GroupPin::level)}: @level }
                 in @@collection
                 return NEW || OLD
         """,
     mapOf(
         "person" to person,
-        "group" to group
+        "group" to group,
+        "level" to level
     )
 )
 
@@ -49,11 +50,18 @@ fun Db.groups(person: String) = query(
         for group, edge in outbound @person graph `${Member::class.graph()}`
             filter edge.${f(Member::hide)} != true
                 and edge.${f(Member::gone)} != true
-            sort group.${f(Group::seen)} desc
+            let pinLevel = first(
+                for groupPin in `${GroupPin::class.collection()}`
+                    filter groupPin.${f(GroupPin::person)} == @personKey
+                        and groupPin.${f(GroupPin::group)} == group._key
+                    return groupPin.${f(GroupPin::level)}
+            )
+            sort pinLevel != null desc, pinLevel desc, group.${f(Group::seen)} desc
             return ${groupExtended(person)}
     """.trimIndent(),
     mapOf(
-        "person" to person.asId(Person::class)
+        "person" to person.asId(Person::class),
+        "personKey" to person
     )
 )
 

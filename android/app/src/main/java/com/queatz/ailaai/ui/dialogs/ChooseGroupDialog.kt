@@ -61,7 +61,7 @@ fun ChooseGroupDialog(
             .filter(filter)
         shownGroups = (if (searchText.isBlank()) all else all.filter {
             it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()).contains(searchText, true)
-        }).sortedByDescending { it.pin == true }
+        }).sortedByDescending { it.pinLevel ?: if (it.pin == true) 0 else -1 }
         if (!hasPreselected && shownGroups.isNotEmpty()) {
             if (!preselect.isNullOrEmpty() && selected.isEmpty()) {
                 selected = shownGroups.filter { group -> preselect.any { it.id == group.group?.id } }
