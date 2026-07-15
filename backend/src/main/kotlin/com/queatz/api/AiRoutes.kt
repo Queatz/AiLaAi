@@ -239,45 +239,53 @@ fun Route.aiRoutes() {
             return@webSocket
         }
 
+        // Qwen-ASR-Realtime selects the model ONLY via the `model` query parameter on the
+        // realtime endpoint. `qwen3-asr-flash-realtime` is a valid model name, so if
+        // DashScope answers the handshake with `400 "Model not exist"`, the model simply is
+        // not published/enabled for the DashScope region that `secrets.qwen.host` targets
+        // (China-Beijing `dashscope.aliyuncs.com` vs Singapore `dashscope-intl.aliyuncs.com`).
+        // In that case point `secrets.qwen.host` at the region where the account has the
+        // model enabled - it is not a bug in this handler.
+        val model = "qwen3-asr-flash-realtime"
+
         try {
-            val model = "qwen3-asr-flash-realtime"
-            // DashScope exposes an OpenAI-compatible realtime WebSocket endpoint for
-            // qwen3-asr-flash-realtime. It only accepts secure connections (wss:// on port
-            // 443) and the model is selected via the `model` query parameter. The protocol
-            // is the OpenAI realtime transcription protocol: the server first emits
-            // `session.created`, we reply with `session.update` to configure transcription,
-            // then stream audio as base64 `input_audio_buffer.append` events and read back
-            // `conversation.item.input_audio_transcription.*` events.
+            // Qwen-ASR-Realtime is a dedicated DashScope WebSocket API. It only accepts
+            // secure connections (wss:// on port 443); the model is chosen via the `model`
+            // query parameter. Flow: the server emits `session.created`, we reply with
+            // `session.update` to configure transcription, stream audio as base64
+            // `input_audio_buffer.append` events, read back
+            // `conversation.item.input_audio_transcription.*` events, and finish with
+            // `session.finish`.
             qwenClient.clientWss(
                 host = secrets.qwen!!.host,
                 port = 443,
                 path = "/api-ws/v1/realtime",
                 request = {
                     header("Authorization", "Bearer $qwenApiKey")
-                    parameter("model", "qwen3-asr-flash-realtime")
+                    parameter("model", model)
                 }
             ) {
                 val qwenSession = this
-                // The OpenAI realtime protocol requires the session to be created and
-                // configured before any audio is streamed. We gate audio forwarding on
-                // `session.updated` so DashScope has applied our transcription config before
-                // we start sending audio.
+                // The session must be created and configured before any audio is streamed.
+                // We gate audio forwarding on `session.updated` so DashScope has applied our
+                // transcription config first.
                 val sessionReady = CompletableDeferred<Unit>()
 
-                // Configure the session for transcription only: 16 kHz mono PCM16 in (which
-                // is exactly what the app records and streams), with server-side VAD so
-                // DashScope segments speech turns automatically.
-                // qwen3-asr-flash-realtime auto-detects the spoken language, so we
-                // intentionally do not send a language hint: an unsupported hint would fail
-                // the task instead of falling back to detection.
+                // Configure the session per the Qwen-ASR-Realtime client-events spec. The app
+                // records 16 kHz mono PCM16, which maps to `input_audio_format` "pcm" at
+                // `sample_rate` 16000. The model is NOT set here (it is the `model` query
+                // parameter); the session only takes the recognition `language`. `server_vad`
+                // turn detection lets DashScope segment speech turns automatically (VAD mode).
+                // Every client event must carry a unique `event_id`.
                 val sessionUpdate = """
                     {
+                      "event_id": "${java.util.UUID.randomUUID()}",
                       "type": "session.update",
                       "session": {
-                        "modalities": ["text"],
-                        "input_audio_format": "pcm16",
+                        "input_audio_format": "pcm",
+                        "sample_rate": 16000,
                         "input_audio_transcription": {
-                          "model": "$model"
+                          "language": "$language"
                         },
                         "turn_detection": {
                           "type": "server_vad"
@@ -298,12 +306,12 @@ fun Route.aiRoutes() {
                         val encoder = java.util.Base64.getEncoder()
                         serverSession.incoming.consumeEach { frame ->
                             if (frame is Frame.Binary) {
-                                // The realtime protocol expects audio as base64 inside an
-                                // `input_audio_buffer.append` event, not as raw binary frames.
+                                // Audio is sent as base64 inside an `input_audio_buffer.append`
+                                // event (each event needs a unique `event_id`).
                                 val audioBase64 = encoder.encodeToString(frame.data)
                                 qwenSession.send(
                                     Frame.Text(
-                                        """{"type":"input_audio_buffer.append","audio":"$audioBase64"}"""
+                                        """{"event_id":"${java.util.UUID.randomUUID()}","type":"input_audio_buffer.append","audio":"$audioBase64"}"""
                                     )
                                 )
                             }
@@ -312,10 +320,14 @@ fun Route.aiRoutes() {
                         e.printStackTrace()
                         logger.warning("[VOICE ASSISTANT] Voice assistant: error forwarding audio to Qwen")
                     } finally {
-                        // Commit whatever audio is still buffered so DashScope flushes the
-                        // final transcription before the session ends.
+                        // In VAD mode DashScope segments turns automatically, so end the
+                        // session with `session.finish` (input_audio_buffer.commit is
+                        // Manual-mode only). DashScope then flushes the final transcription
+                        // and replies with `session.finished`.
                         runCatching {
-                            qwenSession.send(Frame.Text("""{"type":"input_audio_buffer.commit"}"""))
+                            qwenSession.send(
+                                Frame.Text("""{"event_id":"${java.util.UUID.randomUUID()}","type":"session.finish"}""")
+                            )
                         }
                     }
                 }
@@ -354,6 +366,14 @@ fun Route.aiRoutes() {
                                         if (!transcript.isNullOrBlank()) {
                                             serverSession.send(Frame.Text(transcript))
                                         }
+                                    }
+                                    "conversation.item.input_audio_transcription.failed" -> {
+                                        val errorMessage = event["error"]?.jsonObject
+                                            ?.get("message")?.jsonPrimitive?.content
+                                        logger.warning("[VOICE ASSISTANT] Voice assistant: Qwen transcription failed: $errorMessage")
+                                    }
+                                    "session.finished" -> {
+                                        logger.warning("[VOICE ASSISTANT] Voice assistant: Qwen session finished")
                                     }
                                     "error" -> {
                                         val errorMessage = event["error"]?.jsonObject
@@ -401,13 +421,15 @@ fun Route.aiRoutes() {
             val qwenReason = runCatching {
                 val response = qwenClient.request("https://${secrets.qwen!!.host}/api-ws/v1/realtime") {
                     method = HttpMethod.Get
-                    parameter("model", "qwen3-asr-flash-realtime")
+                    parameter("model", model)
                     header("Authorization", "Bearer $qwenApiKey")
                 }
                 "status=${response.status}, body=${response.bodyAsText()}"
             }.getOrElse { "unavailable (${it.localizedMessage})" }
+            // Include the host + model so a `400 "Model not exist"` (valid model name but not
+            // enabled for this region) is immediately attributable to the wrong region host.
             logger.warning(
-                "[VOICE ASSISTANT] Voice assistant: connection to Qwen failed: ${e.localizedMessage}; Qwen response: $qwenReason"
+                "[VOICE ASSISTANT] Voice assistant: connection to Qwen failed (host=${secrets.qwen?.host}, model=$model): ${e.localizedMessage}; Qwen response: $qwenReason"
             )
             close(
                 reason = CloseReason(
