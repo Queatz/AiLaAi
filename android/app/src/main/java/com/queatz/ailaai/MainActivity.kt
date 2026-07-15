@@ -2,6 +2,8 @@ package com.queatz.ailaai
 
 import android.app.ComponentCaller
 import android.content.Intent
+import android.media.AudioRecord
+import android.media.MediaRecorder
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -199,6 +201,7 @@ import androidx.compose.ui.input.pointer.changedToUp
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.ui.graphics.Color
 import app.ailaai.api.newReminder
 
 private val appTabKey = stringPreferencesKey("app.tab")
@@ -377,7 +380,7 @@ class MainActivity : AppCompatActivity() {
                     var apiIsReachable by rememberStateOf(true)
 
                     var isListening by remember { mutableStateOf(false) }
-                    var speechText by remember { mutableStateOf("Listening...") }
+                    var speechText by remember { mutableStateOf(context.getString(R.string.listening)) }
                     var assistantJob by remember { mutableStateOf<Job?>(null) }
                     val micPermissionRequester = permissionRequester(android.Manifest.permission.RECORD_AUDIO)
 
@@ -390,7 +393,7 @@ class MainActivity : AppCompatActivity() {
                     fun startAssistant() {
                         if (isListening) return
                         isListening = true
-                        speechText = "Listening..."
+                        speechText = context.getString(R.string.listening)
 
                         assistantJob = scope.launch(kotlinx.coroutines.Dispatchers.IO) {
                             val languageCode = if (appLanguage?.startsWith("vi") == true) "vi" else "en"
@@ -405,17 +408,17 @@ class MainActivity : AppCompatActivity() {
                                     urlString = "$wsUrl?language=$languageCode",
                                     request = {
                                         if (token != null) {
-                                            header(io.ktor.http.HttpHeaders.Authorization, "Bearer $token")
+                                            header(HttpHeaders.Authorization, "Bearer $token")
                                         }
                                     }
                                 ) {
                                     val sampleRate = 16000
                                     val channelConfig = android.media.AudioFormat.CHANNEL_IN_MONO
                                     val audioFormat = android.media.AudioFormat.ENCODING_PCM_16BIT
-                                    val minBufferSize = android.media.AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
+                                    val minBufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
 
-                                    audioRecord = android.media.AudioRecord(
-                                        android.media.MediaRecorder.AudioSource.MIC,
+                                    audioRecord = AudioRecord(
+                                        MediaRecorder.AudioSource.MIC,
                                         sampleRate,
                                         channelConfig,
                                         audioFormat,
@@ -473,7 +476,7 @@ class MainActivity : AppCompatActivity() {
                                     e.printStackTrace()
                                 }
 
-                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                                kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable + kotlinx.coroutines.Dispatchers.Main) {
                                     isListening = false
                                     if (finalTranscript.isNotBlank()) {
                                         val startInstant = Clock.System.now().plus(1.hours)
@@ -740,6 +743,12 @@ class MainActivity : AppCompatActivity() {
                                     label = "bottomBarHeight"
                                 )
 
+                                val glowHeight by animateDpAsState(
+                                    targetValue = if (isListening) 8.dp else 1.dp,
+                                    animationSpec = tween(durationMillis = 300),
+                                    label = "glowHeight"
+                                )
+
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -752,13 +761,14 @@ class MainActivity : AppCompatActivity() {
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(if (isListening) 4.dp else 1.dp)
+                                            .height(glowHeight)
                                             .background(
                                                 if (isListening) {
                                                     verticalGradient(
                                                         listOf(
-                                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.0f)
+                                                            MaterialTheme.colorScheme.onBackground,
+                                                            MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 1f),
+                                                            MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.0f)
                                                         )
                                                     )
                                                 } else {
@@ -852,7 +862,7 @@ class MainActivity : AppCompatActivity() {
                                             Box(
                                                 modifier = Modifier
                                                     .size(buttonSize)
-                                                    .shadow(if (isListening) 6.elevation else 2.elevation, CircleShape)
+                                                    .shadow(if (isListening) 4.elevation else 1.elevation, CircleShape)
                                                     .clip(CircleShape)
                                                     .background(
                                                         if (isListening) MaterialTheme.colorScheme.primary
@@ -890,7 +900,7 @@ class MainActivity : AppCompatActivity() {
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Icon(
-                                                    imageVector = androidx.compose.material.icons.Icons.Default.Mic,
+                                                    imageVector = Icons.Default.Mic,
                                                     contentDescription = "Voice Assistant",
                                                     tint = if (isListening) MaterialTheme.colorScheme.onPrimary
                                                            else MaterialTheme.colorScheme.onPrimaryContainer,
