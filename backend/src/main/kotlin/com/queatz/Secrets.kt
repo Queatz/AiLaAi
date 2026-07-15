@@ -18,7 +18,8 @@ data class Secrets(
 
 @Serializable
 data class SecretsQwen(
-    val apiKey: String
+    val apiKey: String,
+    val host: String,
 )
 
 @Serializable

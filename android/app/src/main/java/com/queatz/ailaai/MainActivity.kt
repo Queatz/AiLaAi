@@ -380,7 +380,7 @@ class MainActivity : AppCompatActivity() {
                     var apiIsReachable by rememberStateOf(true)
 
                     var isListening by remember { mutableStateOf(false) }
-                    var speechText by remember { mutableStateOf(context.getString(R.string.listening)) }
+                    var speechText by remember { mutableStateOf(resources.getString(R.string.listening)) }
                     var assistantJob by remember { mutableStateOf<Job?>(null) }
                     val micPermissionRequester = permissionRequester(android.Manifest.permission.RECORD_AUDIO)
 
@@ -393,7 +393,7 @@ class MainActivity : AppCompatActivity() {
                     fun startAssistant() {
                         if (isListening) return
                         isListening = true
-                        speechText = context.getString(R.string.listening)
+                        speechText = resources.getString(R.string.listening)
 
                         assistantJob = scope.launch(kotlinx.coroutines.Dispatchers.IO) {
                             val languageCode = if (appLanguage?.startsWith("vi") == true) "vi" else "en"
