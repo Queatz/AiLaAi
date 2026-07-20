@@ -28,12 +28,18 @@ import com.queatz.save
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
+import io.ktor.client.request.post
 import io.ktor.client.request.request
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
@@ -46,20 +52,38 @@ import io.ktor.server.routing.post
 import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
+import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import java.util.logging.Logger
 import io.ktor.client.plugins.websocket.WebSockets as ClientWebSockets
 import io.ktor.client.plugins.websocket.wss as clientWss
 
-private val qwenClient = HttpClient(CIO) {
-    install(ClientWebSockets)
+private const val qwenConnectTimeoutMillis = 30_000L
+private const val qwenRequestTimeoutMillis = 10 * 60 * 1_000L
+private const val qwenSocketTimeoutMillis = 10 * 60 * 1_000L
+private const val qwenRealtimeAudioChunkSize = 3_200
+private const val qwenRealtimeHost = "dashscope.aliyuncs.com"
+
+private val qwenClient by lazy {
+    HttpClient(CIO) {
+        install(HttpTimeout) {
+            connectTimeoutMillis = qwenConnectTimeoutMillis
+            requestTimeoutMillis = qwenRequestTimeoutMillis
+            socketTimeoutMillis = qwenSocketTimeoutMillis
+        }
+        install(ClientWebSockets)
+    }
 }
 
 fun Route.aiRoutes() {
@@ -167,6 +191,22 @@ fun Route.aiRoutes() {
             }
         }
 
+        post("/ai/assistant/transcribe") {
+            respond {
+                var transcribedText: String? = null
+                val language = call.request.queryParameters["language"] ?: "en"
+
+                call.receiveBytes("audio") { bytes, _ ->
+                    transcribedText = qwenTranscribe(
+                        audio = bytes,
+                        language = language,
+                    )
+                }
+
+                transcribedText?.let { AiTranscribeResponse(it) } ?: HttpStatusCode.InternalServerError
+            }
+        }
+
         post("/ai/json") {
             respond {
                 val request = call.receive<AiJsonRequest>()
@@ -239,13 +279,9 @@ fun Route.aiRoutes() {
             return@webSocket
         }
 
-        // Qwen-ASR-Realtime selects the model ONLY via the `model` query parameter on the
-        // realtime endpoint. `qwen3-asr-flash-realtime` is a valid model name, so if
-        // DashScope answers the handshake with `400 "Model not exist"`, the model simply is
-        // not published/enabled for the DashScope region that `secrets.qwen.host` targets
-        // (China-Beijing `dashscope.aliyuncs.com` vs Singapore `dashscope-intl.aliyuncs.com`).
-        // In that case point `secrets.qwen.host` at the region where the account has the
-        // model enabled - it is not a bug in this handler.
+        // Realtime ASR uses DashScope's public realtime service, not the configured Model
+        // Studio deployment host used by the final file-transcription request. The model is
+        // selected only by this endpoint's `model` query parameter.
         val model = "qwen3-asr-flash-realtime"
 
         try {
@@ -257,7 +293,7 @@ fun Route.aiRoutes() {
             // `conversation.item.input_audio_transcription.*` events, and finish with
             // `session.finish`.
             qwenClient.clientWss(
-                host = secrets.qwen!!.host,
+                host = qwenRealtimeHost,
                 port = 443,
                 path = "/api-ws/v1/realtime",
                 request = {
@@ -301,19 +337,22 @@ fun Route.aiRoutes() {
 
                 // Forward audio from the app to Qwen, but only once the session is ready.
                 val receiveJob = launch {
+                    val encoder = java.util.Base64.getEncoder()
+                    val audioBatcher = PcmAudioBatcher(
+                        chunkSize = qwenRealtimeAudioChunkSize,
+                    )
                     try {
                         sessionReady.await()
-                        val encoder = java.util.Base64.getEncoder()
                         serverSession.incoming.consumeEach { frame ->
                             if (frame is Frame.Binary) {
-                                // Audio is sent as base64 inside an `input_audio_buffer.append`
-                                // event (each event needs a unique `event_id`).
-                                val audioBase64 = encoder.encodeToString(frame.data)
-                                qwenSession.send(
-                                    Frame.Text(
-                                        """{"event_id":"${java.util.UUID.randomUUID()}","type":"input_audio_buffer.append","audio":"$audioBase64"}"""
+                                audioBatcher.append(
+                                    audio = frame.data,
+                                ).forEach { audio ->
+                                    qwenSession.sendRealtimeAudio(
+                                        encoder = encoder,
+                                        audio = audio,
                                     )
-                                )
+                                }
                             }
                         }
                     } catch (e: Exception) {
@@ -325,6 +364,12 @@ fun Route.aiRoutes() {
                         // Manual-mode only). DashScope then flushes the final transcription
                         // and replies with `session.finished`.
                         runCatching {
+                            audioBatcher.flush()?.let { audio ->
+                                qwenSession.sendRealtimeAudio(
+                                    encoder = encoder,
+                                    audio = audio,
+                                )
+                            }
                             qwenSession.send(
                                 Frame.Text("""{"event_id":"${java.util.UUID.randomUUID()}","type":"session.finish"}""")
                             )
@@ -338,14 +383,12 @@ fun Route.aiRoutes() {
                         qwenSession.incoming.consumeEach { frame ->
                             if (frame is Frame.Text) {
                                 val text = frame.readText()
-                                // Log every raw frame from DashScope so the upstream's actual
-                                // response (including the exact `error` message) is always
-                                // visible when diagnosing issues.
-                                logger.warning("[VOICE ASSISTANT] Voice assistant: Qwen frame = $text")
                                 val event = runCatching { json.parseToJsonElement(text) }
                                     .getOrNull()?.jsonObject
+                                val eventType = event?.get("type")?.jsonPrimitive?.content
+                                logger.fine("[VOICE ASSISTANT] Voice assistant: Qwen event type=$eventType")
 
-                                when (event?.get("type")?.jsonPrimitive?.content) {
+                                when (eventType) {
                                     "session.created" -> {
                                         logger.warning("[VOICE ASSISTANT] Voice assistant: Qwen session created")
                                         qwenSession.send(Frame.Text(sessionUpdate))
@@ -416,20 +459,18 @@ fun Route.aiRoutes() {
             // reports the status code ("expected 101 but was 403") and throws away the
             // response body, so we never see *why* Qwen rejected us. Re-issue the exact same
             // URL as a plain HTTP request to capture the status and body Qwen returns and log
-            // it, so the real reason (bad key, model not enabled for the account, wrong
-            // region/host, etc.) is visible in the logs.
+            // it, so the real reason (bad key, model availability, or invalid configuration)
+            // is visible in the logs.
             val qwenReason = runCatching {
-                val response = qwenClient.request("https://${secrets.qwen!!.host}/api-ws/v1/realtime") {
+                val response = qwenClient.request("https://$qwenRealtimeHost/api-ws/v1/realtime") {
                     method = HttpMethod.Get
                     parameter("model", model)
                     header("Authorization", "Bearer $qwenApiKey")
                 }
                 "status=${response.status}, body=${response.bodyAsText()}"
             }.getOrElse { "unavailable (${it.localizedMessage})" }
-            // Include the host + model so a `400 "Model not exist"` (valid model name but not
-            // enabled for this region) is immediately attributable to the wrong region host.
             logger.warning(
-                "[VOICE ASSISTANT] Voice assistant: connection to Qwen failed (host=${secrets.qwen?.host}, model=$model): ${e.localizedMessage}; Qwen response: $qwenReason"
+                "[VOICE ASSISTANT] Voice assistant: connection to Qwen failed (host=$qwenRealtimeHost, model=$model): ${e.localizedMessage}; Qwen response: $qwenReason"
             )
             close(
                 reason = CloseReason(
@@ -440,3 +481,142 @@ fun Route.aiRoutes() {
         }
     }
 }
+
+private suspend fun qwenTranscribe(
+    audio: ByteArray,
+    language: String,
+): String? {
+    val qwen = secrets.qwen ?: return null
+    if (audio.isEmpty()) return null
+
+    return runCatching {
+        val response = qwenClient.post("https://${qwen.host}/api/v1/services/aigc/multimodal-generation/generation") {
+            header("Authorization", "Bearer ${qwen.apiKey}")
+            contentType(ContentType.Application.Json)
+            setBody(
+                json.encodeToString(
+                    buildJsonObject {
+                        put("model", "qwen3-asr-flash")
+                        put(
+                            "input",
+                            buildJsonObject {
+                                put(
+                                    "messages",
+                                    buildJsonArray {
+                                        add(
+                                            buildJsonObject {
+                                                put("role", "user")
+                                                put(
+                                                    "content",
+                                                    buildJsonArray {
+                                                        add(
+                                                            buildJsonObject {
+                                                                put(
+                                                                    "audio",
+                                                                    "data:audio/wav;base64," +
+                                                                        java.util.Base64.getEncoder().encodeToString(audio)
+                                                                )
+                                                            }
+                                                        )
+                                                        add(
+                                                            buildJsonObject {
+                                                                put("text", "Transcribe this audio in $language.")
+                                                            }
+                                                        )
+                                                    }
+                                                )
+                                            }
+                                        )
+                                    }
+                                )
+                            }
+                        )
+                    }.toString()
+                )
+            )
+        }
+        val responseBody = response.bodyAsText()
+
+        if (!response.status.isSuccess()) {
+            Logger.getAnonymousLogger().warning(
+                "[VOICE ASSISTANT] Qwen final transcription failed (status=${response.status}): $responseBody"
+            )
+            null
+        } else {
+            qwenTranscriptFromResponse(responseBody)
+        }
+    }.onFailure {
+        it.printStackTrace()
+    }.getOrNull()
+}
+
+internal class PcmAudioBatcher(
+    private val chunkSize: Int,
+) {
+    private var pending = ByteArray(0)
+
+    fun append(
+        audio: ByteArray,
+    ): List<ByteArray> {
+        if (audio.isEmpty()) return emptyList()
+
+        val combined = pending + audio
+        val fullChunkCount = combined.size / chunkSize
+        val chunks = ArrayList<ByteArray>(fullChunkCount)
+
+        repeat(fullChunkCount) { index ->
+            val start = index * chunkSize
+            chunks += combined.copyOfRange(
+                fromIndex = start,
+                toIndex = start + chunkSize,
+            )
+        }
+
+        pending = combined.copyOfRange(
+            fromIndex = fullChunkCount * chunkSize,
+            toIndex = combined.size,
+        )
+
+        return chunks
+    }
+
+    fun flush(): ByteArray? = pending.takeIf { it.isNotEmpty() }?.also {
+        pending = ByteArray(0)
+    }
+}
+
+private suspend fun WebSocketSession.sendRealtimeAudio(
+    encoder: java.util.Base64.Encoder,
+    audio: ByteArray,
+) {
+    val audioBase64 = encoder.encodeToString(audio)
+
+    send(
+        Frame.Text(
+            """{"event_id":"${java.util.UUID.randomUUID()}","type":"input_audio_buffer.append","audio":"$audioBase64"}"""
+        )
+    )
+}
+
+internal fun qwenTranscriptFromResponse(
+    responseBody: String,
+): String? = runCatching {
+    json.parseToJsonElement(responseBody)
+        .jsonObject["output"]
+        ?.jsonObject
+        ?.get("choices")
+        ?.jsonArray
+        ?.firstOrNull()
+        ?.jsonObject
+        ?.get("message")
+        ?.jsonObject
+        ?.get("content")
+        ?.jsonArray
+        ?.firstOrNull()
+        ?.jsonObject
+        ?.get("text")
+        ?.jsonPrimitive
+        ?.content
+        ?.trim()
+        ?.takeIf { it.isNotBlank() }
+}.getOrNull()
