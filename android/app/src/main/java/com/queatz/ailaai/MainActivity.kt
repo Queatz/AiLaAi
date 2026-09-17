@@ -2,8 +2,6 @@ package com.queatz.ailaai
 
 import android.app.ComponentCaller
 import android.content.Intent
-import android.media.AudioRecord
-import android.media.MediaRecorder
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -99,7 +97,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import app.ailaai.api.ErrorBlock
-import app.ailaai.api.aiAssistantTranscribe
 import app.ailaai.api.groups
 import app.ailaai.api.me
 import app.ailaai.api.updateMe
@@ -129,6 +126,7 @@ import com.queatz.ailaai.item.InventoryScreen
 import com.queatz.ailaai.item.MyItemsScreen
 import com.queatz.ailaai.schedule.ReminderScreen
 import com.queatz.ailaai.schedule.RemindersScreen
+import com.queatz.ailaai.services.assistant
 import com.queatz.ailaai.services.calls
 import com.queatz.ailaai.services.connectivity
 import com.queatz.ailaai.services.joins
@@ -177,23 +175,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 import java.util.logging.Logger
 import kotlin.time.Duration.Companion.seconds
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.websocket.WebSockets as ClientWebSockets
-import io.ktor.client.plugins.websocket.webSocket
-import io.ktor.websocket.Frame
-import io.ktor.websocket.readText
-import io.ktor.http.HttpHeaders
-import io.ktor.client.request.header
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.Job
-import com.queatz.db.Reminder
 import com.queatz.ailaai.ui.permission.permissionRequester
-import kotlin.time.Duration.Companion.hours
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -203,10 +185,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.ui.graphics.Color
-import app.ailaai.api.newReminder
-import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 
 private val appTabKey = stringPreferencesKey("app.tab")
 private val appVersionCodeKey = intPreferencesKey("app.versionCode")
@@ -383,144 +361,18 @@ class MainActivity : AppCompatActivity() {
                     var appUi by rememberStateOf(AppUi())
                     var apiIsReachable by rememberStateOf(true)
 
-                    var isListening by remember { mutableStateOf(false) }
-                    var speechText by remember { mutableStateOf(resources.getString(R.string.listening)) }
-                    var assistantJob by remember { mutableStateOf<Job?>(null) }
+                    val isListening by assistant.isListening.collectAsState()
+                    val speechText by assistant.speechText.collectAsState()
                     val micPermissionRequester = permissionRequester(android.Manifest.permission.RECORD_AUDIO)
 
                     fun stopAssistant() {
-                        isListening = false
-                        assistantJob?.cancel()
-                        assistantJob = null
+                        assistant.stop()
                     }
 
                     fun startAssistant() {
-                        if (isListening) return
-                        isListening = true
-                        speechText = resources.getString(R.string.listening)
-
-                        assistantJob = scope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                            val languageCode = if (appLanguage?.startsWith("vi") == true) "vi" else "en"
-                            val wsUrl = api.baseUrl.replace("http://", "ws://").replace("https://", "wss://") + "/ai/assistant"
-                            val token = api.token()
-
-                            var audioRecord: android.media.AudioRecord? = null
-                            var finalTranscript = ""
-                            val recordedAudio = ByteArrayOutputStream()
-
-                            try {
-                                voiceAssistantClient.webSocket(
-                                    urlString = "$wsUrl?language=$languageCode",
-                                    request = {
-                                        if (token != null) {
-                                            header(HttpHeaders.Authorization, "Bearer $token")
-                                        }
-                                    }
-                                ) {
-                                    val sampleRate = 16000
-                                    val channelConfig = android.media.AudioFormat.CHANNEL_IN_MONO
-                                    val audioFormat = android.media.AudioFormat.ENCODING_PCM_16BIT
-                                    val minBufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
-
-                                    audioRecord = AudioRecord(
-                                        MediaRecorder.AudioSource.MIC,
-                                        sampleRate,
-                                        channelConfig,
-                                        audioFormat,
-                                        minBufferSize
-                                    )
-
-                                    audioRecord?.startRecording()
-
-                                    val sendJob = launch {
-                                        val buffer = ByteArray(2048)
-                                        try {
-                                            while (isActive && isListening) {
-                                                val read = audioRecord?.read(buffer, 0, buffer.size) ?: -1
-                                                if (read > 0) {
-                                                    val data = buffer.copyOf(read)
-                                                    recordedAudio.write(data)
-                                                    send(io.ktor.websocket.Frame.Binary(fin = true, data = data))
-                                                }
-                                                delay(20)
-                                            }
-                                        } catch (e: Exception) {
-                                            e.printStackTrace()
-                                        }
-                                    }
-
-                                    val receiveJob = launch {
-                                        try {
-                                            incoming.consumeEach { frame ->
-                                                if (frame is io.ktor.websocket.Frame.Text) {
-                                                    val text = frame.readText()
-                                                    if (text.isNotBlank()) {
-                                                        finalTranscript = text
-                                                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                                                            speechText = text
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        } catch (e: Exception) {
-                                            e.printStackTrace()
-                                        }
-                                    }
-
-                                    joinAll(sendJob, receiveJob)
-                                }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                                    context.toast("Connection error: ${e.localizedMessage}")
-                                }
-                            } finally {
-                                try {
-                                    audioRecord?.stop()
-                                    audioRecord?.release()
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                }
-
-                                val batchTranscript = kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable + kotlinx.coroutines.Dispatchers.IO) {
-                                    recordedAudio.toByteArray().takeIf { it.isNotEmpty() }?.let { audio ->
-                                        var transcript: String? = null
-                                        api.aiAssistantTranscribe(
-                                            audio = pcm16ToWav(audio),
-                                            language = languageCode,
-                                            onError = {
-                                                it.printStackTrace()
-                                            }
-                                        ) {
-                                            transcript = it.text
-                                        }
-                                        transcript
-                                    }
-                                }
-
-                                kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable + kotlinx.coroutines.Dispatchers.Main) {
-                                    isListening = false
-                                    batchTranscript?.let {
-                                        finalTranscript = it
-                                        speechText = it
-                                    }
-                                    if (finalTranscript.isNotBlank()) {
-                                        val startInstant = Clock.System.now().plus(1.hours)
-                                        val reminder = com.queatz.db.Reminder(
-                                            title = finalTranscript,
-                                            start = startInstant,
-                                            timezone = TimeZone.currentSystemDefault().id,
-                                            utcOffset = TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds / (60.0 * 60.0)
-                                        )
-                                        api.newReminder(reminder, onError = {
-                                            it.printStackTrace()
-                                        }) {
-                                            context.toast(context.getString(R.string.reminder_created))
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        assistant.start(
+                            context = context,
+                        )
                     }
 
                     fun toggleAssistant(forceStart: Boolean = false, forceStop: Boolean = false) {
@@ -927,6 +779,7 @@ class MainActivity : AppCompatActivity() {
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.Mic,
+                                                    // todo: translate
                                                     contentDescription = "Voice Assistant",
                                                     tint = if (isListening) MaterialTheme.colorScheme.onPrimary
                                                            else MaterialTheme.colorScheme.onPrimaryContainer,
@@ -1396,34 +1249,3 @@ data class NavButton(
     val icon: ImageVector,
     val selectedIcon: ImageVector? = null
 )
-
-private val voiceAssistantClient by lazy {
-    HttpClient(OkHttp) {
-        install(ClientWebSockets)
-    }
-}
-
-private fun pcm16ToWav(
-    audio: ByteArray,
-    sampleRate: Int = 16_000,
-): ByteArray {
-    val header = ByteBuffer
-        .allocate(44)
-        .order(ByteOrder.LITTLE_ENDIAN)
-        .put("RIFF".toByteArray())
-        .putInt(36 + audio.size)
-        .put("WAVE".toByteArray())
-        .put("fmt ".toByteArray())
-        .putInt(16)
-        .putShort(1)
-        .putShort(1)
-        .putInt(sampleRate)
-        .putInt(sampleRate * 2)
-        .putShort(2)
-        .putShort(16)
-        .put("data".toByteArray())
-        .putInt(audio.size)
-        .array()
-
-    return header + audio
-}
