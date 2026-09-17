@@ -2,7 +2,6 @@ package com.queatz.ailaai.db
 
 import android.content.Context
 import io.objectbox.BoxStore
-import io.objectbox.kotlin.boxFor
 
 val db by lazy {
     Db()
@@ -27,7 +26,7 @@ class Db {
         }
     }
 
-    inline fun <reified T : Any> box() = store.boxFor<T>()
+    inline fun <reified T : Any> box() = store.boxFor(T::class.java)
 
     fun clear() {
         close()

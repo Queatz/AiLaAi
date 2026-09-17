@@ -6,6 +6,7 @@ import org.jetbrains.kotlin.konan.properties.Properties
 
 plugins {
     id("com.android.application")
+    id("com.android.legacy-kapt")
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.compose)
     id("com.huawei.agconnect")
