@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.4.10-RC"
+kotlin = "2.4.20"
 coroutines = "1.11.0"
 ktor = "3.5.0"
 choiceSdk = "0.3.0"
