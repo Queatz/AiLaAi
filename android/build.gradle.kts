@@ -11,11 +11,11 @@ buildscript {
         val agpVersion = properties.getProperty("AGP_VERSION")
             .orEmpty()
             .ifBlank {
-                "9.4.0"
+                "9.1.0"
             }
         classpath("com.android.tools.build:gradle:$agpVersion")
         classpath(libs.kotlin.gradle.plugin)
-        classpath("com.huawei.agconnect:agcp:1.9.1.300")
+        classpath("com.huawei.agconnect:agcp:1.9.6.300")
         classpath("com.google.gms:google-services:4.5.0")
         classpath("io.objectbox:objectbox-gradle-plugin:5.4.2")
     }
