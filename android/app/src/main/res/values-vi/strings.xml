@@ -1128,4 +1128,5 @@
     <string name="languages">Ngôn ngữ</string>
     <string name="outdoors">Ngoài trời</string>
     <string name="listening">Đang nghe…</string>
+    <string name="transcribing">Đang chuyển lời…</string>
 </resources>

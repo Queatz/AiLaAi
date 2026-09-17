@@ -53,6 +53,8 @@ class Assistant {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val recording = AtomicBoolean(false)
     private var job: Job? = null
+    private var listeningLabel = ""
+    private var transcribingLabel = ""
 
     val isListening = MutableStateFlow(false)
     val speechText = MutableStateFlow("")
@@ -63,7 +65,9 @@ class Assistant {
         if (job?.isActive == true) return
 
         val appContext = context.applicationContext
-        speechText.value = appContext.getString(R.string.listening)
+        listeningLabel = appContext.getString(R.string.listening)
+        transcribingLabel = appContext.getString(R.string.transcribing)
+        speechText.value = listeningLabel
         isListening.value = true
         recording.set(true)
 
@@ -81,6 +85,9 @@ class Assistant {
 
     fun stop() {
         recording.set(false)
+        if (speechText.value == listeningLabel) {
+            speechText.value = transcribingLabel
+        }
     }
 
     @SuppressLint("MissingPermission")

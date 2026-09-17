@@ -1190,4 +1190,5 @@
     <string name="free">Free</string>
     <string name="timezone">Timezone</string>
     <string name="listening">Listening…</string>
+    <string name="transcribing">Transcribing…</string>
 </resources>
