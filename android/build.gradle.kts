@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.Delete
+
 buildscript {
     repositories {
         maven(url = "https://developer.huawei.com/repo/")
@@ -17,7 +19,7 @@ buildscript {
         classpath(libs.kotlin.gradle.plugin)
         classpath("com.huawei.agconnect:agcp:1.9.6.300")
         classpath("com.google.gms:google-services:4.5.0")
-        classpath("io.objectbox:objectbox-gradle-plugin:5.4.2")
+        classpath("io.objectbox:objectbox-gradle-plugin:6.0.0-beta")
     }
 }
 
