@@ -41,7 +41,7 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import at.bluesource.choicesdk.maps.common.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import app.ailaai.api.people

@@ -48,7 +48,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import app.ailaai.api.uploadAudio
-import at.bluesource.choicesdk.maps.common.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api

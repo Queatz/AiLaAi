@@ -12,7 +12,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import at.bluesource.choicesdk.core.Outcome
 import at.bluesource.choicesdk.location.common.LocationRequest
 import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
-import at.bluesource.choicesdk.maps.common.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.google.accompanist.permissions.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.dataStore
@@ -88,7 +88,7 @@ fun locationSelector(
         if (geo == null) {
             val savedGeo = context.dataStore.data.first()[geoKey]?.split(",")?.map { it.toDouble() }
             if (savedGeo != null) {
-                onGeoChange(LatLng.getFactory().create(savedGeo[0], savedGeo[1]))
+                onGeoChange(LatLng(savedGeo[0], savedGeo[1]))
             }
         } else {
             context.dataStore.edit {

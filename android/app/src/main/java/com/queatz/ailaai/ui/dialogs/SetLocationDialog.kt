@@ -26,7 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import at.bluesource.choicesdk.maps.common.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.MapWithMarker

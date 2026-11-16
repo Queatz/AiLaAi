@@ -36,7 +36,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.*
 import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
-import at.bluesource.choicesdk.maps.common.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState

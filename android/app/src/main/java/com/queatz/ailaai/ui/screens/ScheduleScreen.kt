@@ -33,6 +33,7 @@ import com.queatz.ailaai.schedule.ScheduleView.*
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Reminder
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -47,14 +48,15 @@ import kotlin.time.Duration.Companion.minutes
 private val viewKey = stringPreferencesKey("schedule.view")
 
 private var cache = emptyList<ReminderEvent>()
+private var viewCache: ScheduleView? = null
 
 @Composable
 fun ScheduleScreen() {
     var events by rememberStateOf(cache)
     val onExpand = remember { MutableSharedFlow<Unit>() }
     val scope = rememberCoroutineScope()
-    var isLoading by rememberStateOf(true)
-    var view by rememberStateOf<ScheduleView?>(null)
+    var isLoading by rememberStateOf(events.isEmpty())
+    var view by rememberStateOf(viewCache)
     val state = rememberLazyListState()
     val context = LocalContext.current
     val nav = nav
@@ -79,6 +81,7 @@ fun ScheduleScreen() {
         } ?: let {
             view = ScheduleView.Daily
         }
+        viewCache = view
     }
 
     fun initialRange(): Pair<Instant, Instant> {
@@ -122,9 +125,17 @@ fun ScheduleScreen() {
 
     suspend fun reload() {
         val range = range
+        var cancelled = false
         api.occurrences(
             range.first,
-            range.second
+            range.second,
+            onError = {
+                if (it is CancellationException || it is InterruptedException) {
+                    cancelled = true
+                } else {
+                    context.showDidntWork(R.string.error_load_occurrences)
+                }
+            }
         ) {
             val scrollToTop = range.first != shownRange.first
             shownRange = range
@@ -196,10 +207,13 @@ fun ScheduleScreen() {
                 toTop()
             }
         }
-        isLoading = false
+        if (!cancelled) {
+            isLoading = false
+        }
     }
 
     LaunchedEffect(view, range) {
+        if (view == null) return@LaunchedEffect
         reload()
         updates.collectLatest {
             reload()
@@ -207,6 +221,7 @@ fun ScheduleScreen() {
     }
 
     LaunchedEffect(view, range) {
+        if (view == null) return@LaunchedEffect
         while (true) {
             delay(15.minutes)
             reload()
@@ -276,6 +291,7 @@ fun ScheduleScreen() {
                                 range = initialRange()
                             } else {
                                 view = it
+                                viewCache = it
                                 scope.launch {
                                     context.dataStore.edit {
                                         it[viewKey] = view.toString()
@@ -296,38 +312,43 @@ fun ScheduleScreen() {
 
             val view = view
 
-            if (isLoading || view == null) {
-                Loading()
-            } else {
-                val shownEvents = remember(selectedCategory, events) {
-                    if (selectedCategory == null) {
-                        events
-                    } else {
-                        events.filter { it.reminder.categories?.contains(selectedCategory) == true }
-                    }
+            val shownEvents = remember(selectedCategory, events) {
+                if (selectedCategory == null) {
+                    events
+                } else {
+                    events.filter { it.reminder.categories?.contains(selectedCategory) == true }
                 }
-                LazyColumn(
-                    state = state,
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        start = 1.pad,
-                        end = 1.pad,
-                        top = 1.pad,
-                        bottom = 1.pad + 80.dp
-                    )
-                ) {
-                    if (shownEvents.isNotEmpty()) {
-                        item(contentType = -1) {
-                            var isInitial by remember {
-                                mutableStateOf(true)
-                            }
-                            LoadMore(hasMore = true, permanent = true, contentPadding = 1.pad) {
-                                if (isInitial) {
-                                    isInitial = false
-                                    toTop()
-                                } else {
-                                    range = (range.first - view.duration) to range.second
-                                }
+            }
+
+            LazyColumn(
+                state = state,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start = 1.pad,
+                    end = 1.pad,
+                    top = 1.pad,
+                    bottom = 1.pad + 80.dp
+                )
+            ) {
+                if (isLoading || view == null) {
+                    item {
+                        Loading()
+                    }
+                } else if (shownEvents.isEmpty()) {
+                    item {
+                        EmptyText(stringResource(R.string.nothing_scheduled))
+                    }
+                } else {
+                    item(contentType = -1) {
+                        var isInitial by remember {
+                            mutableStateOf(true)
+                        }
+                        LoadMore(hasMore = true, permanent = true, contentPadding = 1.pad) {
+                            if (isInitial) {
+                                isInitial = false
+                                toTop()
+                            } else {
+                                range = (range.first - view.duration) to range.second
                             }
                         }
                     }
@@ -367,15 +388,13 @@ fun ScheduleScreen() {
                         today = end
                     }
 
-                    if (shownEvents.isNotEmpty()) {
-                        item(contentType = -1) {
-                            LoadMore(
-                                hasMore = true,
-                                permanent = true,
-                                contentPadding = 1.pad
-                            ) {
-                                range = range.first to (range.second + view.duration)
-                            }
+                    item(contentType = -1) {
+                        LoadMore(
+                            hasMore = true,
+                            permanent = true,
+                            contentPadding = 1.pad
+                        ) {
+                            range = range.first to (range.second + view.duration)
                         }
                     }
                 }

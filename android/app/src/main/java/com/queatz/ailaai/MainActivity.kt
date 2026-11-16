@@ -616,6 +616,17 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
+                    fun onTabClick(item: NavButton) {
+                        if (startDestinationLoaded) {
+                            if (navController.currentDestination?.route != item.route.route) {
+                                navController.popBackStack()
+                                navController.appNavigate(item.route)
+                            } else if (item.route == AppNav.Messages) {
+                                messages.reload()
+                            }
+                        }
+                    }
+
                     Scaffold(
                         bottomBar = {
                             if (showNavigation && !isLandscape) {
@@ -721,10 +732,7 @@ class MainActivity : AppCompatActivity() {
                                                 selected = selected,
                                                 modifier = if (appUi.showNavLabels) Modifier.offset(y = 4.dp) else Modifier,
                                                 onClick = {
-                                                    if (startDestinationLoaded && navController.currentDestination?.route != item.route.route) {
-                                                        navController.popBackStack()
-                                                        navController.appNavigate(item.route)
-                                                    }
+                                                    onTabClick(item)
                                                 }
                                             )
                                         }
@@ -826,10 +834,7 @@ class MainActivity : AppCompatActivity() {
                                                 selected = selected,
                                                 modifier = if (appUi.showNavLabels) Modifier.offset(y = 4.dp) else Modifier,
                                                 onClick = {
-                                                    if (startDestinationLoaded && navController.currentDestination?.route != item.route.route) {
-                                                        navController.popBackStack()
-                                                        navController.appNavigate(item.route)
-                                                    }
+                                                    onTabClick(item)
                                                 }
                                             )
                                         }
@@ -899,10 +904,7 @@ class MainActivity : AppCompatActivity() {
                                                 },
                                                 selected = navController.currentDestination?.route?.substringBefore("/") == item.route.route.substringBefore("/"),
                                                 onClick = {
-                                                    if (startDestinationLoaded && navController.currentDestination?.route != item.route.route) {
-                                                        navController.popBackStack()
-                                                        navController.appNavigate(item.route)
-                                                    }
+                                                    onTabClick(item)
                                                 },
                                                 modifier = Modifier.padding(horizontal = .5f.pad)
                                             )

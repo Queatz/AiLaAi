@@ -34,7 +34,8 @@
             android:label="@string/app_name"
             android:localeConfig="@xml/locales_config"
             android:appCategory="social"
-            android:theme="@style/Theme.AiLaAi">
+            android:theme="@style/Theme.AiLaAi"
+            tools:targetApi="33">
         <activity
                 android:name=".MainActivity"
                 android:exported="true"
@@ -195,11 +196,13 @@
                 android:name="com.huawei.hms.client.appid"
                 android:value="appid=${HMS_APP_ID}"/>
 
-        <receiver android:name="com.huawei.hms.support.api.push.PushMsgReceiver" android:exported="true"
-                  tools:node="merge"/>
-
-        <receiver android:name="com.huawei.hms.support.api.push.PushReceiver" android:exported="true"
-                  tools:node="merge"/>
+        <service
+                android:name=".services.MessagingService"
+                android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
 
         <!-- VideoSDK -->
 

@@ -69,11 +69,11 @@ import androidx.core.graphics.div
 import androidx.core.graphics.plus
 import androidx.core.view.doOnAttach
 import androidx.core.view.doOnDetach
-import at.bluesource.choicesdk.maps.common.CameraPosition
-import at.bluesource.choicesdk.maps.common.CameraUpdateFactory
-import at.bluesource.choicesdk.maps.common.LatLng
-import at.bluesource.choicesdk.maps.common.Map
-import at.bluesource.choicesdk.maps.common.MapFragment
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -142,7 +142,7 @@ fun MapScreen(
         mutableStateOf(null)
     }
     val nav = nav
-    var mapType by rememberSavableStateOf(Map.MAP_TYPE_NORMAL)
+    var mapType by rememberSavableStateOf(GoogleMap.MAP_TYPE_NORMAL)
     var zoom by rememberSavableStateOf<Float?>(null)
     val scope = rememberCoroutineScope()
     var cameraPosition by rememberStateOf<CameraPosition?>(null)
@@ -152,7 +152,7 @@ fun MapScreen(
 
     var mapKey by remember { mutableStateOf(0) }
     var composed by remember { mutableStateOf(false) }
-    var map: Map? by remember { mutableStateOf(null) }
+    var map: GoogleMap? by remember { mutableStateOf(null) }
     var mapView: LayoutMapBinding? by remember { mutableStateOf(null) }
 
     LaunchedEffect(control) {
@@ -186,9 +186,9 @@ fun MapScreen(
 
     LaunchedEffect(cameraPosition) {
         mapType = if ((cameraPosition?.zoom ?: 0f) > 20f) {
-            Map.MAP_TYPE_HYBRID
+            GoogleMap.MAP_TYPE_HYBRID
         } else {
-            Map.MAP_TYPE_NORMAL
+            GoogleMap.MAP_TYPE_NORMAL
         }
     }
 
@@ -199,12 +199,12 @@ fun MapScreen(
     LaunchedEffect(Unit) {
         recenter.collect {
             map?.animateCamera(
-                CameraUpdateFactory.get().newCameraPosition(
+                CameraUpdateFactory.newCameraPosition(
                     CameraPosition.Builder()
-                        .setTarget(it.first)
-                        .setZoom(it.second ?: 14f)
-                        .setBearing(if (it.second == null) 0f else map?.cameraPosition?.bearing ?: 0f)
-                        .setTilt(if (it.second == null) 0f else map?.cameraPosition?.tilt ?: 0f)
+                        .target(it.first)
+                        .zoom(it.second ?: 14f)
+                        .bearing(if (it.second == null) 0f else map?.cameraPosition?.bearing ?: 0f)
+                        .tilt(if (it.second == null) 0f else map?.cameraPosition?.tilt ?: 0f)
                         .build()
                 )
             )
@@ -232,7 +232,7 @@ fun MapScreen(
         cardPositions = renderedCards.map { card ->
             Pin(
                 card = card,
-                position = map!!.getProjection().toScreenLocation(card.geo!!.toLatLng()!!)
+                position = map!!.projection.toScreenLocation(card.geo!!.toLatLng()!!)
             )
         }
     }
@@ -273,12 +273,12 @@ fun MapScreen(
                     }
                 }
 
-                view.getFragment<MapFragment>().getMapAsync {
+                view.getFragment<SupportMapFragment>().getMapAsync {
                     map = it
                     map?.apply {
                         clear()
 
-                        getUiSettings().apply {
+                        uiSettings.apply {
                             isMapToolbarEnabled = true
                             isCompassEnabled = true
                             isMyLocationButtonEnabled = true
@@ -308,10 +308,10 @@ fun MapScreen(
                         }
 
                         moveCamera(
-                            CameraUpdateFactory.get().newCameraPosition(
+                            CameraUpdateFactory.newCameraPosition(
                                 CameraPosition.Builder()
-                                    .setTarget(position ?: return@apply)
-                                    .setZoom(zoom ?: 14f)
+                                    .target(position ?: return@apply)
+                                    .zoom(zoom ?: 14f)
                                     .build()
                             )
                         )
@@ -338,7 +338,7 @@ fun MapScreen(
                 if (nearby.size == 1) {
                     block()
                 } else {
-                    val geo = map.getProjection().fromScreenLocation(nearby.average())
+                    val geo = map.projection.fromScreenLocation(nearby.average())
                     scope.launch { recenter.emit(geo to map.cameraPosition.zoom + 2f) }
                 }
             }
@@ -353,7 +353,7 @@ fun MapScreen(
                 key(inventory.id) {
                     var placed by remember(inventory) { mutableStateOf(false) }
                     var size by remember { mutableStateOf(IntSize(0, 0)) }
-                    val pos = map.getProjection().toScreenLocation(inventory.geo!!.toLatLng()!!)
+                    val pos = map.projection.toScreenLocation(inventory.geo!!.toLatLng()!!)
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,

@@ -46,7 +46,7 @@ import app.ailaai.api.myGeo
 import app.ailaai.api.people
 import app.ailaai.api.recentStatuses
 import app.ailaai.api.updateGroup
-import at.bluesource.choicesdk.maps.common.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.cache.CacheKey
@@ -226,6 +226,15 @@ fun FriendsScreen() {
             .collectLatest {
                 reloadFlow.emit(true)
             }
+    }
+
+    LaunchedEffect(Unit) {
+        messages.onReload.collectLatest {
+            scope.launch {
+                state.scrollToTop()
+            }
+            reloadFlow.emit(false)
+        }
     }
 
     ResumeEffect {

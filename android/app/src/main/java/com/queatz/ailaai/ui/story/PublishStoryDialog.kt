@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import app.ailaai.api.card
 import app.ailaai.api.profile
-import at.bluesource.choicesdk.maps.common.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.storyDraft
 import com.queatz.ailaai.data.api
