@@ -13,6 +13,7 @@ suspend fun Api.ratings(
         "offset" to offset.toString(),
         "limit" to limit.toString()
     ),
+    errorContext = "load ratings",
     onError = onError,
     onSuccess = onSuccess
 )

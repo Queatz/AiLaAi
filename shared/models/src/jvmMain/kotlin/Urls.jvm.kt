@@ -1,11 +1,11 @@
 package com.queatz.db
 
-import java.net.URL
+import java.net.URI
 
 actual class UrlValidator actual constructor() {
     actual fun validate(url: String): String? {
         return try {
-            URL(url).toString()
+            URI(url).toURL().toString()
         } catch (_: Throwable) {
             null
         }

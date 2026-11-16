@@ -12,6 +12,7 @@ suspend fun Api.message(
     onSuccess: SuccessBlock<Message>,
 ) = get(
     "messages/$message",
+    errorContext = "load message",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -24,6 +25,7 @@ suspend fun Api.updateMessage(
 ) = post(
     "messages/$id",
     messageUpdate,
+    errorContext = "update message",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -33,13 +35,13 @@ suspend fun Api.reactToMessage(
     react: ReactBody,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {}
-) = post("messages/$id/react", react, onError = onError, onSuccess = onSuccess)
+) = post("messages/$id/react", react, errorContext = "react to message", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.messageReactions(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<ReactionAndPerson>> = {}
-) = get("messages/$id/reactions", onError = onError, onSuccess = onSuccess)
+) = get("messages/$id/reactions", errorContext = "load reactions", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.deleteMessage(
     message: String,
@@ -47,6 +49,7 @@ suspend fun Api.deleteMessage(
     onSuccess: SuccessBlock<HttpStatusCode>,
 ) = post(
     "messages/$message/delete",
+    errorContext = "delete message",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -57,6 +60,7 @@ suspend fun Api.messageRating(
     onSuccess: SuccessBlock<Rating>,
 ) = get(
     url = "/messages/$id/rating",
+    errorContext = "load rating",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -69,6 +73,7 @@ suspend fun Api.setMessageRating(
 ) = post(
     url = "/messages/$id/rating",
     body = rating,
+    errorContext = "rate message",
     onError = onError,
     onSuccess = onSuccess
 )

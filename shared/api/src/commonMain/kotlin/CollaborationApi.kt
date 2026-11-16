@@ -12,6 +12,7 @@ suspend fun Api.myCollaborations(
     onSuccess: SuccessBlock<List<Card>> = {}
 ) = get(
     "me/collaborations",
+    errorContext = "load collaborations",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -23,6 +24,7 @@ suspend fun Api.leaveCollaboration(
 ) = post(
     "me/collaborations/leave",
     LeaveCollaborationBody(card),
+    errorContext = "leave collaboration",
     onError = onError,
     onSuccess = onSuccess
 )

@@ -53,7 +53,7 @@ import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.extensions.format
 import com.queatz.ailaai.extensions.isUnread
 import com.queatz.ailaai.extensions.name
-import com.queatz.ailaai.extensions.nullIfBlank
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.photos
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.timeAgo
@@ -442,7 +442,7 @@ val GroupExtended.latestMessagePersonOrBotName
             ?: stringResource(R.string.someone)
 
 private fun Message.preview(context: Context): String? {
-    return text?.nullIfBlank ?: attachmentText(context)
+    return text?.notBlank ?: attachmentText(context)
 }
 
 

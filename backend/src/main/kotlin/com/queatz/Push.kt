@@ -82,122 +82,134 @@ class Push {
     private suspend fun start() {
         withContext(Dispatchers.IO) {
             // HMS token
-            launch {
-                while (Thread.currentThread().isAlive) {
-                    try {
-                        val response = http.post(hmsOAuthEndpoint) {
-                            header("Host", "oauth-login.cloud.huawei.com")
-                            contentType(ContentType.Application.FormUrlEncoded)
-                            setBody(FormDataContent(Parameters.build {
-                                append("grant_type", "client_credentials")
-                                append("client_id", secrets.hms.clientId)
-                                append("client_secret", secrets.hms.clientSecret)
-                            }))
-                        }
-
-                        Logger.getAnonymousLogger().info(response.toString())
-
-                        if (response.status.isSuccess()) {
-                            response.body<OAuthResponse>().let {
-                                hmsToken = it.access_token
-                                delay((it.expires_in ?: 1.hours.inWholeSeconds).seconds.minus(30.seconds))
+            if (secrets.hms.appId.isBlank() || secrets.hms.clientId.isBlank() || secrets.hms.clientSecret.isBlank()) {
+                Logger.getAnonymousLogger().warning("HMS push is disabled: missing hms secrets")
+            } else {
+                launch {
+                    while (Thread.currentThread().isAlive) {
+                        try {
+                            val response = http.post(hmsOAuthEndpoint) {
+                                header("Host", "oauth-login.cloud.huawei.com")
+                                contentType(ContentType.Application.FormUrlEncoded)
+                                setBody(FormDataContent(Parameters.build {
+                                    append("grant_type", "client_credentials")
+                                    append("client_id", secrets.hms.clientId)
+                                    append("client_secret", secrets.hms.clientSecret)
+                                }))
                             }
-                        } else {
-                            delay(1.minutes)
+
+                            Logger.getAnonymousLogger().info(response.toString())
+
+                            if (response.status.isSuccess()) {
+                                response.body<OAuthResponse>().let {
+                                    hmsToken = it.access_token
+                                    delay((it.expires_in ?: 1.hours.inWholeSeconds).seconds.minus(30.seconds))
+                                }
+                            } else {
+                                delay(1.minutes)
+                            }
+                        } catch (throwable: Throwable) {
+                            throwable.printStackTrace()
+                            delay(15.seconds)
                         }
-                    } catch (throwable: Throwable) {
-                        throwable.printStackTrace()
-                        delay(15.seconds)
                     }
                 }
             }
 
             // GMS token
-            launch {
-                while (Thread.currentThread().isAlive) {
-                    try {
-                        val keySpecPKCS8 = PKCS8EncodedKeySpec(Base64.getDecoder().decode(secrets.gms.privateKey))
-                        val privateKey = KeyFactory.getInstance("RSA").generatePrivate(keySpecPKCS8)
-                        val token = JWT.create()
-                            .withAudience(gmsOAuthEndpoint)
-                            .withIssuer(secrets.gms.clientEmail)
-                            .withKeyId(secrets.gms.privateKeyId)
-                            .withSubject(secrets.gms.clientEmail)
-                            .withIssuedAt(Clock.System.now().toJavaInstant().toGMTDate().toJvmDate())
-                            .withExpiresAt(Clock.System.now().plus(1.hours).toJavaInstant().toGMTDate().toJvmDate())
-                            .withClaim("scope", "https://www.googleapis.com/auth/firebase.messaging")
-                            .withClaim("type", "service_account")
-                            .sign(Algorithm.RSA256(null, privateKey as RSAPrivateKey))
+            if (secrets.gms.appId.isBlank() || secrets.gms.clientEmail.isBlank() || secrets.gms.privateKeyId.isBlank() || secrets.gms.privateKey.isBlank()) {
+                Logger.getAnonymousLogger().warning("GMS push is disabled: missing gms secrets")
+            } else {
+                launch {
+                    while (Thread.currentThread().isAlive) {
+                        try {
+                            val keySpecPKCS8 = PKCS8EncodedKeySpec(Base64.getDecoder().decode(secrets.gms.privateKey))
+                            val privateKey = KeyFactory.getInstance("RSA").generatePrivate(keySpecPKCS8)
+                            val token = JWT.create()
+                                .withAudience(gmsOAuthEndpoint)
+                                .withIssuer(secrets.gms.clientEmail)
+                                .withKeyId(secrets.gms.privateKeyId)
+                                .withSubject(secrets.gms.clientEmail)
+                                .withIssuedAt(Clock.System.now().toJavaInstant().toGMTDate().toJvmDate())
+                                .withExpiresAt(Clock.System.now().plus(1.hours).toJavaInstant().toGMTDate().toJvmDate())
+                                .withClaim("scope", "https://www.googleapis.com/auth/firebase.messaging")
+                                .withClaim("type", "service_account")
+                                .sign(Algorithm.RSA256(null, privateKey as RSAPrivateKey))
 
-                        val response = http.post(gmsOAuthEndpoint) { // https://oauth2.googleapis.com/token ??
-                            contentType(ContentType.Application.FormUrlEncoded)
-                            setBody(FormDataContent(Parameters.build {
-                                append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
-                                append("assertion", token)
-                            }))
-                        }
-
-                        Logger.getAnonymousLogger().info(response.toString())
-
-                        if (response.status.isSuccess()) {
-                            response.body<OAuthResponse>().let {
-                                gmsToken = it.access_token
-                                delay((it.expires_in ?: 1.hours.inWholeSeconds).seconds.minus(30.seconds))
+                            val response = http.post(gmsOAuthEndpoint) { // https://oauth2.googleapis.com/token ??
+                                contentType(ContentType.Application.FormUrlEncoded)
+                                setBody(FormDataContent(Parameters.build {
+                                    append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
+                                    append("assertion", token)
+                                }))
                             }
-                        } else {
-                            delay(1.minutes)
+
+                            Logger.getAnonymousLogger().info(response.toString())
+
+                            if (response.status.isSuccess()) {
+                                response.body<OAuthResponse>().let {
+                                    gmsToken = it.access_token
+                                    delay((it.expires_in ?: 1.hours.inWholeSeconds).seconds.minus(30.seconds))
+                                }
+                            } else {
+                                delay(1.minutes)
+                            }
+                        } catch (throwable: Throwable) {
+                            throwable.printStackTrace()
+                            delay(15.seconds)
                         }
-                    } catch (throwable: Throwable) {
-                        throwable.printStackTrace()
-                        delay(15.seconds)
                     }
                 }
             }
 
             // APNS token
-            launch {
-                while (Thread.currentThread().isAlive) {
-                    try {
-                        val keySpecPKCS8 = PKCS8EncodedKeySpec(Base64.getDecoder().decode(secrets.apns.privateKey))
-                        val privateKey = KeyFactory.getInstance("EC").generatePrivate(keySpecPKCS8)
-                        val token = JWT.create()
-                            .withAudience(apnsPushEndpoint)
-                            .withIssuer(secrets.apns.teamId)
-                            .withKeyId(secrets.apns.privateKeyId)
-                            .withSubject(secrets.apns.teamId)
-                            .withIssuedAt(Clock.System.now().toJavaInstant().toGMTDate().toJvmDate())
-                            .withExpiresAt(Clock.System.now().plus(1.hours).toJavaInstant().toGMTDate().toJvmDate())
-                            .sign(Algorithm.ECDSA256(null, privateKey as ECPrivateKey))
+            if (secrets.apns.privateKey.isBlank() || secrets.apns.privateKeyId.isBlank() || secrets.apns.teamId.isBlank()) {
+                Logger.getAnonymousLogger().warning("APNS push is disabled: missing apns secrets")
+            } else {
+                launch {
+                    while (Thread.currentThread().isAlive) {
+                        try {
+                            val keySpecPKCS8 = PKCS8EncodedKeySpec(Base64.getDecoder().decode(secrets.apns.privateKey))
+                            val privateKey = KeyFactory.getInstance("EC").generatePrivate(keySpecPKCS8)
+                            val token = JWT.create()
+                                .withAudience(apnsPushEndpoint)
+                                .withIssuer(secrets.apns.teamId)
+                                .withKeyId(secrets.apns.privateKeyId)
+                                .withSubject(secrets.apns.teamId)
+                                .withIssuedAt(Clock.System.now().toJavaInstant().toGMTDate().toJvmDate())
+                                .withExpiresAt(Clock.System.now().plus(1.hours).toJavaInstant().toGMTDate().toJvmDate())
+                                .sign(Algorithm.ECDSA256(null, privateKey as ECPrivateKey))
 
-                        apnsToken = token
-                        delay(1.hours.inWholeSeconds.seconds.minus(30.seconds))
-                    } catch (throwable: Throwable) {
-                        throwable.printStackTrace()
-                        delay(15.seconds)
+                            apnsToken = token
+                            delay(1.hours.inWholeSeconds.seconds.minus(30.seconds))
+                        } catch (throwable: Throwable) {
+                            throwable.printStackTrace()
+                            delay(15.seconds)
+                        }
                     }
                 }
-            }
 
-            // APNS Sandbox token
-            launch {
-                while (Thread.currentThread().isAlive) {
-                    try {
-                        val keySpecPKCS8 = PKCS8EncodedKeySpec(Base64.getDecoder().decode(secrets.apns.privateKey))
-                        val privateKey = KeyFactory.getInstance("EC").generatePrivate(keySpecPKCS8)
-                        val token = JWT.create()
-                            .withAudience(apnsPushSandboxEndpoint)
-                            .withIssuer(secrets.apns.teamId)
-                            .withKeyId(secrets.apns.privateKeyId)
-                            .withSubject(secrets.apns.teamId)
-                            .withIssuedAt(Clock.System.now().toJavaInstant().toGMTDate().toJvmDate())
-                            .withExpiresAt(Clock.System.now().plus(1.hours).toJavaInstant().toGMTDate().toJvmDate())
-                            .sign(Algorithm.ECDSA256(null, privateKey as ECPrivateKey))
+                // APNS Sandbox token
+                launch {
+                    while (Thread.currentThread().isAlive) {
+                        try {
+                            val keySpecPKCS8 = PKCS8EncodedKeySpec(Base64.getDecoder().decode(secrets.apns.privateKey))
+                            val privateKey = KeyFactory.getInstance("EC").generatePrivate(keySpecPKCS8)
+                            val token = JWT.create()
+                                .withAudience(apnsPushSandboxEndpoint)
+                                .withIssuer(secrets.apns.teamId)
+                                .withKeyId(secrets.apns.privateKeyId)
+                                .withSubject(secrets.apns.teamId)
+                                .withIssuedAt(Clock.System.now().toJavaInstant().toGMTDate().toJvmDate())
+                                .withExpiresAt(Clock.System.now().plus(1.hours).toJavaInstant().toGMTDate().toJvmDate())
+                                .sign(Algorithm.ECDSA256(null, privateKey as ECPrivateKey))
 
-                        apnsToken = token
-                        delay(1.hours.inWholeSeconds.seconds.minus(30.seconds))
-                    } catch (throwable: Throwable) {
-                        throwable.printStackTrace()
-                        delay(15.seconds)
+                            apnsToken = token
+                            delay(1.hours.inWholeSeconds.seconds.minus(30.seconds))
+                        } catch (throwable: Throwable) {
+                            throwable.printStackTrace()
+                            delay(15.seconds)
+                        }
                     }
                 }
             }
@@ -220,10 +232,15 @@ class Push {
         Logger.getAnonymousLogger().info(json.encodeToString(pushData))
         when (device.type!!) {
             DeviceType.Hms -> {
+                val token = hmsToken
+                if (token == null) {
+                    Logger.getAnonymousLogger().warning("Skipping HMS push: missing hmsToken")
+                    return
+                }
                 try {
                     val response = http.post(hmsPushEndpoint) {
                         contentType(ContentType.Application.Json.withCharset(UTF_8))
-                        header(HttpHeaders.Authorization, "Bearer $hmsToken")
+                        header(HttpHeaders.Authorization, "Bearer $token")
                         setBody(
                             HmsPushBody(
                                 HmsPushBodyMessage(
@@ -241,10 +258,15 @@ class Push {
             }
 
             DeviceType.Gms -> {
+                val token = gmsToken
+                if (token == null) {
+                    Logger.getAnonymousLogger().warning("Skipping GMS push: missing gmsToken")
+                    return
+                }
                 try {
                     val response = http.post(gmsPushEndpoint) {
                         contentType(ContentType.Application.Json.withCharset(UTF_8))
-                        header(HttpHeaders.Authorization, "Bearer $gmsToken")
+                        header(HttpHeaders.Authorization, "Bearer $token")
                         setBody(
                             GmsPushBody(
                                 GmsPushBodyMessage(
@@ -291,10 +313,15 @@ class Push {
                 events.emit(pushData to device)
             }
             DeviceType.Apns -> {
+                val token = apnsToken
+                if (token == null) {
+                    Logger.getAnonymousLogger().warning("Skipping APNS push: missing apnsToken")
+                    return
+                }
                 try {
                     val response = http2.post("$apnsPushEndpoint/3/device/${device.token!!}") {
                         contentType(ContentType.Application.Json.withCharset(UTF_8))
-                        header(HttpHeaders.Authorization, "Bearer $apnsToken")
+                        header(HttpHeaders.Authorization, "Bearer $token")
                         header("apns-push-type", "alert")
                         header("apns-topic", secrets.apns.topic)//todo move to secrets.json
                         setBody(
@@ -319,7 +346,7 @@ class Push {
                 try {
                     val response = http2.post("$apnsPushSandboxEndpoint/3/device/${device.token!!}") {
                         contentType(ContentType.Application.Json.withCharset(UTF_8))
-                        header(HttpHeaders.Authorization, "Bearer $apnsToken")
+                        header(HttpHeaders.Authorization, "Bearer $token")
                         header("apns-push-type", "alert")
                         header("apns-topic", secrets.apns.topic)//todo move to secrets.json
                         setBody(

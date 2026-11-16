@@ -6,4 +6,4 @@ import com.queatz.db.Account
 suspend fun Api.account(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Account> = {}
-) = get("account", onError = onError, onSuccess = onSuccess)
+) = get("account", errorContext = "load account", onError = onError, onSuccess = onSuccess)

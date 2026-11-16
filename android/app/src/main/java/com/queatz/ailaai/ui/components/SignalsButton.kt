@@ -20,19 +20,23 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
-import app.ailaai.api.activeSignals
-import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.greetingRes
 import com.queatz.ailaai.extensions.rememberAnimatedGradientBrush
+import com.queatz.ailaai.services.push
+import com.queatz.ailaai.services.signals
 import com.queatz.ailaai.ui.theme.pad
+import com.queatz.push.SignalPushData
+import com.queatz.push.SignalReplyPushData
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun SignalsButton(
     onClick: () -> Unit
 ) {
-    var count by remember { mutableIntStateOf(0) }
+    val activeSignals by signals.rememberActiveSignals()
+    val count = activeSignals?.let { it.mine.size + it.others.size } ?: 0
 
     val isDark = isSystemInDarkTheme()
 
@@ -72,11 +76,17 @@ fun SignalsButton(
 
     LaunchedEffect(Unit) {
         while (true) {
-            api.activeSignals(onError = {}) {
-                count = it.mine.size + it.others.size
-            }
+            signals.reload()
             delay(30.seconds)
         }
+    }
+
+    LaunchedEffect(push) {
+        push.events
+            .filter { it is SignalPushData || it is SignalReplyPushData }
+            .collect {
+                signals.reload()
+            }
     }
 
     Box(

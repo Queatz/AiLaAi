@@ -61,7 +61,7 @@ fun String.launchUrl(context: Context) {
         )
     } catch (t: Throwable) {
         t.printStackTrace()
-        context.showDidntWork()
+        context.showDidntWork(R.string.error_open_link)
     }
 }
 

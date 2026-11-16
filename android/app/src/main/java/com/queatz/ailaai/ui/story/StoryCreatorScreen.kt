@@ -262,7 +262,7 @@ fun StoryCreatorScreen(
     }
 
     suspend fun publish() {
-        if (edited) return context.showDidntWork()
+        if (edited) return context.showDidntWork(R.string.error_save_post)
 
         if (storyContents.any(::isBlankText)) {
             storyContents = storyContents.toMutableList().filterNot(::isBlankText)

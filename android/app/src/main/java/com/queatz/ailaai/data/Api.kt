@@ -52,6 +52,7 @@ class Api : app.ailaai.api.Api() {
 
     override val baseUrl = "https://api.ailaai.app"
 //    private val baseUrl = "http://10.0.2.2:8080"
+//    override val baseUrl = "https://127.0.0.1:8443"
 
     private val tokenKey = stringPreferencesKey("token")
 
@@ -110,11 +111,15 @@ class Api : app.ailaai.api.Api() {
     fun url(it: String) = "$baseUrl$it"
 
     override suspend fun showError(t: Throwable) {
+        showError(t, null)
+    }
+
+    override suspend fun showError(t: Throwable, errorContext: String?) {
         t.printStackTrace()
         // Usually cancellations are from the user leaving the page
         if (t !is CancellationException && t !is InterruptedException) {
             withContext(Dispatchers.Main) {
-                context.showDidntWork()
+                context.showDidntWork(errorContext)
             }
         }
     }

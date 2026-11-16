@@ -2,7 +2,7 @@ package com.queatz.ailaai.services
 
 import android.content.Context
 import android.content.Intent
-import androidx.core.os.bundleOf
+import android.os.Bundle
 import app.ailaai.api.calls
 import app.ailaai.api.group
 import app.ailaai.api.groupCall
@@ -137,10 +137,10 @@ class Calls {
                 context,
                 CallService::class.java
             ).putExtras(
-                bundleOf(
-                    GROUP_ID_EXTRA to groupId,
-                    GROUP_NAME_EXTRA to groupName
-                )
+                Bundle().apply {
+                    putString(GROUP_ID_EXTRA, groupId)
+                    putString(GROUP_NAME_EXTRA, groupName)
+                }
             )
         )
     }
@@ -248,7 +248,7 @@ class Calls {
                                 streams = active.value!!.streams + GroupCallParticipant(
                                     participant = participant,
                                     stream = stream!!.track,
-                                    kind = stream!!.kind
+                                    kind = stream.kind
                                 )
                             )
                         }

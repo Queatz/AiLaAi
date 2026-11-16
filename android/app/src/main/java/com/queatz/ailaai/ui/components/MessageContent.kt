@@ -438,7 +438,7 @@ fun ColumnScope.MessageContent(
                                             scope.launch {
                                                 bitmap.save(context)?.also {
                                                     context.toast(savedString)
-                                                } ?: context.showDidntWork()
+                                                } ?: context.showDidntWork(R.string.error_save_image)
                                             }
                                         }
                                     }
@@ -903,11 +903,11 @@ fun ColumnScope.MessageContent(
             onLongClick = {
                 scope.launch {
                     api.sticker(
-                        id = attachedSticker?.id ?: return@launch context.showDidntWork(),
+                        id = attachedSticker?.id ?: return@launch context.showDidntWork(R.string.error_load_sticker),
                         onError = {
                             when (it.status) {
                                 HttpStatusCode.NotFound -> context.toast(R.string.sticker_pack_not_found)
-                                else -> context.showDidntWork()
+                                else -> context.showDidntWork(R.string.error_load_sticker)
                             }
                         }
                     ) {
@@ -1170,8 +1170,7 @@ fun ColumnScope.MessageContent(
                             modifier = Modifier.padding(end = 8.dp)
                         )
                         Text(
-                            // todo: translate
-                            text = if (ongoing) "Ongoing call" else "Call ended",
+                            text = stringResource(if (ongoing) R.string.ongoing_call else R.string.call_ended),
                             color = if (ongoing) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                             style = MaterialTheme.typography.labelLarge
                         )

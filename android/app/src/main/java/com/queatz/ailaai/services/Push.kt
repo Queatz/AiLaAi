@@ -10,12 +10,12 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.Uri
+import android.os.Bundle
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
-import androidx.core.os.bundleOf
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.Lifecycle
@@ -189,10 +189,10 @@ class Push {
                 if (replyInGroup != null) {
                     val replyIntent = Intent(context, ReplyReceiver::class.java).apply {
                         putExtras(
-                            bundleOf(
-                                ReplyReceiver.KEY_GROUP_ID to replyInGroup,
-                                ReplyReceiver.KEY_NOTIFICATION_KEY to groupKey,
-                            )
+                            Bundle().apply {
+                                putString(ReplyReceiver.KEY_GROUP_ID, replyInGroup)
+                                putString(ReplyReceiver.KEY_NOTIFICATION_KEY, groupKey)
+                            }
                         )
                     }
                     val replyPendingIntent: PendingIntent = PendingIntent.getBroadcast(
@@ -227,10 +227,10 @@ class Push {
                     actions.fold(it) { it, action ->
                         val actionIntent = Intent(context, ActionReceiver::class.java).apply {
                             putExtras(
-                                bundleOf(
-                                    ActionReceiver.KEY_ACTION to json.encodeToString(action),
-                                    ActionReceiver.KEY_NOTIFICATION_KEY to groupKey,
-                                )
+                                Bundle().apply {
+                                    putString(ActionReceiver.KEY_ACTION, json.encodeToString(action))
+                                    putString(ActionReceiver.KEY_NOTIFICATION_KEY, groupKey)
+                                }
                             )
                         }
 

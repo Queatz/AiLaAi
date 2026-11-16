@@ -204,7 +204,7 @@ fun StickerPackEditorScreen(stickerPackId: String) {
                         if (it is FileSizeException) {
                             context.toast(R.string.max_sticker_size)
                         } else {
-                            context.showDidntWork()
+                            context.showDidntWork(R.string.error_upload_sticker)
                         }
                     }
                 ) {}

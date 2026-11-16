@@ -12,53 +12,53 @@ suspend fun Api.signals(
 ) = get("signals", buildMap {
     localHour?.let { put("localHour", it.toString()) }
     if (offset > 0) put("offset", offset.toString())
-}, onError = onError, onSuccess = onSuccess)
+}, errorContext = "load signals", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.createSignal(
     signal: Signal,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Signal> = {}
-) = post("signals", signal, onError = onError, onSuccess = onSuccess)
+) = post("signals", signal, errorContext = "create signal", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.mySignals(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<PersonSignal>> = {}
-) = get("signals/me", onError = onError, onSuccess = onSuccess)
+) = get("signals/me", errorContext = "load my signals", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.toggleSignal(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<PersonSignal> = {}
-) = post("signals/$id/toggle", onError = onError, onSuccess = onSuccess)
+) = post("signals/$id/toggle", errorContext = "toggle signal", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.sendSignal(
     body: SendSignalBody,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<SignalSend> = {}
-) = post("signals/send", body, onError = onError, onSuccess = onSuccess)
+) = post("signals/send", body, errorContext = "send signal", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.cancelSignal(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<SignalSend> = {}
-) = post("signals/send/$id/cancel", onError = onError, onSuccess = onSuccess)
+) = post("signals/send/$id/cancel", errorContext = "cancel signal", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.replySignal(
     id: String,
     body: SignalReplyBody,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<SignalReply> = {}
-) = post("signals/send/$id/reply", body, onError = onError, onSuccess = onSuccess)
+) = post("signals/send/$id/reply", body, errorContext = "reply to signal", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.activeSignals(
     geo: List<Double>? = null,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<ActiveSignalsResponse> = {}
-) = get("signals/active", geo?.let { mapOf("geo" to it.joinToString(",")) }, onError = onError, onSuccess = onSuccess)
+) = get("signals/active", geo?.let { mapOf("geo" to it.joinToString(",")) }, errorContext = "load active signals", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.createSignalGroup(
     id: String,
     people: List<String>,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Group> = {}
-) = post("signals/send/$id/create-group", CreateGroupBody(people, reuse = false), onError = onError, onSuccess = onSuccess)
+) = post("signals/send/$id/create-group", CreateGroupBody(people, reuse = false), errorContext = "create group", onError = onError, onSuccess = onSuccess)

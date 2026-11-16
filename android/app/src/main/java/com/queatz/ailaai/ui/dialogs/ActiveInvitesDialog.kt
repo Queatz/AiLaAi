@@ -65,7 +65,7 @@ fun ActiveInvitesDialog(
     suspend fun reload() {
         api.activeGroupInvites(groupId, onError = {
             isLoading = false
-            context.showDidntWork()
+            context.showDidntWork(R.string.error_load_invites)
         }) { result ->
             invites = result
             isLoading = false

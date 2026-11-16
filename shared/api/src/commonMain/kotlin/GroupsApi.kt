@@ -9,7 +9,7 @@ suspend fun Api.groupTopReactions(
     group: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<ReactionCount>>,
-) = get("groups/$group/reactions/top", onError = onError, onSuccess = onSuccess)
+) = get("groups/$group/reactions/top", errorContext = "load reactions", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.messages(
     group: String,
@@ -25,6 +25,7 @@ suspend fun Api.messages(
         "reaction" to reaction,
         "rating" to rating,
     ).filterValues { it != null },
+    errorContext = "load messages",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -33,13 +34,13 @@ suspend fun Api.groupCall(
     group: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<CallAndToken>,
-) = post("groups/$group/call", onError = onError, onSuccess = onSuccess)
+) = post("groups/$group/call", errorContext = "start call", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.groupCards(
     group: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Card>>,
-) = get("groups/$group/cards", onError = onError, onSuccess = onSuccess)
+) = get("groups/$group/cards", errorContext = "load group pages", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.messagesBefore(
     group: String,
@@ -57,6 +58,7 @@ suspend fun Api.messagesBefore(
         "reaction" to reaction,
         "rating" to rating,
     ).filterValues { it != null },
+    errorContext = "load messages",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -64,7 +66,7 @@ suspend fun Api.messagesBefore(
 suspend fun Api.groups(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<GroupExtended>>,
-) = get("groups", onError = onError, onSuccess = onSuccess)
+) = get("groups", errorContext = "load groups", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.exploreGroups(
     geo: Geo,
@@ -83,6 +85,7 @@ suspend fun Api.exploreGroups(
         "limit" to limit.toString(),
         "offset" to offset.toString(),
     ),
+    errorContext = "load groups",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -91,40 +94,40 @@ suspend fun Api.group(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<GroupExtended>,
-) = get("groups/$id", onError = onError, onSuccess = onSuccess)
+) = get("groups/$id", errorContext = "load group", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.createGroup(
     people: List<String>,
     reuse: Boolean = false,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Group>,
-) = post("groups", CreateGroupBody(people.toSet().toList(), reuse), onError = onError, onSuccess = onSuccess)
+) = post("groups", CreateGroupBody(people.toSet().toList(), reuse), errorContext = "create group", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.groupsWith(
     people: List<String>,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<GroupExtended>>,
-) = post("groups/search", SearchGroupBody(people.toSet().toList()), onError = onError, onSuccess = onSuccess)
+) = post("groups/search", SearchGroupBody(people.toSet().toList()), errorContext = "search groups", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.updateGroup(
     id: String,
     groupUpdate: Group,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Group> = {},
-) = post("groups/$id", groupUpdate, onError = onError, onSuccess = onSuccess)
+) = post("groups/$id", groupUpdate, errorContext = "update group", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.pinGroup(
     id: String,
     level: Int? = null,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {},
-) = post("groups/$id/pin${if (level != null) "?level=$level" else ""}", onError = onError, onSuccess = onSuccess)
+) = post("groups/$id/pin${if (level != null) "?level=$level" else ""}", errorContext = "pin group", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.unpinGroup(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {},
-) = post("groups/$id/unpin", onError = onError, onSuccess = onSuccess)
+) = post("groups/$id/unpin", errorContext = "unpin group", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.sendMedia(
     group: String,
@@ -150,7 +153,7 @@ suspend fun Api.sendMedia(
                 )
             }
         }
-    ), client = httpDataClient, onError = onError, onSuccess = onSuccess)
+    ), client = httpDataClient, errorContext = "send image", onError = onError, onSuccess = onSuccess)
 }
 
 suspend fun Api.sendAudio(
@@ -178,6 +181,7 @@ suspend fun Api.sendAudio(
             }
         ),
         client = httpDataClient,
+        errorContext = "send audio",
         onError = onError,
         onSuccess = onSuccess
     )
@@ -208,6 +212,7 @@ suspend fun Api.sendAudio(
             }
         ),
         client = httpDataClient,
+        errorContext = "send audio",
         onError = onError,
         onSuccess = onSuccess
     )
@@ -245,6 +250,7 @@ suspend fun Api.sendVideos(
         ),
         progressCallback = uploadCallback,
         client = httpDataClient,
+        errorContext = "send video",
         onError = onError,
         onSuccess = onSuccess
     )
@@ -255,7 +261,7 @@ suspend fun Api.sendMessage(
     message: Message,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {},
-) = post("groups/$group/messages", message, onError = onError, onSuccess = onSuccess)
+) = post("groups/$group/messages", message, errorContext = "send message", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.activeGroupInvites(
     id: String,
@@ -263,6 +269,7 @@ suspend fun Api.activeGroupInvites(
     onSuccess: SuccessBlock<List<Invite>> = {},
 ) = get(
     "/groups/$id/invites",
+    errorContext = "load invites",
     onError = onError,
     onSuccess = onSuccess
 )

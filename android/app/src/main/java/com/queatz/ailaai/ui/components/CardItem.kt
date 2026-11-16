@@ -175,7 +175,7 @@ fun CardItem(
                                 }
 
                                 else -> {
-                                    context.showDidntWork()
+                                    context.showDidntWork(R.string.error_save_page)
                                 }
                             }
                         }

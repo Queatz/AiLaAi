@@ -16,6 +16,7 @@ suspend fun Api.gameScene(
     onSuccess: SuccessBlock<GameScene>,
 ) = get(
     url = "game-scene/$id",
+    errorContext = "load scene",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -27,6 +28,7 @@ suspend fun Api.createGameScene(
 ) = post(
     url = "game-scene",
     body = gameScene,
+    errorContext = "create scene",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -39,6 +41,7 @@ suspend fun Api.updateGameScene(
 ) = post(
     url = "game-scene/$id",
     body = gameScene,
+    errorContext = "update scene",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -49,6 +52,7 @@ suspend fun Api.deleteGameScene(
     onSuccess: SuccessBlock<HttpStatusCode>,
 ) = post(
     url = "game-scene/$id/delete",
+    errorContext = "delete scene",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -58,6 +62,7 @@ suspend fun Api.gameScenes(
     onSuccess: SuccessBlock<List<GameScene>>,
 ) = get(
     url = "game-scene",
+    errorContext = "load scenes",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -69,6 +74,7 @@ suspend fun Api.gameTile(
     onSuccess: SuccessBlock<GameTile>,
 ) = get(
     url = "game-tile/$id",
+    errorContext = "load tile",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -78,6 +84,7 @@ suspend fun Api.gameTiles(
     onSuccess: SuccessBlock<List<GameTile>>,
 ) = get(
     url = "game-tile",
+    errorContext = "load tiles",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -89,6 +96,7 @@ suspend fun Api.createGameTile(
 ) = post(
     url = "game-tile",
     body = gameTile,
+    errorContext = "create tile",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -101,6 +109,7 @@ suspend fun Api.updateGameTile(
 ) = post(
     url = "game-tile/$id",
     body = gameTile,
+    errorContext = "update tile",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -111,6 +120,7 @@ suspend fun Api.deleteGameTile(
     onSuccess: SuccessBlock<HttpStatusCode>,
 ) = post(
     url = "game-tile/$id/delete",
+    errorContext = "delete tile",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -122,6 +132,7 @@ suspend fun Api.gameObject(
     onSuccess: SuccessBlock<GameObject>,
 ) = get(
     url = "game-object/$id",
+    errorContext = "load object",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -131,6 +142,7 @@ suspend fun Api.gameObjects(
     onSuccess: SuccessBlock<List<GameObject>>,
 ) = get(
     url = "game-object",
+    errorContext = "load objects",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -142,6 +154,7 @@ suspend fun Api.createGameObject(
 ) = post(
     url = "game-object",
     body = gameObject,
+    errorContext = "create object",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -154,6 +167,7 @@ suspend fun Api.updateGameObject(
 ) = post(
     url = "game-object/$id",
     body = gameObject,
+    errorContext = "update object",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -164,6 +178,7 @@ suspend fun Api.deleteGameObject(
     onSuccess: SuccessBlock<HttpStatusCode>,
 ) = post(
     url = "game-object/$id/delete",
+    errorContext = "delete object",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -175,6 +190,7 @@ suspend fun Api.gameMusic(
     onSuccess: SuccessBlock<GameMusic>,
 ) = get(
     url = "game-music/$id",
+    errorContext = "load music",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -184,6 +200,7 @@ suspend fun Api.gameMusics(
     onSuccess: SuccessBlock<List<GameMusic>>,
 ) = get(
     url = "game-music",
+    errorContext = "load music",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -195,6 +212,7 @@ suspend fun Api.createGameMusic(
 ) = post(
     url = "game-music",
     body = gameMusic,
+    errorContext = "create music",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -207,6 +225,7 @@ suspend fun Api.updateGameMusic(
 ) = post(
     url = "game-music/$id",
     body = gameMusic,
+    errorContext = "update music",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -217,6 +236,7 @@ suspend fun Api.deleteGameMusic(
     onSuccess: SuccessBlock<HttpStatusCode>,
 ) = post(
     url = "game-music/$id/delete",
+    errorContext = "delete music",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -228,6 +248,7 @@ suspend fun Api.gameSceneDiscussions(
     onSuccess: SuccessBlock<List<GameDiscussionExtended>>,
 ) = get(
     url = "game-scene/$id/discussions",
+    errorContext = "load discussions",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -238,6 +259,7 @@ suspend fun Api.gameDiscussion(
     onSuccess: SuccessBlock<GameDiscussionExtended>,
 ) = get(
     url = "game-discussion/$id",
+    errorContext = "load discussion",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -250,6 +272,7 @@ suspend fun Api.createGameDiscussion(
 ) = post(
     url = "game-scene/$sceneId/discussion",
     body = discussion,
+    errorContext = "create discussion",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -262,6 +285,7 @@ suspend fun Api.commentOnGameDiscussion(
 ) = post(
     url = "game-discussion/$id/comment",
     body = comment,
+    errorContext = "add comment",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -272,6 +296,7 @@ suspend fun Api.deleteGameDiscussion(
     onSuccess: SuccessBlock<HttpStatusCode>,
 ) = post(
     url = "game-discussion/$id/delete",
+    errorContext = "delete discussion",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -282,6 +307,7 @@ suspend fun Api.resolveGameDiscussion(
     onSuccess: SuccessBlock<GameDiscussion>,
 ) = post(
     url = "game-discussion/$id/resolve",
+    errorContext = "resolve discussion",
     onError = onError,
     onSuccess = onSuccess
 )

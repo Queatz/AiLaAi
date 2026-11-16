@@ -24,7 +24,7 @@ import com.queatz.db.UrlAttachment
 import com.queatz.db.VideosAttachment
 import kotlin.time.Clock
 import kotlin.time.Instant
-import java.math.BigDecimal
+import com.ibm.icu.math.BigDecimal
 import java.text.ParseException
 
 data class ContactPhoto(

@@ -9,6 +9,7 @@ suspend fun Api.createQuickInvite(
     onSuccess: SuccessBlock<Invite> = {}
 ) = get(
     url = "invite",
+    errorContext = "create invite",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -20,6 +21,7 @@ suspend fun Api.createInvite(
 ) = post(
     url = "invite",
     body = invite,
+    errorContext = "create invite",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -30,6 +32,7 @@ suspend fun Api.invite(
     onSuccess: SuccessBlock<Invite>
 ) = get(
     url = "invite/$code",
+    errorContext = "load invite",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -42,6 +45,7 @@ suspend fun Api.updateInvite(
 ) = post(
     url = "invite/$id",
     body = invite,
+    errorContext = "update invite",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -52,6 +56,7 @@ suspend fun Api.useInvite(
     onSuccess: SuccessBlock<UseInviteResponse> = {}
 ) = post(
     url = "invite/$code/use",
+    errorContext = "use invite",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -62,6 +67,7 @@ suspend fun Api.deleteInvite(
     onSuccess: SuccessBlock<HttpStatusCode> = {}
 ) = post(
     url = "invite/$id/delete",
+    errorContext = "delete invite",
     onError = onError,
     onSuccess = onSuccess
 )

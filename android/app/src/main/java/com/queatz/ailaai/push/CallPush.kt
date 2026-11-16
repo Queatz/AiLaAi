@@ -2,7 +2,7 @@ package com.queatz.ailaai.push
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import androidx.core.os.bundleOf
+import android.os.Bundle
 import com.queatz.ailaai.CallService.Companion.GROUP_ID_EXTRA
 import com.queatz.ailaai.CallService.Companion.GROUP_NAME_EXTRA
 import com.queatz.ailaai.IncomingCallService
@@ -22,10 +22,10 @@ fun Push.receive(data: CallPushData) {
                 context,
                 IncomingCallService::class.java
             ).putExtras(
-                bundleOf(
-                    GROUP_ID_EXTRA to data.group.id!!,
-                    GROUP_NAME_EXTRA to title
-                )
+                Bundle().apply {
+                    putString(GROUP_ID_EXTRA, data.group.id!!)
+                    putString(GROUP_NAME_EXTRA, title)
+                }
             )
         )
     }

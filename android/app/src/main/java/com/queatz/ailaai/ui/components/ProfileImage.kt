@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.nullIfBlank
+import com.queatz.ailaai.extensions.notBlank
 
 @Composable
 fun ProfileImage(
@@ -29,7 +29,7 @@ fun ProfileImage(
     size: Dp = 32.dp,
     onClick: () -> Unit,
 ) {
-    if (photo?.nullIfBlank == null) {
+    if (photo?.notBlank == null) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier

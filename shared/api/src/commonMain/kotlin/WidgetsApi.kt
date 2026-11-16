@@ -13,6 +13,7 @@ suspend fun Api.widget(
     onSuccess: SuccessBlock<Widget>
 ) = get(
     url = "widgets/$id",
+    errorContext = "load widget",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -28,6 +29,7 @@ suspend fun Api.createWidget(
         widget = widget,
         data = data
     ),
+    errorContext = "create widget",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -40,6 +42,7 @@ suspend fun Api.updateWidget(
 ) = post(
     url = "widgets/$id",
     body = widget,
+    errorContext = "update widget",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -52,6 +55,7 @@ suspend fun Api.runWidget(
 ) = post(
     url = "widgets/$id/run",
     body = data,
+    errorContext = "run widget",
     onError = onError,
     onSuccess = onSuccess
 )

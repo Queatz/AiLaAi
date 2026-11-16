@@ -95,7 +95,7 @@ fun PublishStoryDialog(
             if (it.status == HttpStatusCode.NotFound) {
                 // Ignored
             } else {
-                context.showDidntWork()
+                context.showDidntWork(R.string.error_load_draft)
             }
         }) {
             storyDraft = it
@@ -106,7 +106,7 @@ fun PublishStoryDialog(
             if (it.status == HttpStatusCode.NotFound) {
                 // Ignored
             } else {
-                context.showDidntWork()
+                context.showDidntWork(R.string.error_load_draft)
             }
         }) {
             storyDraft = it

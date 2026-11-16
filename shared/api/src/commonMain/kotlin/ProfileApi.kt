@@ -27,6 +27,7 @@ suspend fun Api.uploadProfileContentPhotos(
             }
         ),
         client = httpDataClient,
+        errorContext = "upload image",
         onError = onError,
         onSuccess = onSuccess
     )
@@ -53,6 +54,7 @@ suspend fun Api.uploadProfileContentAudio(
             }
         ),
         client = httpDataClient,
+        errorContext = "upload audio",
         onError = onError,
         onSuccess = onSuccess
     )

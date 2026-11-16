@@ -115,7 +115,7 @@ fun PhotoDialog(
                                         scope.launch {
                                             bitmap.save(context)?.also {
                                                 context.toast(savedString)
-                                            } ?: context.showDidntWork()
+                                            } ?: context.showDidntWork(R.string.error_save_image)
                                         }
                                     }
                                 }

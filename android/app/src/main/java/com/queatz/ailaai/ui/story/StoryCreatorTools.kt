@@ -3,6 +3,7 @@ package com.queatz.ailaai.ui.story
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ListAlt
 import androidx.compose.material.icons.automirrored.outlined.Notes
 import androidx.compose.material.icons.outlined.AccountTree
 import androidx.compose.material.icons.outlined.Add
@@ -10,7 +11,6 @@ import androidx.compose.material.icons.outlined.FormatShapes
 import androidx.compose.material.icons.outlined.HistoryEdu
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Landscape
-import androidx.compose.material.icons.outlined.ListAlt
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.People
@@ -319,7 +319,7 @@ fun StoryCreatorTools(
                 }
 
                 item(
-                    icon = Icons.Outlined.ListAlt,
+                    icon = Icons.AutoMirrored.Outlined.ListAlt,
                     name = Widgets.Form.stringResource
                 ) {
                 addWidget = Widgets.Form

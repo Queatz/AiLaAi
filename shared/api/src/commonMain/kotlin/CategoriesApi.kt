@@ -11,6 +11,7 @@ suspend fun Api.categories(
     parameters = mapOf(
         "geo" to geo.toString()
     ),
+    errorContext = "load categories",
     onError = onError,
     onSuccess = onSuccess
 )

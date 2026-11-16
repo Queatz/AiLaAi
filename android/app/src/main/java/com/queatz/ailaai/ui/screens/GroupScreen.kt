@@ -34,6 +34,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.automirrored.outlined.AddToHomeScreen
 import androidx.compose.material.icons.automirrored.outlined.Logout
@@ -61,7 +62,6 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.NotificationsPaused
 import androidx.compose.material.icons.outlined.QrCode2
-import androidx.compose.material.icons.outlined.Reply
 import androidx.compose.material.icons.outlined.Report
 import androidx.compose.material.icons.outlined.Rocket
 import androidx.compose.material.icons.outlined.Search
@@ -165,7 +165,6 @@ import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.notEmpty
-import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.saveAudio
@@ -173,6 +172,7 @@ import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.shareAsUrl
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.startOfMinute
+import com.queatz.ailaai.extensions.status
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.extensions.toLatLng
 import com.queatz.ailaai.extensions.toList
@@ -250,6 +250,7 @@ import com.queatz.db.Trade
 import com.queatz.db.TradeAttachment
 import createTrade
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
@@ -475,8 +476,11 @@ fun GroupScreen(groupId: String) {
             onError = { ex ->
                 if (ex is CancellationException || ex is InterruptedException) {
                     // Ignore
-                } else {
+                } else if (ex.status == HttpStatusCode.NotFound) {
                     showGroupNotFound = true
+                } else {
+                    ex.printStackTrace()
+                    context.showDidntWork(R.string.error_load_group)
                 }
             }) {
             groupExtended = it
@@ -554,7 +558,7 @@ fun GroupScreen(groupId: String) {
                 api.sendMessage(
                     newGroup.id!!, message = Message(
                         attachment = json.encodeToString(ReplyAttachment(message = message.id!!)),
-                        attachments = json.encodeToString(GroupAttachment(group = groupExtended!!.group!!.id!!))
+                        attachments = json.encodeToString(GroupAttachment(group = groupId))
                             .inList()
                     )
                 )
@@ -599,24 +603,16 @@ fun GroupScreen(groupId: String) {
         verticalArrangement = Arrangement.Bottom,
         modifier = Modifier.fillMaxSize()
     ) {
-        if (groupExtended == null) {
-            if (isLoading) {
-                Loading()
-            }
-        } else {
-            val allMembers = groupExtended!!.members
-                ?.sortedByDescending { it.person?.seen ?: fromEpochMilliseconds(0) }
-                ?: emptyList()
-            val myMember = groupExtended!!.members?.find { it.person?.id == me?.id }
-            val otherMembers = groupExtended!!.members?.filter { it.person?.id != me?.id } ?: emptyList()
-            val state = rememberLazyListState()
-            val canManage =
-                myMember?.member?.host == true || groupExtended?.group?.config?.edits != GroupEditsConfig.Hosts
+        val allMembers = groupExtended?.members
+            ?.sortedByDescending { it.person?.seen ?: fromEpochMilliseconds(0) }
+            ?: emptyList()
+        val myMember = groupExtended?.members?.find { it.person?.id == me?.id }
+        val otherMembers = groupExtended?.members?.filter { it.person?.id != me?.id } ?: emptyList()
+        val state = rememberLazyListState()
+        val canManage =
+            groupExtended != null && (myMember?.member?.host == true || groupExtended?.group?.config?.edits != GroupEditsConfig.Hosts)
 
-            var latestMessage by remember { mutableStateOf<Instant?>(null) }
-
-            val someone = stringResource(R.string.someone)
-            val emptyGroup = stringResource(R.string.empty_group_name)
+        var latestMessage by remember { mutableStateOf<Instant?>(null) }
 
             LaunchedEffect(messages) {
                 val latest = messages.firstOrNull()?.createdAt
@@ -662,7 +658,7 @@ fun GroupScreen(groupId: String) {
                                     scope.launch {
                                         state.scrollToTop()
                                     }
-                                } else {
+                                } else if (groupExtended != null) {
                                     if (otherMembers.size == 1) {
                                         nav.appNavigate(AppNav.Profile(otherMembers.first().person!!.id!!))
                                     } else {
@@ -674,11 +670,11 @@ fun GroupScreen(groupId: String) {
                         val someone = stringResource(R.string.someone)
                         val emptyGroup = stringResource(R.string.empty_group_name)
                         Text(
-                            groupExtended!!.name(
+                            groupExtended?.name(
                                 someone,
                                 emptyGroup,
                                 me?.id?.let(::listOf) ?: emptyList()
-                            ),
+                            ) ?: "",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -818,19 +814,21 @@ fun GroupScreen(groupId: String) {
                             onDismissRequest = { showMenu = false },
                         ) {
                             Toolbar {
-                                item(
-                                    icon = Icons.Outlined.Group,
-                                    name = stringResource(R.string.members)
-                                ) {
-                                    showMenu = false
-                                    showGroupMembers = true
-                                }
-                                item(
-                                    icon = Icons.Outlined.Map,
-                                    name = stringResource(R.string.cards)
-                                ) {
-                                    showMenu = false
-                                    showCards = !showCards
+                                if (groupExtended != null) {
+                                    item(
+                                        icon = Icons.Outlined.Group,
+                                        name = stringResource(R.string.members)
+                                    ) {
+                                        showMenu = false
+                                        showGroupMembers = true
+                                    }
+                                    item(
+                                        icon = Icons.Outlined.Map,
+                                        name = stringResource(R.string.cards)
+                                    ) {
+                                        showMenu = false
+                                        showCards = !showCards
+                                    }
                                 }
                                 if (myMember != null) {
                                     if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
@@ -994,6 +992,12 @@ fun GroupScreen(groupId: String) {
                 },
                 modifier = Modifier.zIndex(1f)
             )
+
+            if (isLoading) {
+                Loading(
+                    modifier = Modifier.padding(vertical = 1.pad)
+                )
+            }
 
             if (showCards && groupExtended != null) {
                 GroupCards(groupExtended!!)
@@ -1222,7 +1226,7 @@ fun GroupScreen(groupId: String) {
                                 if (stageReply == null) {
                                     stageReply = stagedReply
                                 }
-                                context.showDidntWork()
+                                context.showDidntWork(R.string.error_send_message)
                             }) {
                                 reloadMessages()
                             }
@@ -1308,7 +1312,7 @@ fun GroupScreen(groupId: String) {
                                     .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
                             ) {
                                 Icon(
-                                    Icons.Outlined.Reply,
+                                    Icons.AutoMirrored.Outlined.Reply,
                                     null,
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = .5f),
                                     modifier = Modifier
@@ -1703,7 +1707,7 @@ fun GroupScreen(groupId: String) {
                                 group = groupId,
                                 videos = videos,
                                 onError = {
-                                    context.showDidntWork()
+                                    context.showDidntWork(R.string.error_send_video)
                                 },
                                 message = stageReply?.id?.let {
                                     Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
@@ -1894,8 +1898,8 @@ fun GroupScreen(groupId: String) {
                 }
             }
 
-            if (showRemoveGroupMembers) {
-                val members = groupExtended!!.members!!
+            if (showRemoveGroupMembers && groupExtended != null) {
+                val members = groupExtended!!.members.orEmpty()
                     .mapNotNull { it.person?.id }
                     .filter { it != me?.id }
                 ChoosePeopleDialog(
@@ -1923,7 +1927,7 @@ fun GroupScreen(groupId: String) {
                                 context.toast(
                                     context.getString(
                                         R.string.x_removed,
-                                        person.name?.nullIfBlank ?: someone
+                                        person.name?.notBlank ?: someone
                                     )
                                 )
                                 anySucceeded = true
@@ -1933,15 +1937,15 @@ fun GroupScreen(groupId: String) {
                             reload()
                         }
                         if (anyFailed) {
-                            context.showDidntWork()
+                            context.showDidntWork(R.string.error_remove_member)
                         }
                     },
                     omit = { it.id!! !in members }
                 )
             }
 
-            if (showPromoteGroupMembers) {
-                val members = groupExtended!!.members!!
+            if (showPromoteGroupMembers && groupExtended != null) {
+                val members = groupExtended!!.members.orEmpty()
                     .mapNotNull { it.person?.id }
                     .filter { it != me?.id }
                 ChoosePeopleDialog(
@@ -1970,7 +1974,7 @@ fun GroupScreen(groupId: String) {
                                 context.toast(
                                     context.getString(
                                         R.string.x_promoted,
-                                        person.name?.nullIfBlank ?: someone
+                                        person.name?.notBlank ?: someone
                                     )
                                 )
                                 anySucceeded = true
@@ -1980,15 +1984,15 @@ fun GroupScreen(groupId: String) {
                             reload()
                         }
                         if (anyFailed) {
-                            context.showDidntWork()
+                            context.showDidntWork(R.string.error_promote_member)
                         }
                     },
                     omit = { it.id!! !in members }
                 )
             }
 
-            if (showTradeWithDialog) {
-                val people = groupExtended!!.members!!
+            if (showTradeWithDialog && groupExtended != null) {
+                val people = groupExtended!!.members.orEmpty()
                     .mapNotNull { it.person }
                     .filter { it.id != me?.id }
                 ChoosePeopleDialog(
@@ -2009,8 +2013,8 @@ fun GroupScreen(groupId: String) {
                 )
             }
 
-            if (showNewReminderWithDialog) {
-                val people = groupExtended!!.members!!
+            if (showNewReminderWithDialog && groupExtended != null) {
+                val people = groupExtended!!.members.orEmpty()
                     .mapNotNull { it.person }
                     .filter { it.id != me?.id }
                 ChoosePeopleDialog(
@@ -2116,9 +2120,9 @@ fun GroupScreen(groupId: String) {
                 )
             }
 
-            if (showInviteMembers) {
+            if (showInviteMembers && groupExtended != null) {
                 val someone = stringResource(R.string.someone)
-                val omit = groupExtended!!.members!!.mapNotNull { it.person?.id }
+                val omit = groupExtended!!.members.orEmpty().mapNotNull { it.person?.id }
                 ChoosePeopleDialog(
                     onDismissRequest = {
                         showInviteMembers = false
@@ -2142,7 +2146,7 @@ fun GroupScreen(groupId: String) {
                                 context.toast(
                                     context.getString(
                                         R.string.person_invited,
-                                        person.name?.nullIfBlank ?: someone
+                                        person.name?.notBlank ?: someone
                                     )
                                 )
                                 anySucceeded = true
@@ -2152,7 +2156,7 @@ fun GroupScreen(groupId: String) {
                             reload()
                         }
                         if (anyFailed) {
-                            context.showDidntWork()
+                            context.showDidntWork(R.string.error_invite_member)
                         }
                     },
                     actions = {
@@ -2187,7 +2191,7 @@ fun GroupScreen(groupId: String) {
                         showQrCodeDialog = false
                     },
                     groupUrl(groupId),
-                    groupExtended!!.name(
+                    groupExtended?.name(
                         someone,
                         emptyGroup,
                         me?.id?.let(::listOf) ?: emptyList()
@@ -2195,7 +2199,7 @@ fun GroupScreen(groupId: String) {
                 )
             }
 
-            if (showRenameGroup) {
+            if (showRenameGroup && groupExtended?.group != null) {
                 RenameGroupDialog({
                     showRenameGroup = false
                 }, groupExtended!!.group!!, {
@@ -2204,7 +2208,7 @@ fun GroupScreen(groupId: String) {
                 })
             }
 
-            if (showDescriptionDialog) {
+            if (showDescriptionDialog && groupExtended?.group != null) {
                 GroupDescriptionDialog({
                     showDescriptionDialog = false
                 }, groupExtended!!.group!!, {
@@ -2359,7 +2363,7 @@ fun GroupScreen(groupId: String) {
                 )
             }
 
-            if (showChangeGroupStatus) {
+            if (showChangeGroupStatus && groupExtended?.group != null) {
                 val open = groupExtended?.group?.open == true
                 AlertDialog(
                     {
@@ -2597,7 +2601,7 @@ fun GroupScreen(groupId: String) {
                                                 showFailedToSendAudio = null
                                                 context.toast(context.getString(R.string.saved))
                                             } else {
-                                                context.toast(context.getString(R.string.didnt_work))
+                                                context.showDidntWork(R.string.error_save_audio)
                                             }
                                         }
                                     }
@@ -2675,7 +2679,6 @@ fun GroupScreen(groupId: String) {
                     it.id!!
                 )
             }
-        }
     }
 }
 

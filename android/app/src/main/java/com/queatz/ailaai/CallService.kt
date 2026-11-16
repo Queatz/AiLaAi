@@ -6,10 +6,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
+import android.os.Bundle
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
 import androidx.core.app.ServiceCompat
-import androidx.core.os.bundleOf
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.services.Notifications
 import com.queatz.ailaai.services.calls
@@ -45,9 +45,9 @@ class CallService : Service() {
             applicationContext,
             CallReceiver::class.java
         ).putExtras(
-            bundleOf(
-                GROUP_ID_EXTRA to groupId
-            )
+            Bundle().apply {
+                putString(GROUP_ID_EXTRA, groupId)
+            }
         )
 
         val notification = NotificationCompat.Builder(this, Notifications.OngoingCalls.key)
@@ -92,7 +92,7 @@ class CallService : Service() {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
                 && t is ForegroundServiceStartNotAllowedException
             ) {
-                applicationContext.showDidntWork()
+                applicationContext.showDidntWork(R.string.error_start_call_service)
             }
         }
 

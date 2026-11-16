@@ -32,7 +32,7 @@ suspend fun Api.uploadPhotos(
                 )
             }
         }
-    ), client = httpDataClient, onError = onError, onSuccess = onSuccess)
+    ), client = httpDataClient, errorContext = "upload image", onError = onError, onSuccess = onSuccess)
 }
 
 suspend fun Api.uploadVideo(
@@ -54,7 +54,7 @@ suspend fun Api.uploadVideo(
                 }
             )
         }
-    ), client = httpDataClient, onError = onError, onSuccess = onSuccess)
+    ), client = httpDataClient, errorContext = "upload video", onError = onError, onSuccess = onSuccess)
 }
 
 suspend fun Api.uploadAudio(
@@ -76,7 +76,7 @@ suspend fun Api.uploadAudio(
                 }
             )
         }
-    ), client = httpDataClient, onError = onError, onSuccess = onSuccess)
+    ), client = httpDataClient, errorContext = "upload audio", onError = onError, onSuccess = onSuccess)
 }
 
 suspend fun Api.uploadAudio(
@@ -98,7 +98,7 @@ suspend fun Api.uploadAudio(
                 }
             )
         }
-    ), client = httpDataClient, onError = onError, onSuccess = onSuccess)
+    ), client = httpDataClient, errorContext = "upload audio", onError = onError, onSuccess = onSuccess)
 }
 
 suspend fun Api.uploadVideo(
@@ -120,7 +120,7 @@ suspend fun Api.uploadVideo(
                 }
             )
         }
-    ), client = httpDataClient, onError = onError, onSuccess = onSuccess)
+    ), client = httpDataClient, errorContext = "upload video", onError = onError, onSuccess = onSuccess)
 }
 
 suspend fun Api.uploadScreenshot(
@@ -140,5 +140,5 @@ suspend fun Api.uploadScreenshot(
                 }
             )
         }
-    ), client = httpDataClient, onError = onError, onSuccess = onSuccess)
+    ), client = httpDataClient, errorContext = "upload screenshot", onError = onError, onSuccess = onSuccess)
 }

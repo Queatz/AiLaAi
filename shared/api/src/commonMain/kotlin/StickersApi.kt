@@ -9,54 +9,54 @@ suspend fun Api.stickerPack(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<StickerPack>
-) = get("sticker-packs/${id}", onError = onError, onSuccess = onSuccess)
+) = get("sticker-packs/${id}", errorContext = "load sticker pack", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.sticker(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Sticker>
-) = get("sticker/${id}", onError = onError, onSuccess = onSuccess)
+) = get("sticker/${id}", errorContext = "load sticker", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.myStickerPacks(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<StickerPack>>
-) = get("me/sticker-packs", onError = onError, onSuccess = onSuccess)
+) = get("me/sticker-packs", errorContext = "load sticker packs", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.stickerPacks(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<StickerPack>>
-) = get("sticker-packs", onError = onError, onSuccess = onSuccess)
+) = get("sticker-packs", errorContext = "load sticker packs", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.saveStickerPack(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {}
-) = post("sticker-packs/${id}/save", onError = onError, onSuccess = onSuccess)
+) = post("sticker-packs/${id}/save", errorContext = "save sticker pack", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.unsaveStickerPack(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {}
-) = post("sticker-packs/${id}/unsave", onError = onError, onSuccess = onSuccess)
+) = post("sticker-packs/${id}/unsave", errorContext = "unsave sticker pack", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.createStickerPack(
     stickerPack: StickerPack,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<StickerPack>
-) = post("sticker-packs", stickerPack, onError = onError, onSuccess = onSuccess)
+) = post("sticker-packs", stickerPack, errorContext = "create sticker pack", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.updateStickerPack(
     id: String,
     stickerPack: StickerPack,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<StickerPack>
-) = post("sticker-packs/${id}", stickerPack, onError = onError, onSuccess = onSuccess)
+) = post("sticker-packs/${id}", stickerPack, errorContext = "update sticker pack", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.stickers(
     stickerPackId: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Sticker>>
-) = get("sticker-packs/${stickerPackId}/stickers", onError = onError, onSuccess = onSuccess)
+) = get("sticker-packs/${stickerPackId}/stickers", errorContext = "load stickers", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.createSticker(
     id: String,
@@ -71,23 +71,23 @@ suspend fun Api.createSticker(
             append(HttpHeaders.ContentDisposition, "filename=sticker.${photoContentType.split("/").lastOrNull() ?: "png"}")
         })
     }
-), client = httpDataClient, onError = onError, onSuccess = onSuccess)
+), client = httpDataClient, errorContext = "create sticker", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.updateSticker(
     id: String,
     sticker: Sticker,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Sticker>
-) = post("sticker/${id}", sticker, onError = onError, onSuccess = onSuccess)
+) = post("sticker/${id}", sticker, errorContext = "update sticker", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.deleteSticker(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {}
-) = post("sticker/${id}/delete", onError = onError, onSuccess = onSuccess)
+) = post("sticker/${id}/delete", errorContext = "delete sticker", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.deleteStickerPack(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {}
-) = post("sticker-pack/${id}/delete", onError = onError, onSuccess = onSuccess)
+) = post("sticker-pack/${id}/delete", errorContext = "delete sticker pack", onError = onError, onSuccess = onSuccess)

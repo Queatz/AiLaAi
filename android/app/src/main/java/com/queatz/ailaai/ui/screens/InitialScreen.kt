@@ -7,13 +7,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -29,54 +35,132 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush.Companion.linearGradient
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import app.ailaai.api.signIn
 import app.ailaai.api.signInWithLink
 import app.ailaai.api.signUp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.didntWorkMessage
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.components.ScanQrCodeResult
 import com.queatz.ailaai.ui.theme.pad
 import io.ktor.client.plugins.ResponseException
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 @Composable
 fun InitialScreen(onKnown: (isSignUp: Boolean) -> Unit) {
+    val context = LocalContext.current
+    val resources = LocalResources.current
     var codeValue by remember { mutableStateOf("") }
     var codeExpired by rememberStateOf(false)
     var codeValueEnabled by rememberStateOf(true)
+    var isSigningUp by rememberStateOf(false)
+    var signUpError by rememberStateOf<String?>(null)
     val scope = rememberCoroutineScope()
-    val keyboardController = LocalSoftwareKeyboardController.current!!
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     var signInDialog by rememberStateOf(false)
+    var transferCode by remember { mutableStateOf("") }
+    var isSigningIn by rememberStateOf(false)
+    var signInError by rememberStateOf<String?>(null)
+    val isBusy = isSigningUp || isSigningIn
 
-    fun signIn(transferCode: String) {
+    suspend fun formatError(t: Throwable): String {
+        return if (t is ResponseException) {
+            val status = t.response.status
+            val body = runCatching { t.response.bodyAsText() }
+                .getOrNull()
+                ?.trim()
+                ?.takeIf { it.isNotBlank() && !it.startsWith("<") }
+                ?.take(200)
+            if (body != null) {
+                resources.getString(R.string.server_error_x, status.value, body)
+            } else {
+                resources.getString(R.string.server_error_x, status.value, status.description)
+            }
+        } else {
+            val message = t.localizedMessage ?: t.message
+            val type = t::class.simpleName ?: resources.getString(R.string.error)
+            if (!message.isNullOrBlank()) "$type: $message" else type
+        }
+    }
+
+    fun signIn(code: String) {
+        if (isBusy) return
+        isSigningIn = true
+        signInError = null
         scope.launch {
-            api.signIn(transferCode) {
-                api.setToken(it.token)
-                onKnown(false)
-                keyboardController.hide()
+            try {
+                api.signIn(
+                    code,
+                    onError = { ex ->
+                        if (ex is CancellationException) throw ex
+                        signInError = formatError(ex)
+                        context.showDidntWork(R.string.error_sign_in)
+                    }
+                ) {
+                    signInDialog = false
+                    transferCode = ""
+                    api.setToken(it.token)
+                    onKnown(false)
+                    keyboardController?.hide()
+                }
+            } catch (t: Throwable) {
+                if (t is CancellationException) throw t
+                signInError = formatError(t)
+                context.showDidntWork(R.string.error_sign_in)
+            } finally {
+                isSigningIn = false
             }
         }
     }
 
     if (signInDialog) {
         AlertDialog(
-            {
-                signInDialog = false
+            onDismissRequest = {
+                if (!isSigningIn) {
+                    signInDialog = false
+                }
             },
-            {
-                TextButton(
-                    {
-                        signInDialog = false
+            confirmButton = {
+                Button(
+                    onClick = {
+                        signIn(transferCode.trim())
+                    },
+                    enabled = transferCode.isNotBlank() && !isBusy
+                ) {
+                    if (isSigningIn) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier
+                                .padding(end = 1.pad)
+                                .size(16.dp),
+                            strokeWidth = 2.dp
+                        )
                     }
+                    Text(stringResource(R.string.sign_in))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        signInDialog = false
+                    },
+                    enabled = !isSigningIn
                 ) {
                     Text(stringResource(R.string.go_back))
                 }
@@ -88,57 +172,104 @@ fun InitialScreen(onKnown: (isSignUp: Boolean) -> Unit) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(1.pad)
                 ) {
-                    var transferCode by remember { mutableStateOf("") }
                     OutlinedTextField(
                         transferCode,
                         {
                             transferCode = it.take(16)
+                            if (signInError != null) {
+                                signInError = null
+                            }
 
-                            if (transferCode.length == 16) {
+                            if (transferCode.length == 16 && !isBusy) {
                                 signIn(transferCode)
                             }
                         },
+                        enabled = !isBusy,
                         placeholder = { Text(stringResource(R.string.transfer_code)) },
                         shape = MaterialTheme.shapes.large,
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
                             imeAction = ImeAction.Done
                         ),
+                        keyboardActions = KeyboardActions(onDone = {
+                            if (transferCode.isNotBlank() && !isBusy) {
+                                signIn(transferCode.trim())
+                            }
+                        })
                     )
+
+                    if (signInError != null) {
+                        Text(
+                            signInError!!,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
             }
         )
     }
 
     fun signInWithLink(link: String) {
+        if (isBusy) return
+        isSigningIn = true
+        signInError = null
         scope.launch {
-            api.signInWithLink(
-                link = link
-            ) {
-                api.setToken(it.token)
-                onKnown(false)
-                keyboardController.hide()
+            try {
+                api.signInWithLink(
+                    link = link,
+                    onError = { ex ->
+                        if (ex is CancellationException) throw ex
+                        signInError = formatError(ex)
+                        context.showDidntWork(R.string.error_sign_in)
+                    }
+                ) {
+                    api.setToken(it.token)
+                    onKnown(false)
+                    keyboardController?.hide()
+                }
+            } catch (t: Throwable) {
+                if (t is CancellationException) throw t
+                signInError = formatError(t)
+                context.showDidntWork(R.string.error_sign_in)
+            } finally {
+                isSigningIn = false
             }
-            codeValueEnabled = true
         }
     }
 
     fun signUp(code: String? = null) {
+        if (isBusy) return
+        isSigningUp = true
+        signUpError = null
+        codeExpired = false
+        codeValueEnabled = false
         scope.launch {
-            api.signUp(
-                inviteCode = code,
-                onError = { ex ->
-                    if (ex is ResponseException) {
-                        if (ex.response.status in listOf(HttpStatusCode.Unauthorized, HttpStatusCode.NotFound)) {
+            try {
+                api.signUp(
+                    inviteCode = code,
+                    onError = { ex ->
+                        if (ex is CancellationException) throw ex
+                        if (!code.isNullOrBlank() && ex is ResponseException && ex.response.status in listOf(HttpStatusCode.Unauthorized, HttpStatusCode.NotFound)) {
                             codeExpired = true
+                        } else {
+                            signUpError = formatError(ex)
+                            context.showDidntWork(R.string.error_sign_up)
                         }
                     }
-                }) {
-                api.setToken(it.token)
-                onKnown(true)
-                keyboardController.hide()
+                ) {
+                    api.setToken(it.token)
+                    onKnown(true)
+                    keyboardController?.hide()
+                }
+            } catch (t: Throwable) {
+                if (t is CancellationException) throw t
+                signUpError = formatError(t)
+                context.showDidntWork(R.string.error_sign_up)
+            } finally {
+                isSigningUp = false
+                codeValueEnabled = true
             }
-            codeValueEnabled = true
         }
     }
 
@@ -156,6 +287,7 @@ fun InitialScreen(onKnown: (isSignUp: Boolean) -> Unit) {
                 )
             )
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(
                 PaddingValues(
                     top = 1.pad,
@@ -184,13 +316,15 @@ fun InitialScreen(onKnown: (isSignUp: Boolean) -> Unit) {
                 if (codeExpired) {
                     codeExpired = false
                 }
+                if (signUpError != null) {
+                    signUpError = null
+                }
 
-                if (it.length == 6) {
-                    codeValueEnabled = false
+                if (it.length == 6 && !isBusy) {
                     signUp(it)
                 }
             },
-            enabled = codeValueEnabled,
+            enabled = codeValueEnabled && !isBusy,
             label = { Text(stringResource(R.string.enter_invite_code)) },
             shape = MaterialTheme.shapes.large,
             singleLine = true,
@@ -199,8 +333,9 @@ fun InitialScreen(onKnown: (isSignUp: Boolean) -> Unit) {
                 imeAction = ImeAction.Done
             ),
             keyboardActions = KeyboardActions(onDone = {
-                codeValueEnabled = false
-                signUp(codeValue)
+                if (!isBusy) {
+                    signUp(codeValue.trim().ifBlank { null })
+                }
             }),
         )
 
@@ -213,24 +348,83 @@ fun InitialScreen(onKnown: (isSignUp: Boolean) -> Unit) {
         }
 
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(2.pad)
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(2.pad),
+            modifier = Modifier
+                .widthIn(max = 400.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 2.pad, vertical = 2.pad)
         ) {
-            Button(
-                {
-                    signUp()
-                },
-                modifier = Modifier.padding(vertical = 3.pad)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f)
             ) {
-                Text(stringResource(R.string.sign_up))
+                Button(
+                    {
+                        signUp(codeValue.trim().ifBlank { null })
+                    },
+                    enabled = !isBusy,
+                    modifier = Modifier.padding(top = 1.pad)
+                ) {
+                    if (isSigningUp) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier
+                                .padding(end = 1.pad)
+                                .size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                    }
+                    Text(stringResource(R.string.sign_up))
+                }
+
+                if (signUpError != null) {
+                    Text(
+                        text = signUpError!!,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 1.pad)
+                    )
+                }
             }
-            OutlinedButton(
-                {
-                    signInDialog = true
-                },
-                modifier = Modifier.padding(vertical = 3.pad)
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f)
             ) {
-                Text(stringResource(R.string.sign_in))
+                OutlinedButton(
+                    {
+                        signInDialog = true
+                    },
+                    enabled = !isBusy,
+                    modifier = Modifier.padding(top = 1.pad)
+                ) {
+                    if (isSigningIn) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .padding(end = 1.pad)
+                                .size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                    }
+                    Text(stringResource(R.string.sign_in))
+                }
+
+                if (signInError != null) {
+                    Text(
+                        text = signInError!!,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 1.pad)
+                    )
+                }
             }
         }
 
@@ -238,30 +432,29 @@ fun InitialScreen(onKnown: (isSignUp: Boolean) -> Unit) {
             button = { scan ->
                 OutlinedButton(
                     onClick = scan,
+                    enabled = !isBusy,
                     modifier = Modifier.padding(vertical = 1.pad)
                 ) {
                     Icon(
                         Icons.Outlined.QrCodeScanner,
-                        // todo: translate
-                        contentDescription = "Scan QR",
+                        contentDescription = stringResource(R.string.scan_qr),
                         modifier = Modifier.padding(end = 1.pad)
                     )
-                    // todo: translate
-                    Text("Scan QR")
+                    Text(stringResource(R.string.scan_qr))
                 }
             }
         ) { result ->
             // Handle standard app URLs
             when (result) {
                 is ScanQrCodeResult.Invite -> {
-                    codeValueEnabled = false
                     signUp(result.code)
                 }
 
                 is ScanQrCodeResult.LinkDevice -> {
                     if (result.token.isNotBlank()) {
-                        codeValueEnabled = false
                         signInWithLink(result.token)
+                    } else {
+                        signInError = context.didntWorkMessage(R.string.error_invalid_link_code)
                     }
                 }
 

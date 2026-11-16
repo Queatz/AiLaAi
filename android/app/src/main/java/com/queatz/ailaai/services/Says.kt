@@ -3,7 +3,7 @@ package com.queatz.ailaai.services
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import com.queatz.ailaai.extensions.nullIfBlank
+import com.queatz.ailaai.extensions.notBlank
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -22,7 +22,7 @@ class Say {
         try {
             synchronized(this) { job }?.cancelAndJoin()
         } finally {
-            say?.nullIfBlank?.let { say ->
+            say?.notBlank?.let { say ->
                 coroutineScope {
                     synchronized(this) {
                         job = launch {

@@ -45,6 +45,7 @@ suspend fun Api.cards(
         "activityActive" to activityActive?.toString(),
         "parking" to parking?.name,
     ),
+        errorContext = "load pages",
         onError = onError,
         onSuccess = onSuccess
     )
@@ -55,6 +56,7 @@ suspend fun Api.card(
     onSuccess: SuccessBlock<Card>,
 ) = get(
     "cards/$id",
+    errorContext = "load page",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -65,6 +67,7 @@ suspend fun Api.cardByUrl(
     onSuccess: SuccessBlock<Card>,
 ) = get(
     "urls/cards/$url",
+    errorContext = "load page",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -75,6 +78,7 @@ suspend fun Api.cardsCards(
     onSuccess: SuccessBlock<List<Card>>,
 ) = get(
     "cards/$id/cards",
+    errorContext = "load pages",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -84,6 +88,7 @@ suspend fun Api.myCards(
     onSuccess: SuccessBlock<List<Card>>,
 ) = get(
     "me/cards",
+    errorContext = "load my pages",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -101,6 +106,7 @@ suspend fun Api.savedCards(
         "offset" to offset.toString(),
         "limit" to limit.toString()
     ),
+    errorContext = "load saved pages",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -111,6 +117,7 @@ suspend fun Api.newCard(
     onSuccess: SuccessBlock<Card>,
 ) = post(
     "cards", card,
+    errorContext = "create page",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -123,6 +130,7 @@ suspend fun Api.updateCard(
 ) = post(
     url = "cards/$id",
     body = card,
+    errorContext = "update page",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -133,6 +141,7 @@ suspend fun Api.upgradeCardDetails(
     onSuccess: SuccessBlock<CardUpgradeDetails>,
 ) = get(
     url = "cards/$id/upgrade",
+    errorContext = "load upgrade details",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -145,6 +154,7 @@ suspend fun Api.upgradeCard(
 ) = post(
     url = "cards/$id/upgrade",
     body = upgrade,
+    errorContext = "upgrade page",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -155,6 +165,7 @@ suspend fun Api.downgradeCardDetails(
     onSuccess: SuccessBlock<CardDowngradeDetails>,
 ) = get(
     url = "cards/$id/downgrade",
+    errorContext = "load downgrade details",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -167,6 +178,7 @@ suspend fun Api.downgradeCard(
 ) = post(
     url = "cards/$id/downgrade",
     body = downgrade,
+    errorContext = "downgrade page",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -177,6 +189,7 @@ suspend fun Api.deleteCard(
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) = post(
     "cards/$id/delete",
+    errorContext = "delete page",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -187,6 +200,7 @@ suspend fun Api.saveCard(
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) = post(
     "cards/$id/save",
+    errorContext = "save page",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -197,6 +211,7 @@ suspend fun Api.unsaveCard(
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) = post(
     "cards/$id/unsave",
+    errorContext = "unsave page",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -215,6 +230,7 @@ suspend fun Api.uploadCardPhoto(
             })
         }
     ), client = httpDataClient,
+        errorContext = "upload page image",
         onError = onError,
         onSuccess = onSuccess)
 }
@@ -244,6 +260,7 @@ suspend fun Api.uploadCardVideo(
         ),
         progressCallback = uploadCallback,
         client = httpDataClient,
+        errorContext = "upload page video",
         onError = onError,
         onSuccess = onSuccess
     )
@@ -255,6 +272,7 @@ suspend fun Api.cardGroup(
     onSuccess: SuccessBlock<Group>,
 ) = get(
     "cards/$card/group",
+    errorContext = "load page group",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -265,6 +283,7 @@ suspend fun Api.cardPeople(
     onSuccess: SuccessBlock<List<Person>> = {},
 ) = get(
     "cards/$card/people",
+    errorContext = "load page people",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -279,6 +298,7 @@ suspend fun Api.cardVisits(
     parameters = mapOf(
         "since" to since.toString()
     ),
+    errorContext = "load page visits",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -290,6 +310,7 @@ suspend fun Api.wildReply(
 ) = post(
     url = "wild/reply",
     body = reply,
+    errorContext = "send reply",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -317,6 +338,7 @@ suspend fun Api.uploadCardContentPhotos(
             }
         ),
         client = httpDataClient,
+        errorContext = "upload image",
         onError = onError,
         onSuccess = onSuccess
     )
@@ -343,6 +365,7 @@ suspend fun Api.uploadCardContentAudio(
             }
         ),
         client = httpDataClient,
+        errorContext = "upload audio",
         onError = onError,
         onSuccess = onSuccess
     )

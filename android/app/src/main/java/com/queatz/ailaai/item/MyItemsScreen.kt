@@ -157,7 +157,7 @@ fun MyItemsScreen() {
                     quantity = quantity
                 )
                 showMintItem = null
-            } ?: context.showDidntWork()
+            } ?: context.showDidntWork(R.string.error_invalid_quantity)
         }
     }
 

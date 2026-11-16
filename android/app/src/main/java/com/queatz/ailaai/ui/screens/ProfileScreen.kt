@@ -24,8 +24,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.QrCode2
@@ -511,7 +511,7 @@ fun ProfileScreen(personId: String) {
                     }
                 }.awaitAll()
                 if (hasError) {
-                    context.showDidntWork()
+                    context.showDidntWork(R.string.error_send_profile)
                 } else {
                     context.toast(sent)
                 }
@@ -733,7 +733,7 @@ fun ProfileScreen(personId: String) {
                                 .clip(CircleShape)
                         ) {
                             Icon(
-                                Icons.Outlined.ArrowBack,
+                                Icons.AutoMirrored.Outlined.ArrowBack,
                                 stringResource(R.string.go_back),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )

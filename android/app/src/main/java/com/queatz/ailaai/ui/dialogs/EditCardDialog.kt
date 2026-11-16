@@ -14,10 +14,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.ArrowForward
-import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -192,7 +192,7 @@ fun EditCardDialog(
                         }
                     ) {
                         Icon(
-                            Icons.Outlined.ArrowBack,
+                            Icons.AutoMirrored.Outlined.ArrowBack,
                             stringResource(R.string.go_back),
                             modifier = Modifier.padding(end = 1.pad)
                         )
@@ -264,7 +264,7 @@ fun EditCardDialog(
                             )
                         ) {
                             Icon(
-                                Icons.Outlined.Message,
+                                Icons.AutoMirrored.Outlined.Message,
                                 null
                             )
                         }
@@ -306,7 +306,7 @@ fun EditCardDialog(
                                 colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary)
                             ) {
                                 Icon(
-                                    Icons.Outlined.ArrowForward,
+                                    Icons.AutoMirrored.Outlined.ArrowForward,
                                     stringResource(R.string.continue_conversation)
                                 )
                             }
