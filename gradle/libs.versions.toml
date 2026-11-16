@@ -2,7 +2,6 @@
 kotlin = "2.4.20"
 coroutines = "1.11.0"
 ktor = "3.6.1"
-choiceSdk = "0.3.0"
 compose = "1.12.1"
 serialization = "1.11.0"
 datetime = "0.8.0"

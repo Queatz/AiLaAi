@@ -5,21 +5,23 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Looper
 import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat.checkSelfPermission
 import androidx.core.app.NotificationCompat
 import androidx.work.*
 import app.ailaai.api.myGeo
-import at.bluesource.choicesdk.core.Outcome
-import at.bluesource.choicesdk.location.common.LocationRequest
-import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.toGeo
 import com.queatz.ailaai.extensions.toLatLng
 import com.queatz.ailaai.services.Push
 import com.queatz.push.UpdateLocationPushData
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -81,46 +83,46 @@ class LocationUpdateWorker(
         setForeground(ForegroundInfo(NOTIFICATION_ID, notification))
 
         // Get current location
-        val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(context)
+        val locationClient = LocationServices.getFusedLocationProviderClient(context)
         val done = CompletableDeferred<Unit>()
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 10_000L)
+            .setMaxUpdateDelayMillis(60_000L)
+            .build()
+        val locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                val location = locationResult.lastLocation ?: return
+                val latLng = location.toLatLng()
+                locationClient.removeLocationUpdates(this)
 
-        try {
-            val disposable = locationClient
-                .observeLocation(
-                    LocationRequest.Builder()
-                        .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
-                        .setInterval(10000) // 10 seconds
-                        .setMaxWaitTime(60000) // 1 minute
-                        .build()
-                )
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { outcome ->
-                    if (outcome is Outcome.Success) {
-                        val location = outcome.value.lastLocation!!
-                        val latLng = location.toLatLng()
-
-                        // 3. Send location to server via API call
-                        CoroutineScope(Dispatchers.IO).launch {
-                            api.myGeo(
-                                geo = latLng.toGeo()
-                            ) {
-                                done.complete(Unit)
-                            }
-                        }
+                // 3. Send location to server via API call
+                CoroutineScope(Dispatchers.IO).launch {
+                    api.myGeo(
+                        geo = latLng.toGeo()
+                    ) {
+                        done.complete(Unit)
                     }
                 }
+            }
+        }
+
+        try {
+            locationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
 
             // Wait for location to be fetched
             withTimeoutOrNull(1.minutes) {
                 done.await()
             }
 
-            disposable.dispose()
-
             return Result.success()
         } catch (e: Exception) {
             e.printStackTrace()
             return Result.failure()
+        } finally {
+            locationClient.removeLocationUpdates(locationCallback)
         }
     }
 

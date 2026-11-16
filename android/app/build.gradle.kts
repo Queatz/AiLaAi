@@ -154,7 +154,6 @@ dependencies {
     implementation("androidx.compose.ui:ui:${versions.compose}")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
     implementation("androidx.compose.ui:ui-tooling-preview:${versions.compose}")
-    runtimeOnly("androidx.compose.runtime:runtime-rxjava3:${versions.compose}")
     implementation("androidx.compose.ui:ui-viewbinding:${versions.compose}")
     implementation("androidx.compose.material3:material3:1.4.0")
     implementation("androidx.compose.material3:material3-window-size-class:1.4.0")
@@ -183,17 +182,16 @@ dependencies {
     implementation("com.mikepenz:multiplatform-markdown-renderer-code:${versions.markdownRenderer}")
     implementation("androidx.work:work-runtime-ktx:2.12.0")
 
-    // Google Maps & Firebase Messaging
+    // Google Maps, Location & Firebase Messaging
     implementation("com.google.android.gms:play-services-base:18.11.1")
+    implementation("com.google.android.gms:play-services-location:21.4.0")
     implementation("com.google.android.gms:play-services-maps:20.1.0")
     implementation("com.google.firebase:firebase-messaging:26.0.2")
 
     // HMS Support
-    implementation("at.bluesource.choicesdk:choicesdk-location:${versions.choiceSdk}")
     implementation("com.huawei.hms:base:6.13.0.300")
     implementation("com.huawei.hms:scanplus:2.15.0.301")
     implementation("com.huawei.hms:hwid:6.14.0.300")
-    implementation("com.huawei.hms:location:6.12.0.300")
 
     // Media
     implementation("androidx.exifinterface:exifinterface:1.4.2")

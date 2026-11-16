@@ -8,7 +8,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import app.ailaai.api.crash
 import app.ailaai.api.myDevice
-import at.bluesource.choicesdk.core.ChoiceSdk
 import com.google.auto.service.AutoService
 import com.google.firebase.messaging.FirebaseMessaging
 import com.queatz.ailaai.data.api
@@ -45,7 +44,6 @@ class Application : android.app.Application() {
             t.printStackTrace()
         }
 
-        ChoiceSdk.init(this)
         db.init(this)
         api.init(this)
         push.init(this)
