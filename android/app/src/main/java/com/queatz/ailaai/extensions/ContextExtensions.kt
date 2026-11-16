@@ -26,7 +26,19 @@ fun AppCompatActivity.rememberIsInPipMode(): Boolean {
     return pipMode
 }
 
-fun Context.showDidntWork() = toast(getString(R.string.didnt_work))
+fun Context.didntWorkMessage(errorContext: String? = null): String =
+    if (errorContext.isNullOrBlank()) {
+        getString(R.string.didnt_work)
+    } else {
+        getString(R.string.x_x, getString(R.string.didnt_work), localizedErrorContext(errorContext))
+    }
+
+fun Context.didntWorkMessage(@StringRes errorContextRes: Int): String =
+    getString(R.string.x_x, getString(R.string.didnt_work), getString(errorContextRes))
+
+fun Context.showDidntWork(errorContext: String? = null) = toast(didntWorkMessage(errorContext))
+
+fun Context.showDidntWork(@StringRes errorContextRes: Int) = toast(didntWorkMessage(errorContextRes))
 
 fun Context.toast(@StringRes stringRes: Int) = toast(getString(stringRes))
 

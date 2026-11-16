@@ -7,52 +7,52 @@ import io.ktor.http.*
 suspend fun Api.myTopReactions(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<ReactionCount>>,
-) = get("me/reactions/top", onError = onError, onSuccess = onSuccess)
+) = get("me/reactions/top", errorContext = "load reactions", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.me(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Person>,
-) = get("me", onError = onError, onSuccess = onSuccess)
+) = get("me", errorContext = "load profile", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.transferCode(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Transfer>,
-) = get("me/transfer", onError = onError, onSuccess = onSuccess)
+) = get("me/transfer", errorContext = "load transfer code", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.refreshTransferCode(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Transfer>,
-) = post("me/transfer/refresh", onError = onError, onSuccess = onSuccess)
+) = post("me/transfer/refresh", errorContext = "refresh transfer code", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.myGeo(
     geo: Geo,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {},
-) = post("me/geo", geo.toList(), onError = onError, onSuccess = onSuccess)
+) = post("me/geo", geo.toList(), errorContext = "update location", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.myDevice(
     deviceType: DeviceType,
     deviceToken: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {},
-) = post("me/device", MyDevice(deviceType, deviceToken), onError = onError, onSuccess = onSuccess)
+) = post("me/device", MyDevice(deviceType, deviceToken), errorContext = "register device", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.updateMe(
     person: Person,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Person> = {},
-) = post("me", person, onError = onError, onSuccess = onSuccess)
+) = post("me", person, errorContext = "update profile", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.updateProfile(
     profile: Profile,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Profile> = {},
-) = post("me/profile", profile, onError = onError, onSuccess = onSuccess)
+) = post("me/profile", profile, errorContext = "update profile", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.hiddenGroups(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<GroupExtended>> = {},
-) = get("me/groups/hidden", onError = onError, onSuccess = onSuccess)
+) = get("me/groups/hidden", errorContext = "load hidden groups", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.updateProfilePhoto(
     photo: ByteArray,
@@ -66,7 +66,7 @@ suspend fun Api.updateProfilePhoto(
                 append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
             })
         }
-    ), client = httpDataClient, onError = onError, onSuccess = onSuccess)
+    ), client = httpDataClient, errorContext = "upload profile image", onError = onError, onSuccess = onSuccess)
 }
 
 suspend fun Api.updateProfileVideo(
@@ -93,6 +93,7 @@ suspend fun Api.updateProfileVideo(
         ),
         progressCallback = uploadCallback,
         client = httpDataClient,
+        errorContext = "upload profile video",
         onError = onError,
         onSuccess = onSuccess
     )
@@ -114,6 +115,7 @@ suspend fun Api.updateMyPhoto(
             }
         ),
         client = httpDataClient,
+        errorContext = "upload profile image",
         onError = onError,
         onSuccess = onSuccess
     )
@@ -125,6 +127,7 @@ suspend fun Api.deleteMe(
 ) {
     return post(
         "me/delete",
+        errorContext = "delete account",
         onError = onError,
         onSuccess = onSuccess
     )

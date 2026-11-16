@@ -134,7 +134,7 @@ fun SettingsScreen(
             showBiometrics = false
 
             if (it) {
-                context.showDidntWork()
+                context.showDidntWork(R.string.error_verify_biometrics)
             } else {
                 biometricsSucceeded = true
                 onBiometricsSucceeded?.invoke()

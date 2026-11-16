@@ -7,29 +7,39 @@
         <compositeConfiguration>
           <compositeBuild compositeDefinitionSource="SCRIPT">
             <builds>
-              <build path="$PROJECT_DIR$/../ailaai-shared" name="ailaai-shared">
+              <build path="$PROJECT_DIR$/../shared" name="ailaai-shared">
                 <projects>
-                  <project path="$PROJECT_DIR$/../ailaai-shared" />
-                  <project path="$PROJECT_DIR$/../ailaai-shared/api" />
-                  <project path="$PROJECT_DIR$/../ailaai-shared/models" />
-                  <project path="$PROJECT_DIR$/../ailaai-shared/push" />
-                  <project path="$PROJECT_DIR$/../ailaai-shared/widgets" />
+                  <project path="$PROJECT_DIR$/../shared" />
+                  <project path="$PROJECT_DIR$/../shared/api" />
+                  <project path="$PROJECT_DIR$/../shared/content" />
+                  <project path="$PROJECT_DIR$/../shared/models" />
+                  <project path="$PROJECT_DIR$/../shared/push" />
+                  <project path="$PROJECT_DIR$/../shared/reminders" />
+                  <project path="$PROJECT_DIR$/../shared/widgets" />
+                </projects>
+              </build>
+              <build path="$PROJECT_DIR$/../shared/config" name="config">
+                <projects>
+                  <project path="$PROJECT_DIR$/../shared/config" />
                 </projects>
               </build>
             </builds>
           </compositeBuild>
         </compositeConfiguration>
+        <option name="testRunner" value="CHOOSE_PER_TEST" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleJvm" value="17" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/../ailaai-shared" />
-            <option value="$PROJECT_DIR$/../ailaai-shared/api" />
-            <option value="$PROJECT_DIR$/../ailaai-shared/models" />
-            <option value="$PROJECT_DIR$/../ailaai-shared/push" />
-            <option value="$PROJECT_DIR$/../ailaai-shared/widgets" />
+            <option value="$PROJECT_DIR$/../shared" />
+            <option value="$PROJECT_DIR$/../shared/api" />
+            <option value="$PROJECT_DIR$/../shared/config" />
+            <option value="$PROJECT_DIR$/../shared/content" />
+            <option value="$PROJECT_DIR$/../shared/models" />
+            <option value="$PROJECT_DIR$/../shared/push" />
+            <option value="$PROJECT_DIR$/../shared/reminders" />
+            <option value="$PROJECT_DIR$/../shared/widgets" />
           </set>
         </option>
       </GradleProjectSettings>

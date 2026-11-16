@@ -58,7 +58,7 @@ class CallActivity : AppCompatActivity() {
             if (result.resultCode == RESULT_OK) {
                 calls.meeting?.enableScreenShare(result.data)
             } else {
-                applicationContext.showDidntWork()
+                applicationContext.showDidntWork(R.string.error_share_screen)
             }
         }
 

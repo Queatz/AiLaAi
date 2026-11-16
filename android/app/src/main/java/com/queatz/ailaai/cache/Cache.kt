@@ -11,7 +11,8 @@ val cache by lazy {
 
 enum class CacheKey {
     Me,
-    Groups
+    Groups,
+    ActiveSignals
 }
 
 class Cache {

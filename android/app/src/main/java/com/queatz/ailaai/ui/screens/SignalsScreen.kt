@@ -95,6 +95,7 @@ import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.push
+import com.queatz.ailaai.services.signals as signalsService
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.PageInput
@@ -109,7 +110,6 @@ import com.queatz.ailaai.ui.dialogs.SignalRepliesDialog
 import com.queatz.ailaai.ui.dialogs.SignalSettingsDialog
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.pad
-import com.queatz.db.ActiveSignalsResponse
 import com.queatz.db.Group
 import com.queatz.db.PersonSignal
 import com.queatz.db.Signal
@@ -131,9 +131,16 @@ fun SignalsScreen(id: String? = null) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
+    var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
+    val locationSelector = locationSelector(
+        geo = geo,
+        onGeoChange = { geo = it },
+        activity = nav.context as Activity
+    )
+
     var signals by remember { mutableStateOf(emptyList<Signal>()) }
     var personSignals by remember { mutableStateOf(emptyList<PersonSignal>()) }
-    var activeSignals by remember { mutableStateOf<ActiveSignalsResponse?>(null) }
+    var activeSignals by remember { mutableStateOf(if (geo == null) signalsService.activeSignals.value else null) }
     var isLoading by remember { mutableStateOf(true) }
     var signalsOffset by remember { mutableIntStateOf(0) }
     var canLoadMore by remember { mutableStateOf(true) }
@@ -151,13 +158,6 @@ fun SignalsScreen(id: String? = null) {
     var hasOpenedDeepLink by rememberSaveable { mutableStateOf(false) }
     var photoToShow by remember { mutableStateOf<String?>(null) }
 
-    var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
-    val locationSelector = locationSelector(
-        geo = geo,
-        onGeoChange = { geo = it },
-        activity = nav.context as Activity
-    )
-
     var myId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(id) {
@@ -168,6 +168,9 @@ fun SignalsScreen(id: String? = null) {
         scope.launch {
             api.activeSignals(geo?.toList(), onError = { isLoading = false }) {
                 activeSignals = it
+                if (geo == null) {
+                    signalsService.update(it)
+                }
                 isLoading = false
                 
                 // If we came from a deep link, open the correct dialog
@@ -444,7 +447,7 @@ fun SignalsScreen(id: String? = null) {
             onDismissRequest = { showSendDialog = null },
             onSubmit = { body ->
                 scope.launch {
-                    api.sendSignal(body, onError = { context.showDidntWork() }) {
+                    api.sendSignal(body, onError = { context.showDidntWork(R.string.error_send_signal) }) {
                         showSendDialog = null
                         signalSentAnimation = signal
                         refreshActive()
@@ -465,7 +468,7 @@ fun SignalsScreen(id: String? = null) {
             },
             onSubmit = { body ->
                 scope.launch {
-                    api.replySignal(send.signalSend.id!!, body, onError = { context.showDidntWork() }) {
+                    api.replySignal(send.signalSend.id!!, body, onError = { context.showDidntWork(R.string.error_reply_to_signal) }) {
                         showReplyDialog = null
                         if (id == send.signalSend.id) {
                             nav.popBackStack()

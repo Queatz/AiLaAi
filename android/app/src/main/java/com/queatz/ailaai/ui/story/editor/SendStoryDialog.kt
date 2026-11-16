@@ -56,7 +56,7 @@ fun SendStoryDialog(
                 }
             }.awaitAll()
             if (hasError) {
-                context.showDidntWork()
+                context.showDidntWork(R.string.error_send_post)
             } else {
                 context.toast(sent)
             }

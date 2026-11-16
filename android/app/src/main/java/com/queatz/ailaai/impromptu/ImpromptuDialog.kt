@@ -591,10 +591,8 @@ private fun ImpromptuSettingsDialog(
                         if (showDisclosureDialog) {
                             Alert(
                                 onDismissRequest = { showDisclosureDialog = false },
-                                // todo: translate
-                                title = "Background location",
-                                // todo: translate
-                                text = "Your location is not saved except for the last location received in order to power the Impromptu feature.",
+                                title = stringResource(R.string.background_location),
+                                text = stringResource(R.string.background_location_disclosure),
                                 dismissButton = stringResource(R.string.cancel),
                                 confirmButton = stringResource(R.string.accept),
                                 onConfirm = {

@@ -20,6 +20,7 @@ suspend fun Api.scripts(
         "offset" to offset.toString(),
         "limit" to limit.toString(),
     ),
+    errorContext = "load scripts",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -29,6 +30,7 @@ suspend fun Api.myScripts(
     onSuccess: SuccessBlock<List<Script>>,
 ) = get(
     "me/scripts",
+    errorContext = "load my scripts",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -39,6 +41,7 @@ suspend fun Api.script(
     onSuccess: SuccessBlock<Script>,
 ) = get(
     "scripts/$id",
+    errorContext = "load script",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -50,6 +53,7 @@ suspend fun Api.createScript(
 ) = post(
     "scripts",
     body = script,
+    errorContext = "create script",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -62,6 +66,7 @@ suspend fun Api.updateScript(
 ) = post(
     "scripts/$id",
     body = script,
+    errorContext = "update script",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -74,6 +79,7 @@ suspend fun Api.runScript(
 ) = post(
     "scripts/$id/run",
     body = data,
+    errorContext = "run script",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -84,6 +90,7 @@ suspend fun Api.deleteScript(
     onSuccess: SuccessBlock<HttpStatusCode>,
 ) = post(
     "scripts/$id/delete",
+    errorContext = "delete script",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -94,6 +101,7 @@ suspend fun Api.scriptData(
     onSuccess: SuccessBlock<ScriptData>,
 ) = get(
     "scripts/$id/data",
+    errorContext = "load script data",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -106,6 +114,7 @@ suspend fun Api.updateScriptData(
 ) = post(
     "scripts/$id/data",
     body = scriptData,
+    errorContext = "update script data",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -114,13 +123,13 @@ suspend fun Api.pinScript(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {},
-) = post("scripts/$id/pin", onError = onError, onSuccess = onSuccess)
+) = post("scripts/$id/pin", errorContext = "pin script", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.unpinScript(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {},
-) = post("scripts/$id/unpin", onError = onError, onSuccess = onSuccess)
+) = post("scripts/$id/unpin", errorContext = "unpin script", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.scriptStats(
     id: String,
@@ -128,6 +137,7 @@ suspend fun Api.scriptStats(
     onSuccess: SuccessBlock<ScriptStats>,
 ) = get(
     "scripts/$id/stats",
+    errorContext = "load script stats",
     onError = onError,
     onSuccess = onSuccess
 )

@@ -25,6 +25,7 @@ suspend fun Api.aiAssistantTranscribe(
             )
         }
     ),
+    errorContext = "transcribe audio",
     onError = onError,
     onSuccess = onSuccess
 )

@@ -47,7 +47,7 @@ fun createPath(points: List<Offset>) = Path().apply {
                 if (i == 1) {
                     this.lineTo(midPoint.x, midPoint.y)
                 } else {
-                    this.quadraticBezierTo(it.x, it.y, midPoint.x, midPoint.y)
+                    this.quadraticTo(it.x, it.y, midPoint.x, midPoint.y)
                 }
             }
             oldPoint = point

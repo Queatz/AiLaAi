@@ -12,16 +12,14 @@ buildscript {
         }
         val agpVersion = properties.getProperty("AGP_VERSION")
             .orEmpty()
-            .ifBlank {
-                "9.1.0"
-            }
+            .ifBlank { "9.5.1" }
         classpath("com.android.tools.build:gradle:$agpVersion")
         // AGP 9 ships kapt as a separate plugin; ObjectBox still generates via kapt.
         classpath("com.android.legacy-kapt:com.android.legacy-kapt.gradle.plugin:$agpVersion")
         classpath(libs.kotlin.gradle.plugin)
         classpath("com.huawei.agconnect:agcp:1.9.6.300")
-        classpath("com.google.gms:google-services:4.5.0")
-        classpath("io.objectbox:objectbox-gradle-plugin:6.0.0-beta")
+        classpath("com.google.gms:google-services:4.6.0")
+        classpath("io.objectbox:objectbox-gradle-plugin:6.0.0-beta3")
     }
 }
 
@@ -30,5 +28,6 @@ plugins {
 }
 
 tasks.register("clean", Delete::class) {
+    description = "removes the root project build directory and its contents"
     delete(rootProject.layout.buildDirectory)
 }

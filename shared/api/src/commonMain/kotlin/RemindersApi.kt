@@ -13,6 +13,7 @@ suspend fun Api.reminders(
     onSuccess: SuccessBlock<List<Reminder>> = {}
 ) = get(
     url = "reminders",
+    errorContext = "load reminders",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -26,6 +27,7 @@ suspend fun Api.occurrences(
     onSuccess: SuccessBlock<List<ReminderOccurrences>> = {}
 ) = get(
     url = "occurrences",
+    errorContext = "load occurrences",
     onError = onError,
     onSuccess = onSuccess,
     parameters = mapOf(
@@ -43,6 +45,7 @@ suspend fun Api.newReminder(
 ) = post(
     url = "reminders",
     body = reminder,
+    errorContext = "create reminder",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -55,6 +58,7 @@ suspend fun Api.updateReminder(
 ) = post(
     url = "reminders/$id",
     body = reminder,
+    errorContext = "update reminder",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -65,6 +69,7 @@ suspend fun Api.joinReminder(
     onSuccess: SuccessBlock<HttpStatusCode> = {}
 ) = post(
     url = "reminders/$id/join",
+    errorContext = "join reminder",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -75,6 +80,7 @@ suspend fun Api.leaveReminder(
     onSuccess: SuccessBlock<HttpStatusCode> = {}
 ) = post(
     url = "reminders/$id/leave",
+    errorContext = "leave reminder",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -85,6 +91,7 @@ suspend fun Api.reminder(
     onSuccess: SuccessBlock<Reminder> = {}
 ) = get(
     url = "reminders/$id",
+    errorContext = "load reminder",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -97,6 +104,7 @@ suspend fun Api.reminderOccurrences(
     onSuccess: SuccessBlock<List<ReminderOccurrences>>
 ) = get(
     url = "reminders/$id/occurrences",
+    errorContext = "load occurrences",
     onError = onError,
     onSuccess = onSuccess,
     parameters = mapOf(
@@ -114,6 +122,7 @@ suspend fun Api.updateReminderOccurrence(
 ) = post(
     url = "reminders/$id/occurrences/$occurrence",
     body = update,
+    errorContext = "update occurrence",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -125,6 +134,7 @@ suspend fun Api.deleteReminderOccurrence(
     onSuccess: SuccessBlock<HttpStatusCode> = {}
 ) = post(
     url = "reminders/$id/occurrences/$occurrence/delete",
+    errorContext = "delete occurrence",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -135,6 +145,7 @@ suspend fun Api.deleteReminder(
     onSuccess: SuccessBlock<HttpStatusCode> = {}
 ) = post(
     url = "reminders/$reminderId/delete",
+    errorContext = "delete reminder",
     onError = onError,
     onSuccess = onSuccess
 )

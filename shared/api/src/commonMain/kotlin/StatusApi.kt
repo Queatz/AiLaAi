@@ -9,26 +9,26 @@ suspend fun Api.myStatus(
     personStatus: PersonStatus,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<PersonStatus>,
-) = post("me/status", personStatus, onError = onError, onSuccess = onSuccess)
+) = post("me/status", personStatus, errorContext = "update status", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.recentStatuses(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Status>>,
-) = get("me/statuses", onError = onError, onSuccess = onSuccess)
+) = get("me/statuses", errorContext = "load statuses", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.createStatus(
     status: Status,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Status>,
-) = post("statuses", status, onError = onError, onSuccess = onSuccess)
+) = post("statuses", status, errorContext = "create status", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.friendStatuses(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<PersonStatus>>,
-) = get("statuses", onError = onError, onSuccess = onSuccess)
+) = get("statuses", errorContext = "load statuses", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.deleteStatus(
     statusId: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode>,
-) = post("statuses/$statusId/delete", onError = onError, onSuccess = onSuccess)
+) = post("statuses/$statusId/delete", errorContext = "delete status", onError = onError, onSuccess = onSuccess)

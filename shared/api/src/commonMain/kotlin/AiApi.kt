@@ -20,6 +20,7 @@ suspend fun Api.aiStyles(
     onSuccess: SuccessBlock<List<Pair<String, String>>>,
 ) = get(
     url = "ai/styles",
+    errorContext = "load AI styles",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -31,6 +32,7 @@ suspend fun Api.aiPhoto(
 ) = post(
     url = "ai/photo",
     body = request,
+    errorContext = "generate image",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -42,6 +44,7 @@ suspend fun Api.aiSpeak(
 ) = post(
     url = "ai/speak",
     body = request,
+    errorContext = "generate speech",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -53,6 +56,7 @@ suspend fun Api.aiScript(
 ) = post(
     url = "ai/script",
     body = request,
+    errorContext = "generate script",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -75,6 +79,7 @@ suspend fun Api.aiTranscribe(
             )
         }
     ),
+    errorContext = "transcribe audio",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -86,6 +91,7 @@ suspend fun Api.aiJson(
 ) = post(
     url = "ai/json",
     body = request,
+    errorContext = "generate JSON",
     onError = onError,
     onSuccess = onSuccess
 )

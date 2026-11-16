@@ -5,4 +5,4 @@ import com.queatz.db.ExportDataResponse
 suspend fun Api.exportData(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<ExportDataResponse> = {}
-) = get("export-data", onError = onError, onSuccess = onSuccess)
+) = get("export-data", errorContext = "export data", onError = onError, onSuccess = onSuccess)

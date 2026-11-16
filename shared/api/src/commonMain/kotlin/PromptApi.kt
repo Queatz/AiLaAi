@@ -12,6 +12,7 @@ suspend fun Api.prompts(
     parameters = context?.let {
         mapOf("context" to it.toString())
     },
+    errorContext = "load prompts",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -23,6 +24,7 @@ suspend fun Api.addPrompt(
 ) = post(
     "prompts",
     body = prompt,
+    errorContext = "save prompt",
     onError = onError,
     onSuccess = onSuccess
 )

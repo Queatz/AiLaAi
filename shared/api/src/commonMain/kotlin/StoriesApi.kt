@@ -28,6 +28,7 @@ suspend fun Api.stories(
         "limit" to limit.toString(),
         "public" to public?.toString()
     ),
+    errorContext = "load posts",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -36,25 +37,25 @@ suspend fun Api.createStory(
     story: Story,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Story>
-) = post("stories", story, onError = onError, onSuccess = onSuccess)
+) = post("stories", story, errorContext = "create post", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.story(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Story>
-) = get("stories/$id", onError = onError, onSuccess = onSuccess)
+) = get("stories/$id", errorContext = "load post", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.updateStory(
     id: String,
     story: Story,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Story> = {}
-) = post("stories/$id", story, onError = onError, onSuccess = onSuccess)
+) = post("stories/$id", story, errorContext = "update post", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.myStories(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Story>>
-) = get("me/stories", onError = onError, onSuccess = onSuccess)
+) = get("me/stories", errorContext = "load my posts", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.uploadStoryPhotos(
     story: String,
@@ -79,6 +80,7 @@ suspend fun Api.uploadStoryPhotos(
             }
         ),
         client = httpDataClient,
+        errorContext = "upload image",
         onError = onError,
         onSuccess = onSuccess
     )
@@ -105,6 +107,7 @@ suspend fun Api.uploadStoryAudio(
             }
         ),
         client = httpDataClient,
+        errorContext = "upload audio",
         onError = onError,
         onSuccess = onSuccess
     )
@@ -114,46 +117,46 @@ suspend fun Api.deleteStory(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {}
-) = post("stories/$id/delete", onError = onError, onSuccess = onSuccess)
+) = post("stories/$id/delete", errorContext = "delete post", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.reactToStory(
     id: String,
     react: ReactBody,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {}
-) = post("stories/$id/react", react, onError = onError, onSuccess = onSuccess)
+) = post("stories/$id/react", react, errorContext = "react to post", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.commentOnStory(
     id: String,
     comment: Comment,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Comment> = {}
-) = post("stories/$id/comment", comment, onError = onError, onSuccess = onSuccess)
+) = post("stories/$id/comment", comment, errorContext = "add comment", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.storyReactions(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<ReactionAndPerson>> = {}
-) = get("stories/$id/reactions", onError = onError, onSuccess = onSuccess)
+) = get("stories/$id/reactions", errorContext = "load reactions", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.storyComments(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<CommentExtended>> = {}
-) = get("stories/$id/comments", onError = onError, onSuccess = onSuccess)
+) = get("stories/$id/comments", errorContext = "load comments", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.storyDraft(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<StoryDraft>
-) = get("stories/$id/draft", onError = onError, onSuccess = onSuccess)
+) = get("stories/$id/draft", errorContext = "load draft", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.updateStoryDraft(
     id: String,
     draft: StoryDraft,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<StoryDraft>
-) = post("stories/$id/draft", draft, onError = onError, onSuccess = onSuccess)
+) = post("stories/$id/draft", draft, errorContext = "save draft", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.storyByUrl(
     url: String,
@@ -161,6 +164,7 @@ suspend fun Api.storyByUrl(
     onSuccess: SuccessBlock<Story>
 ) = get(
     url = "urls/stories/$url",
+    errorContext = "load post",
     onError = onError,
     onSuccess = onSuccess
 )

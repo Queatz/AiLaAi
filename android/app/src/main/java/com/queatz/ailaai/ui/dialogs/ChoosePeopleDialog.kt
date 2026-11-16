@@ -114,7 +114,7 @@ fun ChoosePeopleDialog(
                 }
 
                 else -> {
-                    context.showDidntWork()
+                    context.showDidntWork(R.string.error_scan_qr_code)
                 }
             }
         },

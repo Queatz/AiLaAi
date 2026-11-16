@@ -70,10 +70,7 @@ fun LazyGridScope.sceneItem(
 
                         settings.javaScriptEnabled = true
                         settings.domStorageEnabled = true
-                        settings.databaseEnabled = true
                         settings.allowFileAccess = true
-                        settings.allowFileAccessFromFileURLs = true
-                        settings.allowUniversalAccessFromFileURLs = true
                         settings.mediaPlaybackRequiresUserGesture = false
                         settings.allowContentAccess = true
 

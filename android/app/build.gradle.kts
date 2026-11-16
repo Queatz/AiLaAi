@@ -21,7 +21,7 @@ properties.load(file("../local.properties").inputStream())
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(JavaLanguageVersion.of(25))
     }
 }
 
@@ -81,6 +81,11 @@ android {
             // This is here because of just how slow Jetpack Compose is in debug mode
             isDebuggable = false
         }
+        create("local") {
+            initWith(getByName("debug"))
+            isDebuggable = true
+            matchingFallbacks += listOf("debug")
+        }
         release {
             signingConfigs.findByName("release")?.let {
                 signingConfig = it
@@ -119,6 +124,11 @@ android {
     }
     androidResources {
         localeFilters.addAll(setOf("en", "vi"))
+    }
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
     }
 }
 
@@ -174,7 +184,7 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.11.2")
 
     // GoogleApiAvailability
-    implementation("com.google.android.gms:play-services-base:18.10.0")
+    implementation("com.google.android.gms:play-services-base:18.11.1")
 
     // HMS Support
     implementation("at.bluesource.choicesdk:choicesdk-location:${versions.choiceSdk}")

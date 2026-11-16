@@ -55,7 +55,7 @@ suspend fun Card.reply(conversation: List<String>, onSuccess: (groupId: String) 
         api.sendMessage(
             group = group.id!!,
             message = Message(
-                text = conversation.filterNotBlank().ifNotEmpty?.joinToString(" → "),
+                text = conversation.filterNotBlank().notEmpty?.joinToString(" → "),
                 attachment = json.encodeToString(CardAttachment(id!!))
             )
         ) {

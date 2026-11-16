@@ -19,9 +19,9 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.extensions.contactPhoto
 import com.queatz.ailaai.extensions.formatItemQuantity
-import com.queatz.ailaai.extensions.ifNotEmpty
 import com.queatz.ailaai.extensions.items
 import com.queatz.ailaai.extensions.notBlank
+import com.queatz.ailaai.extensions.notEmpty
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.GroupPhoto
@@ -69,7 +69,7 @@ fun ActiveTradeItem(
                          if (trade.trade!!.cancelledAt != null) {
                              stringResource(R.string.cancelled)
                          } else {
-                             trade.items.ifNotEmpty?.joinToString {
+                             trade.items.notEmpty?.joinToString {
                                  "${it.inventoryItem.item!!.name} x${it.quantity.formatItemQuantity()}"
                              } ?: pluralStringResource(
                                  R.plurals.x_items,

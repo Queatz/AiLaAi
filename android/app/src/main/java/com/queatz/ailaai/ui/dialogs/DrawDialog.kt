@@ -44,7 +44,7 @@ fun DrawDialog(onDismissRequest: () -> Unit, onSubmit: (ImageBitmap) -> Unit) {
                 onSubmit(bitmapAsync.await())
             } catch (error: Throwable) {
                 error.printStackTrace()
-                context.showDidntWork()
+                context.showDidntWork(R.string.error_save_drawing)
             }
         }
     }

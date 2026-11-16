@@ -12,6 +12,7 @@ import com.queatz.ailaai.appLanguage
 import kotlinx.coroutines.delay
 import kotlinx.datetime.*
 import kotlin.time.Clock.System.now
+import kotlin.time.Instant
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.TimeZone
 import java.time.Duration
@@ -56,7 +57,7 @@ fun Instant.plus(
     years: Int = 0,
     zone: TimeZone = TimeZone.currentSystemDefault(),
 ) = toLocalDateTime(zone).let {
-    (LocalDate(it.year, it.month, it.dayOfMonth) + DatePeriod(days = days + weeks * 7, months = months, years = years)).atTime(it.time)
+    (LocalDate(it.year, it.month, it.day) + DatePeriod(days = days + weeks * 7, months = months, years = years)).atTime(it.time)
 }.toInstant(zone)
 
 fun Instant.startOfMinute() = toJavaInstant().truncatedTo(ChronoUnit.MINUTES).toKotlinInstant()
@@ -83,8 +84,8 @@ fun Instant.monthYear() = DateTimeFormatter.ofPattern("MMM yyyy")
 fun Instant.dayMonthYear() = DateTimeFormatter.ofPattern("MMMM d, yyyy")
     .format(toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime())!!
 
-fun Instant.dayOfMonth() = MessageFormat.format("{0,ordinal}", toLocalDateTime(TimeZone.currentSystemDefault()).dayOfMonth)!!
-fun Instant.day() = toLocalDateTime(TimeZone.currentSystemDefault()).dayOfMonth
+fun Instant.dayOfMonth() = MessageFormat.format("{0,ordinal}", toLocalDateTime(TimeZone.currentSystemDefault()).day)!!
+fun Instant.day() = toLocalDateTime(TimeZone.currentSystemDefault()).day
 fun Instant.minute() = toLocalDateTime(TimeZone.currentSystemDefault()).minute
 fun Instant.hour() = toLocalDateTime(TimeZone.currentSystemDefault()).hour
 fun Instant.nameOfDayOfWeek() = DateTimeFormatter.ofPattern("EEE")

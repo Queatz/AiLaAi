@@ -11,10 +11,10 @@ private val urlValidator = UrlValidator()
 
 private val trimChars = "\"'“”()[].,:;!?".toCharArray()
 
-private inline fun String.trimUrl(): String? =
+private fun String.trimUrl(): String? =
     trim(*trimChars).takeIf { it.contains(tldsRegex) }
 
-private inline fun String.ensureScheme() =
+private fun String.ensureScheme() =
     if (contains("://")) this else "https://$this"
 
 fun String.extractUrls() = mutableListOf<String>().apply {

@@ -116,7 +116,7 @@ class CardScreenState(
     val setPhotoState = ChoosePhotoDialogState(mutableStateOf(card?.name ?: ""))
     val setBackgroundState = ChoosePhotoDialogState(mutableStateOf(card?.name ?: ""))
 
-    val isMine get() = me?.id != null && card?.person == me?.id
+    val isMine get() = me?.id != null && card?.person == me.id
     val isMineOrIAmACollaborator get() = isMine || card?.collaborators?.contains(me?.id) == true
 
     fun reload() {

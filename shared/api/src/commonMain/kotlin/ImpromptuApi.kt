@@ -8,6 +8,7 @@ suspend fun Api.myImpromptu(
     onSuccess: SuccessBlock<Impromptu>,
 ) = get(
     url = "me/impromptu",
+    errorContext = "load impromptu",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -19,6 +20,7 @@ suspend fun Api.updateMyImpromptu(
 ) = post(
     url = "me/impromptu",
     body = impromptu,
+    errorContext = "update impromptu",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -30,6 +32,7 @@ suspend fun Api.createImpromptuSeek(
 ) = post(
     url = "me/impromptu/seek",
     body = impromptuSeek,
+    errorContext = "create seek",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -42,6 +45,7 @@ suspend fun Api.updateImpromptuSeek(
 ) = post(
     url = "me/impromptu/seek/$id",
     body = impromptuSeek,
+    errorContext = "update seek",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -52,6 +56,7 @@ suspend fun Api.deleteImpromptuSeek(
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) = post(
     url = "me/impromptu/seek/$id/delete",
+    errorContext = "delete seek",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -67,6 +72,7 @@ suspend fun Api.getImpromptuHistory(
         "offset" to offset.toString(),
         "limit" to limit.toString()
     ),
+    errorContext = "load history",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -77,6 +83,7 @@ suspend fun Api.deleteImpromptuHistory(
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) = post(
     url = "me/impromptu/history/$id/delete",
+    errorContext = "delete history",
     onError = onError,
     onSuccess = onSuccess
 )

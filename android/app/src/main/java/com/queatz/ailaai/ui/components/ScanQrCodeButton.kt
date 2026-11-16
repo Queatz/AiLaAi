@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.content.IntentCompat
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import app.ailaai.api.useInvite
@@ -113,7 +114,7 @@ fun ScanQrCodeButton(
     val scanQrLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data
-                ?.getParcelableExtra<HmsScan?>(ScanUtil.RESULT)
+                ?.let { IntentCompat.getParcelableExtra(it, ScanUtil.RESULT, HmsScan::class.java) }
                 ?.let {
                     it.linkUrl?.linkValue?.takeIf { it.startsWith(appDomain) }?.drop(appDomain.length)?.let {
                         when {
@@ -157,7 +158,7 @@ fun ScanQrCodeButton(
                         }
                     }
                 } ?: run {
-                context.showDidntWork()
+                context.showDidntWork(R.string.error_scan_qr_code)
             }
         }
     }

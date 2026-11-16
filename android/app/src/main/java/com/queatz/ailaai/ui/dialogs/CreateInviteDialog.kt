@@ -245,7 +245,7 @@ fun CreateInviteDialog(
                                 ),
                                 onError = {
                                     isCreating = false
-                                    context.showDidntWork()
+                                    context.showDidntWork(R.string.error_create_invite)
                                 }
                             ) { invite ->
                                 isCreating = false

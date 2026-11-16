@@ -1,11 +1,15 @@
 package com.queatz.ailaai.ui.story
 
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.*
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.appNavigate
@@ -14,7 +18,6 @@ import com.queatz.ailaai.nav
 import com.queatz.db.Person
 import kotlin.time.Instant
 
-@OptIn(ExperimentalTextApi::class)
 @Composable
 fun StoryAuthors(
     publishDate: Instant?,
@@ -34,28 +37,30 @@ fun StoryAuthors(
                         append(" ")
                     }
                 }
-                withStyle(
-                    SpanStyle(
-                        textDecoration = TextDecoration.Underline,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    withAnnotation(person.id!!, person.id!!) {
-                        append(person.name ?: someone)
+                val id = person.id!!
+                withLink(
+                    LinkAnnotation.Clickable(
+                        tag = id,
+                        styles = TextLinkStyles(
+                            style = SpanStyle(
+                                textDecoration = TextDecoration.Underline,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        )
+                    ) {
+                        nav.appNavigate(AppNav.Profile(id))
                     }
+                ) {
+                    append(person.name ?: someone)
                 }
             }
     }
-    ClickableText(
+    Text(
         authorsText,
         style = MaterialTheme.typography.bodyMedium.merge(
             SpanStyle(
                 color = MaterialTheme.colorScheme.secondary
             )
         )
-    ) {
-        authorsText.getStringAnnotations(it, it).firstOrNull()?.tag?.let { id ->
-            nav.appNavigate(AppNav.Profile(id))
-        }
-    }
+    )
 }

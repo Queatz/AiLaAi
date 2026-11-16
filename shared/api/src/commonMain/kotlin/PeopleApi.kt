@@ -24,20 +24,20 @@ suspend fun Api.people(
     parameters["offset"] = offset.toString()
     parameters["limit"] = limit.toString()
 
-    get("people", parameters, onError = onError, onSuccess = onSuccess)
+    get("people", parameters, errorContext = "load people", onError = onError, onSuccess = onSuccess)
 }
 
 suspend fun Api.profile(
     personId: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<PersonProfile>,
-) = get("people/$personId/profile", onError = onError, onSuccess = onSuccess)
+) = get("people/$personId/profile", errorContext = "load profile", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.groupsOfPerson(
     personId: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<GroupExtended>>,
-) = get("people/$personId/groups", onError = onError, onSuccess = onSuccess)
+) = get("people/$personId/groups", errorContext = "load groups", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.statusesOfPerson(
     personId: String,
@@ -48,6 +48,7 @@ suspend fun Api.statusesOfPerson(
 ) = get(
     url = "people/$personId/statuses",
     parameters = mapOf("offset" to offset.toString(), "limit" to limit.toString()),
+    errorContext = "load statuses",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -56,26 +57,26 @@ suspend fun Api.storiesOfPerson(
     personId: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Story>>,
-) = get("people/$personId/stories", onError = onError, onSuccess = onSuccess)
+) = get("people/$personId/stories", errorContext = "load posts", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.profileCards(
     personId: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Card>>,
-) = get("people/$personId/profile/cards", onError = onError, onSuccess = onSuccess)
+) = get("people/$personId/profile/cards", errorContext = "load pages", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.activeCardsOfPerson(
     personId: String,
     search: String?,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Card>>,
-) = get("people/$personId/profile/cards", mapOf("search" to search), onError = onError, onSuccess = onSuccess)
+) = get("people/$personId/profile/cards", mapOf("search" to search), errorContext = "load pages", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.equippedItems(
     personId: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<InventoryItemExtended>>,
-) = get("people/$personId/items/equipped", onError = onError, onSuccess = onSuccess)
+) = get("people/$personId/items/equipped", errorContext = "load equipped items", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.profileByUrl(
     url: String,
@@ -83,6 +84,7 @@ suspend fun Api.profileByUrl(
     onSuccess: SuccessBlock<PersonProfile>
 ) = get(
     url = "profile/url/$url",
+    errorContext = "load profile",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -91,10 +93,10 @@ suspend fun Api.subscribe(
     personId: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Subscription>,
-) = post("people/$personId/subscribe", onError = onError, onSuccess = onSuccess)
+) = post("people/$personId/subscribe", errorContext = "subscribe", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.unsubscribe(
     personId: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode>,
-) = post("people/$personId/unsubscribe", onError = onError, onSuccess = onSuccess)
+) = post("people/$personId/unsubscribe", errorContext = "unsubscribe", onError = onError, onSuccess = onSuccess)

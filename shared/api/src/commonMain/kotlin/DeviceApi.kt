@@ -10,6 +10,7 @@ suspend fun Api.linkDevice(
     onSuccess: SuccessBlock<LinkDeviceToken> = {}
 ) = get(
     url = "link-device/$token",
+    errorContext = "check link device",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -19,6 +20,7 @@ suspend fun Api.linkDevice(
     onSuccess: SuccessBlock<LinkDeviceToken> = {}
 ) = post(
     url = "link-device",
+    errorContext = "link device",
     onError = onError,
     onSuccess = onSuccess
 )

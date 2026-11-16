@@ -19,6 +19,7 @@ import com.queatz.ailaai.BuildConfig
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
+import com.queatz.ailaai.extensions.didntWorkMessage
 import com.queatz.ailaai.extensions.launchUrl
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.DialogBase
@@ -38,7 +39,7 @@ fun ReleaseNotesDialog(onDismissRequest: () -> Unit) {
             releaseNotes = api.appReleaseNotes()
         } catch (e: Exception) {
             e.printStackTrace()
-            releaseNotes = context.getString(R.string.didnt_work)
+            releaseNotes = context.didntWorkMessage(R.string.error_load_release_notes)
         }
     }
 

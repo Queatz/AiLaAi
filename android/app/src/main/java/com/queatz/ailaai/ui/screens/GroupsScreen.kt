@@ -97,7 +97,7 @@ fun GroupsScreen(
                 public = true,
                 onError = {
                     if (it !is CancellationException) {
-                        context.showDidntWork()
+                        context.showDidntWork(R.string.error_load_groups)
                     }
                 }
             ) {

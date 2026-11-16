@@ -158,7 +158,7 @@ fun ChoosePhotoDialog(
             runCatching {
                 cameraLauncher.launch(cameraUri)
             }.onFailure {
-                context.showDidntWork()
+                context.showDidntWork(R.string.error_open_camera)
             }
         }
     }

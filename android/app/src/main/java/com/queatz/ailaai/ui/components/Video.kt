@@ -7,13 +7,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import com.queatz.ailaai.databinding.LayoutVideoBinding
 
 
@@ -77,7 +78,7 @@ fun Video(
         root.apply {
             player = exoPlayer
             useController = showController
-            useArtwork = true
+            artworkDisplayMode = PlayerView.ARTWORK_DISPLAY_MODE_FIT
             setShutterBackgroundColor(color)
             resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
             layoutParams = FrameLayout.LayoutParams(

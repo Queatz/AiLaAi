@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.IntentCompat
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import app.ailaai.api.me
@@ -165,13 +166,13 @@ class ShareActivity : AppCompatActivity() {
     }
 
     private fun handleSendImage(intent: Intent): SharedContent? {
-        return (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let {
+        return (IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Parcelable::class.java) as? Uri)?.let {
             SharedContent.Photos(listOf(it))
         }
     }
 
     private fun handleSendMultipleImages(intent: Intent): SharedContent? {
-        return intent.getParcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)?.let {
+        return IntentCompat.getParcelableArrayListExtra(intent, Intent.EXTRA_STREAM, Parcelable::class.java)?.let {
             SharedContent.Photos(it.mapNotNull { it as? Uri })
         }
     }

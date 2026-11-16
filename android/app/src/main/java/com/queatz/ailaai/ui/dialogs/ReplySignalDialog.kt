@@ -77,7 +77,7 @@ fun ReplySignalDialog(
         onIsRecordingAudio = { isRecordingAudio = it },
         onRecordingAudioDuration = { recordingAudioDuration = it },
         onPermissionDenied = { context.toast(R.string.permission_denied) },
-        onFailed = { context.showDidntWork() }
+        onFailed = { context.showDidntWork(R.string.error_record_audio) }
     ) { file ->
         audio = android.net.Uri.fromFile(file).toString()
         var success = false
@@ -85,7 +85,7 @@ fun ReplySignalDialog(
         api.uploadAudio(file.asInputProvider(), onError = {
             isUploading = false
             audio = null
-            context.showDidntWork()
+            context.showDidntWork(R.string.error_upload_audio)
         }) { response ->
             audio = response.urls.firstOrNull()
             success = true
@@ -251,7 +251,7 @@ fun ReplySignalDialog(
                                 photo?.let {
                                     api.uploadPhotosFromUris(context, listOf(it), onError = {
                                         isUploading = false
-                                        context.showDidntWork()
+                                        context.showDidntWork(R.string.error_upload_image)
                                     }) {
                                         photoPath = it.urls.firstOrNull()
                                     }

@@ -112,14 +112,14 @@ fun Reactions(
                             containerColor = MaterialTheme.colorScheme.secondaryContainer
                         ) else ButtonDefaults.outlinedButtonColors(),
                         border = if (selected == reaction.reaction) {
-                            ButtonDefaults.outlinedButtonBorder.copy(
+                            ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
                                 width = 2.dp,
                                 brush = SolidColor(
                                     MaterialTheme.colorScheme.primary
                                 )
                             )
                         } else {
-                            ButtonDefaults.outlinedButtonBorder
+                            ButtonDefaults.outlinedButtonBorder(enabled = true)
                         },
                         interactionSource = rememberLongClickInteractionSource(
                             onClick = {

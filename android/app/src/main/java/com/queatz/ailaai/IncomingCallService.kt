@@ -8,10 +8,10 @@ import android.content.pm.ServiceInfo
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
 import androidx.core.app.ServiceCompat
-import androidx.core.os.bundleOf
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.services.Notifications
 import com.queatz.ailaai.services.calls
@@ -38,10 +38,10 @@ class IncomingCallService : Service() {
 
         val callIntent = Intent(context, CallService::class.java).apply {
             putExtras(
-                bundleOf(
-                    CallService.GROUP_ID_EXTRA to groupId,
-                    CallService.GROUP_NAME_EXTRA to groupName,
-                )
+                Bundle().apply {
+                    putString(CallService.GROUP_ID_EXTRA, groupId)
+                    putString(CallService.GROUP_NAME_EXTRA, groupName)
+                }
             )
         }
 
@@ -59,9 +59,9 @@ class IncomingCallService : Service() {
             context,
             CallReceiver::class.java
         ).putExtras(
-            bundleOf(
-                CallService.GROUP_ID_EXTRA to groupId
-            )
+            Bundle().apply {
+                putString(CallService.GROUP_ID_EXTRA, groupId)
+            }
         )
 
         val channel = Notifications.Calls
@@ -103,7 +103,7 @@ class IncomingCallService : Service() {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
                 && t is ForegroundServiceStartNotAllowedException
             ) {
-                applicationContext.showDidntWork()
+                applicationContext.showDidntWork(R.string.error_start_incoming_call_service)
             }
         }
 

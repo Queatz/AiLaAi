@@ -21,14 +21,19 @@ abstract class Api {
 
     protected abstract suspend fun showError(t: Throwable)
 
+    protected open suspend fun showError(t: Throwable, errorContext: String?) {
+        showError(t)
+    }
+
     internal suspend inline fun <reified T : Any> post(
         url: String,
         noinline progressCallback: ((Float) -> Unit)? = null,
         client: HttpClient = httpClient,
+        errorContext: String? = null,
         noinline onError: ErrorBlock,
         noinline onSuccess: SuccessBlock<T>
     ) {
-        post(url, null as String?, progressCallback, client, onError, onSuccess)
+        post(url, null as String?, progressCallback, client, errorContext, onError, onSuccess)
     }
 
     internal suspend inline fun <reified Body : Any, reified T : Any> post(
@@ -36,6 +41,7 @@ abstract class Api {
         body: Body?,
         noinline progressCallback: ((Float) -> Unit)? = null,
         client: HttpClient = httpClient,
+        errorContext: String? = null,
         noinline onError: ErrorBlock,
         noinline onSuccess: SuccessBlock<T>
     ) {
@@ -43,7 +49,7 @@ abstract class Api {
             onSuccess(post(url, body, progressCallback, client))
         } catch (t: Throwable) {
             if (onError?.invoke(t) == null) {
-                showError(t)
+                showError(t, errorContext)
             }
         }
     }
@@ -82,6 +88,7 @@ abstract class Api {
         url: String,
         parameters: Map<String, String?>? = null,
         client: HttpClient = httpClient,
+        errorContext: String? = null,
         noinline onError: ErrorBlock,
         noinline onSuccess: SuccessBlock<T>
     ) {
@@ -89,7 +96,7 @@ abstract class Api {
             onSuccess(get(url, parameters, client))
         } catch (t: Throwable) {
             if (onError?.invoke(t) == null) {
-                showError(t)
+                showError(t, errorContext)
             }
         }
     }

@@ -100,6 +100,11 @@ class Call {
     }
 
     fun start(scope: CoroutineScope) {
+        if (secrets.videoSdk.apiKey.isBlank() || secrets.videoSdk.secret.isBlank()) {
+            Logger.getAnonymousLogger().warning("VideoSDK is disabled: missing videoSdk secrets")
+            return
+        }
+
         scope.launch {
             while (scope.isActive) {
                 try {
@@ -180,12 +185,18 @@ class Call {
         }
     }
 
-    fun jwt(expiresIn: Duration) = JWT.create()
-        .withAudience(videoSdkEndpoint)
-        .withPayload(json.encodeToString(VideoSdkJwtPayload(secrets.videoSdk.apiKey)))
-        .withIssuedAt(Clock.System.now().toJavaInstant().toGMTDate().toJvmDate())
-        .withExpiresAt(Clock.System.now().plus(expiresIn).toJavaInstant().toGMTDate().toJvmDate())
-        .sign(Algorithm.HMAC256(secrets.videoSdk.secret))
+    fun jwt(expiresIn: Duration): String {
+        if (secrets.videoSdk.secret.isBlank()) {
+            Logger.getAnonymousLogger().warning("VideoSDK JWT signing skipped: secrets.videoSdk.secret is blank")
+            return ""
+        }
+        return JWT.create()
+            .withAudience(videoSdkEndpoint)
+            .withPayload(json.encodeToString(VideoSdkJwtPayload(secrets.videoSdk.apiKey)))
+            .withIssuedAt(Clock.System.now().toJavaInstant().toGMTDate().toJvmDate())
+            .withExpiresAt(Clock.System.now().plus(expiresIn).toJavaInstant().toGMTDate().toJvmDate())
+            .sign(Algorithm.HMAC256(secrets.videoSdk.secret))
+    }
 
     suspend fun createRoom() = http.post("$videoSdkEndpoint/rooms") {
         header(HttpHeaders.Authorization, _token ?: throw IllegalStateException("VideoSDK: Missing JWT"))

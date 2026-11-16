@@ -187,7 +187,7 @@ fun SheetScreen(
                         // Ignored, geo probably changes
                     } else {
                         isLoading = false
-                        context.showDidntWork()
+                        context.showDidntWork(R.string.error_load_posts)
                     }
                 }
             ) {
@@ -216,7 +216,7 @@ fun SheetScreen(
                         // Ignored, geo probably changes
                     } else {
                         isPeopleLoading = false
-                        context.showDidntWork()
+                        context.showDidntWork(R.string.error_load_people)
                     }
                 }
             ) { result ->

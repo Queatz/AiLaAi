@@ -97,7 +97,15 @@ fun CardList(
             } else if (isError || cards.isEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     EmptyText(
-                        text = stringResource(if (isError) R.string.didnt_work else R.string.no_cards_to_show),
+                        text = if (isError) {
+                            stringResource(
+                                R.string.x_x,
+                                stringResource(R.string.didnt_work),
+                                stringResource(R.string.error_load_pages)
+                            )
+                        } else {
+                            stringResource(R.string.no_cards_to_show)
+                        },
                     )
                 }
             }

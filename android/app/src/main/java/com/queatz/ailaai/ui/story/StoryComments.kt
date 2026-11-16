@@ -45,9 +45,9 @@ import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.extensions.contactPhoto
 import com.queatz.ailaai.extensions.format
-import com.queatz.ailaai.extensions.ifNotEmpty
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.notBlank
+import com.queatz.ailaai.extensions.notEmpty
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.me
@@ -131,7 +131,7 @@ fun StoryComments(
         }.forEach { comment ->
             key(comment.comment!!.id!!) {
                 val showTotalReplies = comment.totalReplies!! > 0
-                val replies = (loadedCommentReplies[comment.comment!!.id!!] ?: comment.replies)?.ifNotEmpty
+                val replies = (loadedCommentReplies[comment.comment!!.id!!] ?: comment.replies)?.notEmpty
                 var showReply by rememberStateOf(false)
                 var reply by rememberStateOf("")
                 var isSendingReply by rememberStateOf(false)

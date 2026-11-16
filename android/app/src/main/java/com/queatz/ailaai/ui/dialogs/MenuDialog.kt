@@ -17,11 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.queatz.ailaai.ui.theme.pad
 
-@DslMarker
-annotation class MenuDialogMarker
-
 @Composable
-@MenuDialogMarker
 fun Menu(
     onDismissRequest: () -> Unit,
     block: @Composable ColumnScope.() -> Unit,
@@ -44,7 +40,6 @@ fun Menu(
     }
 }
 
-@MenuDialogMarker
 @Composable
 fun menuItem(
     title: String,

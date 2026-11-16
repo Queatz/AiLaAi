@@ -168,7 +168,7 @@ fun ScheduleReminderDialog(
                             } else {
                                 stringResource(R.string.day_of_the_month, it.ordinal)
                             }
-                        } ?: emptyList())).ifNotEmpty
+                        } ?: emptyList())).notEmpty
                         Text(
                             days?.asNaturalList { it } ?: stringResource(R.string.every_day)
                         )
@@ -181,7 +181,7 @@ fun ScheduleReminderDialog(
                     ) {
                         val context = LocalContext.current
                         Text(
-                            reminder.schedule?.weeks?.ifNotEmpty?.asNaturalList {
+                            reminder.schedule?.weeks?.notEmpty?.asNaturalList {
                                 context.getString(R.string.x_week, it.ordinal)
                             } ?: stringResource(R.string.every_week)
                         )
@@ -193,7 +193,7 @@ fun ScheduleReminderDialog(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            reminder.schedule?.months?.ifNotEmpty?.asNaturalList {
+                            reminder.schedule?.months?.notEmpty?.asNaturalList {
                                 it.monthName
                             } ?: stringResource(R.string.every_month)
                         )

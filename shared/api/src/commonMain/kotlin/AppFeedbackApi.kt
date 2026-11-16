@@ -7,4 +7,4 @@ suspend fun Api.sendAppFeedback(
     appFeedback: AppFeedback,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {}
-) = post("feedback", appFeedback, onError = onError, onSuccess = onSuccess)
+) = post("feedback", appFeedback, errorContext = "send feedback", onError = onError, onSuccess = onSuccess)

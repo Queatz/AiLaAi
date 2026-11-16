@@ -94,7 +94,7 @@ fun CardAppBar(state: CardScreenState, showInFullscreen: Boolean) {
                                     }
 
                                     else -> {
-                                        context.showDidntWork()
+                                        context.showDidntWork(R.string.error_save_page)
                                     }
                                 }
                             }

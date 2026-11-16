@@ -9,6 +9,7 @@ suspend fun Api.joinRequests(
     onSuccess: SuccessBlock<List<JoinRequestAndPerson>> = {}
 ) = get(
     url = "join-requests",
+    errorContext = "load join requests",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -18,6 +19,7 @@ suspend fun Api.myJoinRequests(
     onSuccess: SuccessBlock<List<JoinRequestAndPerson>> = {}
 ) = get(
     url = "me/join-requests",
+    errorContext = "load join requests",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -29,6 +31,7 @@ suspend fun Api.newJoinRequest(
 ) = post(
     url = "join-requests",
     body = joinRequest,
+    errorContext = "send join request",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -39,6 +42,7 @@ suspend fun Api.acceptJoinRequest(
     onSuccess: SuccessBlock<HttpResponse> = {}
 ) = post(
     url = "join-requests/$joinRequest/accept",
+    errorContext = "accept join request",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -49,6 +53,7 @@ suspend fun Api.deleteJoinRequest(
     onSuccess: SuccessBlock<HttpResponse> = {}
 ) = post(
     url = "join-requests/$joinRequest/delete",
+    errorContext = "delete join request",
     onError = onError,
     onSuccess = onSuccess
 )

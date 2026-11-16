@@ -49,7 +49,7 @@ fun SendMessageDialog(
                 }
             }.awaitAll()
             if (hasError) {
-                context.showDidntWork()
+                context.showDidntWork(R.string.error_send_message)
             } else {
                 context.toast(sent)
             }

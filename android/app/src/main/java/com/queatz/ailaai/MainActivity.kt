@@ -135,6 +135,7 @@ import com.queatz.ailaai.services.messages
 import com.queatz.ailaai.services.push
 import com.queatz.ailaai.services.saves
 import com.queatz.ailaai.services.say
+import com.queatz.ailaai.services.signals
 import com.queatz.ailaai.services.trading
 import com.queatz.ailaai.slideshow.slideshow
 import com.queatz.ailaai.ui.components.GroupPhoto
@@ -250,6 +251,7 @@ class MainActivity : AppCompatActivity() {
             WindowCompat.setDecorFitsSystemWindows(window, false)
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
         } else {
+            @Suppress("DEPRECATION")
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         }
 
@@ -451,6 +453,7 @@ class MainActivity : AppCompatActivity() {
                     LaunchedEffect(me) {
                         if (me == null) {
                             messages.clear()
+                            signals.clear()
                         } else {
                             api.groups(
                                 onError = {
@@ -568,6 +571,7 @@ class MainActivity : AppCompatActivity() {
                                         known = false
                                         me = null
                                         cache.remove(CacheKey.Me)
+                                        signals.clear()
                                         showSignedOut = false
                                     }
                                 ) {
@@ -616,7 +620,7 @@ class MainActivity : AppCompatActivity() {
                         bottomBar = {
                             if (showNavigation && !isLandscape) {
                                 val bottomBarHeight by animateDpAsState(
-                                    targetValue = if (isListening) 110.dp else 53.dp,
+                                    targetValue = if (isListening) 110.dp else 54.dp,
                                     animationSpec = tween(durationMillis = 300),
                                     label = "bottomBarHeight"
                                 )
@@ -715,8 +719,9 @@ class MainActivity : AppCompatActivity() {
                                                     null
                                                 },
                                                 selected = selected,
+                                                modifier = if (appUi.showNavLabels) Modifier.offset(y = 4.dp) else Modifier,
                                                 onClick = {
-                                                    if (startDestinationLoaded) {
+                                                    if (startDestinationLoaded && navController.currentDestination?.route != item.route.route) {
                                                         navController.popBackStack()
                                                         navController.appNavigate(item.route)
                                                     }
@@ -779,8 +784,7 @@ class MainActivity : AppCompatActivity() {
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.Mic,
-                                                    // todo: translate
-                                                    contentDescription = "Voice Assistant",
+                                                    contentDescription = stringResource(R.string.voice_assistant),
                                                     tint = if (isListening) MaterialTheme.colorScheme.onPrimary
                                                            else MaterialTheme.colorScheme.onPrimaryContainer,
                                                     modifier = Modifier.size(24.dp)
@@ -820,8 +824,9 @@ class MainActivity : AppCompatActivity() {
                                                     null
                                                 },
                                                 selected = selected,
+                                                modifier = if (appUi.showNavLabels) Modifier.offset(y = 4.dp) else Modifier,
                                                 onClick = {
-                                                    if (startDestinationLoaded) {
+                                                    if (startDestinationLoaded && navController.currentDestination?.route != item.route.route) {
                                                         navController.popBackStack()
                                                         navController.appNavigate(item.route)
                                                     }
@@ -851,6 +856,7 @@ class MainActivity : AppCompatActivity() {
                                             },
                                             selected = navController.currentDestination?.route?.substringBefore("/") ==
                                                     AppNav.Profile(me?.id.orEmpty()).route.substringBefore("/"),
+                                            modifier = if (appUi.showNavLabels) Modifier.offset(y = 4.dp) else Modifier,
                                             onClick = {
                                                 me?.id?.let { id ->
                                                     navController.appNavigate(AppNav.Profile(id))
@@ -893,7 +899,7 @@ class MainActivity : AppCompatActivity() {
                                                 },
                                                 selected = navController.currentDestination?.route?.substringBefore("/") == item.route.route.substringBefore("/"),
                                                 onClick = {
-                                                    if (startDestinationLoaded) {
+                                                    if (startDestinationLoaded && navController.currentDestination?.route != item.route.route) {
                                                         navController.popBackStack()
                                                         navController.appNavigate(item.route)
                                                     }

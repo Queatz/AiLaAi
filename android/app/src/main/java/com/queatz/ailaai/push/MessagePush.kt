@@ -6,7 +6,6 @@ import com.queatz.ailaai.MainActivity
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.extensions.attachmentText
 import com.queatz.ailaai.extensions.notBlank
-import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.services.Notifications
 import com.queatz.ailaai.services.Push
 import com.queatz.ailaai.services.isTopGroup
@@ -47,7 +46,7 @@ fun Push.receive(data: MessagePushData) {
                 if (groupName != null) {
                     append("$personName: ")
                 }
-                append(data.message.text?.nullIfBlank ?: data.message.attachmentText(context) ?: "")
+                append(data.message.text?.notBlank ?: data.message.attachmentText(context) ?: "")
             }
         )
     }

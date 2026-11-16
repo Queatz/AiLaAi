@@ -134,7 +134,11 @@ fun FriendsScreen() {
         MutableSharedFlow<Boolean>()
     }
     var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
-    var categories by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    val categories = remember(allGroups) {
+        allGroups
+            .flatMap { it.group?.categories ?: emptyList() }
+            .sortedDistinct()
+    }
     var myStatusDialog by rememberStateOf(false)
     var statuses by rememberStateOf(emptyMap<String, PersonStatus?>())
     var recentStatuses by rememberStateOf(emptyList<Status>())
@@ -150,9 +154,6 @@ fun FriendsScreen() {
     LaunchedEffect(allGroups) {
         groupsCache = allGroups
         cache.put(CacheKey.Groups, allGroups)
-        categories = allGroups
-            .flatMap { it.group?.categories ?: emptyList() }
-            .sortedDistinct()
     }
 
     suspend fun reloadStatuses() {
@@ -200,7 +201,7 @@ fun FriendsScreen() {
         api.groups(
             onError = {
                 if (!passive && it !is CancellationException) {
-                    context.showDidntWork()
+                    context.showDidntWork(R.string.error_load_groups)
                 }
             }
         ) {

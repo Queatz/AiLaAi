@@ -8,6 +8,7 @@ suspend fun Api.apps(
     onSuccess: SuccessBlock<List<App>>,
 ) = get(
     url = "apps",
+    errorContext = "load apps",
     onError = onError,
     onSuccess = onSuccess
 )
@@ -19,6 +20,7 @@ suspend fun Api.createApp(
 ) = post(
     url = "apps",
     body = details,
+    errorContext = "create app",
     onError = onError,
     onSuccess = onSuccess
 )
