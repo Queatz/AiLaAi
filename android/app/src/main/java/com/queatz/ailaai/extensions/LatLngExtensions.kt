@@ -1,7 +1,7 @@
 package com.queatz.ailaai.extensions
 
 import android.location.Location
-import at.bluesource.choicesdk.maps.common.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.queatz.db.Geo
 
 fun LatLng.distance(to: LatLng): Float {

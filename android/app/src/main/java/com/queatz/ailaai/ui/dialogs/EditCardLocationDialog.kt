@@ -35,8 +35,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.*
-import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
-import at.bluesource.choicesdk.maps.common.LatLng
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -63,7 +63,7 @@ fun EditCardLocationDialog(
     onChange: () -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current!!
-    val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(activity)
+    val locationClient = remember { LocationServices.getFusedLocationProviderClient(activity) }
 
     var parentCard by remember { mutableStateOf<Card?>(null) }
     var parentGroup by remember { mutableStateOf<GroupExtended?>(null) }
@@ -106,7 +106,7 @@ fun EditCardLocationDialog(
     }
 
     if (position.toList().sum() == 0.0) {
-        locationClient.getLastLocation()
+        locationClient.lastLocation
             .addOnFailureListener(activity) {
                 it.printStackTrace()
             }

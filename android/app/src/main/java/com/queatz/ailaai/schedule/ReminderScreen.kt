@@ -68,7 +68,7 @@ import app.ailaai.api.leaveReminder
 import app.ailaai.api.reminder
 import app.ailaai.api.reminderOccurrences
 import app.ailaai.api.updateReminder
-import at.bluesource.choicesdk.maps.common.LatLng
+import com.google.android.gms.maps.model.LatLng
 import coil3.compose.AsyncImage
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R

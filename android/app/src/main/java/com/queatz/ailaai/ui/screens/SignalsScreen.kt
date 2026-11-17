@@ -80,7 +80,7 @@ import app.ailaai.api.replySignal
 import app.ailaai.api.sendSignal
 import app.ailaai.api.signals
 import app.ailaai.api.toggleSignal
-import at.bluesource.choicesdk.maps.common.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api

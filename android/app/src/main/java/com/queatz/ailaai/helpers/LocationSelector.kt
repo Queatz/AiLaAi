@@ -3,24 +3,25 @@ package com.queatz.ailaai.helpers
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.os.Looper
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import at.bluesource.choicesdk.core.Outcome
-import at.bluesource.choicesdk.location.common.LocationRequest
-import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
-import at.bluesource.choicesdk.maps.common.LatLng
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.model.LatLng
 import com.google.accompanist.permissions.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toLatLng
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.disposables.Disposable
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -38,7 +39,7 @@ fun locationSelector(
 ): LocationSelector {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val locationClient = remember { FusedLocationProviderFactory.getFusedLocationProviderClient(activity) }
+    val locationClient = remember { LocationServices.getFusedLocationProviderClient(activity) }
     var geoManual by rememberStateOf(false)
     var showSetMyLocation by rememberStateOf(false)
     var wasRequested by rememberStateOf(false)
@@ -55,18 +56,30 @@ fun locationSelector(
 
     if (granted) {
         DisposableEffect(Unit) {
-            val disposable = locationClient
-                .observeLocation(LocationRequest.createDefault())
-                .filter { it is Outcome.Success && it.value.lastLocation != null }
-                .take(1)
-                .takeWhile { scope.isActive }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    geoManual = false
-                    onGeoChange((it as Outcome.Success).value.lastLocation!!.toLatLng())
+            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 10_000L)
+                .setMaxUpdates(1)
+                .build()
+            val locationCallback = object : LocationCallback() {
+                override fun onLocationResult(result: LocationResult) {
+                    result.lastLocation?.let { location ->
+                        if (scope.isActive) {
+                            geoManual = false
+                            onGeoChange(location.toLatLng())
+                        }
+                        locationClient.removeLocationUpdates(this)
+                    }
                 }
+            }
 
-            onDispose { disposable.dispose() }
+            locationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
+
+            onDispose {
+                locationClient.removeLocationUpdates(locationCallback)
+            }
         }
     }
 
@@ -88,7 +101,7 @@ fun locationSelector(
         if (geo == null) {
             val savedGeo = context.dataStore.data.first()[geoKey]?.split(",")?.map { it.toDouble() }
             if (savedGeo != null) {
-                onGeoChange(LatLng.getFactory().create(savedGeo[0], savedGeo[1]))
+                onGeoChange(LatLng(savedGeo[0], savedGeo[1]))
             }
         } else {
             context.dataStore.edit {

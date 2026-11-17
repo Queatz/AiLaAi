@@ -38,7 +38,7 @@ kotlin {
 }
 
 android {
-    compileSdk = 36
+    compileSdk = 37
     namespace = "com.queatz.ailaai"
 
     defaultConfig {
@@ -47,7 +47,7 @@ android {
 
         applicationId = "com.ailaai.app"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 109
         versionName = "1.0.9"
 
@@ -150,15 +150,14 @@ dependencies {
 
     // Compose
     implementation("com.google.android.material:material:1.14.0")
-    implementation("androidx.navigation:navigation-compose:2.9.8")
+    implementation("androidx.navigation:navigation-compose:2.10.2")
     implementation("androidx.compose.ui:ui:${versions.compose}")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
     implementation("androidx.compose.ui:ui-tooling-preview:${versions.compose}")
-    runtimeOnly("androidx.compose.runtime:runtime-rxjava3:${versions.compose}")
     implementation("androidx.compose.ui:ui-viewbinding:${versions.compose}")
     implementation("androidx.compose.material3:material3:1.4.0")
     implementation("androidx.compose.material3:material3-window-size-class:1.4.0")
-    implementation("sh.calvin.reorderable:reorderable:2.4.3")
+    implementation("sh.calvin.reorderable:reorderable:3.1.0")
 
     // Android
     implementation("com.google.accompanist:accompanist-permissions:0.37.3")
@@ -167,49 +166,46 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.serialization}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutines}")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0")
     implementation("androidx.activity:activity-compose:1.13.0")
-    implementation("androidx.datastore:datastore-preferences:1.2.1")
-    implementation("androidx.core:core-ktx:1.18.0")
-    implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("androidx.appcompat:appcompat-resources:1.7.1")
+    implementation("androidx.datastore:datastore-preferences:1.3.0")
+    implementation("androidx.core:core-ktx:1.19.1")
+    implementation("androidx.appcompat:appcompat:1.8.0")
+    implementation("androidx.appcompat:appcompat-resources:1.8.0")
     implementation("androidx.biometric:biometric-ktx:1.4.0-alpha02")
     implementation("dev.shreyaspatil:capturable:3.0.1")
-    implementation("com.github.skydoves:colorpicker-compose:1.2.0")
-    implementation("io.github.ehsannarmani:compose-charts:0.2.5")
+    implementation("com.github.skydoves:colorpicker-compose:1.3.0")
+    implementation("io.github.ehsannarmani:compose-charts:1.0.0")
     implementation("com.mikepenz:multiplatform-markdown-renderer-m3:${versions.markdownRenderer}")
     implementation("com.mikepenz:multiplatform-markdown-renderer-coil3:${versions.markdownRenderer}")
     implementation("com.mikepenz:multiplatform-markdown-renderer-code:${versions.markdownRenderer}")
-    implementation("androidx.work:work-runtime-ktx:2.11.2")
+    implementation("androidx.work:work-runtime-ktx:2.12.0")
 
-    // GoogleApiAvailability
+    // Google Maps, Location & Firebase Messaging
     implementation("com.google.android.gms:play-services-base:18.11.1")
+    implementation("com.google.android.gms:play-services-location:21.4.0")
+    implementation("com.google.android.gms:play-services-maps:20.1.0")
+    implementation("com.google.firebase:firebase-messaging:26.0.2")
 
     // HMS Support
-    implementation("at.bluesource.choicesdk:choicesdk-location:${versions.choiceSdk}")
-    implementation("at.bluesource.choicesdk:choicesdk-maps:${versions.choiceSdk}")
-    implementation("at.bluesource.choicesdk:choicesdk-messaging:${versions.choiceSdk}")
     implementation("com.huawei.hms:base:6.13.0.300")
-    implementation("com.huawei.hms:maps:6.11.2.301")
-    implementation("com.huawei.hms:push:6.11.0.300")
-    implementation("com.huawei.hms:scanplus:2.12.0.301")
-    implementation("com.huawei.hms:hwid:6.12.0.300")
-    implementation("com.huawei.hms:location:6.12.0.300")
+    implementation("com.huawei.hms:scanplus:2.15.0.301")
+    implementation("com.huawei.hms:hwid:6.14.0.300")
 
     // Media
     implementation("androidx.exifinterface:exifinterface:1.4.2")
-    implementation("io.coil-kt.coil3:coil-compose:3.4.0")
-    implementation("io.coil-kt.coil3:coil-network-ktor3:3.4.0")
+    implementation("io.coil-kt.coil3:coil-compose:3.6.3")
+    implementation("io.coil-kt.coil3:coil-network-ktor3:3.6.3")
     implementation("me.saket.telephoto:zoomable-image-coil3:0.19.0")
-    implementation("androidx.media3:media3-exoplayer:1.10.1")
-    implementation("androidx.media3:media3-ui:1.10.1")
+    implementation("androidx.media3:media3-exoplayer:1.11.1")
+    implementation("androidx.media3:media3-ui:1.11.1")
     implementation("com.otaliastudios:transcoder:0.11.2")
 
     // Logging & Crash Reporting
-    implementation("ch.acra:acra-core:5.13.1")
-    implementation("ch.acra:acra-toast:5.13.1")
-    implementation("com.ibm.icu:icu4j:78.3")
+    implementation("ch.acra:acra-core:5.14.2")
+    implementation("ch.acra:acra-toast:5.14.2")
+    implementation("com.ibm.icu:icu4j:79.1")
     ksp("dev.zacsweers.autoservice:auto-service-ksp:1.2.0")
     implementation("com.google.auto.service:auto-service-annotations:1.1.1")
 

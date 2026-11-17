@@ -14,7 +14,6 @@ open class Versions(
     val kotlin = version("kotlin")
     val coroutines = version("coroutines")
     val ktor = version("ktor")
-    val choiceSdk = version("choiceSdk")
     val compose = version("compose")
     val serialization = version("serialization")
     val datetime = version("datetime")

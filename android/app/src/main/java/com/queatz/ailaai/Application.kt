@@ -8,16 +8,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import app.ailaai.api.crash
 import app.ailaai.api.myDevice
-import at.bluesource.choicesdk.core.ChoiceSdk
-import at.bluesource.choicesdk.messaging.common.RemoteMessage
-import at.bluesource.choicesdk.messaging.factory.MessagingRepositoryFactory
 import com.google.auto.service.AutoService
-import com.google.android.gms.common.GoogleApiAvailability
-import com.huawei.hms.api.HuaweiApiAvailability
-import com.google.android.gms.common.ConnectionResult as GmsConnectionResult
-import com.huawei.hms.api.ConnectionResult as HmsConnectionResult
-import com.huawei.hms.maps.MapClientIdentify
-import com.huawei.hms.maps.MapsInitializer
+import com.google.firebase.messaging.FirebaseMessaging
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.db.db
 import com.queatz.ailaai.services.calls
@@ -26,9 +18,6 @@ import com.queatz.ailaai.services.push
 import com.queatz.ailaai.services.ui
 import com.queatz.ailaai.slideshow.slideshow
 import com.queatz.db.DeviceType
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.observers.DisposableObserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -46,8 +35,6 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 
 class Application : android.app.Application() {
 
-    private var disposable = CompositeDisposable()
-
     override fun onCreate() {
         super.onCreate()
 
@@ -57,7 +44,6 @@ class Application : android.app.Application() {
             t.printStackTrace()
         }
 
-        ChoiceSdk.init(this)
         db.init(this)
         api.init(this)
         push.init(this)
@@ -68,56 +54,18 @@ class Application : android.app.Application() {
 
         val scope = CoroutineScope(Dispatchers.IO)
 
-        val deviceType = when {
-            GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this) == GmsConnectionResult.SUCCESS -> DeviceType.Gms
-            HuaweiApiAvailability.getInstance().isHuaweiMobileServicesAvailable(this) == HmsConnectionResult.SUCCESS -> DeviceType.Hms
-            else -> DeviceType.Gms
-        }
-
-        // todo this should be in a new version of ChoiceSDK
-        if (deviceType == DeviceType.Hms) {
-            MapsInitializer.initialize(this)
-        }
-
-        val tokenObserver = object : DisposableObserver<String>() {
-            override fun onNext(token: String) {
-                if (token.isBlank()) {
-                    return
-                }
-
-                scope.launch {
-                    api.myDevice(deviceType, token, onError = {})
+        @Suppress("DEPRECATION")
+        FirebaseMessaging.getInstance().token
+            .addOnSuccessListener { token ->
+                if (token.isNotBlank()) {
+                    scope.launch {
+                        api.myDevice(DeviceType.Gms, token, onError = {})
+                    }
                 }
             }
-            override fun onError(throwable: Throwable) {
-                throwable.printStackTrace()
+            .addOnFailureListener {
+                it.printStackTrace()
             }
-            override fun onComplete() {}
-        }
-
-        MessagingRepositoryFactory.getMessagingService()
-            .getNewTokenObservable()
-            .subscribeWith(tokenObserver)
-            .let(disposable::add)
-
-        MessagingRepositoryFactory.getMessagingService().requestToken(this)
-
-        val messageObserver: DisposableObserver<RemoteMessage> = object : DisposableObserver<RemoteMessage>() {
-            override fun onNext(remoteMessage: RemoteMessage) {
-                push.got(remoteMessage.data)
-            }
-
-            override fun onError(throwable: Throwable) {
-                throwable.printStackTrace()
-            }
-            override fun onComplete() {}
-        }
-
-        MessagingRepositoryFactory.getMessagingService()
-            .getMessageReceivedObservable()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeWith(messageObserver)
-            .let(disposable::add)
     }
 
 
@@ -134,7 +82,6 @@ class Application : android.app.Application() {
     }
 
     override fun onTerminate() {
-        disposable.dispose()
         connectivity.stop()
         super.onTerminate()
     }

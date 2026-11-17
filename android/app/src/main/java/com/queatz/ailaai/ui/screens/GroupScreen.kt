@@ -139,7 +139,7 @@ import app.ailaai.api.sendMessage
 import app.ailaai.api.updateGroup
 import app.ailaai.api.updateMember
 import app.ailaai.api.setMessageRating
-import at.bluesource.choicesdk.maps.common.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.MainActivity
 import com.queatz.ailaai.R
