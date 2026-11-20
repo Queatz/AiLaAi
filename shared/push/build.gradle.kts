@@ -38,15 +38,11 @@ kotlin {
         optIn.add("kotlin.time.ExperimentalTime")
     }
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(project(":models"))
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${versions.serialization}")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.serialization}")
-            }
+        commonMain.dependencies {
+            implementation(project(":models"))
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${versions.serialization}")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.serialization}")
         }
-        val jvmMain by getting
-        val jsMain by getting
     }
 }

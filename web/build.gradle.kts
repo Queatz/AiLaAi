@@ -26,7 +26,7 @@ tasks.register("run") {
 defaultTasks("run")
 
 kotlin {
-    js(IR) {
+    js {
         browser {
             runTask {
                 args("-t")
@@ -45,31 +45,29 @@ kotlin {
         optIn.add("kotlin.time.ExperimentalTime")
     }
     sourceSets {
-        val jsMain by getting {
-            dependencies {
-                implementation("app.ailaai.shared:push")
-                implementation("app.ailaai.shared:models")
-                implementation("app.ailaai.shared:api")
-                implementation("app.ailaai.shared:widgets")
-                implementation("app.ailaai.shared:reminders")
-                implementation("app.ailaai.shared:content")
-                implementation("io.ktor:ktor-client-js:${versions.ktor}")
-                implementation("io.ktor:ktor-client-content-negotiation:${versions.ktor}")
-                implementation("io.ktor:ktor-serialization-kotlinx-json:${versions.ktor}")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
-                implementation("app.softwork:routing-compose:0.5.0")
-                implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.5.4")
-                implementation(npm("qr", "0.6.0"))
-                implementation(npm("date-fns", "4.1.0"))
-                implementation(npm("@vvo/tzdb", "6.198.0"))
-                implementation(npm("@videosdk.live/js-sdk", "0.8.1"))
-                implementation(npm("mapbox-gl", "3.23.1"))
-                implementation(npm("marked", "18.0.3"))
-                implementation(npm("html-webpack-plugin", "5.6.7"))
-                implementation(npm("@babylonjs/core", "9.7.0"))
-                implementation(npm("@babylonjs/materials", "9.7.0"))
-                implementation(npm("monaco-editor", "0.55.1"))
-            }
+        jsMain.dependencies {
+            implementation("app.ailaai.shared:push")
+            implementation("app.ailaai.shared:models")
+            implementation("app.ailaai.shared:api")
+            implementation("app.ailaai.shared:widgets")
+            implementation("app.ailaai.shared:reminders")
+            implementation("app.ailaai.shared:content")
+            implementation("io.ktor:ktor-client-js:${versions.ktor}")
+            implementation("io.ktor:ktor-client-content-negotiation:${versions.ktor}")
+            implementation("io.ktor:ktor-serialization-kotlinx-json:${versions.ktor}")
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
+            implementation("app.softwork:routing-compose:0.5.0")
+            implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.5.4")
+            implementation(npm("qr", "0.6.0"))
+            implementation(npm("date-fns", "4.1.0"))
+            implementation(npm("@vvo/tzdb", "6.198.0"))
+            implementation(npm("@videosdk.live/js-sdk", "0.8.1"))
+            implementation(npm("mapbox-gl", "3.23.1"))
+            implementation(npm("marked", "18.0.3"))
+            implementation(npm("html-webpack-plugin", "5.6.7"))
+            implementation(npm("@babylonjs/core", "9.7.0"))
+            implementation(npm("@babylonjs/materials", "9.7.0"))
+            implementation(npm("monaco-editor", "0.55.1"))
         }
     }
 }
