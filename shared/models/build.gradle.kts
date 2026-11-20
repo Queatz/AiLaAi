@@ -41,22 +41,17 @@ kotlin {
         freeCompilerArgs.add("-Xexpect-actual-classes")
     }
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(project(":widgets"))
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${versions.serialization}")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.serialization}")
-            }
+        commonMain.dependencies {
+            implementation(project(":widgets"))
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${versions.serialization}")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.serialization}")
         }
-        val jvmMain by getting {
-            dependencies {
-                implementation("com.fasterxml.jackson.core:jackson-core:${versions.jackson}")
-                implementation("com.fasterxml.jackson.core:jackson-databind:${versions.jackson}")
-                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${versions.jackson}")
-                implementation("com.arangodb:jackson-serde-json:${versions.arango}")
-            }
+        jvmMain.dependencies {
+            implementation("com.fasterxml.jackson.core:jackson-core:${versions.jackson}")
+            implementation("com.fasterxml.jackson.core:jackson-databind:${versions.jackson}")
+            implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${versions.jackson}")
+            implementation("com.arangodb:jackson-serde-json:${versions.arango}")
         }
-        val jsMain by getting
     }
 }

@@ -8,7 +8,10 @@ buildscript {
     }
     dependencies {
         val properties = java.util.Properties().apply {
-            load(file("local.properties").inputStream())
+            val localPropsFile = file("local.properties")
+            if (localPropsFile.exists()) {
+                load(localPropsFile.inputStream())
+            }
         }
         val agpVersion = properties.getProperty("AGP_VERSION")
             .orEmpty()
