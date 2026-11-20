@@ -17,7 +17,10 @@ plugins {
 }
 
 val properties = Properties()
-properties.load(file("../local.properties").inputStream())
+val localPropertiesFile = file("../local.properties")
+if (localPropertiesFile.exists()) {
+    properties.load(localPropertiesFile.inputStream())
+}
 
 java {
     toolchain {
