@@ -1,4 +1,4 @@
-@file:Suppress("UnstableApiUsage")
+@file:Suppress("UnstableApiUsage", "PackageDirectoryMismatch")
 
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -17,7 +17,10 @@ plugins {
 }
 
 val properties = Properties()
-properties.load(file("../local.properties").inputStream())
+val localPropertiesFile = file("../local.properties")
+if (localPropertiesFile.exists()) {
+    properties.load(localPropertiesFile.inputStream())
+}
 
 java {
     toolchain {
@@ -42,8 +45,8 @@ android {
     namespace = "com.queatz.ailaai"
 
     defaultConfig {
-        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = properties.getProperty("GOOGLE_MAPS_API_KEY")
-        manifestPlaceholders["HMS_APP_ID"] = properties.getProperty("HMS_APP_ID")
+        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = properties.getProperty("GOOGLE_MAPS_API_KEY") ?: ""
+        manifestPlaceholders["HMS_APP_ID"] = properties.getProperty("HMS_APP_ID") ?: ""
 
         applicationId = "com.ailaai.app"
         minSdk = 26
@@ -61,14 +64,12 @@ android {
         viewBinding = true
     }
     signingConfigs {
-        properties.getProperty("storeFile").let {
-            if (it.isNotBlank()) {
-                create("release") {
-                    storeFile = file(it)
-                    storePassword = properties.getProperty("storePassword")
-                    keyAlias = properties.getProperty("keyAlias")
-                    keyPassword = properties.getProperty("keyPassword")
-                }
+        properties.getProperty("storeFile")?.takeIf { it.isNotBlank() }?.let { storeFilePath ->
+            create("release") {
+                storeFile = file(storeFilePath)
+                storePassword = properties.getProperty("storePassword")
+                keyAlias = properties.getProperty("keyAlias")
+                keyPassword = properties.getProperty("keyPassword")
             }
         }
     }
