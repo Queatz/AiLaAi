@@ -70,6 +70,20 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import linkDevice
 
+private sealed class PendingCacheDowngrade {
+    abstract val bytesToDelete: Long?
+
+    data class Mode(
+        val targetMode: CacheMode,
+        override val bytesToDelete: Long? = null,
+    ) : PendingCacheDowngrade()
+
+    data class SizeLimit(
+        val targetLimit: CacheSizeLimit,
+        override val bytesToDelete: Long? = null,
+    ) : PendingCacheDowngrade()
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -103,13 +117,16 @@ fun SettingsScreen(
     var isUpdatingCacheSetting by rememberStateOf(false)
     var cacheModeMenuExpanded by rememberStateOf(false)
     var cacheSizeLimitMenuExpanded by rememberStateOf(false)
+    var pendingCacheDowngrade by remember { mutableStateOf<PendingCacheDowngrade?>(null) }
     var totalCacheBytes by rememberStateOf<Long?>(null)
+
+    suspend fun currentImageCacheBytes(): Long = withContext(Dispatchers.IO) {
+        runCatching { context.imageLoader.diskCache?.size ?: 0L }.getOrDefault(0L)
+    }
 
     suspend fun refreshCacheSize() {
         val messageBytes = groupMessageCache.sizeBytes()
-        val imageBytes = withContext(Dispatchers.IO) {
-            runCatching { context.imageLoader.diskCache?.size ?: 0L }.getOrDefault(0L)
-        }
+        val imageBytes = currentImageCacheBytes()
         totalCacheBytes = messageBytes + imageBytes
     }
 
@@ -642,7 +659,7 @@ fun SettingsScreen(
                     modifier = Modifier.padding(top = 1.pad, start = 1.5f.pad, end = 1.5f.pad)
                 )
 
-                fun updateCacheMode(mode: CacheMode) {
+                fun applyCacheMode(mode: CacheMode) {
                     if (isUpdatingCacheSetting || mode == cacheMode) {
                         return
                     }
@@ -657,7 +674,7 @@ fun SettingsScreen(
                     }
                 }
 
-                fun updateCacheSizeLimit(limit: CacheSizeLimit) {
+                fun applyCacheSizeLimit(limit: CacheSizeLimit) {
                     if (isUpdatingCacheSetting || limit == cacheSizeLimit) {
                         return
                     }
@@ -669,6 +686,50 @@ fun SettingsScreen(
                             }
                         refreshCacheSize()
                         isUpdatingCacheSetting = false
+                    }
+                }
+
+                fun requestCacheModeChange(mode: CacheMode) {
+                    if (isUpdatingCacheSetting || mode == cacheMode) {
+                        return
+                    }
+                    if (mode.ordinal < cacheMode.ordinal) {
+                        val initial = PendingCacheDowngrade.Mode(targetMode = mode)
+                        pendingCacheDowngrade = initial
+                        scope.launch {
+                            val imageBytes = currentImageCacheBytes()
+                            val bytesToDelete = groupMessageCache.estimateBytesDeletedOnModeChange(
+                                targetMode = mode,
+                                currentImageCacheBytes = imageBytes,
+                            )
+                            if (pendingCacheDowngrade == initial) {
+                                pendingCacheDowngrade = initial.copy(bytesToDelete = bytesToDelete)
+                            }
+                        }
+                    } else {
+                        applyCacheMode(mode)
+                    }
+                }
+
+                fun requestCacheSizeLimitChange(limit: CacheSizeLimit) {
+                    if (isUpdatingCacheSetting || limit == cacheSizeLimit) {
+                        return
+                    }
+                    if (limit.ordinal < cacheSizeLimit.ordinal) {
+                        val initial = PendingCacheDowngrade.SizeLimit(targetLimit = limit)
+                        pendingCacheDowngrade = initial
+                        scope.launch {
+                            val imageBytes = currentImageCacheBytes()
+                            val bytesToDelete = groupMessageCache.estimateBytesDeletedOnSizeLimitChange(
+                                targetLimit = limit,
+                                currentImageCacheBytes = imageBytes,
+                            )
+                            if (pendingCacheDowngrade == initial) {
+                                pendingCacheDowngrade = initial.copy(bytesToDelete = bytesToDelete)
+                            }
+                        }
+                    } else {
+                        applyCacheSizeLimit(limit)
                     }
                 }
 
@@ -691,6 +752,82 @@ fun SettingsScreen(
                     CacheSizeLimit.Gb32 -> stringResource(R.string.cache_size_32gb)
                     CacheSizeLimit.Gb64 -> stringResource(R.string.cache_size_64gb)
                     CacheSizeLimit.Unlimited -> stringResource(R.string.cache_size_unlimited)
+                }
+
+                pendingCacheDowngrade?.let { pending ->
+                    val bytesToDelete = pending.bytesToDelete
+                    AlertDialog(
+                        onDismissRequest = {
+                            pendingCacheDowngrade = null
+                        },
+                        title = {
+                            Text(stringResource(R.string.cache_downgrade_confirm_title))
+                        },
+                        text = {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(1.pad)
+                            ) {
+                                Text(
+                                    text = when (pending) {
+                                        is PendingCacheDowngrade.Mode -> stringResource(
+                                            R.string.cache_mode_downgrade_message,
+                                            cacheModeLabel(pending.targetMode),
+                                        )
+
+                                        is PendingCacheDowngrade.SizeLimit -> stringResource(
+                                            R.string.cache_size_limit_downgrade_message,
+                                            cacheSizeLimitLabel(pending.targetLimit),
+                                        )
+                                    }
+                                )
+                                Text(
+                                    text = when {
+                                        bytesToDelete == null -> stringResource(R.string.loading_cache_items)
+                                        bytesToDelete > 0L -> stringResource(
+                                            R.string.cache_to_be_deleted_x,
+                                            Formatter.formatShortFileSize(context, bytesToDelete),
+                                        )
+
+                                        else -> stringResource(R.string.cache_to_be_deleted_none)
+                                    },
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = if ((bytesToDelete ?: 0L) > 0L) {
+                                        MaterialTheme.colorScheme.error
+                                    } else {
+                                        MaterialTheme.colorScheme.secondary
+                                    },
+                                )
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    pendingCacheDowngrade = null
+                                }
+                            ) {
+                                Text(stringResource(R.string.cancel))
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    pendingCacheDowngrade = null
+                                    when (pending) {
+                                        is PendingCacheDowngrade.Mode -> applyCacheMode(pending.targetMode)
+                                        is PendingCacheDowngrade.SizeLimit -> applyCacheSizeLimit(pending.targetLimit)
+                                    }
+                                },
+                                enabled = bytesToDelete != null && !isUpdatingCacheSetting,
+                                colors = if ((bytesToDelete ?: 0L) > 0L) {
+                                    ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                                } else {
+                                    ButtonDefaults.textButtonColors()
+                                },
+                            ) {
+                                Text(stringResource(R.string.confirm))
+                            }
+                        },
+                    )
                 }
 
                 ExposedDropdownMenuBox(
@@ -740,7 +877,7 @@ fun SettingsScreen(
                                 },
                                 onClick = {
                                     cacheModeMenuExpanded = false
-                                    updateCacheMode(mode)
+                                    requestCacheModeChange(mode)
                                 },
                                 contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                             )
@@ -797,7 +934,7 @@ fun SettingsScreen(
                                 },
                                 onClick = {
                                     cacheSizeLimitMenuExpanded = false
-                                    updateCacheSizeLimit(limit)
+                                    requestCacheSizeLimitChange(limit)
                                 },
                                 contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                             )

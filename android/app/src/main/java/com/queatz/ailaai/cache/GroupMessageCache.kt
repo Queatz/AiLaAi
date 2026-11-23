@@ -557,6 +557,104 @@ class GroupMessageCache {
         }
     }
 
+    suspend fun estimateBytesDeletedOnModeChange(
+        targetMode: CacheMode,
+        currentImageCacheBytes: Long,
+    ): Long {
+        if (targetMode.ordinal >= _mode.value.ordinal || !isInitialized()) {
+            return 0L
+        }
+
+        return when (targetMode) {
+            CacheMode.None -> sizeBytes() + currentImageCacheBytes.coerceAtLeast(0L)
+
+            CacheMode.Recent100 -> withContext(Dispatchers.IO) {
+                diskMutex.withLock {
+                    if (!cacheDir.exists()) {
+                        return@withLock 0L
+                    }
+
+                    val files = cacheDir.listFiles { file ->
+                        file.isFile && file.name.endsWith(".json")
+                    } ?: return@withLock 0L
+
+                    var freed = 0L
+                    files.forEach { file ->
+                        val existing = runCatching {
+                            json.decodeFromString<CachedGroupData>(file.readText())
+                        }.getOrNull() ?: return@forEach
+
+                        if (existing.messages.size > MAX_CACHED_MESSAGES_PER_GROUP) {
+                            val trimmed = existing.copy(
+                                messages = existing.messages.take(MAX_CACHED_MESSAGES_PER_GROUP),
+                                hasOlderMessages = true,
+                            )
+                            val newSize = runCatching {
+                                json.encodeToString(trimmed).toByteArray(StandardCharsets.UTF_8).size.toLong()
+                            }.getOrDefault(file.length())
+                            freed += (file.length() - newSize).coerceAtLeast(0L)
+                        }
+                    }
+                    freed
+                }
+            }
+
+            CacheMode.All -> 0L
+        }
+    }
+
+    suspend fun estimateBytesDeletedOnSizeLimitChange(
+        targetLimit: CacheSizeLimit,
+        currentImageCacheBytes: Long,
+    ): Long {
+        if (targetLimit.ordinal >= _sizeLimit.value.ordinal || !isInitialized() || _mode.value == CacheMode.None) {
+            return 0L
+        }
+
+        val maxMessageBytes = targetLimit.messageBudgetBytes
+        val messageBytesToDelete = if (maxMessageBytes == null) {
+            0L
+        } else {
+            withContext(Dispatchers.IO) {
+                diskMutex.withLock {
+                    if (!cacheDir.exists()) {
+                        return@withLock 0L
+                    }
+
+                    val files = cacheDir.listFiles { file ->
+                        file.isFile && file.name.endsWith(".json")
+                    } ?: return@withLock 0L
+
+                    var totalBytes = files.sumOf { it.length() }
+                    if (totalBytes <= maxMessageBytes) {
+                        return@withLock 0L
+                    }
+
+                    var freed = 0L
+                    val oldestFirst = files.sortedBy { it.lastModified() }
+                    for (file in oldestFirst) {
+                        if (totalBytes <= maxMessageBytes) {
+                            break
+                        }
+                        val fileSize = file.length()
+                        totalBytes -= fileSize
+                        freed += fileSize
+                    }
+                    freed
+                }
+            }
+        }
+
+        val maxImageBytes = targetLimit.imageBudgetBytes
+        val imageBytesToDelete = if (maxImageBytes == null) {
+            0L
+        } else {
+            (currentImageCacheBytes.coerceAtLeast(0L) - maxImageBytes).coerceAtLeast(0L)
+        }
+
+        return messageBytesToDelete + imageBytesToDelete
+    }
+
     suspend fun setMode(mode: CacheMode): Result<Unit> {
         val previousMode = _mode.value
         _mode.value = mode
