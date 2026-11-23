@@ -120,7 +120,6 @@ fun Toolbar(
             modifier = modifier
                 .widthIn(max = LocalWindowInfo.current.containerDpSize.width)
                 .fillMaxWidth()
-                .height(IntrinsicSize.Max)
         ) {
             ToolbarScope(outline, itemModifier = Modifier.fillMaxRowHeight()).apply {
                 items()

@@ -4,6 +4,13 @@ import android.content.Context
 import android.util.LruCache
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
+import coil3.annotation.DelicateCoilApi
+import coil3.disk.DiskCache
+import coil3.disk.directory
+import coil3.request.CachePolicy
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.getAllAttachments
 import com.queatz.ailaai.data.json
@@ -28,12 +35,132 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 const val MAX_CACHED_MESSAGES_PER_GROUP = 100
-const val MAX_MESSAGE_CACHE_BYTES = 256L * 1024 * 1024 // 256 MB (paired with 768 MB image cache = 1 GB total)
-const val MAX_IMAGE_CACHE_BYTES = 768L * 1024 * 1024
+const val IMAGE_CACHE_DIR_NAME = "image_cache"
 private const val MAX_IN_MEMORY_GROUPS = 20
 private const val MESSAGE_CACHE_DIR_NAME = "group_messages"
 
 private val messageCacheEnabledKey = booleanPreferencesKey("cache.messages.enabled")
+private val cacheModeKey = stringPreferencesKey("cache.mode")
+private val cacheSizeLimitKey = stringPreferencesKey("cache.size.limit")
+
+enum class CacheMode(val key: String) {
+    None("none"),
+    Recent100("recent_100"),
+    All("all"),
+    ;
+
+    companion object {
+        val Default = Recent100
+
+        fun fromKey(key: String?): CacheMode? = entries.firstOrNull { it.key == key }
+    }
+}
+
+enum class CacheSizeLimit(
+    val key: String,
+    val totalBytes: Long?,
+) {
+    Mb256("256mb", 256L * 1024 * 1024),
+    Mb512("512mb", 512L * 1024 * 1024),
+    Gb1("1gb", 1L * 1024 * 1024 * 1024),
+    Gb2("2gb", 2L * 1024 * 1024 * 1024),
+    Gb4("4gb", 4L * 1024 * 1024 * 1024),
+    Gb8("8gb", 8L * 1024 * 1024 * 1024),
+    Gb16("16gb", 16L * 1024 * 1024 * 1024),
+    Gb32("32gb", 32L * 1024 * 1024 * 1024),
+    Gb64("64gb", 64L * 1024 * 1024 * 1024),
+    Unlimited("unlimited", null),
+    ;
+
+    /** 25% of total budget for chat message cache, paired with 75% for image cache. */
+    val messageBudgetBytes: Long?
+        get() = totalBytes?.div(4)
+
+    /** 75% of total budget for image disk cache, paired with 25% for message cache. */
+    val imageBudgetBytes: Long?
+        get() = totalBytes?.let { it - (it / 4) }
+
+    companion object {
+        val Default = Gb1
+
+        fun fromKey(key: String?): CacheSizeLimit? = entries.firstOrNull { it.key == key }
+    }
+}
+
+private val imageLoaderMutex = Mutex()
+
+fun buildAppImageLoader(
+    context: Context,
+    mode: CacheMode,
+    sizeLimit: CacheSizeLimit,
+): ImageLoader {
+    val appContext = context.applicationContext
+    val builder = ImageLoader.Builder(appContext)
+    if (mode == CacheMode.None) {
+        builder
+            .diskCachePolicy(CachePolicy.DISABLED)
+            .diskCache(null)
+    } else {
+        val maxImageBytes = sizeLimit.imageBudgetBytes ?: Long.MAX_VALUE
+        builder.diskCache {
+            DiskCache.Builder()
+                .directory(appContext.cacheDir.resolve(IMAGE_CACHE_DIR_NAME))
+                .maxSizeBytes(maxImageBytes)
+                .build()
+        }
+    }
+    return builder.build()
+}
+
+@OptIn(DelicateCoilApi::class)
+suspend fun reconfigureAppImageLoader(
+    context: Context,
+    mode: CacheMode,
+    sizeLimit: CacheSizeLimit,
+    trimToLimit: Boolean,
+) {
+    val appContext = context.applicationContext
+    withContext(Dispatchers.IO) {
+        imageLoaderMutex.withLock {
+            val imageCacheDir = appContext.cacheDir.resolve(IMAGE_CACHE_DIR_NAME)
+            val oldLoader = runCatching { SingletonImageLoader.get(appContext) }.getOrNull()
+            val oldDiskCache = oldLoader?.diskCache
+
+            if (mode == CacheMode.None) {
+                runCatching { oldLoader?.shutdown() }
+                runCatching { oldDiskCache?.clear() }
+                runCatching { oldDiskCache?.shutdown() }
+                runCatching { imageCacheDir.deleteRecursively() }
+            } else {
+                runCatching { oldLoader?.shutdown() }
+                runCatching { oldDiskCache?.shutdown() }
+
+                val maxImageBytes = sizeLimit.imageBudgetBytes
+                if (trimToLimit && maxImageBytes != null && imageCacheDir.exists()) {
+                    runCatching {
+                        val trimCache = DiskCache.Builder()
+                            .directory(imageCacheDir)
+                            .maxSizeBytes(maxImageBytes)
+                            .build()
+                        try {
+                            // Reading size initializes the journal; shutdown() trims LRU entries to maxSize.
+                            trimCache.size
+                        } finally {
+                            trimCache.shutdown()
+                        }
+                    }
+                }
+            }
+
+            val newLoader = buildAppImageLoader(
+                context = appContext,
+                mode = mode,
+                sizeLimit = sizeLimit,
+            )
+            SingletonImageLoader.setUnsafe(newLoader)
+        }
+    }
+}
 
 val groupMessageCache by lazy {
     GroupMessageCache()
@@ -158,33 +285,52 @@ class GroupMessageCache {
     private val memoryCache = LruCache<String, CachedGroupData>(MAX_IN_MEMORY_GROUPS)
     private val diskMutex = Mutex()
 
-    private val _enabled = MutableStateFlow(true)
-    val enabled = _enabled.asStateFlow()
+    private val _mode = MutableStateFlow(CacheMode.Default)
+    val mode = _mode.asStateFlow()
 
+    private val _sizeLimit = MutableStateFlow(CacheSizeLimit.Default)
+    val sizeLimit = _sizeLimit.asStateFlow()
+
+    @Synchronized
     fun init(context: Context) {
+        if (isInitialized()) {
+            return
+        }
+
         this.context = context.applicationContext
         this.cacheDir = File(this.context.cacheDir, MESSAGE_CACHE_DIR_NAME)
 
-        val initialEnabled = runCatching {
+        val preferences = runCatching {
             runBlocking {
-                this@GroupMessageCache.context.dataStore.data.first()[messageCacheEnabledKey] ?: true
+                this@GroupMessageCache.context.dataStore.data.first()
             }
-        }.getOrDefault(true)
+        }.getOrNull()
 
-        _enabled.value = initialEnabled
+        val initialMode = CacheMode.fromKey(preferences?.get(cacheModeKey))
+            ?: if (preferences?.get(messageCacheEnabledKey) == false) {
+                CacheMode.None
+            } else {
+                CacheMode.Default
+            }
+
+        val initialSizeLimit = CacheSizeLimit.fromKey(preferences?.get(cacheSizeLimitKey))
+            ?: CacheSizeLimit.Default
+
+        _mode.value = initialMode
+        _sizeLimit.value = initialSizeLimit
     }
 
     fun isInitialized(): Boolean = ::cacheDir.isInitialized
 
     fun getInMemory(groupId: String): CachedGroupData? {
-        if (!_enabled.value) {
+        if (_mode.value == CacheMode.None) {
             return null
         }
         return memoryCache.get(groupId)
     }
 
     suspend fun get(groupId: String): CachedGroupData? {
-        if (!_enabled.value || !isInitialized()) {
+        if (_mode.value == CacheMode.None || !isInitialized()) {
             return null
         }
 
@@ -213,23 +359,26 @@ class GroupMessageCache {
         messages: List<Message>,
         hasOlderMessages: Boolean = true,
     ) {
-        if (!_enabled.value || !isInitialized()) {
+        if (_mode.value == CacheMode.None || !isInitialized()) {
             return
         }
 
-        val trimmed = messages.distinctBy { it.id }.take(MAX_CACHED_MESSAGES_PER_GROUP)
+        val distinct = messages.distinctBy { it.id }
 
         withContext(Dispatchers.IO) {
             diskMutex.withLock {
-                if (!_enabled.value) {
-                    return@withLock
+                val trimmed = when (_mode.value) {
+                    CacheMode.None -> return@withLock
+                    CacheMode.Recent100 -> distinct.take(MAX_CACHED_MESSAGES_PER_GROUP)
+                    CacheMode.All -> distinct
                 }
+                val effectiveHasOlderMessages = hasOlderMessages || trimmed.size < distinct.size
 
                 val existing = memoryCache.get(groupId) ?: readFromDiskUnchecked(groupId)
                 val updated = CachedGroupData(
                     group = group ?: existing?.group,
                     messages = trimmed,
-                    hasOlderMessages = hasOlderMessages,
+                    hasOlderMessages = effectiveHasOlderMessages,
                 )
 
                 memoryCache.put(groupId, updated)
@@ -246,13 +395,13 @@ class GroupMessageCache {
         groupId: String,
         group: GroupExtended,
     ) {
-        if (!_enabled.value || !isInitialized()) {
+        if (_mode.value == CacheMode.None || !isInitialized()) {
             return
         }
 
         withContext(Dispatchers.IO) {
             diskMutex.withLock {
-                if (!_enabled.value) {
+                if (_mode.value == CacheMode.None) {
                     return@withLock
                 }
 
@@ -408,8 +557,9 @@ class GroupMessageCache {
         }
     }
 
-    suspend fun setEnabled(enabled: Boolean): Result<Unit> {
-        _enabled.value = enabled
+    suspend fun setMode(mode: CacheMode): Result<Unit> {
+        val previousMode = _mode.value
+        _mode.value = mode
 
         if (!isInitialized()) {
             return Result.success(Unit)
@@ -417,16 +567,131 @@ class GroupMessageCache {
 
         val persistResult = runCatching {
             context.dataStore.edit { preferences ->
-                preferences[messageCacheEnabledKey] = enabled
+                preferences[cacheModeKey] = mode.key
+                preferences[messageCacheEnabledKey] = mode != CacheMode.None
             }
             Unit
         }
 
-        if (!enabled) {
+        if (persistResult.isFailure) {
+            _mode.value = previousMode
+            return persistResult
+        }
+
+        if (mode == CacheMode.None) {
             clear()
+            reconfigureAppImageLoader(
+                context = context,
+                mode = CacheMode.None,
+                sizeLimit = _sizeLimit.value,
+                trimToLimit = false,
+            )
+        } else {
+            if (previousMode == CacheMode.All && mode == CacheMode.Recent100) {
+                trimAllGroupsToRecentLimit()
+            }
+            if (previousMode == CacheMode.None) {
+                reconfigureAppImageLoader(
+                    context = context,
+                    mode = mode,
+                    sizeLimit = _sizeLimit.value,
+                    trimToLimit = false,
+                )
+            }
         }
 
         return persistResult
+    }
+
+    suspend fun setSizeLimit(limit: CacheSizeLimit): Result<Unit> {
+        val previousLimit = _sizeLimit.value
+        _sizeLimit.value = limit
+
+        if (!isInitialized()) {
+            return Result.success(Unit)
+        }
+
+        val persistResult = runCatching {
+            context.dataStore.edit { preferences ->
+                preferences[cacheSizeLimitKey] = limit.key
+            }
+            Unit
+        }
+
+        if (persistResult.isFailure) {
+            _sizeLimit.value = previousLimit
+            return persistResult
+        }
+
+        withContext(Dispatchers.IO) {
+            diskMutex.withLock {
+                pruneIfOverBudgetUnchecked()
+            }
+        }
+
+        val currentMode = _mode.value
+        if (currentMode != CacheMode.None) {
+            val newImageBudget = limit.imageBudgetBytes
+            val oldImageBudget = previousLimit.imageBudgetBytes
+            val shouldTrimImages = newImageBudget != null &&
+                (oldImageBudget == null || newImageBudget < oldImageBudget)
+            reconfigureAppImageLoader(
+                context = context,
+                mode = currentMode,
+                sizeLimit = limit,
+                trimToLimit = shouldTrimImages,
+            )
+        }
+
+        return persistResult
+    }
+
+    private suspend fun trimAllGroupsToRecentLimit() {
+        withContext(Dispatchers.IO) {
+            diskMutex.withLock {
+                if (cacheDir.exists()) {
+                    val files = cacheDir.listFiles { file ->
+                        file.isFile && file.name.endsWith(".json")
+                    }
+                    files?.forEach { file ->
+                        val groupId = decodeGroupId(file.name.removeSuffix(".json")) ?: return@forEach
+                        val originalLastModified = file.lastModified()
+                        val existing = runCatching {
+                            json.decodeFromString<CachedGroupData>(file.readText())
+                        }.getOrNull() ?: return@forEach
+
+                        if (existing.messages.size > MAX_CACHED_MESSAGES_PER_GROUP) {
+                            val trimmed = existing.copy(
+                                messages = existing.messages.take(MAX_CACHED_MESSAGES_PER_GROUP),
+                                hasOlderMessages = true,
+                            )
+                            writeToDiskUnchecked(
+                                groupId = groupId,
+                                data = trimmed,
+                                lastModifiedMillis = originalLastModified,
+                            )
+                            if (memoryCache.get(groupId) != null) {
+                                memoryCache.put(groupId, trimmed)
+                            }
+                        }
+                    }
+                }
+
+                memoryCache.snapshot().forEach { (groupId, cached) ->
+                    if (cached.messages.size > MAX_CACHED_MESSAGES_PER_GROUP) {
+                        memoryCache.put(
+                            groupId,
+                            cached.copy(
+                                messages = cached.messages.take(MAX_CACHED_MESSAGES_PER_GROUP),
+                                hasOlderMessages = true,
+                            ),
+                        )
+                    }
+                }
+
+                pruneIfOverBudgetUnchecked()
+            }
+        }
     }
 
     private fun fileFor(groupId: String): File {
@@ -452,6 +717,7 @@ class GroupMessageCache {
     private fun writeToDiskUnchecked(
         groupId: String,
         data: CachedGroupData,
+        lastModifiedMillis: Long = System.currentTimeMillis(),
     ) {
         runCatching {
             if (!cacheDir.exists()) {
@@ -467,7 +733,7 @@ class GroupMessageCache {
                 target.writeText(encoded)
                 temp.delete()
             }
-            target.setLastModified(System.currentTimeMillis())
+            target.setLastModified(lastModifiedMillis)
         }
     }
 
@@ -485,6 +751,7 @@ class GroupMessageCache {
     }
 
     private fun pruneIfOverBudgetUnchecked() {
+        val maxBytes = _sizeLimit.value.messageBudgetBytes ?: return
         runCatching {
             if (!cacheDir.exists()) {
                 return
@@ -495,13 +762,13 @@ class GroupMessageCache {
             } ?: return
 
             var totalBytes = files.sumOf { it.length() }
-            if (totalBytes <= MAX_MESSAGE_CACHE_BYTES) {
+            if (totalBytes <= maxBytes) {
                 return
             }
 
             val oldestFirst = files.sortedBy { it.lastModified() }
             for (file in oldestFirst) {
-                if (totalBytes <= MAX_MESSAGE_CACHE_BYTES) {
+                if (totalBytes <= maxBytes) {
                     break
                 }
                 val fileSize = file.length()

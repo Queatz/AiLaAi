@@ -374,15 +374,11 @@ fun GroupScreen(groupId: String) {
 
     val allJoinRequests by joins.joins.collectAsState()
     val myJoinRequests by joins.myJoins.collectAsState()
-    var joinRequests by remember {
-        mutableStateOf(emptyList<JoinRequestAndPerson>())
+    val joinRequests = remember(allJoinRequests, groupId) {
+        allJoinRequests.filter { it.joinRequest?.group == groupId }
     }
 
     background(groupExtended?.group?.background?.let(api::url), groupExtended?.group?.config?.backgroundOpacity ?: 1f)
-
-    LaunchedEffect(allJoinRequests) {
-        joinRequests = allJoinRequests.filter { it.joinRequest?.group == groupId }
-    }
 
     LaunchedEffect(Unit) {
         push.clearGroup(groupId)
@@ -1152,8 +1148,7 @@ fun GroupScreen(groupId: String) {
                                 ) {
                                     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
                                     val textScrollState = rememberScrollState()
-                                    LinkifyText(
-                                        text = groupExtended?.group?.description ?: "",
+                                    Box(
                                         modifier = Modifier
                                             .weight(1f)
                                             .heightIn(max = 128.dp)
@@ -1161,7 +1156,12 @@ fun GroupScreen(groupId: String) {
                                             .onPlaced { viewport = it.boundsInParent().size }
                                             .fadingEdge(viewport, textScrollState)
                                             .padding(1.5f.pad)
-                                    )
+                                    ) {
+                                        LinkifyText(
+                                            text = groupExtended?.group?.description ?: "",
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
                                     IconButton(
                                         onClick = {
                                             showDescription = false

@@ -55,6 +55,7 @@ import coil3.imageLoader
 import coil3.memory.MemoryCache
 import com.queatz.ailaai.R
 import com.queatz.ailaai.cache.CacheKey
+import com.queatz.ailaai.cache.CacheMode
 import com.queatz.ailaai.cache.CachedGroupEntry
 import com.queatz.ailaai.cache.ClearCacheFailure
 import com.queatz.ailaai.cache.cache
@@ -129,7 +130,7 @@ fun ClearCacheScreen() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val me = me
-    val cacheEnabled by groupMessageCache.enabled.collectAsState()
+    val cacheMode by groupMessageCache.mode.collectAsState()
 
     val someone = stringResource(R.string.someone)
     val emptyGroup = stringResource(R.string.empty_group_name)
@@ -567,7 +568,7 @@ fun ClearCacheScreen() {
                             .padding(2.pad)
                     ) {
                         EmptyText(stringResource(R.string.cache_is_empty))
-                        if (!cacheEnabled) {
+                        if (cacheMode == CacheMode.None) {
                             Text(
                                 text = stringResource(R.string.cache_disabled_notice),
                                 style = MaterialTheme.typography.bodySmall,

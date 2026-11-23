@@ -11,11 +11,9 @@ import app.ailaai.api.myDevice
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
-import coil3.disk.DiskCache
-import coil3.disk.directory
 import com.google.auto.service.AutoService
 import com.google.firebase.messaging.FirebaseMessaging
-import com.queatz.ailaai.cache.MAX_IMAGE_CACHE_BYTES
+import com.queatz.ailaai.cache.buildAppImageLoader
 import com.queatz.ailaai.cache.groupMessageCache
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.db.db
@@ -43,15 +41,14 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 class Application : android.app.Application(), SingletonImageLoader.Factory {
 
     override fun newImageLoader(context: PlatformContext): ImageLoader {
-        return ImageLoader.Builder(context)
-            .diskCache {
-                DiskCache.Builder()
-                    .directory(cacheDir.resolve("image_cache"))
-                    .maxSizePercent(0.05)
-                    .maximumMaxSizeBytes(MAX_IMAGE_CACHE_BYTES)
-                    .build()
-            }
-            .build()
+        if (!groupMessageCache.isInitialized()) {
+            groupMessageCache.init(this)
+        }
+        return buildAppImageLoader(
+            context = this,
+            mode = groupMessageCache.mode.value,
+            sizeLimit = groupMessageCache.sizeLimit.value,
+        )
     }
 
     override fun onCreate() {
