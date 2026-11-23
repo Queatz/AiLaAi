@@ -826,7 +826,10 @@ fun GroupScreen(groupId: String) {
                                 someone,
                                 emptyGroup,
                                 me?.id?.let(::listOf) ?: emptyList()
-                            )
+                            ),
+                            groupExtended = groupExtended,
+                            me = me,
+                            activityContext = context
                         )
                     }
 

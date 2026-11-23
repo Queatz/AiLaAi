@@ -29,13 +29,15 @@ import com.queatz.ailaai.services.GroupCallParticipant
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.GroupExtended
-import org.webrtc.RendererCommon
-import org.webrtc.VideoTrack
+import live.videosdk.rtc.android.MediaType
+import videosdk.org.webrtc.RendererCommon
+import videosdk.org.webrtc.VideoTrack
 
 @Composable
 fun CallScreen(
-    group: GroupExtended,
-    active: GroupCall,
+    group: GroupExtended?,
+    groupName: String,
+    active: GroupCall?,
     isInPipMode: Boolean,
     cameraEnabled: Boolean,
     micEnabled: Boolean,
@@ -49,41 +51,59 @@ fun CallScreen(
     onEndCall: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val me = me ?: return
-
-    val activeVideoStreams = active.streams.count {
-        it.kind == "video" || it.kind == "share"
+    val me = me
+    val title = if (group != null && me?.id != null) {
+        group.name(
+            stringResource(R.string.someone),
+            stringResource(R.string.empty_group_name),
+            omit = me.id!!.inList()
+        )
+    } else {
+        groupName
     }
 
+    val activeVideoStreams = active?.streams?.count {
+        it.kind == MediaType.VIDEO || it.kind == MediaType.SHARE
+    } ?: 0
+
     Box(modifier) {
-        // todo lazy grid
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            if (activeVideoStreams > 0) {
-                active.streams.filter {
-                    it.kind == "video" || it.kind == "share"
-                }.filter {
-                    active.pinnedStream == null || active.pinnedStream == it.stream
-                }.forEach {
+        if (active == null) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            // todo lazy grid
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                if (activeVideoStreams > 0) {
+                    active.streams.filter {
+                        it.kind == MediaType.VIDEO || it.kind == MediaType.SHARE
+                    }.filter {
+                        active.pinnedStream == null || active.pinnedStream == it.stream
+                    }.forEach {
+                        VideoSdkView(
+                            track = it.stream as VideoTrack,
+                            scaleType = if (it.kind == MediaType.VIDEO) RendererCommon.ScalingType.SCALE_ASPECT_FILL else RendererCommon.ScalingType.SCALE_ASPECT_FIT,
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable {
+                                    onTogglePin(it)
+                                }
+                        )
+                    }
+                } else if (active.localShare != null || active.localVideo != null) {
                     VideoSdkView(
-                        track = it.stream as VideoTrack,
-                        scaleType = if (it.kind == "video") RendererCommon.ScalingType.SCALE_ASPECT_FILL else RendererCommon.ScalingType.SCALE_ASPECT_FIT,
+                        track = active.localShare ?: active.localVideo as VideoTrack,
+                        scaleType = if (active.localShare == null) RendererCommon.ScalingType.SCALE_ASPECT_FILL else RendererCommon.ScalingType.SCALE_ASPECT_FIT,
                         modifier = Modifier
                             .weight(1f)
-                            .clickable {
-                                onTogglePin(it)
-                            }
                     )
                 }
-            } else if (active.localShare != null || active.localVideo != null) {
-                VideoSdkView(
-                    track = active.localShare ?: active.localVideo as VideoTrack,
-                    scaleType = if (active.localShare == null) RendererCommon.ScalingType.SCALE_ASPECT_FILL else RendererCommon.ScalingType.SCALE_ASPECT_FIT,
-                    modifier = Modifier
-                        .weight(1f)
-                )
             }
         }
 
@@ -106,7 +126,7 @@ fun CallScreen(
                     size = it.size
                 }
         ) {
-            if (activeVideoStreams > 0) {
+            if (active != null && activeVideoStreams > 0) {
                 (active.localShare ?: active.localVideo)?.let { track ->
                     Box(
                         modifier = Modifier
@@ -128,11 +148,7 @@ fun CallScreen(
 
             if (isInPipMode) {
                 Text(
-                    group.name(
-                        stringResource(R.string.someone),
-                        stringResource(R.string.empty_group_name),
-                        omit = me.id!!.inList()
-                    ),
+                    title,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(1.pad)
@@ -154,16 +170,12 @@ fun CallScreen(
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainer
                         ),
-                        enabled = cameraEnabled
+                        enabled = active != null && cameraEnabled
                     ) {
                         Icon(Icons.Outlined.Sync, null)
                     }
                     Text(
-                        group.name(
-                            stringResource(R.string.someone),
-                            stringResource(R.string.empty_group_name),
-                            omit = me.id!!.inList()
-                        ),
+                        title,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .padding(1.pad)
@@ -190,6 +202,7 @@ fun CallScreen(
                         {
                             onToggleMic()
                         },
+                        enabled = active != null,
                         colors = if (micEnabled) {
                             IconButtonDefaults.filledIconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainer
@@ -206,6 +219,7 @@ fun CallScreen(
                         {
                             onToggleCamera()
                         },
+                        enabled = active != null,
                         colors = if (cameraEnabled) {
                             IconButtonDefaults.filledIconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainer
@@ -222,6 +236,7 @@ fun CallScreen(
                         {
                             onToggleScreenShare()
                         },
+                        enabled = active != null,
                         colors = if (screenShareEnabled) {
                             IconButtonDefaults.filledIconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer

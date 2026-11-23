@@ -34,19 +34,23 @@ import com.queatz.ailaai.ui.dialogs.RationaleDialog
 import com.queatz.ailaai.ui.permission.permissionRequester
 import com.queatz.ailaai.ui.permission.rememberState
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
-import com.queatz.db.Person
 import kotlinx.coroutines.flow.collectLatest
+import live.videosdk.rtc.android.MediaType
 import live.videosdk.rtc.android.VideoSDK
-import org.webrtc.VideoTrack
+import videosdk.org.webrtc.VideoTrack
 
 
 class CallActivity : AppCompatActivity() {
 
     private lateinit var startMediaProjection: ActivityResultLauncher<Intent>
+    private var intentGroupId by mutableStateOf<String?>(null)
+    private var intentGroupName by mutableStateOf<String?>(null)
 
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        updateIntentExtras(intent)
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -56,13 +60,13 @@ class CallActivity : AppCompatActivity() {
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
             if (result.resultCode == RESULT_OK) {
-                calls.meeting?.enableScreenShare(result.data)
+                calls.enableScreenShare(result.data)
             } else {
                 applicationContext.showDidntWork(R.string.error_share_screen)
             }
         }
 
-        enterPip()
+        setPictureInPictureParams(pipParams())
 
         onBackPressedDispatcher.addCallback {
             enterPip()
@@ -70,24 +74,31 @@ class CallActivity : AppCompatActivity() {
 
         setContent {
             AiLaAiTheme {
-                var me by rememberStateOf<Person?>(null)
+                val me by calls.me.collectAsState()
                 val isInPipMode = rememberIsInPipMode()
                 val activeCall by calls.active.collectAsState()
+                val enabledStreams by calls.enabledStreams.collectAsState()
                 val group by calls.group.collectAsState()
                 val cameraPermissionRequester = permissionRequester(Manifest.permission.CAMERA)
                 val micPermissionRequester = permissionRequester(Manifest.permission.RECORD_AUDIO)
                 var showPermissionDialog by rememberStateOf(false)
 
-                // todo used cached me for calls
+                val currentGroupId = intentGroupId ?: group?.group?.id
+                val currentGroup = group?.takeIf { currentGroupId == null || it.group?.id == currentGroupId }
+                val currentActiveCall = activeCall?.takeIf { currentGroupId == null || it.group.group?.id == currentGroupId }
+
                 LaunchedEffect(Unit) {
-                    api.me {
-                        me = it
+                    if (calls.me.value == null) {
+                        api.me {
+                            calls.me.value = it
+                        }
                     }
                 }
 
                 LaunchedEffect(Unit) {
                     calls.onEndCall.collectLatest {
-                        if (it == group?.group?.id) {
+                        val activeId = intentGroupId ?: calls.group.value?.group?.id
+                        if (it == activeId || activeId == null) {
                             finish()
                         }
                     }
@@ -133,57 +144,56 @@ class CallActivity : AppCompatActivity() {
                             )
                         }
 
-                        group?.let { group ->
-                            activeCall?.let { active ->
-                                CallScreen(
-                                    group = group,
-                                    active = active,
-                                    isInPipMode = isInPipMode,
-                                    cameraEnabled = calls.enabled("video"),
-                                    micEnabled = calls.enabled("audio"),
-                                    screenShareEnabled = calls.enabled("share"),
-                                    onToggleCamera = {
-                                        cameraPermissionRequester.use(
-                                            onPermanentlyDenied = {
-                                                showPermissionDialog = true
-                                            }
-                                        ) {
-                                            calls.toggleCamera()
+                        if (currentGroup != null || intentGroupName != null || currentActiveCall != null) {
+                            CallScreen(
+                                group = currentGroup,
+                                groupName = intentGroupName.orEmpty(),
+                                active = currentActiveCall,
+                                isInPipMode = isInPipMode,
+                                cameraEnabled = calls.enabled(MediaType.VIDEO, enabledStreams),
+                                micEnabled = calls.enabled(MediaType.AUDIO, enabledStreams),
+                                screenShareEnabled = calls.enabled(MediaType.SHARE, enabledStreams),
+                                onToggleCamera = {
+                                    cameraPermissionRequester.use(
+                                        onPermanentlyDenied = {
+                                            showPermissionDialog = true
                                         }
-                                    },
-                                    onSwitchCamera = {
-                                        cameraPermissionRequester.use(
-                                            onPermanentlyDenied = {
-                                                showPermissionDialog = true
-                                            }
-                                        ) {
-                                            calls.switchCamera()
+                                    ) {
+                                        calls.toggleCamera()
+                                    }
+                                },
+                                onSwitchCamera = {
+                                    cameraPermissionRequester.use(
+                                        onPermanentlyDenied = {
+                                            showPermissionDialog = true
                                         }
-                                    },
-                                    onToggleMic = {
-                                        micPermissionRequester.use(
-                                            onPermanentlyDenied = {
-                                                showPermissionDialog = true
-                                            }
-                                        ) {
-                                            calls.toggleMic()
+                                    ) {
+                                        calls.switchCamera()
+                                    }
+                                },
+                                onToggleMic = {
+                                    micPermissionRequester.use(
+                                        onPermanentlyDenied = {
+                                            showPermissionDialog = true
                                         }
-                                    },
-                                    onToggleScreenShare = {
-                                        calls.toggleScreenShare()
-                                    },
-                                    onEndCall = {
-                                        calls.end(group.group?.id)
-                                    },
-                                    onTogglePictureInPicture = {
-                                        enterPip()
-                                    },
-                                    onTogglePin = {
-                                        calls.togglePin(it.stream as VideoTrack)
-                                    },
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            }
+                                    ) {
+                                        calls.toggleMic()
+                                    }
+                                },
+                                onToggleScreenShare = {
+                                    calls.toggleScreenShare()
+                                },
+                                onEndCall = {
+                                    calls.end(currentGroupId)
+                                },
+                                onTogglePictureInPicture = {
+                                    enterPip()
+                                },
+                                onTogglePin = {
+                                    calls.togglePin(it.stream as VideoTrack)
+                                },
+                                modifier = Modifier.fillMaxSize()
+                            )
                         }
                     }
                 }
@@ -191,20 +201,34 @@ class CallActivity : AppCompatActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        updateIntentExtras(intent)
+    }
+
     override fun onStop() {
         super.onStop()
         finish()
     }
 
+    private fun updateIntentExtras(intent: Intent?) {
+        intent?.getStringExtra(CallService.GROUP_ID_EXTRA)?.let {
+            intentGroupId = it
+        }
+        intent?.getStringExtra(CallService.GROUP_NAME_EXTRA)?.let {
+            intentGroupName = it
+        }
+    }
+
+    private fun pipParams() = PictureInPictureParams.Builder().apply {
+        setAspectRatio(Rational(3, 2))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            setAutoEnterEnabled(true)
+        }
+    }.build()
+
     private fun enterPip() {
-        val ratio = Rational(3, 2)
-        enterPictureInPictureMode(
-            PictureInPictureParams.Builder().apply {
-                setAspectRatio(ratio)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    setAutoEnterEnabled(true)
-                }
-            }.build()
-        )
+        enterPictureInPictureMode(pipParams())
     }
 }
