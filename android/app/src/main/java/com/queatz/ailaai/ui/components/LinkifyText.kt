@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -15,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
+import com.mikepenz.markdown.model.rememberMarkdownState
 import com.queatz.db.splitByUrls
 
 @Composable
@@ -39,8 +41,13 @@ fun LinkifyText(
             }
         }
     }
-    Markdown(
+    val markdownState = rememberMarkdownState(
         content = textProcessed,
+        retainState = true,
+        immediate = LocalInspectionMode.current || textProcessed.length <= 2000,
+    )
+    Markdown(
+        markdownState = markdownState,
         colors = markdownColor(
             text = color,
             codeBackground = MaterialTheme.colorScheme.surfaceVariant,

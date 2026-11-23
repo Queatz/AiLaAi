@@ -1451,4 +1451,61 @@
     <string name="error_upload_video">upload video</string>
     <string name="error_use_invite">use invite</string>
     <string name="error_verify_biometrics">verify biometrics</string>
+    <string name="cache">Cache</string>
+    <string name="cache_mode">Cache chat messages</string>
+    <string name="cache_mode_none">No cache</string>
+    <string name="cache_mode_recent_100">100 most recent messages</string>
+    <string name="cache_mode_all">All messages</string>
+    <string name="cache_size_limit">Cache size limit</string>
+    <string name="cache_downgrade_confirm_title">Reduce cache?</string>
+    <string name="cache_mode_downgrade_message">Switching to \"%1$s\" will remove cached data that exceeds this setting.</string>
+    <string name="cache_size_limit_downgrade_message">Lowering the cache size limit to %1$s will remove the oldest cached data that exceeds the new limit.</string>
+    <string name="cache_to_be_deleted_x">Cache to be deleted: %1$s</string>
+    <string name="cache_to_be_deleted_none">Cache to be deleted: None (0 B)</string>
+    <string name="cache_size_256mb">256 MB</string>
+    <string name="cache_size_512mb">512 MB</string>
+    <string name="cache_size_1gb">1 GB</string>
+    <string name="cache_size_2gb">2 GB</string>
+    <string name="cache_size_4gb">4 GB</string>
+    <string name="cache_size_8gb">8 GB</string>
+    <string name="cache_size_16gb">16 GB</string>
+    <string name="cache_size_32gb">32 GB</string>
+    <string name="cache_size_64gb">64 GB</string>
+    <string name="cache_size_unlimited">Unlimited</string>
+    <string name="clear_cache">Clear cache</string>
+    <string name="clear_cache_empty">No cached data</string>
+    <string name="clear_selected">Clear selected</string>
+    <string name="clear_selected_size">Clear selected (%1$s)</string>
+    <string name="clearing_cache">Clearing cache…</string>
+    <string name="loading_cache_items">Calculating cache size…</string>
+    <string name="cache_total_x">Total: %1$s</string>
+    <string name="cache_selected_summary">%1$d selected • %2$s</string>
+    <string name="select_all">Select all</string>
+    <string name="deselect_all">Deselect all</string>
+    <string name="images">Images</string>
+    <string name="both">Both</string>
+    <string name="cached_images">Cached images</string>
+    <string name="cached_images_description">Photos and thumbnails cached across the app</string>
+    <string name="cache_is_empty">Nothing is currently cached on this device.</string>
+    <string name="cache_disabled_notice">Caching is turned off in Settings.</string>
+    <string name="error_load_cache">Couldn\'t load cached items: %1$s</string>
+    <string name="error_clear_cache_failed">Couldn\'t clear selected cache items.</string>
+    <string name="error_clear_cache_partial">Cleared %1$s (%2$s freed), but %3$d failed:</string>
+    <string name="error_save_cache_setting">Couldn\'t save cache setting.</string>
+    <plurals name="cache_cleared_success">
+        <item quantity="one">Cleared %1$d item (%2$s freed)</item>
+        <item quantity="other">Cleared %1$d items (%2$s freed)</item>
+    </plurals>
+    <plurals name="cached_messages_count">
+        <item quantity="one">%1$d cached message</item>
+        <item quantity="other">%1$d cached messages</item>
+    </plurals>
+    <plurals name="cached_images_count">
+        <item quantity="one">%1$d cached image</item>
+        <item quantity="other">%1$d cached images</item>
+    </plurals>
+    <plurals name="x_items_cleared">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
 </resources>

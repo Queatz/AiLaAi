@@ -105,6 +105,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.queatz.ailaai.cache.CacheKey
 import com.queatz.ailaai.cache.cache
+import com.queatz.ailaai.cache.groupMessageCache
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.data.appDomains
@@ -141,6 +142,7 @@ import com.queatz.ailaai.slideshow.slideshow
 import com.queatz.ailaai.ui.components.GroupPhoto
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.screens.CardScreen
+import com.queatz.ailaai.ui.screens.ClearCacheScreen
 import com.queatz.ailaai.ui.screens.ExploreScreen
 import com.queatz.ailaai.ui.screens.FriendsScreen
 import com.queatz.ailaai.ui.screens.SignalsScreen
@@ -571,6 +573,9 @@ class MainActivity : AppCompatActivity() {
                                         known = false
                                         me = null
                                         cache.remove(CacheKey.Me)
+                                        scope.launch {
+                                            groupMessageCache.clear()
+                                        }
                                         signals.clear()
                                         showSignedOut = false
                                     }
@@ -1167,6 +1172,9 @@ class MainActivity : AppCompatActivity() {
                                                         known = false
                                                     }
                                                 }
+                                            }
+                                            composable("clear-cache") {
+                                                ClearCacheScreen()
                                             }
                                         }
                                     }

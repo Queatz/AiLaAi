@@ -1,6 +1,7 @@
 package com.queatz.ailaai.ui.screens
 
 import account
+import android.text.format.Formatter
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Refresh
@@ -30,10 +32,15 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.os.LocaleListCompat
 import app.ailaai.api.*
+import coil3.imageLoader
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.AppUi
 import com.queatz.ailaai.BuildConfig
 import com.queatz.ailaai.R
 import com.queatz.ailaai.appLanguage
+import com.queatz.ailaai.cache.CacheMode
+import com.queatz.ailaai.cache.CacheSizeLimit
+import com.queatz.ailaai.cache.groupMessageCache
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.data.json
@@ -41,6 +48,7 @@ import com.queatz.ailaai.db.db
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.me
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.BiometricPrompt
@@ -59,8 +67,24 @@ import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import linkDevice
 
+private sealed class PendingCacheDowngrade {
+    abstract val bytesToDelete: Long?
+
+    data class Mode(
+        val targetMode: CacheMode,
+        override val bytesToDelete: Long? = null,
+    ) : PendingCacheDowngrade()
+
+    data class SizeLimit(
+        val targetLimit: CacheSizeLimit,
+        override val bytesToDelete: Long? = null,
+    ) : PendingCacheDowngrade()
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     appUi: AppUi,
@@ -87,6 +111,24 @@ fun SettingsScreen(
     }
     var points by rememberStateOf<Int?>(null)
     val me = me
+    val nav = nav
+    val cacheMode by groupMessageCache.mode.collectAsState()
+    val cacheSizeLimit by groupMessageCache.sizeLimit.collectAsState()
+    var isUpdatingCacheSetting by rememberStateOf(false)
+    var cacheModeMenuExpanded by rememberStateOf(false)
+    var cacheSizeLimitMenuExpanded by rememberStateOf(false)
+    var pendingCacheDowngrade by remember { mutableStateOf<PendingCacheDowngrade?>(null) }
+    var totalCacheBytes by rememberStateOf<Long?>(null)
+
+    suspend fun currentImageCacheBytes(): Long = withContext(Dispatchers.IO) {
+        runCatching { context.imageLoader.diskCache?.size ?: 0L }.getOrDefault(0L)
+    }
+
+    suspend fun refreshCacheSize() {
+        val messageBytes = groupMessageCache.sizeBytes()
+        val imageBytes = currentImageCacheBytes()
+        totalCacheBytes = messageBytes + imageBytes
+    }
 
     fun loadTransferCode() {
         scope.launch {
@@ -177,6 +219,10 @@ fun SettingsScreen(
         }
     }
 
+    ResumeEffect {
+        refreshCacheSize()
+    }
+
     if (inviteDialog) {
         InviteDialog(
             me?.name ?: context.getString(R.string.someone)
@@ -252,6 +298,7 @@ fun SettingsScreen(
                 scope.launch {
                     api.signOut()
                     db.clear()
+                    groupMessageCache.clear()
                     updateMe()
                     signOutDialog = false
                 }
@@ -596,6 +643,330 @@ fun SettingsScreen(
             }, {
                 loadLinkDeviceToken()
             })
+
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 2.pad, vertical = 1.pad)
+                    .shadow(1.dp, MaterialTheme.shapes.large)
+                    .clip(MaterialTheme.shapes.large)
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+            ) {
+                Text(
+                    text = stringResource(R.string.cache),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 1.pad, start = 1.5f.pad, end = 1.5f.pad)
+                )
+
+                fun applyCacheMode(mode: CacheMode) {
+                    if (isUpdatingCacheSetting || mode == cacheMode) {
+                        return
+                    }
+                    scope.launch {
+                        isUpdatingCacheSetting = true
+                        groupMessageCache.setMode(mode)
+                            .onFailure {
+                                context.toast(R.string.error_save_cache_setting)
+                            }
+                        refreshCacheSize()
+                        isUpdatingCacheSetting = false
+                    }
+                }
+
+                fun applyCacheSizeLimit(limit: CacheSizeLimit) {
+                    if (isUpdatingCacheSetting || limit == cacheSizeLimit) {
+                        return
+                    }
+                    scope.launch {
+                        isUpdatingCacheSetting = true
+                        groupMessageCache.setSizeLimit(limit)
+                            .onFailure {
+                                context.toast(R.string.error_save_cache_setting)
+                            }
+                        refreshCacheSize()
+                        isUpdatingCacheSetting = false
+                    }
+                }
+
+                fun requestCacheModeChange(mode: CacheMode) {
+                    if (isUpdatingCacheSetting || mode == cacheMode) {
+                        return
+                    }
+                    if (mode.ordinal < cacheMode.ordinal) {
+                        val initial = PendingCacheDowngrade.Mode(targetMode = mode)
+                        pendingCacheDowngrade = initial
+                        scope.launch {
+                            val imageBytes = currentImageCacheBytes()
+                            val bytesToDelete = groupMessageCache.estimateBytesDeletedOnModeChange(
+                                targetMode = mode,
+                                currentImageCacheBytes = imageBytes,
+                            )
+                            if (pendingCacheDowngrade == initial) {
+                                pendingCacheDowngrade = initial.copy(bytesToDelete = bytesToDelete)
+                            }
+                        }
+                    } else {
+                        applyCacheMode(mode)
+                    }
+                }
+
+                fun requestCacheSizeLimitChange(limit: CacheSizeLimit) {
+                    if (isUpdatingCacheSetting || limit == cacheSizeLimit) {
+                        return
+                    }
+                    if (limit.ordinal < cacheSizeLimit.ordinal) {
+                        val initial = PendingCacheDowngrade.SizeLimit(targetLimit = limit)
+                        pendingCacheDowngrade = initial
+                        scope.launch {
+                            val imageBytes = currentImageCacheBytes()
+                            val bytesToDelete = groupMessageCache.estimateBytesDeletedOnSizeLimitChange(
+                                targetLimit = limit,
+                                currentImageCacheBytes = imageBytes,
+                            )
+                            if (pendingCacheDowngrade == initial) {
+                                pendingCacheDowngrade = initial.copy(bytesToDelete = bytesToDelete)
+                            }
+                        }
+                    } else {
+                        applyCacheSizeLimit(limit)
+                    }
+                }
+
+                @Composable
+                fun cacheModeLabel(mode: CacheMode): String = when (mode) {
+                    CacheMode.None -> stringResource(R.string.cache_mode_none)
+                    CacheMode.Recent100 -> stringResource(R.string.cache_mode_recent_100)
+                    CacheMode.All -> stringResource(R.string.cache_mode_all)
+                }
+
+                @Composable
+                fun cacheSizeLimitLabel(limit: CacheSizeLimit): String = when (limit) {
+                    CacheSizeLimit.Mb256 -> stringResource(R.string.cache_size_256mb)
+                    CacheSizeLimit.Mb512 -> stringResource(R.string.cache_size_512mb)
+                    CacheSizeLimit.Gb1 -> stringResource(R.string.cache_size_1gb)
+                    CacheSizeLimit.Gb2 -> stringResource(R.string.cache_size_2gb)
+                    CacheSizeLimit.Gb4 -> stringResource(R.string.cache_size_4gb)
+                    CacheSizeLimit.Gb8 -> stringResource(R.string.cache_size_8gb)
+                    CacheSizeLimit.Gb16 -> stringResource(R.string.cache_size_16gb)
+                    CacheSizeLimit.Gb32 -> stringResource(R.string.cache_size_32gb)
+                    CacheSizeLimit.Gb64 -> stringResource(R.string.cache_size_64gb)
+                    CacheSizeLimit.Unlimited -> stringResource(R.string.cache_size_unlimited)
+                }
+
+                pendingCacheDowngrade?.let { pending ->
+                    val bytesToDelete = pending.bytesToDelete
+                    AlertDialog(
+                        onDismissRequest = {
+                            pendingCacheDowngrade = null
+                        },
+                        title = {
+                            Text(stringResource(R.string.cache_downgrade_confirm_title))
+                        },
+                        text = {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(1.pad)
+                            ) {
+                                Text(
+                                    text = when (pending) {
+                                        is PendingCacheDowngrade.Mode -> stringResource(
+                                            R.string.cache_mode_downgrade_message,
+                                            cacheModeLabel(pending.targetMode),
+                                        )
+
+                                        is PendingCacheDowngrade.SizeLimit -> stringResource(
+                                            R.string.cache_size_limit_downgrade_message,
+                                            cacheSizeLimitLabel(pending.targetLimit),
+                                        )
+                                    }
+                                )
+                                Text(
+                                    text = when {
+                                        bytesToDelete == null -> stringResource(R.string.loading_cache_items)
+                                        bytesToDelete > 0L -> stringResource(
+                                            R.string.cache_to_be_deleted_x,
+                                            Formatter.formatShortFileSize(context, bytesToDelete),
+                                        )
+
+                                        else -> stringResource(R.string.cache_to_be_deleted_none)
+                                    },
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = if ((bytesToDelete ?: 0L) > 0L) {
+                                        MaterialTheme.colorScheme.error
+                                    } else {
+                                        MaterialTheme.colorScheme.secondary
+                                    },
+                                )
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    pendingCacheDowngrade = null
+                                }
+                            ) {
+                                Text(stringResource(R.string.cancel))
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    pendingCacheDowngrade = null
+                                    when (pending) {
+                                        is PendingCacheDowngrade.Mode -> applyCacheMode(pending.targetMode)
+                                        is PendingCacheDowngrade.SizeLimit -> applyCacheSizeLimit(pending.targetLimit)
+                                    }
+                                },
+                                enabled = bytesToDelete != null && !isUpdatingCacheSetting,
+                                colors = if ((bytesToDelete ?: 0L) > 0L) {
+                                    ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                                } else {
+                                    ButtonDefaults.textButtonColors()
+                                },
+                            ) {
+                                Text(stringResource(R.string.confirm))
+                            }
+                        },
+                    )
+                }
+
+                ExposedDropdownMenuBox(
+                    expanded = cacheModeMenuExpanded && !isUpdatingCacheSetting,
+                    onExpandedChange = { expanded ->
+                        if (!isUpdatingCacheSetting) {
+                            cacheModeMenuExpanded = expanded
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 1.5f.pad, end = 1.5f.pad, top = 1.pad, bottom = .5f.pad)
+                ) {
+                    OutlinedTextField(
+                        value = cacheModeLabel(cacheMode),
+                        onValueChange = {},
+                        readOnly = true,
+                        singleLine = true,
+                        enabled = !isUpdatingCacheSetting,
+                        label = { Text(stringResource(R.string.cache_mode)) },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                expanded = cacheModeMenuExpanded && !isUpdatingCacheSetting
+                            )
+                        },
+                        shape = MaterialTheme.shapes.large,
+                        modifier = Modifier
+                            .menuAnchor(
+                                type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                enabled = !isUpdatingCacheSetting,
+                            )
+                            .fillMaxWidth()
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = cacheModeMenuExpanded && !isUpdatingCacheSetting,
+                        onDismissRequest = { cacheModeMenuExpanded = false },
+                        shape = MaterialTheme.shapes.large,
+                    ) {
+                        CacheMode.entries.forEach { mode ->
+                            DropdownMenuItem(
+                                text = { Text(cacheModeLabel(mode)) },
+                                trailingIcon = if (mode == cacheMode) {
+                                    { Icon(Icons.Outlined.Check, contentDescription = null) }
+                                } else {
+                                    null
+                                },
+                                onClick = {
+                                    cacheModeMenuExpanded = false
+                                    requestCacheModeChange(mode)
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                            )
+                        }
+                    }
+                }
+
+                val cacheSizeLimitEnabled = cacheMode != CacheMode.None && !isUpdatingCacheSetting
+
+                ExposedDropdownMenuBox(
+                    expanded = cacheSizeLimitMenuExpanded && cacheSizeLimitEnabled,
+                    onExpandedChange = { expanded ->
+                        if (cacheSizeLimitEnabled) {
+                            cacheSizeLimitMenuExpanded = expanded
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 1.5f.pad, end = 1.5f.pad, top = .5f.pad, bottom = .5f.pad)
+                ) {
+                    OutlinedTextField(
+                        value = cacheSizeLimitLabel(cacheSizeLimit),
+                        onValueChange = {},
+                        readOnly = true,
+                        singleLine = true,
+                        enabled = cacheSizeLimitEnabled,
+                        label = { Text(stringResource(R.string.cache_size_limit)) },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                expanded = cacheSizeLimitMenuExpanded && cacheSizeLimitEnabled
+                            )
+                        },
+                        shape = MaterialTheme.shapes.large,
+                        modifier = Modifier
+                            .menuAnchor(
+                                type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                enabled = cacheSizeLimitEnabled,
+                            )
+                            .fillMaxWidth()
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = cacheSizeLimitMenuExpanded && cacheSizeLimitEnabled,
+                        onDismissRequest = { cacheSizeLimitMenuExpanded = false },
+                        shape = MaterialTheme.shapes.large,
+                    ) {
+                        CacheSizeLimit.entries.forEach { limit ->
+                            DropdownMenuItem(
+                                text = { Text(cacheSizeLimitLabel(limit)) },
+                                trailingIcon = if (limit == cacheSizeLimit) {
+                                    { Icon(Icons.Outlined.Check, contentDescription = null) }
+                                } else {
+                                    null
+                                },
+                                onClick = {
+                                    cacheSizeLimitMenuExpanded = false
+                                    requestCacheSizeLimitChange(limit)
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                            )
+                        }
+                    }
+                }
+
+                DropdownMenuItem(
+                    text = {
+                        Column(modifier = Modifier.padding(vertical = .5f.pad)) {
+                            Text(
+                                text = stringResource(R.string.clear_cache),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            totalCacheBytes?.let { bytes ->
+                                Text(
+                                    text = if (bytes > 0L) {
+                                        Formatter.formatShortFileSize(context, bytes)
+                                    } else {
+                                        stringResource(R.string.clear_cache_empty)
+                                    },
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                )
+                            }
+                        }
+                    },
+                    onClick = {
+                        nav.appNavigate(AppNav.ClearCache)
+                    },
+                )
+            }
 
             Column(
                 modifier = Modifier

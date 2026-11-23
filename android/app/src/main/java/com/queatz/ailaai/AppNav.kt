@@ -13,6 +13,7 @@ sealed class AppNav(val route: String) {
     data object StickerPacks : AppNav("sticker-packs")
     data object Me : AppNav("me")
     data object Settings : AppNav("settings")
+    data object ClearCache : AppNav("clear-cache")
     class Profile(id: String) : AppNav("profile/$id")
     class EditProfile(id: String) : AppNav("profile/$id/edit")
     class Group(id: String) : AppNav("group/$id")
