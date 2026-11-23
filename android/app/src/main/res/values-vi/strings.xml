@@ -1405,6 +1405,8 @@
     <string name="cache_selected_summary">Đã chọn %1$d • %2$s</string>
     <string name="select_all">Chọn tất cả</string>
     <string name="deselect_all">Bỏ chọn tất cả</string>
+    <string name="images">Hình ảnh</string>
+    <string name="both">Cả hai</string>
     <string name="cached_images">Ảnh đã lưu đệm</string>
     <string name="cached_images_description">Ảnh và ảnh thu nhỏ được lưu đệm trong ứng dụng</string>
     <string name="cache_is_empty">Hiện không có dữ liệu nào được lưu đệm trên thiết bị này.</string>
@@ -1418,6 +1420,9 @@
     </plurals>
     <plurals name="cached_messages_count">
         <item quantity="other">%1$d tin nhắn đã lưu đệm</item>
+    </plurals>
+    <plurals name="cached_images_count">
+        <item quantity="other">%1$d ảnh đã lưu đệm</item>
     </plurals>
     <plurals name="x_items_cleared">
         <item quantity="other">%1$d mục</item>

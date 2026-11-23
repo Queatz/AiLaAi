@@ -4,10 +4,15 @@ import android.content.Context
 import android.util.LruCache
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import com.queatz.ailaai.data.api
+import com.queatz.ailaai.data.getAllAttachments
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.dataStore
 import com.queatz.db.GroupExtended
 import com.queatz.db.Message
+import com.queatz.db.PhotosAttachment
+import com.queatz.db.StickerAttachment
+import com.queatz.db.UrlAttachment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,7 +52,50 @@ data class CachedGroupEntry(
     val messageCount: Int,
     val sizeBytes: Long,
     val lastModifiedMillis: Long,
+    val imageUrls: List<String> = emptyList(),
 )
+
+fun collectGroupImageUrls(
+    group: GroupExtended?,
+    messages: List<Message>,
+): List<String> {
+    val urls = LinkedHashSet<String>()
+
+    group?.group?.photo?.takeIf { it.isNotBlank() }?.let { urls += api.url(it) }
+    group?.group?.background?.takeIf { it.isNotBlank() }?.let { urls += api.url(it) }
+    group?.members?.forEach { member ->
+        member.person?.photo?.takeIf { it.isNotBlank() }?.let { urls += api.url(it) }
+    }
+    group?.bots?.forEach { bot ->
+        bot.photo?.takeIf { it.isNotBlank() }?.let { urls += api.url(it) }
+    }
+
+    messages.forEach { message ->
+        runCatching { message.getAllAttachments() }.getOrNull()?.forEach { attachment ->
+            when (attachment) {
+                is PhotosAttachment -> {
+                    attachment.photos?.forEach { photo ->
+                        if (photo.isNotBlank()) {
+                            urls += api.url(photo)
+                        }
+                    }
+                }
+
+                is StickerAttachment -> {
+                    attachment.photo?.takeIf { it.isNotBlank() }?.let { urls += api.url(it) }
+                }
+
+                is UrlAttachment -> {
+                    attachment.image?.takeIf { it.isNotBlank() }?.let { urls += it }
+                }
+
+                else -> Unit
+            }
+        }
+    }
+
+    return urls.toList()
+}
 
 data class ClearCacheFailure(
     val id: String,
@@ -305,6 +353,10 @@ class GroupMessageCache {
                             messageCount = parsed?.messages?.size ?: 0,
                             sizeBytes = file.length(),
                             lastModifiedMillis = file.lastModified(),
+                            imageUrls = collectGroupImageUrls(
+                                group = parsed?.group,
+                                messages = parsed?.messages.orEmpty(),
+                            ),
                         )
                     }.sortedByDescending { it.sizeBytes }
                 }

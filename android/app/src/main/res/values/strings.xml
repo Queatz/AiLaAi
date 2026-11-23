@@ -1466,6 +1466,8 @@
     <string name="cache_selected_summary">%1$d selected • %2$s</string>
     <string name="select_all">Select all</string>
     <string name="deselect_all">Deselect all</string>
+    <string name="images">Images</string>
+    <string name="both">Both</string>
     <string name="cached_images">Cached images</string>
     <string name="cached_images_description">Photos and thumbnails cached across the app</string>
     <string name="cache_is_empty">Nothing is currently cached on this device.</string>
@@ -1481,6 +1483,10 @@
     <plurals name="cached_messages_count">
         <item quantity="one">%1$d cached message</item>
         <item quantity="other">%1$d cached messages</item>
+    </plurals>
+    <plurals name="cached_images_count">
+        <item quantity="one">%1$d cached image</item>
+        <item quantity="other">%1$d cached images</item>
     </plurals>
     <plurals name="x_items_cleared">
         <item quantity="one">%1$d item</item>
