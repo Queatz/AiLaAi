@@ -92,6 +92,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
@@ -279,14 +280,81 @@ import kotlin.time.Duration.Companion.hours
 
 private val cachedReplies = mutableListOf<Message>()
 
+@Stable
+private class GroupScreenState(initialShowDescription: Boolean) {
+    var sendMessage by mutableStateOf("")
+    var isLoadingGroup by mutableStateOf(true)
+    var isLoadingMessages by mutableStateOf(true)
+    var hasLoadedInitialGroup by mutableStateOf(false)
+    var hasLoadedInitialMessages by mutableStateOf(false)
+    var messagesAreFiltered by mutableStateOf(false)
+    var showGroupNotFound by mutableStateOf(false)
+    var showLeaveGroup by mutableStateOf(false)
+    var showQrCodeDialog by mutableStateOf(false)
+    var showManageDialog by mutableStateOf(false)
+    var showChangeGroupStatus by mutableStateOf(false)
+    var showSettingsDialog by mutableStateOf(false)
+    var showReportDialog by mutableStateOf(false)
+    var showDescriptionDialog by mutableStateOf(false)
+    var showSetPhotoDialog by mutableStateOf(false)
+    var showSetBackgroundDialog by mutableStateOf(false)
+    var showBackgroundOpacityDialog by mutableStateOf(false)
+    var showCategoryDialog by mutableStateOf(false)
+    var showLocationDialog by mutableStateOf(false)
+    var showRenameGroup by mutableStateOf(false)
+    var showGroupMembers by mutableStateOf(false)
+    var showManageGroupMembersMenu by mutableStateOf(false)
+    var showRemoveGroupMembers by mutableStateOf(false)
+    var showPromoteGroupMembers by mutableStateOf(false)
+    var showInviteMembers by mutableStateOf(false)
+    var showCreateInviteDialog by mutableStateOf(false)
+    var showActiveInvitesDialog by mutableStateOf(false)
+    var showPhotoDialog by mutableStateOf(false)
+    var isGeneratingPhoto by mutableStateOf(false)
+    var isGeneratingGroupBackground by mutableStateOf(false)
+    var isGeneratingGroupPhoto by mutableStateOf(false)
+    var showJoinDialog by mutableStateOf(false)
+    var showAudioRationale by mutableStateOf(false)
+    var showFailedToSendAudio by mutableStateOf<File?>(null)
+    var showSnoozeDialog by mutableStateOf(false)
+    var showPhoto by mutableStateOf<String?>(null)
+    var stageReply by mutableStateOf<Message?>(null)
+    var showReplyInNewGroupDialog by mutableStateOf<Message?>(null)
+    var showDescription by mutableStateOf(initialShowDescription)
+    var isRecordingAudio by mutableStateOf(false)
+    var isSendingAudio by mutableStateOf(false)
+    var showMore by mutableStateOf(false)
+    var recordingAudioDuration by mutableStateOf(0L)
+    var maxInputAreaHeight by mutableStateOf(0f)
+    var selectedMessages by mutableStateOf(emptySet<Message>())
+    var showCards by mutableStateOf(false)
+    var showTradeWithDialog by mutableStateOf(false)
+    var showNewReminderWithDialog by mutableStateOf(false)
+    var showScheduleNewReminderDialog by mutableStateOf<List<Person>?>(null)
+    var showTradeDialog by mutableStateOf<Trade?>(null)
+    var showPersonStatusDialog by mutableStateOf<Person?>(null)
+    var showSendDialog by mutableStateOf(false)
+    var searchMessages by mutableStateOf<String?>(null)
+    var searchByReaction by mutableStateOf<String?>(null)
+    var searchByRating by mutableStateOf<String?>(null)
+    var showFilterMenu by mutableStateOf(false)
+    var showReactionDialog by mutableStateOf(false)
+    var showRatingDialog by mutableStateOf(false)
+}
+
 @Composable
 fun GroupScreen(groupId: String) {
+    val screenState = remember { GroupScreenState(ui.getShowDescription(groupId)) }
+    screenState.GroupScreenContent(groupId)
+}
+
+@Composable
+private fun GroupScreenState.GroupScreenContent(groupId: String) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val initialCachedData = remember(groupId) {
         groupMessageCache.getInMemory(groupId)
     }
-    var sendMessage by remember { mutableStateOf("") }
     var groupExtended by remember(groupId) {
         mutableStateOf<GroupExtended?>(
             initialCachedData?.group
@@ -296,68 +364,11 @@ fun GroupScreen(groupId: String) {
     var messages by remember(groupId) {
         mutableStateOf<List<Message>>(initialCachedData?.messages.orEmpty())
     }
-    var isLoadingGroup by rememberStateOf(true)
-    var isLoadingMessages by rememberStateOf(true)
-    var hasLoadedInitialGroup by rememberStateOf(false)
-    var hasLoadedInitialMessages by rememberStateOf(false)
-    var messagesAreFiltered by rememberStateOf(false)
-    var showGroupNotFound by rememberStateOf(false)
-    var showLeaveGroup by rememberStateOf(false)
-    var showQrCodeDialog by rememberStateOf(false)
-    var showManageDialog by rememberStateOf(false)
-    var showChangeGroupStatus by rememberStateOf(false)
-    var showSettingsDialog by rememberStateOf(false)
-    var showReportDialog by rememberStateOf(false)
-    var showDescriptionDialog by rememberStateOf(false)
-    var showSetPhotoDialog by rememberStateOf(false)
-    var showSetBackgroundDialog by rememberStateOf(false)
-    var showBackgroundOpacityDialog by rememberStateOf(false)
-    var showCategoryDialog by rememberStateOf(false)
-    var showLocationDialog by rememberStateOf(false)
-    var showRenameGroup by rememberStateOf(false)
-    var showGroupMembers by rememberStateOf(false)
-    var showManageGroupMembersMenu by rememberStateOf(false)
-    var showRemoveGroupMembers by rememberStateOf(false)
-    var showPromoteGroupMembers by rememberStateOf(false)
-    var showInviteMembers by rememberStateOf(false)
-    var showCreateInviteDialog by rememberStateOf(false)
-    var showActiveInvitesDialog by rememberStateOf(false)
-    var showPhotoDialog by rememberStateOf(false)
-    var isGeneratingPhoto by rememberStateOf(false)
-    var isGeneratingGroupBackground by rememberStateOf(false)
-    var isGeneratingGroupPhoto by rememberStateOf(false)
-    var showJoinDialog by rememberStateOf(false)
-    var showAudioRationale by rememberStateOf(false)
-    var showFailedToSendAudio by rememberStateOf<File?>(null)
-    var showSnoozeDialog by rememberStateOf(false)
-    var showPhoto by remember { mutableStateOf<String?>(null) }
-    var stageReply by remember { mutableStateOf<Message?>(null) }
-    var showReplyInNewGroupDialog by remember { mutableStateOf<Message?>(null) }
-    var showDescription by remember { mutableStateOf(ui.getShowDescription(groupId)) }
     val focusRequester = remember { FocusRequester() }
     var hasOlderMessages by remember(groupId) {
         mutableStateOf(initialCachedData?.hasOlderMessages ?: true)
     }
-    var isRecordingAudio by rememberStateOf(false)
-    var isSendingAudio by rememberStateOf(false)
-    var showMore by rememberStateOf(false)
-    var recordingAudioDuration by rememberStateOf(0L)
-    var maxInputAreaHeight by rememberStateOf(0f)
     val stickerPacks by stickers.rememberStickerPacks()
-    var selectedMessages by rememberStateOf(emptySet<Message>())
-    var showCards by rememberStateOf(false)
-    var showTradeWithDialog by rememberStateOf(false)
-    var showNewReminderWithDialog by rememberStateOf(false)
-    var showScheduleNewReminderDialog by rememberStateOf<List<Person>?>(null)
-    var showTradeDialog by rememberStateOf<Trade?>(null)
-    var showPersonStatusDialog by rememberStateOf<Person?>(null)
-    var showSendDialog by rememberStateOf(false)
-    var searchMessages by rememberStateOf<String?>(null)
-    var searchByReaction by rememberStateOf<String?>(null)
-    var searchByRating by rememberStateOf<String?>(null)
-    var showFilterMenu by rememberStateOf(false)
-    var showReactionDialog by rememberStateOf(false)
-    var showRatingDialog by rememberStateOf(false)
     val inCallCount by calls.inCallCount(groupId).collectAsState(0)
     val nav = nav
     val me = me
