@@ -8,8 +8,15 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import app.ailaai.api.crash
 import app.ailaai.api.myDevice
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
+import coil3.disk.DiskCache
+import coil3.disk.directory
 import com.google.auto.service.AutoService
 import com.google.firebase.messaging.FirebaseMessaging
+import com.queatz.ailaai.cache.MAX_IMAGE_CACHE_BYTES
+import com.queatz.ailaai.cache.groupMessageCache
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.db.db
 import com.queatz.ailaai.services.calls
@@ -33,7 +40,19 @@ import java.util.Locale
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
-class Application : android.app.Application() {
+class Application : android.app.Application(), SingletonImageLoader.Factory {
+
+    override fun newImageLoader(context: PlatformContext): ImageLoader {
+        return ImageLoader.Builder(context)
+            .diskCache {
+                DiskCache.Builder()
+                    .directory(cacheDir.resolve("image_cache"))
+                    .maxSizePercent(0.05)
+                    .maximumMaxSizeBytes(MAX_IMAGE_CACHE_BYTES)
+                    .build()
+            }
+            .build()
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -46,6 +65,7 @@ class Application : android.app.Application() {
 
         db.init(this)
         api.init(this)
+        groupMessageCache.init(this)
         push.init(this)
         ui.init(this)
         calls.init(this)

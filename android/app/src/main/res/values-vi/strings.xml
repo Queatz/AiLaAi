@@ -1390,4 +1390,36 @@
     <string name="error_upload_video">tải video lên</string>
     <string name="error_use_invite">sử dụng lời mời</string>
     <string name="error_verify_biometrics">xác minh sinh trắc học</string>
+    <string name="cache">Bộ nhớ đệm</string>
+    <string name="cache_chat_messages">Lưu đệm tin nhắn trò chuyện</string>
+    <string name="cache_chat_messages_description">Lưu tối đa 100 tin nhắn gần nhất mỗi nhóm trên thiết bị này để tải nhanh hơn</string>
+    <string name="cache_chat_messages_enabled">Đã bật bộ nhớ đệm tin nhắn</string>
+    <string name="cache_chat_messages_disabled">Đã tắt và xóa bộ nhớ đệm tin nhắn</string>
+    <string name="clear_cache">Xóa bộ nhớ đệm</string>
+    <string name="clear_cache_empty">Không có dữ liệu đệm</string>
+    <string name="clear_selected">Xóa mục đã chọn</string>
+    <string name="clear_selected_size">Xóa mục đã chọn (%1$s)</string>
+    <string name="clearing_cache">Đang xóa bộ nhớ đệm…</string>
+    <string name="loading_cache_items">Đang tính dung lượng bộ nhớ đệm…</string>
+    <string name="cache_total_x">Tổng: %1$s</string>
+    <string name="cache_selected_summary">Đã chọn %1$d • %2$s</string>
+    <string name="select_all">Chọn tất cả</string>
+    <string name="deselect_all">Bỏ chọn tất cả</string>
+    <string name="cached_images">Ảnh đã lưu đệm</string>
+    <string name="cached_images_description">Ảnh và ảnh thu nhỏ được lưu đệm trong ứng dụng</string>
+    <string name="cache_is_empty">Hiện không có dữ liệu nào được lưu đệm trên thiết bị này.</string>
+    <string name="cache_disabled_notice">Tính năng lưu đệm tin nhắn cục bộ đang tắt trong Cài đặt.</string>
+    <string name="error_load_cache">Không thể tải danh sách bộ nhớ đệm: %1$s</string>
+    <string name="error_clear_cache_failed">Không thể xóa các mục bộ nhớ đệm đã chọn.</string>
+    <string name="error_clear_cache_partial">Đã xóa %1$s (giải phóng %2$s), nhưng %3$d mục thất bại:</string>
+    <string name="error_toggle_message_cache">Không thể lưu cài đặt bộ nhớ đệm tin nhắn.</string>
+    <plurals name="cache_cleared_success">
+        <item quantity="other">Đã xóa %1$d mục (giải phóng %2$s)</item>
+    </plurals>
+    <plurals name="cached_messages_count">
+        <item quantity="other">%1$d tin nhắn đã lưu đệm</item>
+    </plurals>
+    <plurals name="x_items_cleared">
+        <item quantity="other">%1$d mục</item>
+    </plurals>
 </resources>

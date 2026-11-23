@@ -1,6 +1,7 @@
 package com.queatz.ailaai.ui.screens
 
 import account
+import android.text.format.Formatter
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
@@ -30,10 +31,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.os.LocaleListCompat
 import app.ailaai.api.*
+import coil3.imageLoader
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.AppUi
 import com.queatz.ailaai.BuildConfig
 import com.queatz.ailaai.R
 import com.queatz.ailaai.appLanguage
+import com.queatz.ailaai.cache.groupMessageCache
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.data.json
@@ -41,6 +45,7 @@ import com.queatz.ailaai.db.db
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.me
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.BiometricPrompt
@@ -59,6 +64,7 @@ import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import linkDevice
 
 @Composable
@@ -87,6 +93,18 @@ fun SettingsScreen(
     }
     var points by rememberStateOf<Int?>(null)
     val me = me
+    val nav = nav
+    val messageCacheEnabled by groupMessageCache.enabled.collectAsState()
+    var isUpdatingCacheSetting by rememberStateOf(false)
+    var totalCacheBytes by rememberStateOf<Long?>(null)
+
+    suspend fun refreshCacheSize() {
+        val messageBytes = groupMessageCache.sizeBytes()
+        val imageBytes = withContext(Dispatchers.IO) {
+            runCatching { context.imageLoader.diskCache?.size ?: 0L }.getOrDefault(0L)
+        }
+        totalCacheBytes = messageBytes + imageBytes
+    }
 
     fun loadTransferCode() {
         scope.launch {
@@ -177,6 +195,10 @@ fun SettingsScreen(
         }
     }
 
+    ResumeEffect {
+        refreshCacheSize()
+    }
+
     if (inviteDialog) {
         InviteDialog(
             me?.name ?: context.getString(R.string.someone)
@@ -252,6 +274,7 @@ fun SettingsScreen(
                 scope.launch {
                     api.signOut()
                     db.clear()
+                    groupMessageCache.clear()
                     updateMe()
                     signOutDialog = false
                 }
@@ -596,6 +619,104 @@ fun SettingsScreen(
             }, {
                 loadLinkDeviceToken()
             })
+
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 2.pad, vertical = 1.pad)
+                    .shadow(1.dp, MaterialTheme.shapes.large)
+                    .clip(MaterialTheme.shapes.large)
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+            ) {
+                Text(
+                    text = stringResource(R.string.cache),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 1.pad, start = 1.5f.pad, end = 1.5f.pad)
+                )
+
+                fun toggleMessageCache(enabled: Boolean) {
+                    if (isUpdatingCacheSetting) {
+                        return
+                    }
+                    scope.launch {
+                        isUpdatingCacheSetting = true
+                        groupMessageCache.setEnabled(enabled)
+                            .onSuccess {
+                                context.toast(
+                                    if (enabled) {
+                                        R.string.cache_chat_messages_enabled
+                                    } else {
+                                        R.string.cache_chat_messages_disabled
+                                    }
+                                )
+                            }
+                            .onFailure {
+                                context.toast(R.string.error_toggle_message_cache)
+                            }
+                        refreshCacheSize()
+                        isUpdatingCacheSetting = false
+                    }
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(enabled = !isUpdatingCacheSetting) {
+                            toggleMessageCache(!messageCacheEnabled)
+                        }
+                        .padding(horizontal = 1.5f.pad, vertical = 1.pad)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 1.pad)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.cache_chat_messages),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Text(
+                            text = stringResource(R.string.cache_chat_messages_description),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                    }
+                    Switch(
+                        checked = messageCacheEnabled,
+                        enabled = !isUpdatingCacheSetting,
+                        onCheckedChange = { enabled ->
+                            toggleMessageCache(enabled)
+                        },
+                    )
+                }
+
+                DropdownMenuItem(
+                    text = {
+                        Column(modifier = Modifier.padding(vertical = .5f.pad)) {
+                            Text(
+                                text = stringResource(R.string.clear_cache),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            totalCacheBytes?.let { bytes ->
+                                Text(
+                                    text = if (bytes > 0L) {
+                                        Formatter.formatShortFileSize(context, bytes)
+                                    } else {
+                                        stringResource(R.string.clear_cache_empty)
+                                    },
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                )
+                            }
+                        }
+                    },
+                    onClick = {
+                        nav.appNavigate(AppNav.ClearCache)
+                    },
+                )
+            }
 
             Column(
                 modifier = Modifier

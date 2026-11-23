@@ -81,6 +81,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
@@ -148,6 +149,10 @@ import com.queatz.ailaai.api.sendMediaFromUri
 import com.queatz.ailaai.api.sendVideosFromUri
 import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.background
+import com.queatz.ailaai.cache.CacheKey
+import com.queatz.ailaai.cache.cache
+import com.queatz.ailaai.cache.groupMessageCache
+import com.queatz.ailaai.cache.mergeCachedMessages
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.getAttachment
 import com.queatz.ailaai.data.json
@@ -278,10 +283,24 @@ private val cachedReplies = mutableListOf<Message>()
 fun GroupScreen(groupId: String) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val initialCachedData = remember(groupId) {
+        groupMessageCache.getInMemory(groupId)
+    }
     var sendMessage by remember { mutableStateOf("") }
-    var groupExtended by remember { mutableStateOf<GroupExtended?>(null) }
-    var messages by remember { mutableStateOf<List<Message>>(listOf()) }
-    var isLoading by rememberStateOf(false)
+    var groupExtended by remember(groupId) {
+        mutableStateOf<GroupExtended?>(
+            initialCachedData?.group
+                ?: cache.get<List<GroupExtended>>(CacheKey.Groups)?.find { it.group?.id == groupId }
+        )
+    }
+    var messages by remember(groupId) {
+        mutableStateOf<List<Message>>(initialCachedData?.messages.orEmpty())
+    }
+    var isLoadingGroup by rememberStateOf(true)
+    var isLoadingMessages by rememberStateOf(true)
+    var hasLoadedInitialGroup by rememberStateOf(false)
+    var hasLoadedInitialMessages by rememberStateOf(false)
+    var messagesAreFiltered by rememberStateOf(false)
     var showGroupNotFound by rememberStateOf(false)
     var showLeaveGroup by rememberStateOf(false)
     var showQrCodeDialog by rememberStateOf(false)
@@ -316,7 +335,9 @@ fun GroupScreen(groupId: String) {
     var showReplyInNewGroupDialog by remember { mutableStateOf<Message?>(null) }
     var showDescription by remember { mutableStateOf(ui.getShowDescription(groupId)) }
     val focusRequester = remember { FocusRequester() }
-    var hasOlderMessages by rememberStateOf(true)
+    var hasOlderMessages by remember(groupId) {
+        mutableStateOf(initialCachedData?.hasOlderMessages ?: true)
+    }
     var isRecordingAudio by rememberStateOf(false)
     var isSendingAudio by rememberStateOf(false)
     var showMore by rememberStateOf(false)
@@ -373,15 +394,68 @@ fun GroupScreen(groupId: String) {
         }
     }
 
-    suspend fun reloadMessages() {
-        api.messages(
-            group = groupId,
-            search = searchMessages,
-            reaction = searchByReaction,
-            rating = searchByRating
-        ) {
-            hasOlderMessages = true
-            messages = it
+    LaunchedEffect(groupId) {
+        if (initialCachedData == null) {
+            groupMessageCache.get(groupId)?.let { cached ->
+                if (!hasLoadedInitialGroup && groupExtended == null && cached.group != null) {
+                    groupExtended = cached.group
+                }
+                if (!hasLoadedInitialMessages &&
+                    messages.isEmpty() &&
+                    cached.messages.isNotEmpty() &&
+                    searchMessages == null &&
+                    searchByReaction == null &&
+                    searchByRating == null
+                ) {
+                    messages = cached.messages
+                    hasOlderMessages = cached.hasOlderMessages
+                }
+            }
+        }
+    }
+
+    suspend fun reloadMessages(showLoading: Boolean = false) {
+        val isFiltered = searchMessages != null || searchByReaction != null || searchByRating != null
+        if (showLoading) {
+            isLoadingMessages = true
+        }
+        try {
+            api.messages(
+                group = groupId,
+                search = searchMessages,
+                reaction = searchByReaction,
+                rating = searchByRating
+            ) { fresh ->
+                if (isFiltered) {
+                    messagesAreFiltered = true
+                    hasOlderMessages = true
+                    messages = fresh
+                } else {
+                    val baseMessages = if (messagesAreFiltered) {
+                        groupMessageCache.get(groupId)?.messages.orEmpty()
+                    } else {
+                        messages
+                    }
+                    messagesAreFiltered = false
+                    val merged = mergeCachedMessages(
+                        cached = baseMessages,
+                        fresh = fresh,
+                        maxCount = maxOf(100, baseMessages.size + fresh.size),
+                    )
+                    val moreAvailable = fresh.isNotEmpty()
+                    hasOlderMessages = moreAvailable
+                    messages = merged
+                    groupMessageCache.putMessages(
+                        groupId = groupId,
+                        group = groupExtended,
+                        messages = merged,
+                        hasOlderMessages = moreAvailable,
+                    )
+                }
+            }
+        } finally {
+            hasLoadedInitialMessages = true
+            isLoadingMessages = false
         }
     }
 
@@ -451,6 +525,7 @@ fun GroupScreen(groupId: String) {
             return
         }
 
+        val isFiltered = searchMessages != null || searchByReaction != null || searchByRating != null
         val oldest = messages.lastOrNull()?.createdAt ?: return
         api.messagesBefore(
             group = groupId,
@@ -463,33 +538,58 @@ fun GroupScreen(groupId: String) {
 
             if (messages.size == newMessages.size) {
                 hasOlderMessages = false
+                if (!isFiltered) {
+                    groupMessageCache.putMessages(
+                        groupId = groupId,
+                        group = groupExtended,
+                        messages = messages,
+                        hasOlderMessages = false,
+                    )
+                }
             } else {
                 messages = newMessages
+                if (!isFiltered) {
+                    groupMessageCache.putMessages(
+                        groupId = groupId,
+                        group = groupExtended,
+                        messages = newMessages,
+                        hasOlderMessages = hasOlderMessages,
+                    )
+                }
             }
         }
     }
 
     LaunchedEffect(Unit) {
-        isLoading = true
-        api.group(
-            groupId,
-            onError = { ex ->
-                if (ex is CancellationException || ex is InterruptedException) {
-                    // Ignore
-                } else if (ex.status == HttpStatusCode.NotFound) {
-                    showGroupNotFound = true
-                } else {
-                    ex.printStackTrace()
-                    context.showDidntWork(R.string.error_load_group)
-                }
-            }) {
-            groupExtended = it
+        isLoadingGroup = true
+        try {
+            api.group(
+                groupId,
+                onError = { ex ->
+                    if (ex is CancellationException || ex is InterruptedException) {
+                        // Ignore
+                    } else if (ex.status == HttpStatusCode.NotFound) {
+                        showGroupNotFound = true
+                        groupMessageCache.remove(groupId)
+                    } else {
+                        ex.printStackTrace()
+                        context.showDidntWork(R.string.error_load_group)
+                    }
+                }) {
+                groupExtended = it
+                groupMessageCache.putGroup(
+                    groupId = groupId,
+                    group = it,
+                )
+            }
+        } finally {
+            hasLoadedInitialGroup = true
+            isLoadingGroup = false
         }
-        isLoading = false
     }
 
     LaunchedEffect(searchMessages, searchByReaction, searchByRating) {
-        reloadMessages()
+        reloadMessages(showLoading = true)
     }
 
     LaunchedEffect(stageReply) {
@@ -501,6 +601,10 @@ fun GroupScreen(groupId: String) {
     suspend fun reload() {
         api.group(groupId) {
             groupExtended = it
+            groupMessageCache.putGroup(
+                groupId = groupId,
+                group = it,
+            )
         }
     }
 
@@ -584,8 +688,8 @@ fun GroupScreen(groupId: String) {
         }
     }
 
-    StartEffect {
-        reloadMessages()
+    StartEffect(skipFirst = true) {
+        reloadMessages(showLoading = true)
     }
 
     LaunchedEffect(Unit) {
@@ -612,11 +716,11 @@ fun GroupScreen(groupId: String) {
         val canManage =
             groupExtended != null && (myMember?.member?.host == true || groupExtended?.group?.config?.edits != GroupEditsConfig.Hosts)
 
-        var latestMessage by remember { mutableStateOf<Instant?>(null) }
+        var latestMessage by remember(groupId) { mutableStateOf(messages.firstOrNull()?.createdAt) }
 
             LaunchedEffect(messages) {
                 val latest = messages.firstOrNull()?.createdAt
-                if (latestMessage == null || (latest != null && latestMessage!! < latest)) {
+                if (latest != null && latestMessage != null && latestMessage!! < latest && state.firstVisibleItemIndex <= 1) {
                     state.animateScrollToItem(0)
                 }
                 latestMessage = latest
@@ -993,13 +1097,15 @@ fun GroupScreen(groupId: String) {
                 modifier = Modifier.zIndex(1f)
             )
 
-            if (isLoading) {
-                Loading(
-                    modifier = Modifier.padding(vertical = 1.pad)
-                )
-            }
+            val isRefreshing = isLoadingGroup || isLoadingMessages
 
             if (showCards && groupExtended != null) {
+                if (isRefreshing) {
+                    LinearProgressIndicator(
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
                 GroupCards(groupExtended!!)
             } else {
                 // todo: extract else block new component
@@ -1074,7 +1180,19 @@ fun GroupScreen(groupId: String) {
                         }
                     }
                 }
-                LazyColumn(reverseLayout = true, state = state, modifier = Modifier.weight(1f)) {
+                Box(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    if (isRefreshing) {
+                        LinearProgressIndicator(
+                            color = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.TopCenter)
+                                .zIndex(1f)
+                        )
+                    }
+                    LazyColumn(reverseLayout = true, state = state, modifier = Modifier.fillMaxSize()) {
                     itemsIndexed(messages, key = { _, it -> it.id!! }) { index, message ->
                         val members = groupExtended?.members ?: emptyList()
                         val nextMessage = if (index > 0) messages[index - 1] else null
@@ -1193,7 +1311,11 @@ fun GroupScreen(groupId: String) {
                         }
                     }
                     item {
-                        AnimatedVisibility(hasOlderMessages && messages.isNotEmpty()) {
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = hasOlderMessages &&
+                                messages.isNotEmpty() &&
+                                (hasLoadedInitialMessages || messages.size >= 20)
+                        ) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -1208,6 +1330,7 @@ fun GroupScreen(groupId: String) {
                                 }
                             }
                         }
+                    }
                     }
                 }
 
@@ -2231,6 +2354,7 @@ fun GroupScreen(groupId: String) {
                         TextButton({
                             scope.launch {
                                 api.removeMember(myMember!!.member!!.id!!) {
+                                    groupMessageCache.remove(groupId)
                                     showLeaveGroup = false
                                     nav.popBackStack()
                                 }

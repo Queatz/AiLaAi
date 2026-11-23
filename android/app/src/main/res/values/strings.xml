@@ -1451,4 +1451,39 @@
     <string name="error_upload_video">upload video</string>
     <string name="error_use_invite">use invite</string>
     <string name="error_verify_biometrics">verify biometrics</string>
+    <string name="cache">Cache</string>
+    <string name="cache_chat_messages">Cache chat messages</string>
+    <string name="cache_chat_messages_description">Keep up to 100 recent messages per chat on this device for faster loading</string>
+    <string name="cache_chat_messages_enabled">Message cache enabled</string>
+    <string name="cache_chat_messages_disabled">Message cache disabled and cleared</string>
+    <string name="clear_cache">Clear cache</string>
+    <string name="clear_cache_empty">No cached data</string>
+    <string name="clear_selected">Clear selected</string>
+    <string name="clear_selected_size">Clear selected (%1$s)</string>
+    <string name="clearing_cache">Clearing cache…</string>
+    <string name="loading_cache_items">Calculating cache size…</string>
+    <string name="cache_total_x">Total: %1$s</string>
+    <string name="cache_selected_summary">%1$d selected • %2$s</string>
+    <string name="select_all">Select all</string>
+    <string name="deselect_all">Deselect all</string>
+    <string name="cached_images">Cached images</string>
+    <string name="cached_images_description">Photos and thumbnails cached across the app</string>
+    <string name="cache_is_empty">Nothing is currently cached on this device.</string>
+    <string name="cache_disabled_notice">Local message caching is turned off in Settings.</string>
+    <string name="error_load_cache">Couldn\'t load cached items: %1$s</string>
+    <string name="error_clear_cache_failed">Couldn\'t clear selected cache items.</string>
+    <string name="error_clear_cache_partial">Cleared %1$s (%2$s freed), but %3$d failed:</string>
+    <string name="error_toggle_message_cache">Couldn\'t save message cache setting.</string>
+    <plurals name="cache_cleared_success">
+        <item quantity="one">Cleared %1$d item (%2$s freed)</item>
+        <item quantity="other">Cleared %1$d items (%2$s freed)</item>
+    </plurals>
+    <plurals name="cached_messages_count">
+        <item quantity="one">%1$d cached message</item>
+        <item quantity="other">%1$d cached messages</item>
+    </plurals>
+    <plurals name="x_items_cleared">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
 </resources>
