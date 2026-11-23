@@ -16,6 +16,7 @@ import com.queatz.ailaai.services.calls
 import com.queatz.ailaai.services.priority
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
@@ -24,6 +25,7 @@ import kotlinx.coroutines.launch
 class CallService : Service() {
 
     private val scope = CoroutineScope(Dispatchers.Default)
+    private var endCallJob: Job? = null
 
     override fun onStartCommand(intent: Intent?, intentFlags: Int, startId: Int): Int {
         //todo (need to handle restarting of sticky notification)
@@ -31,6 +33,7 @@ class CallService : Service() {
 
         val groupId = intent.getStringExtra(GROUP_ID_EXTRA) ?: error("Missing '$GROUP_ID_EXTRA'")
         val groupName = intent.getStringExtra(GROUP_NAME_EXTRA) ?: error("Missing '$GROUP_NAME_EXTRA'")
+        val launchCallActivity = intent.getBooleanExtra(LAUNCH_CALL_ACTIVITY_EXTRA, true)
 
         // Show ongoing call notification
         val callIntent = Intent(
@@ -39,6 +42,8 @@ class CallService : Service() {
         ).apply {
             action = Intent.ACTION_CALL
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            putExtra(GROUP_ID_EXTRA, groupId)
+            putExtra(GROUP_NAME_EXTRA, groupName)
         }
 
         val endCallIntent = Intent(
@@ -96,29 +101,24 @@ class CallService : Service() {
             }
         }
 
+        endCallJob?.cancel()
+        endCallJob = scope.launch {
+            calls.onEndCall.filter { it == groupId }.collectLatest {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+                stopSelf()
+            }
+        }
+
+        if (launchCallActivity) {
+            applicationContext.startActivity(callIntent)
+        }
+
         // Join the call
         calls.start(
             groupId,
             applicationContext.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED,
             applicationContext.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-        ) {
-            // Show call
-            applicationContext.startActivity(
-                Intent(
-                    applicationContext,
-                    CallActivity::class.java
-                ).apply {
-                    action = Intent.ACTION_CALL
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                }
-            )
-
-            scope.launch {
-                calls.onEndCall.filter { it == groupId }.collectLatest {
-                    stopForeground(STOP_FOREGROUND_REMOVE)
-                }
-            }
-        }
+        )
 
         return START_STICKY
     }
@@ -137,6 +137,7 @@ class CallService : Service() {
     companion object {
         const val GROUP_ID_EXTRA = "groupId"
         const val GROUP_NAME_EXTRA = "groupName"
+        const val LAUNCH_CALL_ACTIVITY_EXTRA = "launchCallActivity"
         const val CALL_NOTIFICATION_ID = 8888
     }
 }

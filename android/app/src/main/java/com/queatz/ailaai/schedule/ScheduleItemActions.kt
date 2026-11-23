@@ -16,12 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.ui.theme.pad
 
 @Composable
 fun ScheduleItemActions(
     onDismissRequest: () -> Unit,
     showOpen: Boolean,
+    onPreview: () -> Unit,
     onDone: () -> Unit,
     onOpen: () -> Unit,
     onEdit: () -> Unit,
@@ -30,8 +32,25 @@ fun ScheduleItemActions(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(top = .5f.pad)
+        modifier = Modifier
+            .padding(top = .5f.pad)
+            .horizontalFadingEdge()
     ) {
+        OutlinedIconButton(
+            {
+                onDismissRequest()
+                onPreview()
+            },
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        ) {
+            Icon(
+                Icons.Outlined.Visibility,
+                stringResource(R.string.preview),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+
         OutlinedIconButton(
             {
                 onDismissRequest()

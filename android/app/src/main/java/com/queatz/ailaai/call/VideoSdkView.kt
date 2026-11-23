@@ -6,8 +6,8 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import live.videosdk.rtc.android.VideoView
-import org.webrtc.RendererCommon.ScalingType
-import org.webrtc.VideoTrack
+import videosdk.org.webrtc.RendererCommon.ScalingType
+import videosdk.org.webrtc.VideoTrack
 
 @Composable
 fun VideoSdkView(track: VideoTrack, scaleType: ScalingType, modifier: Modifier = Modifier) {
@@ -27,6 +27,7 @@ fun VideoSdkView(track: VideoTrack, scaleType: ScalingType, modifier: Modifier =
                 view.setScalingType(scaleType)
             },
             onRelease = { view ->
+                view.removeTrack()
                 view.releaseSurfaceViewRenderer()
             }
         )

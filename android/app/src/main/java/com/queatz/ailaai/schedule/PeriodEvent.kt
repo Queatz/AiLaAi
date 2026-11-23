@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.deleteReminderOccurrence
 import app.ailaai.api.updateReminderOccurrence
@@ -39,6 +40,8 @@ import kotlinx.coroutines.launch
 import kotlin.time.Instant.Companion.fromEpochMilliseconds
 import updateDate
 
+private const val PeriodEventMaxLines = 4
+
 @Composable
 fun PeriodEvent(
     view: ScheduleView,
@@ -51,6 +54,7 @@ fun PeriodEvent(
 ) {
     val scope = rememberCoroutineScope()
     var expanded by rememberStateOf(false)
+    var showPreview by rememberStateOf(false)
     var showEditNote by rememberStateOf(false)
     var showReschedule by rememberStateOf(false)
     var showDelete by rememberStateOf(false)
@@ -62,6 +66,22 @@ fun PeriodEvent(
         onExpand.collect {
             expanded = false
         }
+    }
+
+    if (showPreview) {
+        ScheduleEventPreviewDialog(
+            onDismissRequest = {
+                showPreview = false
+            },
+            event = event,
+            onOpen = if (showOpen) {
+                {
+                    nav.appNavigate(AppNav.Reminder(event.reminder.id!!))
+                }
+            } else {
+                null
+            }
+        )
     }
 
     if (showDelete) {
@@ -170,48 +190,69 @@ fun PeriodEvent(
                         size = 32.dp
                     )
                 }
+            val title = event.reminder.title ?: ""
+            val subtitle = bulletedString(
+                "⏰".takeIf { event.reminder.alarm == true },
+                if (showFullTime) event.date.formatEventFull(ScheduleView.Yearly) else event.date.formatEvent(
+                    view
+                )?.notBlank,
+                event.reminder.categories?.firstOrNull(),
+                (event.occurrence?.note ?: event.reminder.note)?.notBlank
+            )
+            val titleMaxLines = if (subtitle.isNotBlank()) PeriodEventMaxLines - 1 else PeriodEventMaxLines
+            var titleLineCount by remember(title, subtitle) {
+                mutableIntStateOf(if (title.isNotBlank()) 1 else 0)
+            }
+            val subtitleMaxLines = (PeriodEventMaxLines - titleLineCount).coerceAtLeast(1)
+
             Column {
-                Text(
-                    text = event.reminder.title ?: "",
-                    style = MaterialTheme.typography.bodyMedium.let {
-                        if (done) {
-                            it.copy(textDecoration = TextDecoration.LineThrough)
-                        } else {
-                            it
+                if (title.isNotBlank()) {
+                    Text(
+                        text = title,
+                        maxLines = titleMaxLines,
+                        overflow = TextOverflow.Ellipsis,
+                        onTextLayout = { result ->
+                            if (titleLineCount != result.lineCount) {
+                                titleLineCount = result.lineCount
+                            }
+                        },
+                        style = MaterialTheme.typography.bodyMedium.let {
+                            if (done) {
+                                it.copy(textDecoration = TextDecoration.LineThrough)
+                            } else {
+                                it
+                            }
+                        },
+                        color = MaterialTheme.colorScheme.onSurface.let {
+                            if (done) {
+                                it.copy(alpha = .5f)
+                            } else {
+                                it
+                            }
                         }
-                    },
-                    color = MaterialTheme.colorScheme.onSurface.let {
-                        if (done) {
-                            it.copy(alpha = .5f)
-                        } else {
-                            it
+                    )
+                }
+                if (subtitle.isNotBlank()) {
+                    Text(
+                        text = subtitle,
+                        maxLines = subtitleMaxLines,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.labelSmall.let {
+                            if (done) {
+                                it.copy(textDecoration = TextDecoration.LineThrough)
+                            } else {
+                                it
+                            }
+                        },
+                        color = MaterialTheme.colorScheme.secondary.let {
+                            if (done) {
+                                it.copy(alpha = .5f)
+                            } else {
+                                it
+                            }
                         }
-                    }
-                )
-                Text(
-                    text = bulletedString(
-                        "⏰".takeIf { event.reminder.alarm == true },
-                        if (showFullTime) event.date.formatEventFull(ScheduleView.Yearly) else event.date.formatEvent(
-                            view
-                        )?.notBlank,
-                        event.reminder.categories?.firstOrNull(),
-                        (event.occurrence?.note ?: event.reminder.note)?.notBlank
-                    ),
-                    style = MaterialTheme.typography.labelSmall.let {
-                        if (done) {
-                            it.copy(textDecoration = TextDecoration.LineThrough)
-                        } else {
-                            it
-                        }
-                    },
-                    color = MaterialTheme.colorScheme.secondary.let {
-                        if (done) {
-                            it.copy(alpha = .5f)
-                        } else {
-                            it
-                        }
-                    }
-                )
+                    )
+                }
             }
         }
         AnimatedVisibility(expanded) {
@@ -220,6 +261,9 @@ fun PeriodEvent(
                     expanded = false
                 },
                 showOpen = showOpen,
+                onPreview = {
+                    showPreview = true
+                },
                 onDone = {
                     scope.launch {
                         api.updateReminderOccurrence(

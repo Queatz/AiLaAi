@@ -211,10 +211,7 @@ dependencies {
     implementation("com.google.auto.service:auto-service-annotations:1.1.1")
 
     // VideoSDK
-    implementation("live.videosdk:rtc-android-sdk:0.2.0") { // todo 1.2.1
-        exclude("androidx.core")
-        exclude("com.android.support")
-    }
+    implementation("live.videosdk:rtc-android-sdk:3.0.4")
 
     // Development
     debugImplementation("androidx.compose.ui:ui-tooling:${versions.compose}")

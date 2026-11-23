@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,6 +57,7 @@ import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.photos
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.stripMarkdown
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.me
@@ -358,78 +360,137 @@ fun ContactResult(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            GroupPhoto(photos)
-            Column(
-                modifier = Modifier.weight(1f).let {
-                    if (coverPhoto == null) {
-                        it
-                    } else {
-                        it.padding(vertical = 1.pad)
-                    }
-                }
-            ) {
-                Text(
-                    name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = if (isUnread) FontWeight.Bold else FontWeight.Normal
-                )
-                Text(
-                    description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 2,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-            }
             val bold = inCallCount > 0 || isUnread || (info == GroupInfo.Members && joined)
-            Text(
-                if (info == GroupInfo.Members && joined) {
-                    stringResource(R.string.joined)
-                } else if (inCallCount > 0) stringResource(
-                    R.string.x_in_call,
-                    inCallCount
-                ) else if (joinRequestCount > 0) pluralStringResource(
-                    R.plurals.x_requests,
-                    joinRequestCount,
-                    joinRequestCount
-                ) else lastActive ?: "",
-                style = MaterialTheme.typography.labelMedium,
-                color = if (inCallCount > 0) theme_call else if (bold) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-                fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
-                modifier = Modifier
-                    .padding(1.pad)
-                    .let {
-                        if (bold) {
-                            it
-                        } else {
-                            it.alpha(.5f)
+            val statusText = if (info == GroupInfo.Members && joined) {
+                stringResource(R.string.joined)
+            } else if (inCallCount > 0) stringResource(
+                R.string.x_in_call,
+                inCallCount
+            ) else if (joinRequestCount > 0) pluralStringResource(
+                R.plurals.x_requests,
+                joinRequestCount,
+                joinRequestCount
+            ) else lastActive ?: ""
+
+            if (info == GroupInfo.LatestMessage) {
+                Box(
+                    modifier = Modifier.padding(
+                        horizontal = 1.pad,
+                        vertical = if (coverPhoto == null) .5f.pad else 1.pad
+                    )
+                ) {
+                    GroupPhoto(photos, padding = 0.dp)
+                }
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(
+                            end = 1.pad,
+                            top = if (coverPhoto == null) 0.dp else 1.pad,
+                            bottom = if (coverPhoto == null) 0.dp else 1.pad
+                        )
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(.5f.pad)
+                    ) {
+                        Text(
+                            name,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = if (isUnread) FontWeight.Bold else FontWeight.Normal,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (pinned) {
+                            val tint = when (pinLevel) {
+                                1 -> androidx.compose.ui.graphics.Color.Red
+                                2 -> androidx.compose.ui.graphics.Color(0xFFFF9800)
+                                else -> MaterialTheme.colorScheme.secondary
+                            }
+                            val alpha = if (pinLevel == 1 || pinLevel == 2) 1f else .5f
+                            Icon(
+                                imageVector = Icons.Outlined.PushPin,
+                                contentDescription = null,
+                                tint = tint,
+                                modifier = Modifier
+                                    .alpha(alpha)
+                                    .size(16.dp)
+                            )
                         }
                     }
-            )
-            if (info == GroupInfo.Members && joined) {
-                Icon(
-                    imageVector = Icons.Outlined.Check,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .padding(end = 1.pad)
-                )
-            }
-            if (pinned && info == GroupInfo.LatestMessage) {
-                val tint = when (pinLevel) {
-                    1 -> androidx.compose.ui.graphics.Color.Red
-                    2 -> androidx.compose.ui.graphics.Color(0xFFFF9800)
-                    else -> MaterialTheme.colorScheme.secondary
+                    Text(
+                        description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    if (statusText.isNotBlank()) {
+                        Text(
+                            statusText,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (inCallCount > 0) theme_call else if (bold) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                            fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier
+                                .let {
+                                    if (bold) {
+                                        it
+                                    } else {
+                                        it.alpha(.5f)
+                                    }
+                                }
+                        )
+                    }
                 }
-                val alpha = if (pinLevel == 1 || pinLevel == 2) 1f else .5f
-                Icon(
-                    imageVector = Icons.Outlined.PushPin,
-                    contentDescription = null,
-                    tint = tint,
+            } else {
+                GroupPhoto(photos)
+                Column(
+                    modifier = Modifier.weight(1f).let {
+                        if (coverPhoto == null) {
+                            it
+                        } else {
+                            it.padding(vertical = 1.pad)
+                        }
+                    }
+                ) {
+                    Text(
+                        name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = if (isUnread) FontWeight.Bold else FontWeight.Normal
+                    )
+                    Text(
+                        description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 2,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+                Text(
+                    statusText,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = if (inCallCount > 0) theme_call else if (bold) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                    fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
                     modifier = Modifier
-                        .alpha(alpha)
-                        .size(16.dp)
+                        .padding(1.pad)
+                        .let {
+                            if (bold) {
+                                it
+                            } else {
+                                it.alpha(.5f)
+                            }
+                        }
                 )
+                if (joined) {
+                    Icon(
+                        imageVector = Icons.Outlined.Check,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .padding(end = 1.pad)
+                    )
+                }
             }
         }
     }
@@ -441,8 +502,12 @@ val GroupExtended.latestMessagePersonOrBotName
             ?: (bots?.find { it.id == latestMessage!!.bot }?.name)
             ?: stringResource(R.string.someone)
 
+private val previewWhitespaceRegex = Regex("""\s+""")
+
 private fun Message.preview(context: Context): String? {
-    return text?.notBlank ?: attachmentText(context)
+    return text?.notBlank?.stripMarkdown()?.replace(previewWhitespaceRegex, " ")?.notBlank
+        ?: attachmentText(context)
+        ?: text?.notBlank?.replace(previewWhitespaceRegex, " ")
 }
 
 
