@@ -181,7 +181,7 @@ fun ColumnScope.AppHeader(
                         .padding(horizontal = 6.pad),
                     contentAlignment = Alignment.Center
                 ) {
-                    SignalsButton {
+                    TopChipsRow {
                         nav.appNavigate(AppNav.Signals)
                     }
                 }
