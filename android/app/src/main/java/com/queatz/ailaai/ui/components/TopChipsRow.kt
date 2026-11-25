@@ -295,38 +295,37 @@ fun ChipDetailsDialog(config: ChipConfig, cached: ChipCache?, onDismiss: () -> U
                     )
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(1.pad)
+                Button(
+                    onClick = {
+                        if (isSyncing) return@Button
+                        coroutineScope.launch {
+                            isSyncing = true
+                            syncStatus = "Syncing..."
+                            val success = chips.syncChip(config)
+                            syncStatus = if (success) "Sync successful" else "Sync failed"
+                            isSyncing = false
+                            delay(3000.milliseconds)
+                            syncStatus = ""
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Button(
-                        onClick = { showShareDialog = true },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Outlined.Share, null)
-                        Spacer(Modifier.width(8.dp))
-                        Text(stringResource(R.string.share))
-                    }
+                    Icon(Icons.Outlined.Refresh, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(if (isSyncing) "Syncing..." else "Sync Now")
+                }
 
-                    Button(
-                        onClick = {
-                            if (isSyncing) return@Button
-                            coroutineScope.launch {
-                                isSyncing = true
-                                syncStatus = "Syncing..."
-                                val success = chips.syncChip(config)
-                                syncStatus = if (success) "Sync successful" else "Sync failed"
-                                isSyncing = false
-                                delay(3000.milliseconds)
-                                syncStatus = ""
-                            }
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Outlined.Refresh, null)
-                        Spacer(Modifier.width(8.dp))
-                        Text(if (isSyncing) "Syncing..." else "Sync Now")
-                    }
+                Button(
+                    onClick = { showShareDialog = true },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Outlined.Share, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.share))
                 }
             }
         }
