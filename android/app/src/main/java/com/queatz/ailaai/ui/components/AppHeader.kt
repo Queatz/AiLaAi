@@ -1,6 +1,7 @@
 package com.queatz.ailaai.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -123,25 +125,43 @@ fun ColumnScope.AppHeader(
             }
         }
 
-        Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .background(MaterialTheme.colorScheme.surface)
+        ) {
+            if (showSignalsButton) {
+                Box(
+                    modifier = Modifier.matchParentSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TopChipsRow {
+                        nav.appNavigate(AppNav.Signals)
+                    }
+                }
+            }
+
             AppBar(
                 title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(1.pad)
-                    ) {
-                        Text(
-                            title,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null
-                                ) {
-                                    onTitleClick()
-                                }
-                        )
+                    if (!showSignalsButton) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(1.pad)
+                        ) {
+                            Text(
+                                title,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null
+                                    ) {
+                                        onTitleClick()
+                                    }
+                            )
+                        }
                     }
                 },
                 navigationIcon = navigationIcon,
@@ -171,21 +191,9 @@ fun ColumnScope.AppHeader(
                             }
                         }
                     }
-                }
+                },
+                containerColor = if (showSignalsButton) Color.Transparent else null
             )
-
-            if (showSignalsButton) {
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .padding(horizontal = 6.pad),
-                    contentAlignment = Alignment.Center
-                ) {
-                    TopChipsRow {
-                        nav.appNavigate(AppNav.Signals)
-                    }
-                }
-            }
         }
     }
 }

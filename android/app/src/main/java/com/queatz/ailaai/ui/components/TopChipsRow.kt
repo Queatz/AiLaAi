@@ -122,6 +122,7 @@ fun TopChipsRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .horizontalScroll(scrollState)
+                .padding(horizontal = 1.pad)
                 .pointerInput(Unit) {
                     detectTapGestures(onLongPress = { showOverlay = true })
                 }

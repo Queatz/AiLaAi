@@ -19,14 +19,15 @@ fun AppBar(
     title: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     navigationIcon: @Composable () -> Unit = {},
-    actions: @Composable RowScope.() -> Unit = {}
+    actions: @Composable RowScope.() -> Unit = {},
+    containerColor: Color? = null
 ) {
     val background by background.collectAsState(null)
 
-    val colors = if (background == null) {
-        TopAppBarDefaults.topAppBarColors()
-    } else {
-        TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+    val colors = when {
+        containerColor != null -> TopAppBarDefaults.topAppBarColors(containerColor = containerColor)
+        background == null -> TopAppBarDefaults.topAppBarColors()
+        else -> TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
     }
 
     TopAppBar(
