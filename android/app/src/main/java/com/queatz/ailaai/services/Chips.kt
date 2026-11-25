@@ -22,11 +22,14 @@ import kotlin.time.Clock
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 
+import kotlinx.serialization.json.*
+
 @Serializable
 enum class ChipFormatType {
     TEXT,
     NUMBER,
-    FIXED_2
+    FIXED_2,
+    JSON
 }
 
 @Serializable
@@ -37,8 +40,80 @@ data class ChipConfig(
     val type: ChipFormatType = ChipFormatType.TEXT,
     val prefix: String = "",
     val backgroundColor: Int = 0,
-    val isAbove: Boolean = true
+    val isAbove: Boolean = true,
+    val jsonPath: String = ""
 )
+
+sealed interface JsonParsedResult {
+    data class BooleanValue(val value: Boolean) : JsonParsedResult
+    data object NullValue : JsonParsedResult
+    data object UndefinedValue : JsonParsedResult
+    data class TextValue(val value: String) : JsonParsedResult
+}
+
+private val jsonParser = Json {
+    isLenient = true
+    ignoreUnknownKeys = true
+    coerceInputValues = true
+}
+
+fun evaluateJson(rawString: String, jsonPath: String): JsonParsedResult {
+    val trimmed = rawString.trim()
+    if (trimmed.isEmpty()) return JsonParsedResult.UndefinedValue
+
+    val root = try {
+        jsonParser.parseToJsonElement(trimmed)
+    } catch (_: Exception) {
+        return JsonParsedResult.UndefinedValue
+    }
+
+    val segments = jsonPath
+        .replace('[', '.')
+        .replace(']', '.')
+        .split('.')
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+
+    var current: JsonElement? = root
+    for (segment in segments) {
+        if (current == null) break
+        current = when (current) {
+            is JsonObject -> current[segment]
+            is JsonArray -> {
+                val index = segment.toIntOrNull()
+                if (index != null && index in current.indices) {
+                    current[index]
+                } else {
+                    null
+                }
+            }
+            else -> null
+        }
+    }
+
+    if (current == null) {
+        return JsonParsedResult.UndefinedValue
+    }
+
+    return when (current) {
+        is JsonNull -> JsonParsedResult.NullValue
+        is JsonPrimitive -> {
+            val b = current.booleanOrNull
+            if (!current.isString && b != null) {
+                JsonParsedResult.BooleanValue(b)
+            } else if (current.content.equals("true", ignoreCase = true)) {
+                JsonParsedResult.BooleanValue(true)
+            } else if (current.content.equals("false", ignoreCase = true)) {
+                JsonParsedResult.BooleanValue(false)
+            } else {
+                JsonParsedResult.TextValue(current.content)
+            }
+        }
+        is JsonObject, is JsonArray -> {
+            JsonParsedResult.TextValue(current.toString())
+        }
+    }
+}
 
 @Serializable
 data class ChipCache(
@@ -72,7 +147,7 @@ class Chips {
             val configString = context.dataStore.data.first()[configKey]
             if (!configString.isNullOrBlank()) {
                 try {
-                    _configs.value = Json.decodeFromString(configString)
+                    _configs.value = jsonParser.decodeFromString(configString)
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -81,7 +156,7 @@ class Chips {
             val cacheString = context.dataStore.data.first()[cacheKey]
             if (!cacheString.isNullOrBlank()) {
                 try {
-                    _cache.value = Json.decodeFromString(cacheString)
+                    _cache.value = jsonParser.decodeFromString(cacheString)
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -119,7 +194,7 @@ class Chips {
         _configs.value = newConfigs
         scope.launch {
             context.dataStore.edit {
-                it[configKey] = Json.encodeToString(newConfigs)
+                it[configKey] = jsonParser.encodeToString(newConfigs)
             }
         }
     }
@@ -128,7 +203,7 @@ class Chips {
         _cache.value = newCache
         scope.launch {
             context.dataStore.edit {
-                it[cacheKey] = Json.encodeToString(newCache)
+                it[cacheKey] = jsonParser.encodeToString(newCache)
             }
         }
     }

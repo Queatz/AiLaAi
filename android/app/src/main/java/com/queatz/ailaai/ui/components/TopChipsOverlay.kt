@@ -142,12 +142,13 @@ fun ChipEditor(config: ChipConfig, initiallyEditing: Boolean = false, onCancelSt
     var url by remember(isEditing, config) { mutableStateOf(config.url) }
     var prefix by remember(isEditing, config) { mutableStateOf(config.prefix) }
     var type by remember(isEditing, config) { mutableStateOf(config.type) }
+    var jsonPath by remember(isEditing, config) { mutableStateOf(config.jsonPath) }
     var color by remember(isEditing, config) { mutableIntStateOf(config.backgroundColor) }
 
     val cache by chips.cache.collectAsState()
     val value = cache[config.id]?.value ?: "..."
 
-    val liveConfig = config.copy(name = name, url = url, prefix = prefix, type = type, backgroundColor = color)
+    val liveConfig = config.copy(name = name, url = url, prefix = prefix, type = type, jsonPath = jsonPath, backgroundColor = color)
 
     if (!isEditing) {
         Row(
@@ -229,6 +230,17 @@ fun ChipEditor(config: ChipConfig, initiallyEditing: Boolean = false, onCancelSt
                             }
                         }
                     }
+                }
+
+                if (type == ChipFormatType.JSON) {
+                    OutlinedTextField(
+                        value = jsonPath,
+                        onValueChange = { jsonPath = it },
+                        label = { Text("JSON Path") },
+                        placeholder = { Text("e.g. messages.0.text") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
                 }
 
                 // Colors

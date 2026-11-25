@@ -44,8 +44,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Instant
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.RemoveCircleOutline
+import androidx.compose.material.icons.outlined.ToggleOff
+import androidx.compose.material.icons.outlined.ToggleOn
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
+import com.queatz.ailaai.services.JsonParsedResult
+import com.queatz.ailaai.services.evaluateJson
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -94,7 +103,13 @@ fun TopChipsRow(
         )
     }
 
-    selectedChipConfig?.let { config ->
+    selectedChipConfig?.let { baseConfig ->
+        val config = configs.find { it.id == baseConfig.id }
+        if (config == null) {
+            selectedChipConfig = null
+            return@let
+        }
+
         var isEditing by remember { mutableStateOf(false) }
 
         if (isEditing) {
@@ -108,7 +123,7 @@ fun TopChipsRow(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.5f))
+                        .background(Color.Black.copy(alpha = 0.5f))
                         .clickable {
                             isEditing = false
                             selectedChipConfig = null
@@ -138,13 +153,9 @@ fun TopChipsRow(
                             }
                         }
 
-                        // We can just pull from the configs again so we have the live reactive version
-                        val liveConfig = configs.find { it.id == config.id }
-                        if (liveConfig != null) {
-                            ChipEditor(config = liveConfig, initiallyEditing = true, onCancelStandalone = { 
-                                isEditing = false
-                            })
-                        }
+                        ChipEditor(config = config, initiallyEditing = true, onCancelStandalone = { 
+                            isEditing = false
+                        })
                     }
                 }
             }
@@ -231,24 +242,86 @@ fun ChipDetailsDialog(config: ChipConfig, cached: ChipCache?, onDismiss: () -> U
     }
 }
 
+private data class ChipDisplayInfo(
+    val prefix: String = "",
+    val text: String = "",
+    val icon: ImageVector? = null,
+    val iconTint: Color? = null,
+    val isBoolean: Boolean = false,
+    val booleanValue: Boolean? = null
+)
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ChipItem(config: ChipConfig, value: String, onClick: () -> Unit, onLongClick: () -> Unit) {
-    val formattedValue = remember(value, config.type, config.prefix) {
-        if (value == "..." || value.isBlank()) return@remember "..."
-        val parsed = value.toDoubleOrNull()
-        val text = when (config.type) {
-            ChipFormatType.FIXED_2 -> if (parsed != null) DecimalFormat("#,##0.00").format(parsed / 100.0) else value
-            ChipFormatType.NUMBER -> if (parsed != null) DecimalFormat("#,###.##").format(parsed) else value
-            ChipFormatType.TEXT -> value
+    val displayInfo = remember(value, config) {
+        if (value == "..." || value.isBlank()) {
+            return@remember ChipDisplayInfo(text = "...")
         }
-        "${config.prefix}$text"
+        when (config.type) {
+            ChipFormatType.FIXED_2 -> {
+                val parsed = value.toDoubleOrNull()
+                val text = if (parsed != null) DecimalFormat("#,##0.00").format(parsed / 100.0) else value
+                ChipDisplayInfo(prefix = config.prefix, text = text)
+            }
+            ChipFormatType.NUMBER -> {
+                val parsed = value.toDoubleOrNull()
+                val text = if (parsed != null) DecimalFormat("#,###.##").format(parsed) else value
+                ChipDisplayInfo(prefix = config.prefix, text = text)
+            }
+            ChipFormatType.TEXT -> {
+                ChipDisplayInfo(prefix = config.prefix, text = value)
+            }
+            ChipFormatType.JSON -> {
+                when (val jsonResult = evaluateJson(value, config.jsonPath)) {
+                    is JsonParsedResult.BooleanValue -> {
+                        ChipDisplayInfo(
+                            prefix = config.prefix,
+                            text = if (jsonResult.value) "true" else "false",
+                            icon = if (jsonResult.value) Icons.Outlined.ToggleOn else Icons.Outlined.ToggleOff,
+                            iconTint = if (jsonResult.value) Color(0xFF1B5E20) else Color(0xFF757575),
+                            isBoolean = true,
+                            booleanValue = jsonResult.value
+                        )
+                    }
+                    is JsonParsedResult.NullValue -> {
+                        ChipDisplayInfo(
+                            prefix = config.prefix,
+                            text = "null",
+                            icon = Icons.Outlined.RemoveCircleOutline,
+                            iconTint = Color(0xFF757575)
+                        )
+                    }
+                    is JsonParsedResult.UndefinedValue -> {
+                        ChipDisplayInfo(
+                            prefix = config.prefix,
+                            text = "undefined",
+                            icon = Icons.AutoMirrored.Outlined.HelpOutline,
+                            iconTint = Color(0xFFE65100)
+                        )
+                    }
+                    is JsonParsedResult.TextValue -> {
+                        ChipDisplayInfo(
+                            prefix = config.prefix,
+                            text = jsonResult.value
+                        )
+                    }
+                }
+            }
+        }
     }
 
-    // Colors mapping (for pastel we can use static colors or map from config.backgroundColor)
-    // Here we can map config.backgroundColor to a Color, but for simplicity let's use MaterialTheme colors if 0, else custom.
-    val color = androidx.compose.ui.graphics.Color(if (config.backgroundColor == 0) 0xFFE0E0E0.toInt() else config.backgroundColor)
-    val onColor = androidx.compose.ui.graphics.Color(0xFF000000.toInt())
+    val defaultGrey = 0xFFE0E0E0.toInt()
+    val backgroundColorInt = when {
+        config.type == ChipFormatType.JSON && displayInfo.isBoolean && (config.backgroundColor == 0 || config.backgroundColor == defaultGrey) -> {
+            if (displayInfo.booleanValue == true) 0xFFBAFFC9.toInt() // Pastel Green
+            else 0xFFFFB3BA.toInt() // Pastel Pink/Red
+        }
+        config.backgroundColor == 0 -> defaultGrey
+        else -> config.backgroundColor
+    }
+    val color = Color(backgroundColorInt)
+    val onColor = Color(0xFF000000.toInt())
 
     Box(
         modifier = Modifier
@@ -258,12 +331,48 @@ fun ChipItem(config: ChipConfig, value: String, onClick: () -> Unit, onLongClick
             .padding(horizontal = 1.5f.pad, vertical = 0.5f.pad),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = formattedValue,
-            style = MaterialTheme.typography.labelLarge,
-            color = onColor,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.widthIn(max = 120.dp)
-        )
+        if (displayInfo.icon == null) {
+            Text(
+                text = "${displayInfo.prefix}${displayInfo.text}",
+                style = MaterialTheme.typography.labelLarge,
+                color = onColor,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.widthIn(max = 120.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        } else {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.widthIn(max = 140.dp)
+            ) {
+                if (displayInfo.prefix.isNotEmpty()) {
+                    Text(
+                        text = displayInfo.prefix,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = onColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.width(2.dp))
+                }
+                Icon(
+                    imageVector = displayInfo.icon,
+                    contentDescription = displayInfo.text,
+                    tint = displayInfo.iconTint ?: onColor,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = displayInfo.text,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = onColor,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
     }
 }
