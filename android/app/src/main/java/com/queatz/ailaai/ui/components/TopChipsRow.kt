@@ -53,13 +53,28 @@ import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.RemoveCircleOutline
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.ToggleOff
 import androidx.compose.material.icons.outlined.ToggleOn
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
+import app.ailaai.api.sendMessage
+import com.queatz.ailaai.data.api
+import com.queatz.ailaai.data.json
+import com.queatz.ailaai.extensions.name
+import com.queatz.ailaai.extensions.toast
+import com.queatz.ailaai.me
 import com.queatz.ailaai.services.JsonParsedResult
 import com.queatz.ailaai.services.evaluateJson
+import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
+import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
+import com.queatz.db.ChipAttachment
+import com.queatz.db.Message
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -239,7 +254,8 @@ fun ChipDetailsDialog(config: ChipConfig, cached: ChipCache?, onDismiss: () -> U
     val coroutineScope = rememberCoroutineScope()
     var isSyncing by remember { mutableStateOf(false) }
     var syncStatus by remember { mutableStateOf("") }
-    
+    var showShareDialog by remember { mutableStateOf(false) }
+
     Dialog(onDismissRequest = onDismiss) {
         Card(
             shape = RoundedCornerShape(16.dp),
@@ -263,14 +279,14 @@ fun ChipDetailsDialog(config: ChipConfig, cached: ChipCache?, onDismiss: () -> U
                         Icon(Icons.Outlined.Edit, "Edit")
                     }
                 }
-                
+
                 ChipItem(config = config, value = cached?.value ?: "...", onClick = {}, onLongClick = {})
 
                 Text(
                     text = "Last synced: ${cached?.timestamp?.takeIf { it > 0 }?.let { kotlin.time.Instant.fromEpochMilliseconds(it).shortAgo() } ?: "Never"}",
                     style = MaterialTheme.typography.bodyMedium
                 )
-                
+
                 if (syncStatus.isNotBlank()) {
                     Text(
                         text = syncStatus,
@@ -279,25 +295,156 @@ fun ChipDetailsDialog(config: ChipConfig, cached: ChipCache?, onDismiss: () -> U
                     )
                 }
 
-                Button(
-                    onClick = {
-                        if (isSyncing) return@Button
-                        coroutineScope.launch {
-                            isSyncing = true
-                            syncStatus = "Syncing..."
-                            val success = chips.syncChip(config)
-                            syncStatus = if (success) "Sync successful" else "Sync failed"
-                            isSyncing = false
-                            delay(3000.milliseconds)
-                            syncStatus = ""
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(1.pad)
                 ) {
-                    Icon(Icons.Outlined.Refresh, null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(if (isSyncing) "Syncing..." else "Sync Now")
+                    Button(
+                        onClick = { showShareDialog = true },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Outlined.Share, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.share))
+                    }
+
+                    Button(
+                        onClick = {
+                            if (isSyncing) return@Button
+                            coroutineScope.launch {
+                                isSyncing = true
+                                syncStatus = "Syncing..."
+                                val success = chips.syncChip(config)
+                                syncStatus = if (success) "Sync successful" else "Sync failed"
+                                isSyncing = false
+                                delay(3000.milliseconds)
+                                syncStatus = ""
+                            }
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Outlined.Refresh, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(if (isSyncing) "Syncing..." else "Sync Now")
+                    }
                 }
+            }
+        }
+    }
+
+    if (showShareDialog) {
+        ShareChipDialog(
+            config = config,
+            onDismissRequest = { showShareDialog = false }
+        )
+    }
+}
+
+@Composable
+fun ShareChipDialog(
+    config: ChipConfig,
+    onDismissRequest: () -> Unit
+) {
+    var comment by remember { mutableStateOf("") }
+    var showGroupPicker by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val someone = stringResource(R.string.someone)
+    val emptyGroup = stringResource(R.string.empty_group_name)
+    val me = me
+
+    val sentText = stringResource(R.string.sent)
+
+    if (!showGroupPicker) {
+        Dialog(onDismissRequest = onDismissRequest) {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(3.pad),
+                    verticalArrangement = Arrangement.spacedBy(2.pad)
+                ) {
+                    Text("Share Chip", style = MaterialTheme.typography.titleLarge)
+
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        ChipItem(
+                            config = config,
+                            value = config.name.takeIf { it.isNotBlank() } ?: "...",
+                            onClick = {},
+                            onLongClick = {}
+                        )
+                    }
+
+                    OutlinedTextField(
+                        value = comment,
+                        onValueChange = { comment = it },
+                        label = { Text("Comment (optional)") },
+                        placeholder = { Text("Say something about this chip...") },
+                        modifier = Modifier.fillMaxWidth(),
+                        maxLines = 4
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(onClick = onDismissRequest) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                        Spacer(Modifier.width(8.dp))
+                        Button(onClick = { showGroupPicker = true }) {
+                            Text("Choose conversation")
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        ChooseGroupDialog(
+            onDismissRequest = {
+                showGroupPicker = false
+                onDismissRequest()
+            },
+            title = stringResource(R.string.share),
+            confirmFormatter = defaultConfirmFormatter(
+                R.string.send_text,
+                R.string.send_text_to_group,
+                R.string.send_text_to_groups,
+                R.string.send_text_to_x_groups
+            ) { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) }
+        ) { groups ->
+            val chipAttachment = ChipAttachment(
+                name = config.name,
+                url = config.url,
+                format = config.type.name,
+                prefix = config.prefix,
+                backgroundColor = config.backgroundColor,
+                isAbove = config.isAbove,
+                jsonPath = config.jsonPath
+            )
+            val attachmentJson = json.encodeToString(chipAttachment)
+            val commentText = comment.trim().takeIf { it.isNotEmpty() }
+
+            coroutineScope.launch {
+                coroutineScope {
+                    groups.map { group ->
+                        async {
+                            api.sendMessage(
+                                group.id!!,
+                                Message(
+                                    text = commentText,
+                                    attachment = attachmentJson
+                                )
+                            )
+                        }
+                    }.awaitAll()
+                }
+                context.toast(sentText)
+                onDismissRequest()
             }
         }
     }

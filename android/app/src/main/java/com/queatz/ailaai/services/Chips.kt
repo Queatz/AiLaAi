@@ -253,4 +253,19 @@ class Chips {
         }
         return false
     }
+
+    suspend fun fetchUrl(url: String): String? {
+        if (url.isBlank()) return null
+        return try {
+            val response: HttpResponse = httpClient.get(url) {
+                header("Accept", "*/*")
+                header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36")
+            }
+            if (response.status.value in 200..299) {
+                response.bodyAsText().trim()
+            } else null
+        } catch (_: Exception) {
+            null
+        }
+    }
 }

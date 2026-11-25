@@ -94,6 +94,19 @@ class CallAttachment(
 }
 
 @Serializable
+class ChipAttachment(
+    var name: String? = null,
+    var url: String? = null,
+    var format: String? = null,
+    var prefix: String? = null,
+    var backgroundColor: Int? = null,
+    var isAbove: Boolean? = null,
+    var jsonPath: String? = null
+) : MessageAttachment() {
+    override val type = "chip"
+}
+
+@Serializable
 abstract class MessageAttachment  {
     abstract val type: String
 }
