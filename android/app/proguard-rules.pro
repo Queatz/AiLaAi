@@ -18,4 +18,6 @@
 -keepattributes SourceFile,LineNumberTable
 
 # VideoSDK
+-keep class videosdk.org.** { *; }
+-dontwarn videosdk.org.**
 -dontwarn kotlin.jvm.internal.SourceDebugExtension
