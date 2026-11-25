@@ -114,6 +114,9 @@ fun TopChipsRow(
                     val signalsLeftInContent = pos.x + scrollState.value
                     signalsCenterInContent = signalsLeftInContent + signals.size.width / 2f
                 }
+            }
+            .pointerInput(Unit) {
+                detectTapGestures(onLongPress = { showOverlay = true })
             },
         contentAlignment = Alignment.Center
     ) {
@@ -123,9 +126,6 @@ fun TopChipsRow(
             modifier = Modifier
                 .horizontalScroll(scrollState)
                 .padding(horizontal = 1.pad)
-                .pointerInput(Unit) {
-                    detectTapGestures(onLongPress = { showOverlay = true })
-                }
         ) {
             aboveConfigs.forEach { config ->
                 val value = cache[config.id]?.value ?: "..."
