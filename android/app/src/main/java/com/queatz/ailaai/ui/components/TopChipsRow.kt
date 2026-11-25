@@ -43,6 +43,11 @@ import com.queatz.ailaai.extensions.shortAgo
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Instant
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Edit
@@ -55,6 +60,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import com.queatz.ailaai.services.JsonParsedResult
 import com.queatz.ailaai.services.evaluateJson
+import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -69,30 +75,84 @@ fun TopChipsRow(
     val aboveConfigs = configs.filter { it.isAbove }
     val belowConfigs = configs.filter { !it.isAbove }
 
+    val scrollState = rememberScrollState()
+
+    var containerCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    var signalsCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    var signalsCenterInContent by remember { mutableFloatStateOf(0f) }
+    var viewportWidth by remember { mutableIntStateOf(0) }
+
     LaunchedEffect(Unit) {
         chips.refreshCacheIfNeeded()
     }
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.pointerInput(Unit) {
-            detectTapGestures(onLongPress = { showOverlay = true })
+    val chipConfigsKey = remember(configs, configs.all { cache.containsKey(it.id) }) {
+        configs.map { it.id to it.isAbove to cache.containsKey(it.id) }
+    }
+    var hasInitialCentered by remember(chipConfigsKey) { mutableStateOf(false) }
+
+    LaunchedEffect(chipConfigsKey, signalsCenterInContent, viewportWidth, scrollState.maxValue) {
+        if (!hasInitialCentered && !scrollState.isScrollInProgress && viewportWidth > 0 && signalsCenterInContent > 0f) {
+            if (scrollState.maxValue > 0) {
+                val desiredScroll = (signalsCenterInContent - viewportWidth / 2f).roundToInt()
+                val targetScroll = desiredScroll.coerceIn(0, scrollState.maxValue)
+                scrollState.scrollTo(targetScroll)
+                hasInitialCentered = true
+            }
         }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .onGloballyPositioned { coordinates ->
+                containerCoordinates = coordinates
+                viewportWidth = coordinates.size.width
+                val signals = signalsCoordinates
+                if (coordinates.isAttached && signals != null && signals.isAttached) {
+                    val pos = coordinates.localPositionOf(signals, Offset.Zero)
+                    val signalsLeftInContent = pos.x + scrollState.value
+                    signalsCenterInContent = signalsLeftInContent + signals.size.width / 2f
+                }
+            },
+        contentAlignment = Alignment.Center
     ) {
-        aboveConfigs.forEach { config ->
-            val value = cache[config.id]?.value ?: "..."
-            ChipItem(config = config, value = value, onClick = { selectedChipConfig = config }, onLongClick = { showOverlay = true })
-        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .horizontalScroll(scrollState)
+                .pointerInput(Unit) {
+                    detectTapGestures(onLongPress = { showOverlay = true })
+                }
+        ) {
+            aboveConfigs.forEach { config ->
+                val value = cache[config.id]?.value ?: "..."
+                ChipItem(config = config, value = value, onClick = { selectedChipConfig = config }, onLongClick = { showOverlay = true })
+            }
 
-        SignalsButton(
-            onClick = onSignalsClick,
-            onLongClick = { showOverlay = true }
-        )
+            Box(
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    signalsCoordinates = coordinates
+                    val container = containerCoordinates
+                    if (coordinates.isAttached && container != null && container.isAttached) {
+                        val pos = container.localPositionOf(coordinates, Offset.Zero)
+                        val signalsLeftInContent = pos.x + scrollState.value
+                        signalsCenterInContent = signalsLeftInContent + coordinates.size.width / 2f
+                        viewportWidth = container.size.width
+                    }
+                }
+            ) {
+                SignalsButton(
+                    onClick = onSignalsClick,
+                    onLongClick = { showOverlay = true }
+                )
+            }
 
-        belowConfigs.forEach { config ->
-            val value = cache[config.id]?.value ?: "..."
-            ChipItem(config = config, value = value, onClick = { selectedChipConfig = config }, onLongClick = { showOverlay = true })
+            belowConfigs.forEach { config ->
+                val value = cache[config.id]?.value ?: "..."
+                ChipItem(config = config, value = value, onClick = { selectedChipConfig = config }, onLongClick = { showOverlay = true })
+            }
         }
     }
 
@@ -323,6 +383,10 @@ fun ChipItem(config: ChipConfig, value: String, onClick: () -> Unit, onLongClick
     val color = Color(backgroundColorInt)
     val onColor = Color(0xFF000000.toInt())
 
+    val prefixToDisplay = displayInfo.prefix.take(100)
+    val remainingChars = (100 - prefixToDisplay.length).coerceAtLeast(0)
+    val textToDisplay = displayInfo.text.take(remainingChars)
+
     Box(
         modifier = Modifier
             .clip(CircleShape)
@@ -333,45 +397,48 @@ fun ChipItem(config: ChipConfig, value: String, onClick: () -> Unit, onLongClick
     ) {
         if (displayInfo.icon == null) {
             Text(
-                text = "${displayInfo.prefix}${displayInfo.text}",
+                text = "${prefixToDisplay}${textToDisplay}",
                 style = MaterialTheme.typography.labelLarge,
                 color = onColor,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.widthIn(max = 120.dp),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                softWrap = false,
+                overflow = TextOverflow.Clip
             )
         } else {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.widthIn(max = 140.dp)
+                horizontalArrangement = Arrangement.Center
             ) {
-                if (displayInfo.prefix.isNotEmpty()) {
+                if (prefixToDisplay.isNotEmpty()) {
                     Text(
-                        text = displayInfo.prefix,
+                        text = prefixToDisplay,
                         style = MaterialTheme.typography.labelLarge,
                         color = onColor,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        softWrap = false,
+                        overflow = TextOverflow.Clip
                     )
                     Spacer(Modifier.width(2.dp))
                 }
                 Icon(
                     imageVector = displayInfo.icon,
-                    contentDescription = displayInfo.text,
+                    contentDescription = textToDisplay,
                     tint = displayInfo.iconTint ?: onColor,
                     modifier = Modifier.size(18.dp)
                 )
-                Spacer(Modifier.width(4.dp))
-                Text(
-                    text = displayInfo.text,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = onColor,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                if (textToDisplay.isNotEmpty()) {
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = textToDisplay,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = onColor,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Clip
+                    )
+                }
             }
         }
     }
