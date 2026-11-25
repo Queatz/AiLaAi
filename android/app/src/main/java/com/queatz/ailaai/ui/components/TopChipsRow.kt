@@ -64,6 +64,7 @@ import app.ailaai.api.sendMessage
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.name
+import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.me
 import com.queatz.ailaai.services.JsonParsedResult
@@ -71,6 +72,7 @@ import com.queatz.ailaai.services.evaluateJson
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.db.ChipAttachment
+import com.queatz.db.Group
 import com.queatz.db.Message
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -251,10 +253,13 @@ fun TopChipsRow(
 
 @Composable
 fun ChipDetailsDialog(config: ChipConfig, cached: ChipCache?, onDismiss: () -> Unit, onEdit: () -> Unit) {
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var isSyncing by remember { mutableStateOf(false) }
     var syncStatus by remember { mutableStateOf("") }
+    var isSharing by remember { mutableStateOf(false) }
     var showShareDialog by remember { mutableStateOf(false) }
+    val sentText = stringResource(R.string.sent)
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -317,15 +322,26 @@ fun ChipDetailsDialog(config: ChipConfig, cached: ChipCache?, onDismiss: () -> U
 
                 Button(
                     onClick = { showShareDialog = true },
+                    enabled = !isSharing,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary
                     ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(Icons.Outlined.Share, null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.share))
+                    if (isSharing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onSecondary
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text("Sharing...")
+                    } else {
+                        Icon(Icons.Outlined.Share, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.share))
+                    }
                 }
             }
         }
@@ -334,7 +350,52 @@ fun ChipDetailsDialog(config: ChipConfig, cached: ChipCache?, onDismiss: () -> U
     if (showShareDialog) {
         ShareChipDialog(
             config = config,
-            onDismissRequest = { showShareDialog = false }
+            onDismissRequest = { showShareDialog = false },
+            onShare = { groups, commentText ->
+                showShareDialog = false
+                coroutineScope.launch {
+                    isSharing = true
+                    var hasError = false
+                    try {
+                        val chipAttachment = ChipAttachment(
+                            name = config.name,
+                            url = config.url,
+                            format = config.type.name,
+                            prefix = config.prefix,
+                            backgroundColor = config.backgroundColor,
+                            isAbove = config.isAbove,
+                            jsonPath = config.jsonPath
+                        )
+                        val attachmentJson = json.encodeToString(chipAttachment)
+
+                        coroutineScope {
+                            groups.map { group ->
+                                async {
+                                    api.sendMessage(
+                                        group.id!!,
+                                        Message(
+                                            text = commentText,
+                                            attachment = attachmentJson
+                                        ),
+                                        onError = {
+                                            hasError = true
+                                        }
+                                    )
+                                }
+                            }.awaitAll()
+                        }
+                        if (hasError) {
+                            context.showDidntWork(R.string.error_send_message)
+                        } else {
+                            context.toast(sentText)
+                        }
+                    } catch (_: Exception) {
+                        context.showDidntWork(R.string.error_send_message)
+                    } finally {
+                        isSharing = false
+                    }
+                }
+            }
         )
     }
 }
@@ -342,17 +403,14 @@ fun ChipDetailsDialog(config: ChipConfig, cached: ChipCache?, onDismiss: () -> U
 @Composable
 fun ShareChipDialog(
     config: ChipConfig,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    onShare: (groups: List<Group>, comment: String?) -> Unit
 ) {
     var comment by remember { mutableStateOf("") }
     var showGroupPicker by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
     val someone = stringResource(R.string.someone)
     val emptyGroup = stringResource(R.string.empty_group_name)
     val me = me
-
-    val sentText = stringResource(R.string.sent)
 
     if (!showGroupPicker) {
         Dialog(onDismissRequest = onDismissRequest) {
@@ -416,35 +474,8 @@ fun ShareChipDialog(
                 R.string.send_text_to_x_groups
             ) { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) }
         ) { groups ->
-            val chipAttachment = ChipAttachment(
-                name = config.name,
-                url = config.url,
-                format = config.type.name,
-                prefix = config.prefix,
-                backgroundColor = config.backgroundColor,
-                isAbove = config.isAbove,
-                jsonPath = config.jsonPath
-            )
-            val attachmentJson = json.encodeToString(chipAttachment)
             val commentText = comment.trim().takeIf { it.isNotEmpty() }
-
-            coroutineScope.launch {
-                coroutineScope {
-                    groups.map { group ->
-                        async {
-                            api.sendMessage(
-                                group.id!!,
-                                Message(
-                                    text = commentText,
-                                    attachment = attachmentJson
-                                )
-                            )
-                        }
-                    }.awaitAll()
-                }
-                context.toast(sentText)
-                onDismissRequest()
-            }
+            onShare(groups, commentText)
         }
     }
 }
