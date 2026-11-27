@@ -15,7 +15,7 @@ buildscript {
         }
         val agpVersion = properties.getProperty("AGP_VERSION")
             .orEmpty()
-            .ifBlank { "9.5.2" }
+            .ifBlank { "9.5.3" }
         classpath("com.android.tools.build:gradle:$agpVersion")
         // AGP 9 ships kapt as a separate plugin; ObjectBox still generates via kapt.
         classpath("com.android.legacy-kapt:com.android.legacy-kapt.gradle.plugin:$agpVersion")
