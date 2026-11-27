@@ -99,6 +99,7 @@ class ChipAttachment(
     var url: String? = null,
     var format: String? = null,
     var prefix: String? = null,
+    var color: String? = null,
     var backgroundColor: Int? = null,
     var isAbove: Boolean? = null,
     var jsonPath: String? = null

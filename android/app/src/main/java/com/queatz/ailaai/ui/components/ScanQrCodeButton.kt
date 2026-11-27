@@ -115,47 +115,57 @@ fun ScanQrCodeButton(
         if (result.resultCode == Activity.RESULT_OK) {
             result.data
                 ?.let { IntentCompat.getParcelableExtra(it, ScanUtil.RESULT, HmsScan::class.java) }
-                ?.let {
-                    it.linkUrl?.linkValue?.takeIf { it.startsWith(appDomain) }?.drop(appDomain.length)?.let {
-                        when {
-                            it.startsWith("/group/") -> {
-                                val groupId = it.split("/").getOrNull(2) ?: return@let null
-                                onResult(ScanQrCodeResult.Group(groupId))
-                                true
-                            }
-                            it.startsWith("/page/") -> {
-                                val cardId = it.split("/").getOrNull(2) ?: return@let null
-                                onResult(ScanQrCodeResult.Page(cardId))
-                                true
-                            }
-                            // Depreciated
-                            it.startsWith("/card/") -> {
-                                val cardId = it.split("/").getOrNull(2) ?: return@let null
-                                onResult(ScanQrCodeResult.Page(cardId))
-                                true
-                            }
-                            it.startsWith("/story/") -> {
-                                val storyId = it.split("/").getOrNull(2) ?: return@let null
-                                onResult(ScanQrCodeResult.Story(storyId))
-                                true
-                            }
-                            it.startsWith("/profile/") -> {
-                                val personId = it.split("/").getOrNull(2) ?: return@let null
-                                onResult(ScanQrCodeResult.Profile(personId))
-                                true
-                            }
-                            it.startsWith("/link-device/") -> {
-                                val token = it.split("/").getOrNull(2) ?: return@let null
-                                onResult(ScanQrCodeResult.LinkDevice(token))
-                                true
-                            }
-                            it.startsWith("/invite/") -> {
-                                val code = it.split("/").getOrNull(2) ?: return@let null
-                                onResult(ScanQrCodeResult.Invite(code))
-                                true
-                            }
-                            else -> null
+                ?.let { hmsScan ->
+                    val raw = hmsScan.linkUrl?.linkValue
+                        ?: hmsScan.originalValue
+                        ?: hmsScan.showResult
+                        ?: return@let null
+                    val path = when {
+                        raw.startsWith("http://") || raw.startsWith("https://") -> {
+                            runCatching { java.net.URI(raw).path }.getOrNull()
+                                ?: ("/" + raw.substringAfter("://").substringAfter("/"))
                         }
+                        raw.startsWith("/") -> raw
+                        else -> "/$raw"
+                    }
+                    when {
+                        path.startsWith("/group/") -> {
+                            val groupId = path.split("/").getOrNull(2) ?: return@let null
+                            onResult(ScanQrCodeResult.Group(groupId))
+                            true
+                        }
+                        path.startsWith("/page/") -> {
+                            val cardId = path.split("/").getOrNull(2) ?: return@let null
+                            onResult(ScanQrCodeResult.Page(cardId))
+                            true
+                        }
+                        // Depreciated
+                        path.startsWith("/card/") -> {
+                            val cardId = path.split("/").getOrNull(2) ?: return@let null
+                            onResult(ScanQrCodeResult.Page(cardId))
+                            true
+                        }
+                        path.startsWith("/story/") -> {
+                            val storyId = path.split("/").getOrNull(2) ?: return@let null
+                            onResult(ScanQrCodeResult.Story(storyId))
+                            true
+                        }
+                        path.startsWith("/profile/") -> {
+                            val personId = path.split("/").getOrNull(2) ?: return@let null
+                            onResult(ScanQrCodeResult.Profile(personId))
+                            true
+                        }
+                        path.startsWith("/link-device/") -> {
+                            val token = path.split("/").getOrNull(2) ?: return@let null
+                            onResult(ScanQrCodeResult.LinkDevice(token))
+                            true
+                        }
+                        path.startsWith("/invite/") -> {
+                            val code = path.split("/").getOrNull(2) ?: return@let null
+                            onResult(ScanQrCodeResult.Invite(code))
+                            true
+                        }
+                        else -> null
                     }
                 } ?: run {
                 context.showDidntWork(R.string.error_scan_qr_code)

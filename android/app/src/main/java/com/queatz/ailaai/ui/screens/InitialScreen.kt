@@ -49,6 +49,7 @@ import app.ailaai.api.signInWithLink
 import app.ailaai.api.signUp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.helpers.UserSession
 import com.queatz.ailaai.extensions.didntWorkMessage
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
@@ -115,6 +116,7 @@ fun InitialScreen(onKnown: (isSignUp: Boolean) -> Unit) {
                 ) {
                     signInDialog = false
                     transferCode = ""
+                    UserSession.clear(context)
                     api.setToken(it.token)
                     onKnown(false)
                     keyboardController?.hide()
@@ -224,6 +226,7 @@ fun InitialScreen(onKnown: (isSignUp: Boolean) -> Unit) {
                         context.showDidntWork(R.string.error_sign_in)
                     }
                 ) {
+                    UserSession.clear(context)
                     api.setToken(it.token)
                     onKnown(false)
                     keyboardController?.hide()
@@ -258,6 +261,7 @@ fun InitialScreen(onKnown: (isSignUp: Boolean) -> Unit) {
                         }
                     }
                 ) {
+                    UserSession.clear(context)
                     api.setToken(it.token)
                     onKnown(true)
                     keyboardController?.hide()

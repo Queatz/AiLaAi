@@ -3,11 +3,27 @@ package com.queatz.ailaai.services
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.queatz.ailaai.Application
+import app.ailaai.api.chips
+import app.ailaai.api.createChip
+import app.ailaai.api.deleteChip
+import app.ailaai.api.importChips
+import app.ailaai.api.previewChip
+import app.ailaai.api.reorderChips
+import app.ailaai.api.syncChip
+import app.ailaai.api.updateChip
+import com.queatz.ailaai.cache.CacheKey
+import com.queatz.ailaai.cache.cache
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
+import com.queatz.db.ChipFormatType
+import com.queatz.db.ChipOrderItem
+import com.queatz.db.ChipPreviewResponse
+import com.queatz.db.ImportChipsBody
+import com.queatz.db.PersonChip
+import com.queatz.db.PersonChipExtended
+import com.queatz.db.ReorderChipsBody
+import com.queatz.db.defaultChipHexColor
+import com.queatz.db.legacyColorIntToHex
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,255 +33,220 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Clock
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.plugins.*
-
-import kotlinx.serialization.json.*
 
 @Serializable
-enum class ChipFormatType {
-    TEXT,
-    NUMBER,
-    FIXED_2,
-    JSON
-}
-
-@Serializable
-data class ChipConfig(
-    val id: String,
+private data class LegacyChipConfig(
+    val id: String = "",
     val name: String = "",
     val url: String = "",
     val type: ChipFormatType = ChipFormatType.TEXT,
     val prefix: String = "",
     val backgroundColor: Int = 0,
     val isAbove: Boolean = true,
-    val jsonPath: String = ""
+    val jsonPath: String = "",
 )
 
-sealed interface JsonParsedResult {
-    data class BooleanValue(val value: Boolean) : JsonParsedResult
-    data object NullValue : JsonParsedResult
-    data object UndefinedValue : JsonParsedResult
-    data class TextValue(val value: String) : JsonParsedResult
-}
-
-private val jsonParser = Json {
+private val legacyJson = Json {
     isLenient = true
     ignoreUnknownKeys = true
     coerceInputValues = true
 }
-
-fun evaluateJson(rawString: String, jsonPath: String): JsonParsedResult {
-    val trimmed = rawString.trim()
-    if (trimmed.isEmpty()) return JsonParsedResult.UndefinedValue
-
-    val root = try {
-        jsonParser.parseToJsonElement(trimmed)
-    } catch (_: Exception) {
-        return JsonParsedResult.UndefinedValue
-    }
-
-    val segments = jsonPath
-        .replace('[', '.')
-        .replace(']', '.')
-        .split('.')
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-
-    var current: JsonElement? = root
-    for (segment in segments) {
-        if (current == null) break
-        current = when (current) {
-            is JsonObject -> current[segment]
-            is JsonArray -> {
-                val index = segment.toIntOrNull()
-                if (index != null && index in current.indices) {
-                    current[index]
-                } else {
-                    null
-                }
-            }
-            else -> null
-        }
-    }
-
-    if (current == null) {
-        return JsonParsedResult.UndefinedValue
-    }
-
-    return when (current) {
-        is JsonNull -> JsonParsedResult.NullValue
-        is JsonPrimitive -> {
-            val b = current.booleanOrNull
-            if (!current.isString && b != null) {
-                JsonParsedResult.BooleanValue(b)
-            } else if (current.content.equals("true", ignoreCase = true)) {
-                JsonParsedResult.BooleanValue(true)
-            } else if (current.content.equals("false", ignoreCase = true)) {
-                JsonParsedResult.BooleanValue(false)
-            } else {
-                JsonParsedResult.TextValue(current.content)
-            }
-        }
-        is JsonObject, is JsonArray -> {
-            JsonParsedResult.TextValue(current.toString())
-        }
-    }
-}
-
-@Serializable
-data class ChipCache(
-    val value: String = "",
-    val timestamp: Long = 0
-)
 
 val chips by lazy { Chips() }
 
 class Chips {
     private lateinit var context: Context
     private val scope = CoroutineScope(Dispatchers.IO)
-    private val configKey = stringPreferencesKey("app.chips_config")
-    private val cacheKey = stringPreferencesKey("app.chips_cache")
+    private val legacyConfigKey = stringPreferencesKey("app.chips_config")
+    private val legacyCacheKey = stringPreferencesKey("app.chips_cache")
 
-    private val _configs = MutableStateFlow<List<ChipConfig>>(emptyList())
-    val configs: StateFlow<List<ChipConfig>> = _configs.asStateFlow()
+    private val _items = MutableStateFlow<List<PersonChipExtended>>(emptyList())
+    val items: StateFlow<List<PersonChipExtended>> = _items.asStateFlow()
 
-    private val _cache = MutableStateFlow<Map<String, ChipCache>>(emptyMap())
-    val cache: StateFlow<Map<String, ChipCache>> = _cache.asStateFlow()
-
-    private val httpClient = HttpClient(OkHttp) {
-        install(HttpTimeout) {
-            requestTimeoutMillis = 15000
-        }
-    }
-
-    fun init(context: Context) {
+    fun init(
+        context: Context,
+    ) {
         this.context = context
-        scope.launch {
-            val configString = context.dataStore.data.first()[configKey]
-            if (!configString.isNullOrBlank()) {
-                try {
-                    _configs.value = jsonParser.decodeFromString(configString)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-
-            val cacheString = context.dataStore.data.first()[cacheKey]
-            if (!cacheString.isNullOrBlank()) {
-                try {
-                    _cache.value = jsonParser.decodeFromString(cacheString)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-
-            refreshCacheIfNeeded()
+        cache.get<List<PersonChipExtended>>(CacheKey.Chips)?.let {
+            _items.value = it
         }
     }
 
-    fun addConfig(config: ChipConfig) {
-        val newConfigs = _configs.value + config
-        updateConfigs(newConfigs)
+    private fun updateState(
+        list: List<PersonChipExtended>,
+    ) {
+        _items.value = list
+        cache.put(CacheKey.Chips, list)
     }
 
-    fun removeConfig(id: String) {
-        val newConfigs = _configs.value.filter { it.id != id }
-        updateConfigs(newConfigs)
-
-        val newCache = _cache.value.toMutableMap()
-        newCache.remove(id)
-        updateCache(newCache)
+    fun clear() {
+        _items.value = emptyList()
+        cache.remove(CacheKey.Chips)
     }
 
-    fun updateConfig(config: ChipConfig) {
-        val newConfigs = _configs.value.map { if (it.id == config.id) config else it }
-        updateConfigs(newConfigs)
-
-        // Refresh this chip specifically
-        scope.launch {
-            fetchChipData(config)
+    suspend fun reload() {
+        api.chips { fetched ->
+            if (fetched.isEmpty() && ::context.isInitialized) {
+                val migrated = migrateLegacyConfigsIfPresent()
+                if (migrated != null) {
+                    updateState(migrated)
+                    return@chips
+                }
+            }
+            updateState(fetched)
         }
     }
 
-    private fun updateConfigs(newConfigs: List<ChipConfig>) {
-        _configs.value = newConfigs
-        scope.launch {
+    private suspend fun migrateLegacyConfigsIfPresent(): List<PersonChipExtended>? {
+        val prefs = runCatching { context.dataStore.data.first() }.getOrNull() ?: return null
+        val raw = prefs[legacyConfigKey]?.takeIf { it.isNotBlank() } ?: return null
+        val legacyList = runCatching { legacyJson.decodeFromString<List<LegacyChipConfig>>(raw) }.getOrNull()
+        if (legacyList.isNullOrEmpty()) {
+            clearLegacyPrefs()
+            return null
+        }
+
+        val toImport = legacyList.mapIndexed { index, legacy ->
+            PersonChip(
+                name = legacy.name,
+                url = legacy.url,
+                format = legacy.type,
+                prefix = legacy.prefix,
+                color = legacyColorIntToHex(legacy.backgroundColor) ?: defaultChipHexColor,
+                jsonPath = legacy.jsonPath,
+                isAbove = legacy.isAbove,
+                order = index,
+            )
+        }
+
+        var imported: List<PersonChipExtended>? = null
+        api.importChips(
+            body = ImportChipsBody(chips = toImport),
+        ) { result ->
+            imported = result
+            scope.launch { clearLegacyPrefs() }
+        }
+        return imported
+    }
+
+    private suspend fun clearLegacyPrefs() {
+        runCatching {
             context.dataStore.edit {
-                it[configKey] = jsonParser.encodeToString(newConfigs)
+                it.remove(legacyConfigKey)
+                it.remove(legacyCacheKey)
             }
         }
     }
 
-    private fun updateCache(newCache: Map<String, ChipCache>) {
-        _cache.value = newCache
-        scope.launch {
-            context.dataStore.edit {
-                it[cacheKey] = jsonParser.encodeToString(newCache)
-            }
+    suspend fun create(
+        chip: PersonChip,
+    ): PersonChipExtended? {
+        var created: PersonChipExtended? = null
+        api.createChip(chip = chip) { result ->
+            created = result
+            updateState(sortExtended(_items.value + result))
         }
+        return created
     }
 
-    fun refreshCacheIfNeeded() {
-        scope.launch {
-            val now = System.currentTimeMillis()
-            val oneHourAgo = now - 1.hours.inWholeMilliseconds
-
-            _configs.value.forEach { config ->
-                val cached = _cache.value[config.id]
-                if (cached == null || cached.timestamp < oneHourAgo) {
-                    fetchChipData(config)
-                }
-            }
-        }
-    }
-    
-    suspend fun syncChip(config: ChipConfig): Boolean {
-        return fetchChipData(config)
-    }
-
-    private suspend fun fetchChipData(config: ChipConfig): Boolean {
-        if (config.url.isBlank()) return false
-        try {
-            val response: HttpResponse = httpClient.get(config.url) {
-                header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/jxl,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
-                header("Accept-Language", "en-US,en;q=0.9")
-                header("Cache-Control", "max-age=0")
-                header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36")
-                header("sec-ch-ua", "\"Chromium\";v=\"158\", \"Not.A/Brand\";v=\"24\", \"Google Chrome\";v=\"158\"")
-                header("sec-ch-ua-mobile", "?0")
-                header("sec-ch-ua-platform", "\"Linux\"")
-            }
-            if (response.status.value in 200..299) {
-                val value = response.bodyAsText().trim()
-                val newCache = _cache.value.toMutableMap()
-                newCache[config.id] = ChipCache(
-                    value = value,
-                    timestamp = System.currentTimeMillis()
+    suspend fun update(
+        chip: PersonChip,
+    ): PersonChipExtended? {
+        val id = chip.id ?: return null
+        var updated: PersonChipExtended? = null
+        api.updateChip(id = id, chip = chip) { result ->
+            updated = result
+            updateState(
+                sortExtended(
+                    _items.value.map { if (it.chip.id == id) result else it }
                 )
-                updateCache(newCache)
-                return true
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
+            )
         }
-        return false
+        return updated
     }
 
-    suspend fun fetchUrl(url: String): String? {
-        if (url.isBlank()) return null
-        return try {
-            val response: HttpResponse = httpClient.get(url) {
-                header("Accept", "*/*")
-                header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36")
+    suspend fun remove(
+        id: String,
+    ) {
+        val previous = _items.value
+        updateState(previous.filter { it.chip.id != id })
+        api.deleteChip(
+            id = id,
+            onError = {
+                updateState(previous)
+            },
+        )
+    }
+
+    suspend fun sync(
+        id: String,
+    ): Boolean {
+        var success = false
+        api.syncChip(id = id) { result ->
+            success = result.syncedAt != null
+            updateState(
+                _items.value.map { if (it.chip.id == id) result else it }
+            )
+        }
+        return success
+    }
+
+    suspend fun reorder(
+        orderItems: List<ChipOrderItem>,
+    ) {
+        val byId = orderItems.associateBy { it.id }
+        val optimistic = sortExtended(
+            _items.value.map { ext ->
+                val spec = byId[ext.chip.id]
+                if (spec != null) {
+                    ext.copy(
+                        chip = PersonChip(
+                            person = ext.chip.person,
+                            name = ext.chip.name,
+                            url = ext.chip.url,
+                            format = ext.chip.format,
+                            prefix = ext.chip.prefix,
+                            color = ext.chip.color,
+                            jsonPath = ext.chip.jsonPath,
+                            isAbove = spec.isAbove,
+                            order = spec.order,
+                        ).apply {
+                            id = ext.chip.id
+                            createdAt = ext.chip.createdAt
+                        }
+                    )
+                } else {
+                    ext
+                }
             }
-            if (response.status.value in 200..299) {
-                response.bodyAsText().trim()
-            } else null
-        } catch (_: Exception) {
-            null
+        )
+        updateState(optimistic)
+
+        api.reorderChips(
+            body = ReorderChipsBody(items = orderItems),
+        ) { refreshed ->
+            updateState(refreshed)
         }
     }
+
+    suspend fun previewUrl(
+        url: String,
+    ): ChipPreviewResponse? {
+        if (url.isBlank()) return null
+        var response: ChipPreviewResponse? = null
+        api.previewChip(url = url) {
+            response = it
+        }
+        return response
+    }
+
+    private fun sortExtended(
+        list: List<PersonChipExtended>,
+    ): List<PersonChipExtended> =
+        list.sortedWith(
+            compareBy<PersonChipExtended>(
+                { if (it.chip.isAbove != false) 0 else 1 },
+                { it.chip.order ?: 0 },
+            )
+        )
 }

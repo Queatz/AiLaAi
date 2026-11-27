@@ -32,10 +32,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import app.ailaai.api.createStatus
-import com.github.skydoves.colorpicker.compose.BrightnessSlider
-import com.github.skydoves.colorpicker.compose.ColorEnvelope
-import com.github.skydoves.colorpicker.compose.HsvColorPicker
-import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.hex
@@ -44,6 +40,7 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.SearchField
+import com.queatz.ailaai.ui.components.StatusColorPicker
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Status
 import kotlinx.coroutines.launch
@@ -56,7 +53,6 @@ fun CreateStatusDialog(
     onCreate: (Status) -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val controller = rememberColorPickerController()
     var color by rememberStateOf(initialColor)
     var name by rememberStateOf("")
     var isSaving by rememberStateOf(false)
@@ -104,26 +100,9 @@ fun CreateStatusDialog(
                     )
                 }
                 Spacer(Modifier.height(1.pad))
-                HsvColorPicker(
-                    modifier = Modifier
-                        .widthIn(max = 240.dp)
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .padding(10.dp),
-                    controller = controller,
-                    onColorChanged = {
-                        color = it.color
-                    },
-                    initialColor = initialColor
-                )
-                BrightnessSlider(
-                    controller = controller,
+                StatusColorPicker(
                     initialColor = initialColor,
-                    borderRadius = 24.dp,
-                    borderSize = 2.dp,
-                    wheelRadius = 9.dp,
-                    borderColor = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.height(24.dp).widthIn(max = 240.dp)
+                    onColorChanged = { color = it },
                 )
             }
         ) {

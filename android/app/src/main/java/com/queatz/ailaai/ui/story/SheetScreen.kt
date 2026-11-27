@@ -86,6 +86,11 @@ import kotlinx.coroutines.launch
 private var cache = emptyList<Story>()
 private var peopleCache = emptyList<PersonProfile>()
 
+fun clearSheetScreenCache() {
+    cache = emptyList()
+    peopleCache = emptyList()
+}
+
 class SheetScreenState {
 
     internal var state: LazyGridState? = null

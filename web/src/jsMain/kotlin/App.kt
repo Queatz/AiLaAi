@@ -107,6 +107,8 @@ class Application {
         setToken(null)
         setMe(null)
         setNavPage(null)
+        app.chips.chips.clear()
+        app.signals.signals.clear()
     }
 
     suspend fun sync() {

@@ -50,6 +50,11 @@ private val viewKey = stringPreferencesKey("schedule.view")
 private var cache = emptyList<ReminderEvent>()
 private var viewCache: ScheduleView? = null
 
+fun clearScheduleScreenCache() {
+    cache = emptyList()
+    viewCache = null
+}
+
 @Composable
 fun ScheduleScreen() {
     var events by rememberStateOf(cache)

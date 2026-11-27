@@ -17,6 +17,10 @@ import kotlinx.coroutines.flow.first
 
 private var _categoriesCache = emptyList<String>()
 
+fun clearCategoriesCache() {
+    _categoriesCache = emptyList()
+}
+
 @Composable
 fun ChooseCategoryDialog(
     onDismissRequest: () -> Unit,

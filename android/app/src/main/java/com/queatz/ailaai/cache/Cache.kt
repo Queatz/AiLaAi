@@ -12,7 +12,8 @@ val cache by lazy {
 enum class CacheKey {
     Me,
     Groups,
-    ActiveSignals
+    ActiveSignals,
+    Chips,
 }
 
 class Cache {
@@ -36,6 +37,12 @@ class Cache {
     fun remove(key: CacheKey) {
         runCatching {
             db.box<CacheDbModel>().query(CacheDbModel_.key.equal(key.name)).build().remove()
+        }
+    }
+
+    fun clear() {
+        runCatching {
+            db.box<CacheDbModel>().removeAll()
         }
     }
 }

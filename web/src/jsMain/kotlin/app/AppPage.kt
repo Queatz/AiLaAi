@@ -36,6 +36,10 @@ import app.page.SchedulePage
 import app.page.StoriesPage
 import app.platform.PlatformNavPage
 import app.platform.PlatformPage
+import app.chips.ChipStyleSheet
+import app.chips.TopChipsRow
+import app.signals.SignalsNavPage
+import app.signals.SignalsPage
 import app.scripts.ScriptsNav
 import app.scripts.ScriptsNavPage
 import app.scripts.ScriptsPage
@@ -96,13 +100,15 @@ enum class NavPage {
     Platform,
     Scripts,
     Scenes,
+    Signals,
 }
 
 @Composable
 fun AppPage(tabId: String? = null) {
     StyleManager.use(
         WidgetStyleSheet::class,
-        StoryStyleSheet::class
+        StoryStyleSheet::class,
+        ChipStyleSheet::class
     )
 
     val scope = rememberCoroutineScope()
@@ -414,6 +420,14 @@ fun AppPage(tabId: String? = null) {
         }
     }
 
+    LaunchedEffect(Unit) {
+        push.events.filter {
+            it.action == PushAction.Signal || it.action == PushAction.SignalReply
+        }.collect {
+            playNotificationSound = true
+        }
+    }
+
     // Perform the AppNav navigation
     LaunchedEffect(Unit) {
         appNav.navigate.collectLatest {
@@ -565,6 +579,13 @@ fun AppPage(tabId: String? = null) {
                     overflow("hidden")
                 }
             }) {
+                TopChipsRow(
+                    onOpenSignals = {
+                        AppPageStateManager.updateState { currentState ->
+                            currentState.copy(nav = NavPage.Signals)
+                        }
+                    }
+                )
                 when (nav) {
                     NavPage.Groups -> GroupsNavPage(
                         groupUpdates = groupUpdates,
@@ -725,6 +746,13 @@ fun AppPage(tabId: String? = null) {
                         }
                     )
                     NavPage.Apps -> AppNavPage()
+                    NavPage.Signals -> SignalsNavPage(
+                        onProfileClick = {
+                            AppPageStateManager.updateState { currentState ->
+                                currentState.copy(nav = NavPage.Profile)
+                            }
+                        }
+                    )
                     NavPage.Scenes -> SceneNavPage(
                         selected = scene,
                         onSelected = { selectedScene ->
@@ -921,6 +949,10 @@ fun AppPage(tabId: String? = null) {
                             }
                         }
                     )
+                }
+
+                NavPage.Signals -> {
+                    SignalsPage()
                 }
             }
         }

@@ -112,6 +112,13 @@ class Calls {
         }
     }
 
+    fun clear() {
+        job?.cancel()
+        job = null
+        me.value = null
+        calls.value = emptyList()
+    }
+
     suspend fun reload() {
         api.calls { calls ->
             this.calls.update {

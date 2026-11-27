@@ -3,94 +3,115 @@ package com.queatz.ailaai.ui.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import com.queatz.ailaai.R
-import com.queatz.ailaai.extensions.greetingRes
-import com.queatz.ailaai.services.ChipConfig
-import com.queatz.ailaai.services.ChipFormatType
-import com.queatz.ailaai.services.chips
-import com.queatz.ailaai.services.signals
-import com.queatz.ailaai.services.ChipCache
-import com.queatz.ailaai.ui.theme.pad
-import java.text.DecimalFormat
-import androidx.compose.ui.window.Dialog
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.clickable
-import androidx.compose.material.icons.outlined.Close
-import com.queatz.ailaai.extensions.shortAgo
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
-import kotlinx.datetime.Instant
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.RemoveCircleOutline
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.ToggleOff
 import androidx.compose.material.icons.outlined.ToggleOn
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import app.ailaai.api.sendMessage
+import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.name
+import com.queatz.ailaai.extensions.rememberAnimatedGradientBrush
+import com.queatz.ailaai.extensions.shortAgo
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.me
-import com.queatz.ailaai.services.JsonParsedResult
-import com.queatz.ailaai.services.evaluateJson
+import com.queatz.ailaai.services.chips
+import com.queatz.ailaai.services.push
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.ChipAttachment
+import com.queatz.db.ChipFormatType
+import com.queatz.db.ChipValueKind
 import com.queatz.db.Group
 import com.queatz.db.Message
+import com.queatz.db.PersonChip
+import com.queatz.db.PersonChipExtended
+import com.queatz.db.computeChipGradientPalette
+import com.queatz.db.evaluateChipDisplay
+import com.queatz.db.parseChipHexColor
+import com.queatz.db.resolveChipBaseHex
+import com.queatz.push.ChipPushData
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun TopChipsRow(
-    onSignalsClick: () -> Unit
+    onSignalsClick: () -> Unit,
 ) {
-    val configs by chips.configs.collectAsState()
-    val cache by chips.cache.collectAsState()
+    val items by chips.items.collectAsState()
+    val me = me
     var showOverlay by remember { mutableStateOf(false) }
-    var selectedChipConfig by remember { mutableStateOf<ChipConfig?>(null) }
+    var selectedChipId by remember { mutableStateOf<String?>(null) }
 
-    val aboveConfigs = configs.filter { it.isAbove }
-    val belowConfigs = configs.filter { !it.isAbove }
+    val aboveItems = remember(items) { items.filter { it.chip.isAbove != false } }
+    val belowItems = remember(items) { items.filter { it.chip.isAbove == false } }
 
     val scrollState = rememberScrollState()
 
@@ -99,12 +120,22 @@ fun TopChipsRow(
     var signalsCenterInContent by remember { mutableFloatStateOf(0f) }
     var viewportWidth by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(Unit) {
-        chips.refreshCacheIfNeeded()
+    LaunchedEffect(me?.id) {
+        if (me?.id != null) {
+            chips.reload()
+        }
     }
 
-    val chipConfigsKey = remember(configs, configs.all { cache.containsKey(it.id) }) {
-        configs.map { it.id to it.isAbove to cache.containsKey(it.id) }
+    LaunchedEffect(push) {
+        push.events
+            .filter { it is ChipPushData }
+            .collect {
+                chips.reload()
+            }
+    }
+
+    val chipConfigsKey = remember(items) {
+        items.map { Triple(it.chip.id, it.chip.isAbove, it.value != null) }
     }
     var hasInitialCentered by remember(chipConfigsKey) { mutableStateOf(false) }
 
@@ -135,18 +166,22 @@ fun TopChipsRow(
             .pointerInput(Unit) {
                 detectTapGestures(onLongPress = { showOverlay = true })
             },
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .horizontalScroll(scrollState)
-                .padding(horizontal = 1.pad)
+                .padding(horizontal = 1.pad),
         ) {
-            aboveConfigs.forEach { config ->
-                val value = cache[config.id]?.value ?: "..."
-                ChipItem(config = config, value = value, onClick = { selectedChipConfig = config }, onLongClick = { showOverlay = true })
+            aboveItems.forEach { ext ->
+                ChipItem(
+                    chip = ext.chip,
+                    value = ext.value ?: "...",
+                    onClick = { selectedChipId = ext.chip.id },
+                    onLongClick = { showOverlay = true },
+                )
             }
 
             Box(
@@ -159,17 +194,21 @@ fun TopChipsRow(
                         signalsCenterInContent = signalsLeftInContent + coordinates.size.width / 2f
                         viewportWidth = container.size.width
                     }
-                }
+                },
             ) {
                 SignalsButton(
                     onClick = onSignalsClick,
-                    onLongClick = { showOverlay = true }
+                    onLongClick = { showOverlay = true },
                 )
             }
 
-            belowConfigs.forEach { config ->
-                val value = cache[config.id]?.value ?: "..."
-                ChipItem(config = config, value = value, onClick = { selectedChipConfig = config }, onLongClick = { showOverlay = true })
+            belowItems.forEach { ext ->
+                ChipItem(
+                    chip = ext.chip,
+                    value = ext.value ?: "...",
+                    onClick = { selectedChipId = ext.chip.id },
+                    onLongClick = { showOverlay = true },
+                )
             }
         }
     }
@@ -177,26 +216,29 @@ fun TopChipsRow(
     if (showOverlay) {
         TopChipsOverlay(
             onDismiss = { showOverlay = false },
-            onSignalsClick = onSignalsClick
+            onSignalsClick = onSignalsClick,
         )
     }
 
-    selectedChipConfig?.let { baseConfig ->
-        val config = configs.find { it.id == baseConfig.id }
-        if (config == null) {
-            selectedChipConfig = null
+    selectedChipId?.let { chipId ->
+        val ext = items.find { it.chip.id == chipId }
+        if (ext == null) {
+            selectedChipId = null
             return@let
         }
 
-        var isEditing by remember { mutableStateOf(false) }
+        var isEditing by remember(chipId) { mutableStateOf(false) }
 
         if (isEditing) {
             Dialog(
-                onDismissRequest = { 
+                onDismissRequest = {
                     isEditing = false
-                    selectedChipConfig = null
+                    selectedChipId = null
                 },
-                properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+                properties = DialogProperties(
+                    usePlatformDefaultWidth = false,
+                    decorFitsSystemWindows = false,
+                ),
             ) {
                 Box(
                     modifier = Modifier
@@ -204,9 +246,9 @@ fun TopChipsRow(
                         .background(Color.Black.copy(alpha = 0.5f))
                         .clickable {
                             isEditing = false
-                            selectedChipConfig = null
+                            selectedChipId = null
                         },
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     Column(
                         modifier = Modifier
@@ -215,44 +257,53 @@ fun TopChipsRow(
                             .background(MaterialTheme.colorScheme.surface)
                             .clickable(enabled = false) {}
                             .padding(2.pad),
-                        verticalArrangement = Arrangement.spacedBy(2.pad)
+                        verticalArrangement = Arrangement.spacedBy(2.pad),
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text("Edit Chip", style = MaterialTheme.typography.titleLarge)
-                            IconButton(onClick = {
-                                isEditing = false
-                                selectedChipConfig = null
-                            }) {
+                            IconButton(
+                                onClick = {
+                                    isEditing = false
+                                    selectedChipId = null
+                                },
+                            ) {
                                 Icon(Icons.Outlined.Close, null)
                             }
                         }
 
-                        ChipEditor(config = config, initiallyEditing = true, onCancelStandalone = { 
-                            isEditing = false
-                        })
+                        ChipEditor(
+                            item = ext,
+                            initiallyEditing = true,
+                            onCancelStandalone = {
+                                isEditing = false
+                            },
+                        )
                     }
                 }
             }
         } else {
-            val cached = cache[config.id]
             ChipDetailsDialog(
-                config = config,
-                cached = cached,
-                onDismiss = { selectedChipConfig = null },
+                item = ext,
+                onDismiss = { selectedChipId = null },
                 onEdit = {
                     isEditing = true
-                }
+                },
             )
         }
     }
 }
 
 @Composable
-fun ChipDetailsDialog(config: ChipConfig, cached: ChipCache?, onDismiss: () -> Unit, onEdit: () -> Unit) {
+fun ChipDetailsDialog(
+    item: PersonChipExtended,
+    onDismiss: () -> Unit,
+    onEdit: () -> Unit,
+) {
+    val chip = item.chip
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var isSyncing by remember { mutableStateOf(false) }
@@ -264,56 +315,62 @@ fun ChipDetailsDialog(config: ChipConfig, cached: ChipCache?, onDismiss: () -> U
     Dialog(onDismissRequest = onDismiss) {
         Card(
             shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Column(
                 modifier = Modifier.padding(3.pad),
                 verticalArrangement = Arrangement.spacedBy(2.pad),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = config.name.takeIf { it.isNotBlank() } ?: "Unnamed Chip",
-                        style = MaterialTheme.typography.titleLarge
+                        text = chip.name?.takeIf { it.isNotBlank() } ?: "Unnamed Chip",
+                        style = MaterialTheme.typography.titleLarge,
                     )
                     IconButton(onClick = onEdit) {
                         Icon(Icons.Outlined.Edit, "Edit")
                     }
                 }
 
-                ChipItem(config = config, value = cached?.value ?: "...", onClick = {}, onLongClick = {})
+                ChipItem(
+                    chip = chip,
+                    value = item.value ?: "...",
+                    onClick = {},
+                    onLongClick = {},
+                )
 
                 Text(
-                    text = "Last synced: ${cached?.timestamp?.takeIf { it > 0 }?.let { kotlin.time.Instant.fromEpochMilliseconds(it).shortAgo() } ?: "Never"}",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "Last synced: ${item.syncedAt?.shortAgo() ?: "Never"}",
+                    style = MaterialTheme.typography.bodyMedium,
                 )
 
                 if (syncStatus.isNotBlank()) {
                     Text(
                         text = syncStatus,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
 
                 Button(
                     onClick = {
+                        val id = chip.id ?: return@Button
                         if (isSyncing) return@Button
                         coroutineScope.launch {
                             isSyncing = true
                             syncStatus = "Syncing..."
-                            val success = chips.syncChip(config)
+                            val success = chips.sync(id)
                             syncStatus = if (success) "Sync successful" else "Sync failed"
                             isSyncing = false
                             delay(3000.milliseconds)
                             syncStatus = ""
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(Icons.Outlined.Refresh, null)
                     Spacer(Modifier.width(8.dp))
@@ -325,15 +382,15 @@ fun ChipDetailsDialog(config: ChipConfig, cached: ChipCache?, onDismiss: () -> U
                     enabled = !isSharing,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary
+                        contentColor = MaterialTheme.colorScheme.onSecondary,
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     if (isSharing) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(16.dp),
                             strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.onSecondary
+                            color = MaterialTheme.colorScheme.onSecondary,
                         )
                         Spacer(Modifier.width(8.dp))
                         Text("Sharing...")
@@ -349,7 +406,7 @@ fun ChipDetailsDialog(config: ChipConfig, cached: ChipCache?, onDismiss: () -> U
 
     if (showShareDialog) {
         ShareChipDialog(
-            config = config,
+            chip = chip,
             onDismissRequest = { showShareDialog = false },
             onShare = { groups, commentText ->
                 showShareDialog = false
@@ -358,13 +415,14 @@ fun ChipDetailsDialog(config: ChipConfig, cached: ChipCache?, onDismiss: () -> U
                     var hasError = false
                     try {
                         val chipAttachment = ChipAttachment(
-                            name = config.name,
-                            url = config.url,
-                            format = config.type.name,
-                            prefix = config.prefix,
-                            backgroundColor = config.backgroundColor,
-                            isAbove = config.isAbove,
-                            jsonPath = config.jsonPath
+                            name = chip.name,
+                            url = chip.url,
+                            format = (chip.format ?: ChipFormatType.TEXT).name,
+                            prefix = chip.prefix,
+                            color = chip.color,
+                            backgroundColor = parseChipHexColor(chip.color)?.toArgbInt(),
+                            isAbove = chip.isAbove,
+                            jsonPath = chip.jsonPath,
                         )
                         val attachmentJson = json.encodeToString(chipAttachment)
 
@@ -375,11 +433,11 @@ fun ChipDetailsDialog(config: ChipConfig, cached: ChipCache?, onDismiss: () -> U
                                         group.id!!,
                                         Message(
                                             text = commentText,
-                                            attachment = attachmentJson
+                                            attachment = attachmentJson,
                                         ),
                                         onError = {
                                             hasError = true
-                                        }
+                                        },
                                     )
                                 }
                             }.awaitAll()
@@ -395,16 +453,16 @@ fun ChipDetailsDialog(config: ChipConfig, cached: ChipCache?, onDismiss: () -> U
                         isSharing = false
                     }
                 }
-            }
+            },
         )
     }
 }
 
 @Composable
 fun ShareChipDialog(
-    config: ChipConfig,
+    chip: PersonChip,
     onDismissRequest: () -> Unit,
-    onShare: (groups: List<Group>, comment: String?) -> Unit
+    onShare: (groups: List<Group>, comment: String?) -> Unit,
 ) {
     var comment by remember { mutableStateOf("") }
     var showGroupPicker by remember { mutableStateOf(false) }
@@ -416,23 +474,23 @@ fun ShareChipDialog(
         Dialog(onDismissRequest = onDismissRequest) {
             Card(
                 shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Column(
                     modifier = Modifier.padding(3.pad),
-                    verticalArrangement = Arrangement.spacedBy(2.pad)
+                    verticalArrangement = Arrangement.spacedBy(2.pad),
                 ) {
                     Text("Share Chip", style = MaterialTheme.typography.titleLarge)
 
                     Box(
                         modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         ChipItem(
-                            config = config,
-                            value = config.name.takeIf { it.isNotBlank() } ?: "...",
+                            chip = chip,
+                            value = chip.name?.takeIf { it.isNotBlank() } ?: "...",
                             onClick = {},
-                            onLongClick = {}
+                            onLongClick = {},
                         )
                     }
 
@@ -442,12 +500,12 @@ fun ShareChipDialog(
                         label = { Text("Comment (optional)") },
                         placeholder = { Text("Say something about this chip...") },
                         modifier = Modifier.fillMaxWidth(),
-                        maxLines = 4
+                        maxLines = 4,
                     )
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
+                        horizontalArrangement = Arrangement.End,
                     ) {
                         TextButton(onClick = onDismissRequest) {
                             Text(stringResource(R.string.cancel))
@@ -471,8 +529,8 @@ fun ShareChipDialog(
                 R.string.send_text,
                 R.string.send_text_to_group,
                 R.string.send_text_to_groups,
-                R.string.send_text_to_x_groups
-            ) { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) }
+                R.string.send_text_to_x_groups,
+            ) { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) },
         ) { groups ->
             val commentText = comment.trim().takeIf { it.isNotEmpty() }
             onShare(groups, commentText)
@@ -480,113 +538,103 @@ fun ShareChipDialog(
     }
 }
 
-private data class ChipDisplayInfo(
-    val prefix: String = "",
-    val text: String = "",
-    val icon: ImageVector? = null,
-    val iconTint: Color? = null,
-    val isBoolean: Boolean = false,
-    val booleanValue: Boolean? = null
-)
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ChipItem(config: ChipConfig, value: String, onClick: () -> Unit, onLongClick: () -> Unit) {
-    val displayInfo = remember(value, config) {
-        if (value == "..." || value.isBlank()) {
-            return@remember ChipDisplayInfo(text = "...")
-        }
-        when (config.type) {
-            ChipFormatType.FIXED_2 -> {
-                val parsed = value.toDoubleOrNull()
-                val text = if (parsed != null) DecimalFormat("#,##0.00").format(parsed / 100.0) else value
-                ChipDisplayInfo(prefix = config.prefix, text = text)
-            }
-            ChipFormatType.NUMBER -> {
-                val parsed = value.toDoubleOrNull()
-                val text = if (parsed != null) DecimalFormat("#,###.##").format(parsed) else value
-                ChipDisplayInfo(prefix = config.prefix, text = text)
-            }
-            ChipFormatType.TEXT -> {
-                ChipDisplayInfo(prefix = config.prefix, text = value)
-            }
-            ChipFormatType.JSON -> {
-                when (val jsonResult = evaluateJson(value, config.jsonPath)) {
-                    is JsonParsedResult.BooleanValue -> {
-                        ChipDisplayInfo(
-                            prefix = config.prefix,
-                            text = if (jsonResult.value) "true" else "false",
-                            icon = if (jsonResult.value) Icons.Outlined.ToggleOn else Icons.Outlined.ToggleOff,
-                            iconTint = if (jsonResult.value) Color(0xFF1B5E20) else Color(0xFF757575),
-                            isBoolean = true,
-                            booleanValue = jsonResult.value
-                        )
-                    }
-                    is JsonParsedResult.NullValue -> {
-                        ChipDisplayInfo(
-                            prefix = config.prefix,
-                            text = "null",
-                            icon = Icons.Outlined.RemoveCircleOutline,
-                            iconTint = Color(0xFF757575)
-                        )
-                    }
-                    is JsonParsedResult.UndefinedValue -> {
-                        ChipDisplayInfo(
-                            prefix = config.prefix,
-                            text = "undefined",
-                            icon = Icons.AutoMirrored.Outlined.HelpOutline,
-                            iconTint = Color(0xFFE65100)
-                        )
-                    }
-                    is JsonParsedResult.TextValue -> {
-                        ChipDisplayInfo(
-                            prefix = config.prefix,
-                            text = jsonResult.value
-                        )
-                    }
-                }
-            }
-        }
+fun ChipItem(
+    chip: PersonChip,
+    value: String,
+    legacyBackgroundColor: Int? = null,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+) {
+    val format = chip.format ?: ChipFormatType.TEXT
+    val evaluated = remember(value, chip.prefix, chip.jsonPath, format) {
+        evaluateChipDisplay(
+            format = format,
+            prefix = chip.prefix.orEmpty(),
+            jsonPath = chip.jsonPath.orEmpty(),
+            rawValue = value,
+        )
     }
 
-    val defaultGrey = 0xFFE0E0E0.toInt()
-    val backgroundColorInt = when {
-        config.type == ChipFormatType.JSON && displayInfo.isBoolean && (config.backgroundColor == 0 || config.backgroundColor == defaultGrey) -> {
-            if (displayInfo.booleanValue == true) 0xFFBAFFC9.toInt() // Pastel Green
-            else 0xFFFFB3BA.toInt() // Pastel Pink/Red
-        }
-        config.backgroundColor == 0 -> defaultGrey
-        else -> config.backgroundColor
+    val baseHex = remember(chip.color, legacyBackgroundColor, format, evaluated.kind) {
+        resolveChipBaseHex(
+            color = chip.color,
+            legacyBackgroundColor = legacyBackgroundColor,
+            format = format,
+            kind = evaluated.kind,
+        )
     }
-    val color = Color(backgroundColorInt)
-    val onColor = Color(0xFF000000.toInt())
 
-    val prefixToDisplay = displayInfo.prefix.take(100)
+    val palette = remember(baseHex) {
+        computeChipGradientPalette(baseHex = baseHex)
+    }
+
+    val colors = remember(palette) {
+        palette.stops.map { Color(it.toArgbInt()) }
+    }
+    val borderColors = remember(palette) {
+        palette.borderStops.map { Color(it.toArgbInt()) }
+    }
+
+    val brush = rememberAnimatedGradientBrush(
+        colors = colors,
+        label = "ChipGradient",
+    )
+    val borderBrush = rememberAnimatedGradientBrush(
+        colors = borderColors,
+        label = "ChipBorderGradient",
+    )
+
+    val onColor = if (palette.useLightForeground) {
+        Color(0xFFFFFFFF.toInt())
+    } else {
+        Color(0xFF1A1A1A.toInt())
+    }
+
+    val icon: ImageVector? = when (evaluated.kind) {
+        ChipValueKind.BooleanTrue -> Icons.Outlined.ToggleOn
+        ChipValueKind.BooleanFalse -> Icons.Outlined.ToggleOff
+        ChipValueKind.Null -> Icons.Outlined.RemoveCircleOutline
+        ChipValueKind.Undefined -> Icons.AutoMirrored.Outlined.HelpOutline
+        ChipValueKind.Normal -> null
+    }
+
+    val iconTint: Color = when (evaluated.kind) {
+        ChipValueKind.BooleanTrue -> if (palette.useLightForeground) Color(0xFFB9F6CA) else Color(0xFF1B5E20)
+        ChipValueKind.BooleanFalse -> if (palette.useLightForeground) Color(0xFFE0E0E0) else Color(0xFF616161)
+        ChipValueKind.Null -> if (palette.useLightForeground) Color(0xFFE0E0E0) else Color(0xFF616161)
+        ChipValueKind.Undefined -> if (palette.useLightForeground) Color(0xFFFFCC80) else Color(0xFFE65100)
+        ChipValueKind.Normal -> onColor
+    }
+
+    val prefixToDisplay = evaluated.prefix.take(100)
     val remainingChars = (100 - prefixToDisplay.length).coerceAtLeast(0)
-    val textToDisplay = displayInfo.text.take(remainingChars)
+    val textToDisplay = evaluated.text.take(remainingChars)
 
     Box(
         modifier = Modifier
             .clip(CircleShape)
-            .background(color)
+            .background(brush)
+            .border(2.dp, borderBrush, CircleShape)
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .padding(horizontal = 1.5f.pad, vertical = 0.5f.pad),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
-        if (displayInfo.icon == null) {
+        if (icon == null) {
             Text(
-                text = "${prefixToDisplay}${textToDisplay}",
+                text = "$prefixToDisplay$textToDisplay",
                 style = MaterialTheme.typography.labelLarge,
                 color = onColor,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 softWrap = false,
-                overflow = TextOverflow.Clip
+                overflow = TextOverflow.Clip,
             )
         } else {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Center,
             ) {
                 if (prefixToDisplay.isNotEmpty()) {
                     Text(
@@ -595,15 +643,15 @@ fun ChipItem(config: ChipConfig, value: String, onClick: () -> Unit, onLongClick
                         color = onColor,
                         maxLines = 1,
                         softWrap = false,
-                        overflow = TextOverflow.Clip
+                        overflow = TextOverflow.Clip,
                     )
                     Spacer(Modifier.width(2.dp))
                 }
                 Icon(
-                    imageVector = displayInfo.icon,
+                    imageVector = icon,
                     contentDescription = textToDisplay,
-                    tint = displayInfo.iconTint ?: onColor,
-                    modifier = Modifier.size(18.dp)
+                    tint = iconTint,
+                    modifier = Modifier.size(18.dp),
                 )
                 if (textToDisplay.isNotEmpty()) {
                     Spacer(Modifier.width(4.dp))
@@ -614,7 +662,7 @@ fun ChipItem(config: ChipConfig, value: String, onClick: () -> Unit, onLongClick
                         textAlign = TextAlign.Center,
                         maxLines = 1,
                         softWrap = false,
-                        overflow = TextOverflow.Clip
+                        overflow = TextOverflow.Clip,
                     )
                 }
             }

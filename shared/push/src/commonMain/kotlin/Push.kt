@@ -20,7 +20,8 @@ enum class PushAction {
     UpdateLocation,
     Impromptu,
     Signal,
-    SignalReply
+    SignalReply,
+    Chip
 }
 
 enum class StoryEvent {
@@ -201,3 +202,9 @@ data class SignalReplyPushData(
     val signalReply: SignalReply,
     val transcription: String? = null
 ) : PushDataData()
+
+@Serializable
+data class ChipPushData(
+    val syncedAt: Instant? = null
+) : PushDataData()
+

@@ -60,6 +60,10 @@ import kotlin.random.Random.Default.nextInt
 
 private var groupsCache = emptyList<GroupExtended>()
 
+fun clearGroupsScreenCache() {
+    groupsCache = emptyList()
+}
+
 @Composable
 fun GroupsScreen(
     geo: Geo?,

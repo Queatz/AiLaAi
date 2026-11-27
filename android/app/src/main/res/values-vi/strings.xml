@@ -1444,4 +1444,5 @@
     <plurals name="x_items_cleared">
         <item quantity="other">%1$d mục</item>
     </plurals>
+    <string name="edit_chips">Chỉnh sửa chip</string>
 </resources>

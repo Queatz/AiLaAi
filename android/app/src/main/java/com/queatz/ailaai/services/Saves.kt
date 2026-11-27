@@ -27,6 +27,11 @@ class Saves {
 
     private val savedIds = mutableSetOf<String>()
 
+    fun clear() {
+        savedIds.clear()
+        changes.tryEmit(Unit)
+    }
+
     fun isSaved(card: Card) = savedIds.contains(card.id!!)
 
     suspend fun reload() {

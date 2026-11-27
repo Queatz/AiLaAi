@@ -20,7 +20,7 @@ fun main() {
         module = Application::module,
         configure = {
             connector {
-                port = 8080
+                port = System.getenv("PORT")?.toIntOrNull() ?: System.getProperty("server.port")?.toIntOrNull() ?: 8080
                 host = "0.0.0.0"
             }
 

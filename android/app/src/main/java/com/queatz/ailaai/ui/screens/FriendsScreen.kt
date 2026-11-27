@@ -102,6 +102,10 @@ import kotlin.time.Instant
 
 private var groupsCache = emptyList<GroupExtended>()
 
+fun clearFriendsScreenCache() {
+    groupsCache = emptyList()
+}
+
 @Composable
 fun FriendsScreen() {
     val context = LocalContext.current

@@ -47,6 +47,7 @@ import com.queatz.ailaai.data.json
 import com.queatz.ailaai.db.db
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.ResumeEffect
+import com.queatz.ailaai.helpers.UserSession
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.AppBar
@@ -296,9 +297,7 @@ fun SettingsScreen(
         fun signOut() {
             if (biometricsSucceeded) {
                 scope.launch {
-                    api.signOut()
-                    db.clear()
-                    groupMessageCache.clear()
+                    UserSession.signOut(context)
                     updateMe()
                     signOutDialog = false
                 }
