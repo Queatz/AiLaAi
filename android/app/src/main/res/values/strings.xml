@@ -371,6 +371,7 @@
     <string name="sent_a_link">Sent a link</string>
     <string name="sent_a_trade">Sent a trade</string>
     <string name="sent_a_profile">Sent a profile</string>
+    <string name="sent_a_chip">Shared a chip</string>
     <string name="save_changes">Save changes?</string>
     <string name="all_changes_will_be_lost">All changes will be lost.</string>
     <string name="remove_all">Remove all</string>
@@ -1508,4 +1509,5 @@
         <item quantity="one">%1$d item</item>
         <item quantity="other">%1$d items</item>
     </plurals>
+    <string name="edit_chips">Edit chips</string>
 </resources>

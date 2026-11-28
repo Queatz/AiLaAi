@@ -19,7 +19,7 @@ class Api : app.ailaai.api.Api() {
                 device
             }
         }
-    override val baseUrl: String = apiBaseUrl
+    override val baseUrl: String get() = apiBaseUrl
     override var authToken: String? get() = application.bearerToken.value
         set(value) {
             application.bearerToken.value = value

@@ -9,6 +9,7 @@ import app.AppStyleSheet
 import app.appNav
 import app.call.CallLayout
 import app.call.CallStyleSheet
+import app.chips.ChipStyleSheet
 import app.components.Background
 import app.compose.rememberMobileMode
 import app.game.GameCoverPage
@@ -58,10 +59,18 @@ import org.w3c.dom.set
 import stories.StoryStyleSheet
 
 //const val baseUrl = "http://0.0.0.0:8080"
-const val baseUrl = "https://api.ailaai.app"
+val baseUrl: String get() = if (window.location.hostname in listOf("localhost", "127.0.0.1", "0.0.0.0")) {
+    "http://${window.location.hostname}:8081"
+} else {
+    "https://api.ailaai.app"
+}
 
 //const val webBaseUrl = "http://0.0.0.0:4040"
-const val webBaseUrl = "https://hitown.chat"
+val webBaseUrl: String get() = if (window.location.hostname in listOf("localhost", "127.0.0.1", "0.0.0.0")) {
+    "${window.location.protocol}//${window.location.host}"
+} else {
+    "https://hitown.chat"
+}
 
 val json = Json {
     encodeDefaults = true
@@ -91,7 +100,8 @@ fun main() {
             EffectStyleSheet::class,
             WidgetStyleSheet::class,
             CallStyleSheet::class,
-            StoryStyleSheet::class
+            StoryStyleSheet::class,
+            ChipStyleSheet::class
         )
 
         var language by remember {

@@ -32,6 +32,7 @@ import com.queatz.db.Bot
 import com.queatz.db.Person
 import com.queatz.push.CallPushData
 import com.queatz.push.CallStatusPushData
+import com.queatz.push.ChipPushData
 import com.queatz.push.CollaborationPushData
 import com.queatz.push.CommentPushData
 import com.queatz.push.CommentReplyPushData
@@ -85,6 +86,17 @@ class Push {
         }
     }
 
+    suspend fun clear() {
+        meId = null
+        if (::context.isInitialized) {
+            runCatching {
+                context.dataStore.edit {
+                    it.remove(meKey)
+                }
+            }
+        }
+    }
+
     fun got(data: Map<String, String>) {
         if (!data.containsKey("action")) {
             Log.w("PUSH", "Push notification does not contain 'action'")
@@ -113,6 +125,7 @@ class Push {
                 PushAction.Impromptu -> receive(parse<ImpromptuPushData>(push))
                 PushAction.Signal -> receive(parse<SignalPushData>(push))
                 PushAction.SignalReply -> receive(parse<SignalReplyPushData>(push))
+                PushAction.Chip -> parse<ChipPushData>(push)
             }
         } catch (ex: Throwable) {
             ex.printStackTrace()

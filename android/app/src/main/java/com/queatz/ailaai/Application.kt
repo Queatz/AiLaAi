@@ -68,6 +68,7 @@ class Application : android.app.Application(), SingletonImageLoader.Factory {
         calls.init(this)
         slideshow.init(this)
         connectivity.start(this)
+        com.queatz.ailaai.services.chips.init(this)
 
         val scope = CoroutineScope(Dispatchers.IO)
 

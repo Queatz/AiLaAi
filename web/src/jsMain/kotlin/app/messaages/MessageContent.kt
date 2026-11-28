@@ -10,6 +10,7 @@ import app.ailaai.api.group
 import app.ailaai.api.message
 import app.ailaai.api.reactToMessage
 import app.ailaai.api.call
+import app.chips.SharedChipMessageItem
 import application
 import app.appNav
 import app.dialog.photoDialog
@@ -484,6 +485,10 @@ fun MessageContent(
 
                 is TradeAttachment -> {
                     // todo
+                }
+
+                is ChipAttachment -> {
+                    SharedChipMessageItem(attachment)
                 }
             }
         }

@@ -309,5 +309,13 @@ fun collections() = listOf(
     },
     AiSpeech::class.db {
         ensurePersistentIndex(listOf(AiSpeech::text.name), PersistentIndexOptions())
+    },
+    ChipFeed::class.db {
+        ensurePersistentIndex(listOf(ChipFeed::url.name), PersistentIndexOptions().unique(true))
+    },
+    PersonChip::class.db {
+        ensurePersistentIndex(listOf(PersonChip::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(PersonChip::feed.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(PersonChip::order.name), PersistentIndexOptions())
     }
 )

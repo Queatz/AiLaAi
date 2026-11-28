@@ -16,6 +16,10 @@ class Stickers {
 
     private val stickerPacks = MutableStateFlow<List<StickerPack>?>(null)
 
+    fun clear() {
+        stickerPacks.value = null
+    }
+
     @Composable
     fun rememberStickerPacks(): State<List<StickerPack>?> = stickerPacks.collectAsState()
 

@@ -291,6 +291,7 @@ class Push {
                                                 is ImpromptuPushData -> it
                                                 is SignalPushData -> it
                                                 is SignalReplyPushData -> it
+                                                is ChipPushData -> it
                                                 else -> error("Unknown push data type")
                                             }
                                         )

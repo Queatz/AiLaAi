@@ -9,6 +9,7 @@ import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.ConnectWithoutContact
 import androidx.compose.material.icons.outlined.Rocket
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material.icons.outlined.WifiOff
@@ -28,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import app.ailaai.api.hiddenGroups
 import app.ailaai.api.removeMember
 import app.ailaai.api.updateMember
+import app.ailaai.api.useInvite
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.BuildConfig
 import com.queatz.ailaai.R
@@ -59,6 +61,7 @@ fun ProfileToolbar() {
     val me = me
     val nav = nav
     val scope = rememberCoroutineScope()
+    var showEditChipsOverlay by rememberStateOf(false)
     var showScriptsDialog by rememberStateOf(false)
     var showImpromptuDialog by rememberStateOf(false)
     var showHiddenGroupsDialog by rememberStateOf(false)
@@ -207,7 +210,33 @@ fun ProfileToolbar() {
                         onClick = onClick
                     )
                 }
-            ) {
+            ) { result ->
+                when (result) {
+                    is ScanQrCodeResult.Group -> {
+                        nav.appNavigate(AppNav.Group(result.id))
+                    }
+                    is ScanQrCodeResult.Page -> {
+                        nav.appNavigate(AppNav.Page(result.id))
+                    }
+                    is ScanQrCodeResult.Story -> {
+                        nav.appNavigate(AppNav.Story(result.id))
+                    }
+                    is ScanQrCodeResult.Profile -> {
+                        nav.appNavigate(AppNav.Profile(result.id))
+                    }
+                    is ScanQrCodeResult.LinkDevice -> {
+                        nav.appNavigate(AppNav.LinkDevice(result.token))
+                    }
+                    is ScanQrCodeResult.Invite -> {
+                        scope.launch {
+                            api.useInvite(result.code) {
+                                it.group?.let { groupId ->
+                                    nav.appNavigate(AppNav.Group(groupId))
+                                }
+                            }
+                        }
+                    }
+                }
             }
             if (BuildConfig.ENABLE_BACKGROUND_LOCATION) {
                 item(
@@ -234,12 +263,28 @@ fun ProfileToolbar() {
                 ui.showOfflineNote(!showOfflineNote)
             }
             item(
+                icon = Icons.Outlined.Tune,
+                name = stringResource(R.string.edit_chips),
+            ) {
+                showEditChipsOverlay = true
+            }
+            item(
                 icon = Icons.Outlined.Settings,
                 name = stringResource(R.string.settings),
             ) {
                 nav.appNavigate(AppNav.Settings)
             }
         }
+
+    if (showEditChipsOverlay) {
+        TopChipsOverlay(
+            onDismiss = { showEditChipsOverlay = false },
+            onSignalsClick = {
+                showEditChipsOverlay = false
+                nav.appNavigate(AppNav.Signals)
+            },
+        )
+    }
 }
 
 fun GroupExtended.seenText(active: String, me: Person?): String? {

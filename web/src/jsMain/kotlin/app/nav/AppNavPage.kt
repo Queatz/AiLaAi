@@ -51,7 +51,7 @@ fun AppNavPage() {
                 }
             )
             FeaturePreview(
-                pages = listOf(NavPage.Scenes, NavPage.Scripts),
+                pages = listOf(NavPage.Signals, NavPage.Scenes, NavPage.Scripts),
                 center = false,
                 create = false
             )

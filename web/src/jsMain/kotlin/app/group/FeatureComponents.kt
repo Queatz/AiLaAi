@@ -146,6 +146,13 @@ fun FeaturePreview(
             targetPage = NavPage.Stories
         ),
         FeatureButtonInfo(
+            icon = "sensors",
+            title = "Signals",
+            createTitle = "Send a signal",
+            description = "Send and receive live signals",
+            targetPage = NavPage.Signals
+        ),
+        FeatureButtonInfo(
             icon = "description",
             title = "Scripts",
             createTitle = "Create a script",

@@ -30,6 +30,10 @@ data class MapCardsControl(
 
 private var cache = listOf<Card>()
 
+fun clearMapCardsCache() {
+    cache = emptyList()
+}
+
 @Composable
 fun mapCardsControl(
     geo: LatLng?,

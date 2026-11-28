@@ -17,6 +17,10 @@ class MePresence {
 
     private val value = MutableStateFlow<Presence?>(null)
 
+    fun clear() {
+        value.value = null
+    }
+
     @Composable
     fun rememberPresence(): State<Presence?> = value.collectAsState()
 

@@ -1,6 +1,7 @@
 package com.queatz.ailaai.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
@@ -123,68 +125,106 @@ fun ColumnScope.AppHeader(
             }
         }
 
-        Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-            AppBar(
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(1.pad)
-                    ) {
-                        Text(
-                            title,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null
-                                ) {
-                                    onTitleClick()
-                                }
-                        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .background(MaterialTheme.colorScheme.surface)
+        ) {
+            if (showSignalsButton) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TopChipsRow {
+                        nav.appNavigate(AppNav.Signals)
                     }
-                },
-                navigationIcon = navigationIcon,
-                actions = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .padding(start = .5f.pad)
-                    ) {
-                        actions()
-                        me?.takeIf { showProfile }?.let { me ->
-                            if (me.name?.isNotBlank() == true || me.photo?.isNotBlank() == true) {
-                                GroupPhoto(
-                                    listOf(ContactPhoto(me.name ?: "", me.photo, me.seen)),
-                                    size = 40.dp,
-                                    modifier = Modifier
-                                        .clickable {
-                                            nav.appNavigate(AppNav.Profile(me.id!!))
-                                        }
-                                )
-                            } else {
-                                IconButton({
-                                    nav.appNavigate(AppNav.Profile(me.id!!))
-                                }) {
-                                    Icon(Icons.Outlined.AccountCircle, Icons.Outlined.Settings.name)
-                                }
+                }
+
+                Box(
+                    modifier = Modifier.align(Alignment.CenterStart)
+                ) {
+                    navigationIcon()
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = .5f.pad)
+                ) {
+                    actions()
+                    me?.takeIf { showProfile }?.let { me ->
+                        if (me.name?.isNotBlank() == true || me.photo?.isNotBlank() == true) {
+                            GroupPhoto(
+                                listOf(ContactPhoto(me.name ?: "", me.photo, me.seen)),
+                                size = 40.dp,
+                                modifier = Modifier
+                                    .clickable {
+                                        nav.appNavigate(AppNav.Profile(me.id!!))
+                                    }
+                            )
+                        } else {
+                            IconButton({
+                                nav.appNavigate(AppNav.Profile(me.id!!))
+                            }) {
+                                Icon(Icons.Outlined.AccountCircle, Icons.Outlined.Settings.name)
                             }
                         }
                     }
                 }
-            )
-
-            if (showSignalsButton) {
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .padding(horizontal = 6.pad),
-                    contentAlignment = Alignment.Center
-                ) {
-                    SignalsButton {
-                        nav.appNavigate(AppNav.Signals)
+            } else {
+                AppBar(
+                    title = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(1.pad)
+                        ) {
+                            Text(
+                                title,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null
+                                    ) {
+                                        onTitleClick()
+                                    }
+                            )
+                        }
+                    },
+                    navigationIcon = navigationIcon,
+                    actions = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .padding(start = .5f.pad)
+                        ) {
+                            actions()
+                            me?.takeIf { showProfile }?.let { me ->
+                                if (me.name?.isNotBlank() == true || me.photo?.isNotBlank() == true) {
+                                    GroupPhoto(
+                                        listOf(ContactPhoto(me.name ?: "", me.photo, me.seen)),
+                                        size = 40.dp,
+                                        modifier = Modifier
+                                            .clickable {
+                                                nav.appNavigate(AppNav.Profile(me.id!!))
+                                            }
+                                    )
+                                } else {
+                                    IconButton({
+                                        nav.appNavigate(AppNav.Profile(me.id!!))
+                                    }) {
+                                        Icon(Icons.Outlined.AccountCircle, Icons.Outlined.Settings.name)
+                                    }
+                                }
+                            }
+                        }
                     }
-                }
+                )
             }
         }
     }

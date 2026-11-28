@@ -7,6 +7,7 @@ import com.queatz.ailaai.data.getAttachment
 import com.queatz.db.AudioAttachment
 import com.queatz.db.CallAttachment
 import com.queatz.db.CardAttachment
+import com.queatz.db.ChipAttachment
 import com.queatz.db.GroupAttachment
 import com.queatz.db.GroupExtended
 import com.queatz.db.InventoryItem
@@ -105,6 +106,9 @@ fun Message.attachmentText(context: Context): String? = when (val attachment = g
     }
     is CallAttachment -> {
         context.resources.getString(R.string.started_a_call)
+    }
+    is ChipAttachment -> {
+        context.resources.getString(R.string.sent_a_chip)
     }
     else -> null
 }

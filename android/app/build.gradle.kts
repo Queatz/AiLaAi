@@ -81,11 +81,19 @@ android {
 
             // This is here because of just how slow Jetpack Compose is in debug mode
             isDebuggable = false
+            buildConfigField("String", "API_BASE_URL", "\"https://api.ailaai.app\"")
         }
         create("local") {
             initWith(getByName("debug"))
             isDebuggable = true
             matchingFallbacks += listOf("debug")
+            buildConfigField("String", "API_BASE_URL", "\"http://127.0.0.1:8081\"")
+        }
+        create("localProduction") {
+            initWith(getByName("debug"))
+            isDebuggable = true
+            matchingFallbacks += listOf("debug")
+            buildConfigField("String", "API_BASE_URL", "\"https://api.ailaai.app\"")
         }
         release {
             signingConfigs.findByName("release")?.let {
@@ -97,6 +105,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "API_BASE_URL", "\"https://api.ailaai.app\"")
         }
     }
 

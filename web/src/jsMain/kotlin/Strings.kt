@@ -1710,6 +1710,11 @@ object Strings {
         vn = "Đăng nhập",
         ru = "Войти"
     )
+    val editChips = Translation(
+        en = "Edit chips",
+        vn = "Chỉnh sửa chip",
+        ru = "Редактировать чипы"
+    )
     val signUp = Translation(
         en = "Sign up",
         vn = "Đăng ký",

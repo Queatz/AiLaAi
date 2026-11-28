@@ -35,6 +35,11 @@ import com.queatz.ailaai.ui.theme.pad
 private var myTopReactionsCache = emptyList<String>()
 private val groupTopReactionsCache = mutableMapOf<String, List<String>>()
 
+fun clearReactionsCache() {
+    myTopReactionsCache = emptyList()
+    groupTopReactionsCache.clear()
+}
+
 @Composable
 fun ReactLayout(
     modifier: Modifier = Modifier,

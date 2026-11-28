@@ -17,7 +17,9 @@ import app.ailaai.api.profile
 import app.ailaai.api.sendAppFeedback
 import app.ailaai.api.transferCode
 import app.ailaai.api.updateMe
+import app.NavPage
 import app.ailaai.api.updateProfile
+import app.chips.topChipsOverlayDialog
 import app.components.FlexInput
 import app.dialog.dialog
 import app.dialog.inputDialog
@@ -175,6 +177,19 @@ fun ProfileNavPage(
     }
 
     NavTopBar(me, appString { this.profile }, onProfileClick = onProfileClick) {
+        IconButton(
+            name = "tune",
+            title = appString { editChips },
+            styles = { marginRight(.5f.r) }
+        ) {
+            scope.launch {
+                topChipsOverlayDialog(
+                    onOpenSignals = {
+                        application.setNavPage(NavPage.Signals)
+                    }
+                )
+            }
+        }
         IconButton(
             name = "qr_code",
             title = appString { qrCode },

@@ -1,6 +1,7 @@
 package com.queatz.plugins
 
 import com.queatz.api.*
+import com.queatz.chipService
 import com.queatz.groupCall
 import com.queatz.impromptuService
 import com.queatz.signalService
@@ -34,6 +35,7 @@ fun Application.configureRouting() {
     apps.start(this)
     impromptuService.start(this)
     signalService.start(this)
+    chipService.start(this)
 
     routing {
         get("/hi") { call.respondText("{ \"hi\": true }", contentType = ContentType.Application.Json) }
@@ -80,6 +82,7 @@ fun Application.configureRouting() {
         inviteRoutes()
         impromptuRoutes()
         signalRoutes()
+        chipRoutes()
         gameRoutes()
 
         staticFiles("/static", File("static")) {

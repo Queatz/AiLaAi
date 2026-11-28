@@ -17,6 +17,7 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.CancellationException
 import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.*
+import com.queatz.ailaai.BuildConfig
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
@@ -50,9 +51,7 @@ class Api : app.ailaai.api.Api() {
 
     internal lateinit var context: Context
 
-    override val baseUrl = "https://api.ailaai.app"
-//    private val baseUrl = "http://10.0.2.2:8080"
-//    override val baseUrl = "https://127.0.0.1:8443"
+    override val baseUrl = BuildConfig.API_BASE_URL
 
     private val tokenKey = stringPreferencesKey("token")
 

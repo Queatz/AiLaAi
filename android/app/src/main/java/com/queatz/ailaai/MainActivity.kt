@@ -127,6 +127,7 @@ import com.queatz.ailaai.item.InventoryScreen
 import com.queatz.ailaai.item.MyItemsScreen
 import com.queatz.ailaai.schedule.ReminderScreen
 import com.queatz.ailaai.schedule.RemindersScreen
+import com.queatz.ailaai.helpers.UserSession
 import com.queatz.ailaai.services.assistant
 import com.queatz.ailaai.services.calls
 import com.queatz.ailaai.services.connectivity
@@ -456,7 +457,11 @@ class MainActivity : AppCompatActivity() {
                         if (me == null) {
                             messages.clear()
                             signals.clear()
+                            com.queatz.ailaai.services.chips.clear()
                         } else {
+                            scope.launch {
+                                com.queatz.ailaai.services.chips.reload()
+                            }
                             api.groups(
                                 onError = {
                                     messages.refresh(me, emptyList())
@@ -572,11 +577,9 @@ class MainActivity : AppCompatActivity() {
                                     {
                                         known = false
                                         me = null
-                                        cache.remove(CacheKey.Me)
                                         scope.launch {
-                                            groupMessageCache.clear()
+                                            UserSession.signOut(context)
                                         }
-                                        signals.clear()
                                         showSignedOut = false
                                     }
                                 ) {
@@ -1169,6 +1172,7 @@ class MainActivity : AppCompatActivity() {
                                                             })
                                                         }
                                                     } else {
+                                                        me = null
                                                         known = false
                                                     }
                                                 }

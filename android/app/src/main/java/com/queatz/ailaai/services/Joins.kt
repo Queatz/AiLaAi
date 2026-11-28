@@ -19,6 +19,11 @@ class Joins {
     val myJoins = MutableStateFlow<List<JoinRequestAndPerson>>(emptyList())
     val joins = MutableStateFlow<List<JoinRequestAndPerson>>(emptyList())
 
+    fun clear() {
+        myJoins.value = emptyList()
+        joins.value = emptyList()
+    }
+
     suspend fun reload() {
         reloadIncoming()
         reloadMine()

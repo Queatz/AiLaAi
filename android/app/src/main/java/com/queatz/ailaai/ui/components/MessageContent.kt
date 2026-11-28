@@ -108,6 +108,7 @@ import com.queatz.db.AudioAttachment
 import com.queatz.db.Bot
 import com.queatz.db.Card
 import com.queatz.db.CardAttachment
+import com.queatz.db.ChipAttachment
 import com.queatz.db.CardOptions
 import com.queatz.db.GroupAttachment
 import com.queatz.db.GroupExtended
@@ -176,6 +177,7 @@ fun ColumnScope.MessageContent(
     var showRateMessageDialog by rememberStateOf(false)
     var currentRating by rememberStateOf<Int?>(null)
     var attachedCardId by remember { mutableStateOf<String?>(null) }
+    var attachedChip by remember { mutableStateOf<ChipAttachment?>(null) }
     var attachedTradeId by remember { mutableStateOf<String?>(null) }
     var attachedReplyId by remember { mutableStateOf<String?>(null) }
     var attachedStoryId by remember { mutableStateOf<String?>(null) }
@@ -269,6 +271,10 @@ fun ColumnScope.MessageContent(
                 is CallAttachment -> {
                     attachedCallId = attachment.call
                     attachedCallDuration = attachment.duration
+                }
+
+                is ChipAttachment -> {
+                    attachedChip = attachment
                 }
             }
         }
@@ -1043,6 +1049,14 @@ fun ColumnScope.MessageContent(
                 UrlPreview(it)
             }
         }
+    }
+
+    attachedChip?.let { chip ->
+        SharedChipMessageItem(
+            chip = chip,
+            isMe = isMe,
+            isReply = isReply
+        )
     }
 
     attachedTrade?.let { trade ->
